@@ -1,2 +1,11 @@
-"obj/" 
-".vs/" 
+# Archivos generados por Visual Studio
+.vs/
+bin/
+obj/
+*.suo
+*.user
+*.cache
+
+# Archivos de configuración sensibles
+appsettings.json
+appsettings*.json
