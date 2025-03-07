@@ -2,7 +2,176 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+@section Styles {
+    <link rel="stylesheet" href="~/css/home.css" asp-append-version="true" />
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+}
+
+<div class="home-page">
+    <header id="info-page" class="py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="left text-center">
+                        <h1 class="display-6">Encuentra las Mejores Autopartes en <span class="text-primary">Deluxe Cars</span></h1>
+                        <p class="lead">Calidad, variedad y precios competitivos en un solo lugar.</p>
+                        <a href="#catalogo" class="btn btn-dark d-flex align-items-center justify-content-center gap-2">
+                            <i class='bx bx-search'></i>
+                            <span>Explora el Catálogo</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <img src="~/css/img/auto-rojo-main.jpg" alt="auto rojo" class="img-fluid rounded">
+        </div>
+    </header>
+
+    <section id="features">
+        <h2 class="separator">Por Qué Elegirnos</h2>
+        <div class="sell-nft">
+            <div class="item">
+                <div class="header">
+                    <i class='bx bx-wallet-alt'></i>
+                    <h5>Amplia Variedad</h5>
+                </div>
+                <p>Todo lo que necesitas para tu coche en un solo lugar.</p>
+            </div>
+            <div class="item">
+                <div class="header">
+                    <i class='bx bx-cart-add'></i>
+                    <h5>Precios Competitivos</h5>
+                </div>
+                <p>Las mejores ofertas en autopartes de calidad.</p>
+            </div>
+            <div class="item">
+                <div class="header">
+                    <i class='bx bx-grid-alt'></i>
+                    <h5>Envíos Rápidos</h5>
+                </div>
+                <p>Recibe tus productos en tiempo récord.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="services">
+        <h2 class="separator">Nuestro Catálogo de Autopartes</h2>
+        <div class="nft-shop">
+            <div class="category">
+                <a href="#">Motor</a>
+                <a href="#">Frenos</a>
+                <a href="#">Suspensión y Dirección</a>
+                <a href="#">Sistema Eléctrico</a>
+                <a href="#">Accesorios</a>
+            </div>
+            <div class="nft-list">
+                <div class="item">
+                    <img src="~/css/img/filtro-motor.jpg" alt="Filtros">
+                    <div class="info">
+                        <div>
+                            <h5>Filtros</h5>
+                            <div class="btc">
+                                <i class='bx bxs-car'></i>
+                                <p>0.29 BTC</p>
+                                <button class="btn btn-primary">Añadir al Carrito</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Repite los otros items aquí -->
+                <div class="item">
+                    <img src="~/css/img/bujias.jpg" alt="Bujías">
+                    <div class="info">
+                        <div>
+                            <h5>Bujías</h5>
+                            <div class="btc">
+                                <i class='bx bxs-car'></i>
+                                <p>0.29 BTC</p>
+                                <button class="btn btn-primary">Añadir al Carrito</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="item">
+                    <img src="~/css/img/inyectores.jpg" alt="Coche lavado">
+                    <div class="info">
+                        <div>
+                            <h5>Inyectores</h5>
+                            <div class="btc">
+                                <i class='bx bxs-car'></i>
+                                <p>0.29 BTC</p>
+                                <button class="btn btn-primary">Añadir al Carrito</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="item">
+                    <img src="~/css/img/amortiguadores.jpg" alt="Coche lavado">
+                    <div class="info">
+                        <div>
+                            <h5>Amortiguadores</h5>
+                            <div class="btc">
+                                <i class='bx bxs-car'></i>
+                                <p>0.29 BTC</p>
+                                <button class="btn btn-primary">Añadir al Carrito</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="view-more">
+                <a asp-controller="Catalogo" asp-action="Index" class="btn btn-primary mb-3">Ver mas</a>
+            </div>
+        </div>
+    </section>
+    <section id="suppliers">
+        <h2 class="separator">Lo que Dicen Nuestros Clientes</h2>
+        <div class="sellers">
+            <div class="item">
+                <img src="../img/porfile 1.jpg" alt="Diana">
+                <div class="info">
+                    <h4>Juan Pérez</h4>
+                    <p>¡Encontré el repuesto exacto para mi coche y llegó rápido!</p>
+                </div>
+            </div>
+            <!-- Repite los otros suppliers aquí -->
+            <div class="item">
+                <img src="../img/porfile 1.jpg" alt="Diana">
+                <div class="info">
+                    <h4>Maria Becerra</h4>
+                    <p>¡Encontré el repuesto exacto para mi coche y llegó rápido!</p>
+                </div>
+            </div>
+            <!-- Repite los otros suppliers aquí -->
+            <div class="item">
+                <img src="../img/porfile 1.jpg" alt="Diana">
+                <div class="info">
+                    <h4>Maria Becerra</h4>
+                    <p>¡Encontré el repuesto exacto para mi coche y llegó rápido!</p>
+                </div>
+            </div>
+            <!-- Repite los otros suppliers aquí -->
+            <div class="item">
+                <img src="../img/porfile 1.jpg" alt="Diana">
+                <div class="info">
+                    <h4>Maria Becerra</h4>
+                    <p>¡Encontré el repuesto exacto para mi coche y llegó rápido!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Sección de Llamada a la Acción -->
+    <section id="cta" class="py-5 text-center">
+        <div class="container">
+            <h2 class="mb-4">¡Encuentra Todo lo que Necesitas para tu Vehículo!</h2>
+            <a href="#catalogo" class="btn btn-primary btn-lg">Ver Catálogo Completo</a>
+        </div>
+    </section>
 </div>
+
+@section Scripts {
+    <script src="~/js/home.js" asp-append-version="true"></script>
+}
