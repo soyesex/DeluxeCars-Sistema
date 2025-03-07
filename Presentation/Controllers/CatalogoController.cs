@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace Aplicacion.Controllers
+namespace Aplicacion.Presentation.Controllers
 {
     public class CatalogoController : Controller
     {

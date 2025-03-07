@@ -1,8 +1,8 @@
-﻿using Aplicacion.Models;
+﻿using Aplicacion.Core.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace Aplicacion.Data
+namespace Aplicacion.Infrastructure.Data
 {
     public class ApplicationDbContext : IdentityDbContext
     {

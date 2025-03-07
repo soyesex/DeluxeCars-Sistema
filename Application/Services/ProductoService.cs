@@ -1,10 +1,10 @@
-﻿using Aplicacion.Data;
-using Aplicacion.Interfaces;
+﻿using Aplicacion.Application.ViewModels;
+using Aplicacion.Core.Interfaces;
+using Aplicacion.Infrastructure.Data;
 using Aplicacion.Models;
-using Aplicacion.ViewModels;
 using Microsoft.EntityFrameworkCore;
 
-namespace Aplicacion.Services
+namespace Aplicacion.Application.Services
 {
     public class ProductoService : IProducto
     {

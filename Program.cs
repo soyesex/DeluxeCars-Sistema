@@ -1,6 +1,6 @@
-using Aplicacion.Data;
-using Aplicacion.Interfaces;
-using Aplicacion.Services;
+using Aplicacion.Application.Services;
+using Aplicacion.Core.Interfaces;
+using Aplicacion.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

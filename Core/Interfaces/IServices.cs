@@ -1,4 +1,4 @@
-﻿namespace Aplicacion.Interfaces
+﻿namespace Aplicacion.Core.Interfaces
 {
     public interface IServices<T> where T : class
     {

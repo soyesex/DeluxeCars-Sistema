@@ -1,4 +1,4 @@
-﻿namespace Aplicacion.ViewModels
+﻿namespace Aplicacion.Application.ViewModels
 {
     public class ProductoViewModel
     {

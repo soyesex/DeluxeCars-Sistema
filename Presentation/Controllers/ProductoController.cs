@@ -1,7 +1,7 @@
-﻿using Aplicacion.Interfaces;
+﻿using Aplicacion.Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Aplicacion.Controllers
+namespace Aplicacion.Presentation.Controllers
 {
     public class ProductoController : Controller
     {

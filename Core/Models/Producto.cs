@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Aplicacion.Models
+namespace Aplicacion.Core.Models
 {
     public class Producto
     {

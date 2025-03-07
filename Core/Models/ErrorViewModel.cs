@@ -1,4 +1,4 @@
-namespace Aplicacion.Models
+namespace Aplicacion.Core.Models
 {
     public class ErrorViewModel
     {
