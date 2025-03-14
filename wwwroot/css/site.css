@@ -24,6 +24,7 @@ html {
 body {
     margin-bottom: 60px;
     font-family: 'Poppins', sans-serif; /* Añadido */
+    margin-top: 80px; /* Esto asegura que el contenido no se sobreponga al navbar fijo */
 }
 
 @media (max-width: 576px) {
@@ -65,15 +66,25 @@ body {
     background-color: transparent;
 }
 
-    .login a.signup {
-        background-color: #000;
-        color: #fff;
-        border-radius: 4px;
-        margin-left: 14px;
-    }
+.login a.signup {
+    background-color: #000;
+    color: #fff;
+    border-radius: 4px;
+    margin-left: 14px;
+}
 
 @media (max-width: 576px) {
     .custom-navbar {
         padding: 0 15px;
     }
+}
+
+/* Ajuste de margen superior para el contenido para que no quede debajo del navbar fijo */
+.content {
+    margin-top: 80px; /* Asegura que el contenido no se sobreponga al navbar */
+}
+
+/* Si ya tienes un contenido principal que ocupa toda la altura de la pantalla, asegúrate de que tenga espacio suficiente */
+.main-content {
+    margin-top: 80px; /* Esto puede ajustarse según el tamaño de tu navbar */
 }

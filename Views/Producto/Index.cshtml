@@ -1,4 +1,5 @@
-﻿@model IEnumerable<ProductoViewModel>
+﻿@using Aplicacion.Application.ViewModels
+@model IEnumerable<ProductoViewModel>
 
 @{
     ViewData["Title"] = "Listado de Productos";
@@ -47,4 +48,18 @@
             }
         </tbody>
     </table>
+</div>
+
+<div class="card-body">
+    <div class="d-flex justify-content-between mb-3">
+        <div>
+            <a asp-action="Create" class="btn btn-success">
+                <i class="bi bi-person-plus"></i> Nuevo Producto
+            </a>
+        </div>
+        <form class="d-flex">
+            <input class="form-control me-2" type="search" name="filtro" value="@ViewBag.FiltroActual" placeholder="Buscar..." aria-label="Buscar">
+            <button class="btn btn-outline-secondary" type="submit">Buscar</button>
+        </form>
+    </div>
 </div>

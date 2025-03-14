@@ -1,19 +1,26 @@
-﻿using Aplicacion.Core.Interfaces;
+﻿using Aplicacion.Application.Services;
+using Aplicacion.Core.Interfaces;
+using Aplicacion.Core.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Aplicacion.Presentation.Controllers
 {
     public class ProductoController : Controller
     {
-        private readonly IProducto _service;
-        public ProductoController(IProducto service)
+        private readonly IProductoService _productoService;
+        public ProductoController(IProductoService productoService)
         {
-            _service = service;
+            _productoService = productoService;
         }
-        public async Task<IActionResult> Index()
+        public IActionResult Index(string filtro)
         {
-            var viewModel = await _service.GetAllAsync();
-            return View(viewModel);
+            var productos = string.IsNullOrEmpty(filtro)?_productoService.GetAll():_productoService.Search(filtro);
+
+            //Para que el input mantega el valor
+            ViewBag.FiltroActual = filtro;
+
+            return View(productos);
         }
+        
     }
 }

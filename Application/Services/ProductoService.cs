@@ -1,100 +1,86 @@
 ﻿using Aplicacion.Application.ViewModels;
 using Aplicacion.Core.Interfaces;
 using Aplicacion.Infrastructure.Data;
-using Aplicacion.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Aplicacion.Application.Services
 {
-    public class ProductoService : IProducto
+    public class ProductoService : IProductoService
     {
         private readonly ApplicationDbContext _context;
-        public ProductoService(ApplicationDbContext context)
+        public ProductoService(ApplicationDbContext context) 
         {
             _context = context;
         }
-
-        public async Task<IEnumerable<ProductoViewModel>> GetAllAsync()
+        public IEnumerable<ProductoViewModel> GetAll()
         {
-            var productos = await _context.Producto.Include(x => x.Categoria)
+            try
+            {
+                var productoService = _context.Producto
+                .Include(x => x.Categoria)
                 .Select(x => new ProductoViewModel
                 {
+                    Id = x.Id,
                     CategoriaId = x.CategoriaId,
                     Descripcion = x.Descripcion,
                     Estado = x.Estado,
                     FechaIngreso = x.FechaIngreso,
-                    Id = x.Id,
                     Nombre = x.Nombre,
+                    NombreCategoria = x.Categoria.Nombre,
                     OrigininalEquipmentManufacture = x.OrigninalEquipmentManufacture,
                     Precio = x.Precio,
-                    NombreCategoria = x.Categoria.Nombre,
-                }).ToListAsync();
-            return productos;
-        }
-        public async Task<ProductoViewModel> GetByIdAsync(int id)
-        {
-            var producto = await _context.Producto
-                .Include(x => x.Categoria)
-                .FirstOrDefaultAsync(x => x.Id == id) ??
-                throw new KeyNotFoundException($"Producto con Id {id} no encontrado");
+                }).ToList();
 
-            return new ProductoViewModel
-            {
-                CategoriaId = producto.CategoriaId,
-                Descripcion = producto.Descripcion,
-                Estado = producto.Estado,
-                FechaIngreso = producto.FechaIngreso,
-                Id = producto.Id,
-                Nombre = producto.Nombre,
-                OrigininalEquipmentManufacture = producto.OrigninalEquipmentManufacture,
-                Precio = producto.Precio
-            };
-        }
-        public async Task AddAsync(ProductoViewModel entity)
-        {
-            var producto = new Producto
-            {
-                OrigninalEquipmentManufacture = entity.OrigininalEquipmentManufacture,
-                Nombre = entity.Nombre,
-                FechaIngreso = entity.FechaIngreso,
-                Descripcion = entity.Descripcion,
-                CategoriaId = entity.CategoriaId,
-                Estado = entity.Estado,
-                Precio = entity.Precio,
-            };
-            _context.Producto.Add(producto);
-            await _context.SaveChangesAsync();
-        }
-        public async Task UpdateAsync(ProductoViewModel entity)
-        {
-            var producto = await _context.Producto.FindAsync(entity.Id);
-
-            if (producto is not null)
-            {
-                producto.Nombre = entity.Nombre;
-                producto.Descripcion = entity.Descripcion;
-                producto.OrigninalEquipmentManufacture = entity.OrigininalEquipmentManufacture;
-                producto.Precio = entity.Precio;
-                producto.Estado = entity.Estado;
-                producto.CategoriaId = entity.CategoriaId;
-                producto.FechaIngreso = entity.FechaIngreso;
-
-                _context.Producto.Update(producto);
-                await _context.SaveChangesAsync();
+                return productoService;
             }
-            else throw new KeyNotFoundException();
-        }
-        public async Task DeleteAsync(int id)
-        {
-            var producto = await _context.Producto.FindAsync(id);
-
-            if (producto is not null)
-            {
-                _context.Producto.Remove(producto);
-                await _context.SaveChangesAsync();
+            catch (Exception) 
+            { 
+                return new List<ProductoViewModel>();
             }
-            else throw new KeyNotFoundException();
+        }
+        public IEnumerable<ProductoViewModel> Search(string filtro)
+        {
+            try
+            {
+                var consulta = _context.Producto.AsQueryable();
+
+                if (!string.IsNullOrEmpty(filtro))
+                {
+                    consulta = consulta.Where(p => p.Nombre.Contains(filtro) || p.Categoria.Nombre.Contains(filtro));
+                }
+                return consulta.Select(p => new ProductoViewModel
+                {
+                    Nombre = p.Nombre,
+                    Precio = p.Precio,
+                    Descripcion = p.Descripcion,
+                    Estado = p.Estado,
+                    Stock = p.Stock,
+                }).ToList();
+            }
+            catch (Exception ex) 
+            {
+                throw new Exception($"Error en la busquedad de un Producto {ex}");
+            }
         }
 
+        public Task<bool> Add(ProductoViewModel model)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> Delete(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ProductoViewModel GetById(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> Update(ProductoViewModel model)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

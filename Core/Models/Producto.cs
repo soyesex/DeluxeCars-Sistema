@@ -1,9 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Aplicacion.Core.Models
 {
     public class Producto
     {
+        [Key]
         public int Id { get; set; }
         [Column("IdCategoria")]
         public int CategoriaId { get; set; }
@@ -18,5 +20,6 @@ namespace Aplicacion.Core.Models
         public DateTime FechaIngreso { get; set; }
         public string? Lote { get; set; }
         public Categoria? Categoria { get; set; }
+        public string ImagenUrl { get; set; }
     }
 }
