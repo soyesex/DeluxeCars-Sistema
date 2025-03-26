@@ -1,4 +1,4 @@
-﻿@model Aplicacion.Application.ViewModels.ProductoViewModel
+﻿@* @model Aplicacion.Application.ViewModels.ProductoViewModel
 
 @section Styles {
     <link rel="stylesheet" href="~/css/home.css" asp-append-version="true" />
@@ -80,4 +80,38 @@
         </div>
     </section>
 
+</div> *@
+@model List<Aplicacion.Application.ViewModels.ProductoViewModel>
+
+@{
+    ViewData["Title"] = "Catálogo - Deluxe Cars";
+}
+
+<!-- Sección de catálogo de productos -->
+<div class="container mt-5 pt-5">
+    <h1 class="text-center mb-4">Catálogo de Autopartes - DeluxeCars</h1>
+    <div class="row" id="product-catalog"></div>
 </div>
+
+<!-- Carrito de compras -->
+<div id="cart" class="slide-cart">
+    <div class="cart-header d-flex justify-content-between p-3 text-white">
+        <h4>Carrito de Compras</h4>
+        <button class="btn-close text-white" onclick="toggleCart()"></button>
+    </div>
+    <ul id="cart-items" class="list-group list-group-flush"></ul>
+    <div class="cart-footer p-3 text-white d-flex justify-content-between">
+        <p>Total: $<span id="cart-total">0</span></p>
+        <a asp-controller="Pedido" asp-action="Confirmar" class="btn btn-primary">Finalizar Compra</a>
+    </div>
+</div>
+
+<!-- Botón para abrir el carrito -->
+<button class="cart-btn" onclick="toggleCart()">
+    <i class="bi bi-cart3"></i>
+    <span id="cart-count" class="badge bg-danger">0</span>
+</button>
+
+@section Scripts {
+    <script src="~/js/script.js"></script>
+}

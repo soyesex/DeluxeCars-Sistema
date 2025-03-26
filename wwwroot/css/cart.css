@@ -1,0 +1,74 @@
+﻿/* Estilo para el carrito deslizante */
+.slide-cart {
+    position: fixed;
+    top: 0;
+    right: -300px;
+    width: 300px;
+    height: 100%;
+    background-color: #343a40;
+    color: white;
+    transition: right 0.5s ease;
+    z-index: 9999;
+}
+
+    .slide-cart.open {
+        right: 0;
+    }
+
+/* Estilo para los ítems del carrito */
+#cart-items {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+.list-group-item {
+    background-color: #343a40;
+    color: white;
+    border: none;
+    border-bottom: 1px solid #444;
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+    .list-group-item button {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+
+        .list-group-item button:hover {
+            background-color: #c82333;
+        }
+
+/* Estilo para el botón del carrito */
+.cart-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    padding: 15px;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 10000;
+}
+
+    .cart-btn:hover {
+        background-color: #0056b3;
+    }
+
+/* Estilo para el botón "Finalizar Compra" */
+.cart-footer .btn-primary {
+    background-color: #007bff;
+    border: none;
+}
+
+    .cart-footer .btn-primary:hover {
+        background-color: #0056b3;
+    }

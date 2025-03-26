@@ -1,0 +1,43 @@
+﻿@model List<Aplicacion.Application.ViewModels.ProductoViewModel>
+
+@{
+    ViewData["Title"] = "Confirmación de Pedido - Deluxe Cars";
+}
+
+<div class="container mt-5 pt-5">
+    <h1 class="text-center mb-4">Confirmación de Pedido</h1>
+    @if (Model == null || !Model.Any())
+    {
+        <p class="text-center">No hay ítems en el carrito.</p>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Precio</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Nombre</td>
+                        <td>$@item.Precio.ToString("F2")</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td><strong>Total</strong></td>
+                    <td><strong>$@Model.Sum(item => item.Precio).ToString("F2")</strong></td>
+                </tr>
+            </tfoot>
+        </table>
+        <div class="text-center">
+            <p>¡Gracias por tu compra!</p>
+            <a asp-controller="Catalogo" asp-action="Index" class="btn btn-primary">Volver al Catálogo</a>
+        </div>
+    }
+</div>

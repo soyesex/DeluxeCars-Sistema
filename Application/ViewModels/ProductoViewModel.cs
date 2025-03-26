@@ -12,5 +12,6 @@
         public string? Descripcion { get; set; }
         public bool Estado { get; set; }
         public DateTime FechaIngreso { get; set; }
+        public string ImagenUrl { get; set; } // Mapear la columna ImagenUrl
     }
 }

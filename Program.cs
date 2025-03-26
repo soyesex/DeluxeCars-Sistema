@@ -20,6 +20,13 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<IProductoService, ProductoService>();
 
+// Configurar autenticacion
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Account/Login"; // Ruta para el login
+    options.AccessDeniedPath = "/Account/AccessDenied"; // Ruta para acceso denegado
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -39,11 +46,12 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Producto}/{action=Index}/{id?}");
+    pattern: "{controller=Catalogo}/{action=Index}/{id?}");
 app.MapRazorPages();
 
 app.Run();
