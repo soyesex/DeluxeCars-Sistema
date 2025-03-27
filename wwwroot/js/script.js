@@ -12,7 +12,7 @@ function displayProducts(productsData) {
         card.className = "col-md-4 mb-4";
         card.innerHTML = `
             <div class="card">
-                <img src="${product.imagenUrl}" alt="${product.nombre}" class="card-img-top">
+                <img src="${product.imagenUrl}" alt="${product.nombre}" class="card-img-top" asp-append-version="true">
                 <div class="card-body">
                     <h5 class="card-title">${product.nombre}</h5>
                     <p class="card-text">$${product.precio.toFixed(2)}</p>
@@ -43,6 +43,7 @@ function addToCart(productId) {
 function updateCart() {
     const cartItems = document.getElementById("cart-items");
     const cartTotal = document.getElementById("cart-total");
+    const cartCount = document.getElementById("cart-count"); // Contador del carrito
     cartItems.innerHTML = ""; // Limpiar la lista
     let total = 0;
 
@@ -58,6 +59,8 @@ function updateCart() {
     });
 
     cartTotal.textContent = total.toFixed(2);
+
+    cartCount.textContent = cart.length;
     // Guardar el carrito en localStorage
     localStorage.setItem('cart', JSON.stringify(cart));
 }
@@ -103,4 +106,7 @@ window.onload = function () {
 function prepareCartData() {
     const cartItemsInput = document.getElementById("cartItemsInput");
     cartItemsInput.value = JSON.stringify(cart);
+    console.log("Datos enviados en el formulario:", cartItemsInput.value);
 }
+
+

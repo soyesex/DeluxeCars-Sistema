@@ -1,16 +1,19 @@
-﻿@{
+﻿@model IEnumerable<Aplicacion.Application.ViewModels.ProductoViewModel>
+@{
     ViewData["Title"] = "Home Page";
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/home.css" asp-append-version="true" />
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+
 }
 
 <div class="home-page">
     <header id="info-page" class="py-5">
-        <div class="container">
+        <div class="container mt-3 pt-3">
             <div class="row align-items-center">
+                <!-- Columna 1: Texto -->
                 <div class="col-md-6">
                     <div class="left text-center">
                         <h1 class="display-6">Encuentra las Mejores Autopartes en <span class="text-primary">Deluxe Cars</span></h1>
@@ -21,12 +24,15 @@
                         </a>
                     </div>
                 </div>
+
+                <!-- Columna 2: Imagen -->
+                <div class="col-md-6 text-center">
+                    <img src="~/css/img/auto-rojo-main.jpg" alt="auto rojo" class="img-fluid rounded">
+                </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <img src="~/css/img/auto-rojo-main.jpg" alt="auto rojo" class="img-fluid rounded">
-        </div>
     </header>
+
 
     <section id="features">
         <h2 class="separator">Por Qué Elegirnos</h2>
@@ -59,69 +65,41 @@
         <h2 class="separator">Nuestro Catálogo de Autopartes</h2>
         <div class="nft-shop">
             <div class="category">
-                <a href="#">Motor</a>
-                <a href="#">Frenos</a>
-                <a href="#">Suspensión y Dirección</a>
-                <a href="#">Sistema Eléctrico</a>
-                <a href="#">Accesorios</a>
+                <button class="category-btn" data-category="all">Todos</button>
+                <button class="category-btn" data-category="Motor">Motor</button>
+                <button class="category-btn" data-category="Frenos">Frenos</button>
+                <button class="category-btn" data-category="Suspensión">Suspensión</button>
+                <button class="category-btn" data-category="Filtros">Filtros</button>
+                <button class="category-btn" data-category="Transmisión">Transmisión</button>
+                <button class="category-btn" data-category="Encendido">Encendido</button>
+                <button class="category-btn" data-category="Baterías">Baterías</button>
             </div>
-            <div class="nft-list">
-                <div class="item">
-                    <img src="~/css/img/filtro-motor.jpg" alt="Filtros">
-                    <div class="info">
-                        <div>
-                            <h5>Filtros</h5>
-                            <div class="btc">
-                                <i class='bx bxs-car'></i>
-                                <p>0.29 BTC</p>
-                                <button class="btn btn-primary">Añadir al Carrito</button>
+            <div class="container mt-5 pt-5">
+                <div class="row" id="product-catalog">
+                    @foreach (var producto in Model)
+                    {
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100">
+                                <img src="@producto.ImagenUrl" alt="@producto.Nombre" class="card-img-top" />
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title">@producto.Nombre</h5>
+                                    <p class="card-text text-muted">$@producto.Precio</p>
+                                    <p class="card-text">
+                                        <small class="text-muted">@producto.Descripcion</small>
+                                    </p>
+                                    <p class="card-text">
+                                        <small class="text-muted">Stock: @producto.Stock</small>
+                                    </p>
+                                    <div class="mt-auto">
+                                        <button class="btn btn-success w-100">Agregar al Carrito</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <!-- Repite los otros items aquí -->
-                <div class="item">
-                    <img src="~/css/img/bujias.jpg" alt="Bujías">
-                    <div class="info">
-                        <div>
-                            <h5>Bujías</h5>
-                            <div class="btc">
-                                <i class='bx bxs-car'></i>
-                                <p>0.29 BTC</p>
-                                <button class="btn btn-primary">Añadir al Carrito</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="item">
-                    <img src="~/css/img/inyectores.jpg" alt="Coche lavado">
-                    <div class="info">
-                        <div>
-                            <h5>Inyectores</h5>
-                            <div class="btc">
-                                <i class='bx bxs-car'></i>
-                                <p>0.29 BTC</p>
-                                <button class="btn btn-primary">Añadir al Carrito</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="item">
-                    <img src="~/css/img/amortiguadores.jpg" alt="Coche lavado">
-                    <div class="info">
-                        <div>
-                            <h5>Amortiguadores</h5>
-                            <div class="btc">
-                                <i class='bx bxs-car'></i>
-                                <p>0.29 BTC</p>
-                                <button class="btn btn-primary">Añadir al Carrito</button>
-                            </div>
-                        </div>
-                    </div>
+                    }
                 </div>
             </div>
+
             <div class="view-more">
                 <a asp-controller="Catalogo" asp-action="Index" class="btn btn-primary mb-3">Ver mas</a>
             </div>
@@ -174,4 +152,72 @@
 
 @section Scripts {
     <script src="~/js/home.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let products = [];
+
+        // Función para mostrar los productos en el catálogo
+        function displayProducts(filteredProducts) {
+            const catalog = document.getElementById("product-catalog");
+            catalog.innerHTML = ""; // Limpiamos el catálogo
+
+            filteredProducts.forEach(product => {
+                const card = document.createElement("div");
+                card.className = "col-md-4 mb-4";
+                card.innerHTML = `
+                    <div class="card">
+                        <img src="${product.imagenUrl}" alt="${product.nombre}" class="card-img-top">
+                        <div class="card-body">
+                            <h5 class="card-title">${product.nombre}</h5>
+                            <p class="card-text">$${product.precio.toFixed(2)}</p>
+                            <p class="card-text"><small class="text-muted">${product.descripcion}</small></p>
+                            <p class="card-text"><small class="text-muted">Stock: ${product.stock}</small></p>
+                            <button class="btn btn-success" onclick="addToCart(${product.id})" ${product.stock === 0 ? 'disabled' : ''}>
+                                ${product.stock === 0 ? 'Sin Stock' : 'Agregar al Carrito'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+                catalog.appendChild(card);
+            });
+        }
+
+        // Función para filtrar productos por categoría
+        function filterProducts(category) {
+            if (category === "all") {
+                displayProducts(products); // Mostrar todos los productos
+            } else {
+                const filtered = products.filter(product => product.nombreCategoria === category);
+                displayProducts(filtered);
+            }
+        }
+
+        // Evento para cada botón de categoría
+        document.querySelectorAll(".category-btn").forEach(button => {
+            button.addEventListener("click", function () {
+                const category = this.getAttribute("data-category");
+                filterProducts(category);
+            });
+        });
+
+        // Cargar productos desde el servidor
+        function loadProducts() {
+            $.ajax({
+                url: '/Catalogo/GetProducts',
+                type: 'GET',
+                success: function (data) {
+                    products = data; // Guardamos los productos
+                    displayProducts(products); // Mostramos los productos al cargar la página
+                },
+                error: function (err) {
+                    console.error("Error al cargar los productos", err);
+                }
+            });
+        }
+
+        // Llamar a la función para cargar productos al cargar la página
+        window.onload = function () {
+            loadProducts();
+        };
+    </script>
 }

@@ -17,7 +17,7 @@
 </head>
 <body>
     <header style="position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; box-shadow: 0 4px 2px -2px gray;">
-        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3 custom-navbar">
+        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3 custom-navbar fixed-top">
             <div class="container-fluid">
                 <!-- Logo -->
                 <a class="navbar-brand logo" asp-area="" asp-controller="Home" asp-action="Index">Deluxe Cars</a>
@@ -47,10 +47,7 @@
                                     </li>
                                 }
                                 <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Principal</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Servicios</a>
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Contáctanos</a>
@@ -60,7 +57,7 @@
                                 </li> 
                                 <li class="nav-item">
                                     <form class="nav-link text-dark" asp-controller="Account" asp-action="Logout" method="post">
-                                        <button type="submit" class="btn btn-danger">Cerrar Sesión</button>
+                                        <button type="submit">Cerrar Sesión</button>
                                     </form>
                                 </li>
                             }
@@ -72,17 +69,17 @@
                             }
                         </ul>
                     </div>
-
+@* 
                     <!-- Login -->
                     <div class="ms-auto login">
                         <partial name="_LoginPartial" />
-                    </div>
+                    </div> *@
                 </div>
             </div>
         </nav>
     </header>
 
-    <div class="container-fluid px-3">
+    <div class="container-fluid px-3 ">
         <main role="main" class="text-center pb-3">
             @RenderBody()
         </main>

@@ -13,17 +13,17 @@ namespace Aplicacion.Presentation.Controllers
         }
 
         // Acción para renderizar la vista del catálogo
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var products = _productoService.GetAll();
+            var products = await _productoService.GetAll();
             return View(products);
         }
 
         // Acción para devolver los productos como JSON
         [HttpGet]
-        public IActionResult GetProducts()
+        public async Task<IActionResult> GetProducts()
         {
-            var products = _productoService.GetAll();
+            var products = await _productoService.GetAll();
             return Json(products);
         }
     }

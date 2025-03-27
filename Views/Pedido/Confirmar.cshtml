@@ -1,0 +1,77 @@
+﻿@model List<Aplicacion.Application.ViewModels.ProductoViewModel>
+@{
+    ViewData["Title"] = "Resumen del Pedido";
+}
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Resumen del Pedido</h1>
+
+    @if (Model != null && Model.Any())
+    {
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Precio</th>
+                    <th>Cantidad</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Nombre</td>
+                        <td>$@item.Precio.ToString("F2")</td>
+                        <td>1</td> <!-- Si no manejas cantidades, puedes poner 1 o modificar según tu lógica -->
+                        <td>$@item.Precio.ToString("F2")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div class="text-end">
+            <h3>
+                Total del Pedido: $
+                @Model.Sum(p => p.Precio).ToString("F2")
+            </h3>
+        </div>
+    }
+    else
+    {
+        <p>No hay productos en el pedido.</p>
+    }
+    <div class="text-center mt-4">
+        <a asp-controller="Catalogo" asp-action="Index" class="btn btn-primary">Volver al Catálogo</a>
+        <a id="whatsapp-btn" class="btn btn-success" target="_blank">
+            <i class="bi bi-whatsapp"></i> Enviar por WhatsApp
+        </a>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let pedido = @Html.Raw(Json.Serialize(Model));
+
+            if (pedido && pedido.length > 0) {
+                let mensaje = "Hola, quiero realizar el siguiente pedido:\n\n";
+                let total = 0;
+
+                pedido.forEach((item, index) => {
+                    mensaje += `${index + 1}. ${item.nombre} - $${item.precio.toFixed(2)}\n`;
+                    total += item.precio;
+                });
+
+                mensaje += `\nTotal del Pedido: $${total.toFixed(2)}`;
+
+                // Número de WhatsApp del dueño (cambiar por el real)
+                let numeroWhatsApp = "573137591775";
+                let url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
+
+                document.getElementById("whatsapp-btn").href = url;
+            }
+        });
+    </script>
+}
+
+

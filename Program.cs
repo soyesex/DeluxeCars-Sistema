@@ -41,18 +41,14 @@ builder.Services.Configure<IdentityOptions>(options =>
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.HttpOnly = true;
-    options.ExpireTimeSpan = TimeSpan.FromHours(1);
+    options.ExpireTimeSpan = TimeSpan.FromDays(7);
 
-    options.LoginPath = "/Account/Login";
-    options.AccessDeniedPath = "/Account/AccessDenied";
-    options.SlidingExpiration = true;
-});
+    options.LoginPath = "/Account/Login"; // redirige aqui si no esta autenticado
+    options.LogoutPath = "/Account/Logout"; // Al cerrar la sesion
+    options.AccessDeniedPath = "/Account/AccessDenied"; // Si no tiene permisos
+    options.SlidingExpiration = true; // Renueva el tiempo de sesion con actividad
 
-// Configurar autenticacion
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    options.LoginPath = "/Account/Login"; // Ruta para el login
-    options.AccessDeniedPath = "/Account/AccessDenied"; // Ruta para acceso denegado
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });
 
 var app = builder.Build();
@@ -79,7 +75,7 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Account}/{action=Login}/{id?}");
+    pattern: "{controller=Catalogo}/{action=Index}/{id?}");
 app.MapRazorPages();
 
 async Task CreateRoles(IServiceProvider services)

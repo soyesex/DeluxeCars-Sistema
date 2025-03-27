@@ -14,7 +14,16 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.12" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.12" />
+	<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.12" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\css\img\baterias\" />
+    <Folder Include="wwwroot\css\img\encendido\" />
+    <Folder Include="wwwroot\css\img\motor\" />
+    <Folder Include="wwwroot\css\img\transmision\" />
+    <Folder Include="wwwroot\css\img\suspension\" />
   </ItemGroup>
 
 </Project>

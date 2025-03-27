@@ -17,7 +17,7 @@ namespace Aplicacion.Application.Services
         {
             try
             {
-                var productoService = await _context.Producto
+                var productos = await _context.Productos
                     .Include(x => x.Categoria)
                     .Select(x => new ProductoViewModel
                     {
@@ -31,21 +31,50 @@ namespace Aplicacion.Application.Services
                         NombreCategoria = x.Categoria.Nombre,
                         OrigininalEquipmentManufacture = x.OrigninalEquipmentManufacture,
                         Precio = x.Precio,
-                        ImagenUrl = x.ImagenUrl ?? "/images/default.jpg" // Asegúrate de que la entidad Producto tenga esta propiedad
+                        ImagenUrl = File.Exists($"wwwroot/css{x.ImagenUrl}") ? $"wwwroot/css{x.ImagenUrl}" : "/images/Default.jpeg"
                     }).ToListAsync();
 
-                return productoService;
+                if (productos.Count == 0)
+                {
+                    Console.WriteLine("⚠ No se encontraron productos en la base de datos.");
+                }
+
+                return productos;
             }
             catch (Exception)
             {
                 return new List<ProductoViewModel>();
             }
         }
+        public async Task<IEnumerable<ProductoViewModel>> GetLimitedProducts(int count = 3)
+        {
+            var productos = await _context.Productos
+                .Include(x => x.Categoria)
+                .OrderBy(x => x.Nombre) // Puedes ordenar según alguna lógica deseada
+                .Take(count)
+                .Select(x => new ProductoViewModel
+                {
+                    Id = x.Id,
+                    Stock = x.Stock,
+                    CategoriaId = x.CategoriaId,
+                    Descripcion = x.Descripcion,
+                    Estado = x.Estado,
+                    FechaIngreso = x.FechaIngreso,
+                    Nombre = x.Nombre,
+                    NombreCategoria = x.Categoria.Nombre,
+                    OrigininalEquipmentManufacture = x.OrigninalEquipmentManufacture,
+                    Precio = x.Precio,
+                    ImagenUrl = File.Exists($"wwwroot/{x.ImagenUrl}") ? x.ImagenUrl : "/images/Default.jpeg"
+                }).ToListAsync();
+
+            return productos;
+        }
+
         public async Task<IEnumerable<ProductoViewModel>> Search(string filtro)
         {
             try
             {
-                var consulta = _context.Producto.AsQueryable();
+                var consulta = _context.Productos.AsQueryable();
 
                 if (!string.IsNullOrEmpty(filtro))
                 {
@@ -83,7 +112,7 @@ namespace Aplicacion.Application.Services
                         Precio = model.Precio,
                         Stock = model.Stock
                     };
-                    _context.Producto.Add(producto);
+                    _context.Productos.Add(producto);
                     await _context.SaveChangesAsync();
                     return true;
                 }
@@ -100,10 +129,10 @@ namespace Aplicacion.Application.Services
         {
             try
             {
-                var producto = await _context.Producto.FindAsync(id);
+                var producto = await _context.Productos.FindAsync(id);
                 if (producto != null)
                 {
-                    _context.Producto.Remove(producto);
+                    _context.Productos.Remove(producto);
                     await _context.SaveChangesAsync();
                     return true;
                 }
@@ -119,7 +148,7 @@ namespace Aplicacion.Application.Services
         {
             try
             {
-                var producto = await _context.Producto.FindAsync(id);
+                var producto = await _context.Productos.FindAsync(id);
                 if (producto != null)
                 {
                     return new ProductoViewModel
@@ -148,7 +177,7 @@ namespace Aplicacion.Application.Services
         {
             try
             {
-                var producto = await _context.Producto.FindAsync(model.Id);
+                var producto = await _context.Productos.FindAsync(model.Id);
                 if (producto != null)
                 {
                     producto.Descripcion = model.Descripcion;

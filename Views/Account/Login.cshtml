@@ -18,7 +18,7 @@
     <div class="login-card">
         <h1 class="text-center mb-4">@ViewData["Title"]</h1>
         <section>
-            <form id="account" method="post">
+            <form asp-controller="Account" asp-action="Login" method="post">
                 <h4 class="text-center mb-4">Utiliza tu cuenta</h4>
                 <hr />
                 <div asp-validation-summary="ModelOnly" class="text-danger text-center" role="alert"></div>
@@ -35,23 +35,20 @@
                 <div class="form-check mb-3">
                     <label asp-for="RememberMe" class="form-check-label">
                         <input class="form-check-input" asp-for="RememberMe" />
-                        @Html.DisplayNameFor(m => m.RememberMe)
+                        Recuérdame
                     </label>
                 </div>
                 <div class="d-grid">
-                    <button id="login-submit" type="submit" class="btn btn-primary btn-lg">Ingresar</button>
-                </div>@* 
+                    <button type="submit" class="btn btn-primary btn-lg">Ingresar</button>
+                </div>
                 <div class="text-center mt-3">
                     <p>
-                        <a id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a>
+                        <a>Olvide mi contraseña</a>
                     </p>
                     <p>
-                        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Register as a new user</a>
+                        <a asp-action="Register" asp-controller="Account" >Registrame</a>
                     </p>
-                    <p>
-                        <a id="resend-confirmation" asp-page="./ResendEmailConfirmation">Resend email confirmation</a>
-                    </p>
-                </div> *@
+                </div>
             </form>
         </section>
     </div>

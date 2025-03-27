@@ -13,5 +13,6 @@ namespace Aplicacion.Core.Interfaces
         //bool ExisteCelular(string celular);
         //bool ExisteEmail(string email);
         Task<IEnumerable<ProductoViewModel>> Search(string filtro);
+        Task<IEnumerable<ProductoViewModel>> GetLimitedProducts(int count = 3);
     }
 }

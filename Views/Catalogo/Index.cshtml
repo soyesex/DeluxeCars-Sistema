@@ -1,87 +1,4 @@
-﻿@* @model Aplicacion.Application.ViewModels.ProductoViewModel
-
-@section Styles {
-    <link rel="stylesheet" href="~/css/home.css" asp-append-version="true" />
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
-}
-
-<div class="home-page">
-
-    <section id="services">
-        <h2 class="separator">Catálogo</h2>
-        <div class="nft-shop">
-            <div class="category">
-                <a href="#">Motor</a>
-                <a href="#">Frenos</a>
-                <a href="#">Suspensión y Dirección</a>
-                <a href="#">Sistema Eléctrico</a>
-                <a href="#">Accesorios</a>
-            </div>
-            <div class="nft-list">
-                <div class="item">
-                    <img src="~/css/img/filtro-motor.jpg" alt="Filtros">
-                    <div class="info">
-                        <div>
-                            <h5>Filtros</h5>
-                            <div class="btc">
-                                <i class='bx bxs-car'></i>
-                                <p>0.29 BTC</p>
-                                <button class="btn btn-primary">Añadir al Carrito</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Repite los otros items aquí -->
-                <div class="item">
-                    <img src="~/css/img/bujias.jpg" alt="Bujías">
-                    <div class="info">
-                        <div>
-                            <h5>Bujías</h5>
-                            <div class="btc">
-                                <i class='bx bxs-car'></i>
-                                <p>0.29 BTC</p>
-                                <button class="btn btn-primary">Añadir al Carrito</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="item">
-                    <img src="~/css/img/inyectores.jpg" alt="Coche lavado">
-                    <div class="info">
-                        <div>
-                            <h5>Inyectores</h5>
-                            <div class="btc">
-                                <i class='bx bxs-car'></i>
-                                <p>0.29 BTC</p>
-                                <button class="btn btn-primary">Añadir al Carrito</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="item">
-                    <img src="~/css/img/amortiguadores.jpg" alt="Coche lavado">
-                    <div class="info">
-                        <div>
-                            <h5>Amortiguadores</h5>
-                            <div class="btc">
-                                <i class='bx bxs-car'></i>
-                                <p>0.29 BTC</p>
-                                <button class="btn btn-primary">Añadir al Carrito</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="view-more">
-                <a asp-controller="Catalogo" asp-action="Index" class="btn btn-primary mb-3">Ver mas</a>
-            </div>
-        </div>
-    </section>
-
-</div> *@
-@model List<Aplicacion.Application.ViewModels.ProductoViewModel>
+﻿@model List<Aplicacion.Application.ViewModels.ProductoViewModel>
 
 @{
     ViewData["Title"] = "Catálogo - Deluxe Cars";
@@ -102,8 +19,11 @@
     <ul id="cart-items" class="list-group list-group-flush"></ul>
     <div class="cart-footer p-3 text-white d-flex justify-content-between">
         <p>Total: $<span id="cart-total">0</span></p>
-        <a asp-controller="Pedido" asp-action="Confirmar" class="btn btn-primary">Finalizar Compra</a>
-    </div>
+        <form id="checkoutForm" action="/Pedido/Confirmar" method="post" onsubmit="prepareCartData()">
+            <input type="hidden" id="cartItemsInput" name="cartItemsInput" />
+            <button type="submit" class="btn btn-primary">Finalizar Compra</button>
+        </form>
+
 </div>
 
 <!-- Botón para abrir el carrito -->

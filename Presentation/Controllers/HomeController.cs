@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Aplicacion.Core.Interfaces;
 using Aplicacion.Core.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,15 +8,17 @@ namespace Aplicacion.Presentation.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
+        private readonly IProductoService _productoService;
+        public HomeController(ILogger<HomeController> logger, IProductoService productoService)
         {
             _logger = logger;
+            _productoService = productoService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var limitedProducts = await _productoService.GetLimitedProducts();
+            return View(limitedProducts);
         }
 
         public IActionResult Privacy()

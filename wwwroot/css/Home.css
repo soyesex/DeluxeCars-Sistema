@@ -16,11 +16,10 @@
 
 .home-page header {
     padding: 0;
-    height: calc(100vh - 80px);
+/*    height: calc(100vh - 80px);
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin-top: 80px;
+    justify-content: space-between;*/
 }
 
 .home-page img {
@@ -80,6 +79,7 @@
     padding: 0 80px;
     margin: 50px 0 80px;
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     gap: 30px;
 }
@@ -127,8 +127,8 @@
         display: flex;
         gap: 14px;
     }
-
-        .home-page .nft-shop .category a {
+    /**--------------------------------------------*/
+        .home-page .nft-shop .category-btn {
             background-color: #dfdcdc;
             padding: 8px 14px;
             font-size: 15px;
@@ -136,7 +136,7 @@
             transition: all 0.3s ease;
         }
 
-            .home-page .nft-shop .category a:hover {
+            .home-page .nft-shop .category-btn:hover {
                 color: #fff;
                 background-color: #0f2182;
             }
@@ -144,7 +144,8 @@
     .home-page .nft-shop .nft-list {
         padding: 40px 0;
         display: flex;
-        justify-content: space-between;
+        flex-wrap: wrap;
+        justify-content: center;
         gap: 20px;
     }
 
@@ -306,9 +307,20 @@
             gap: 20px;
         }
 
+            .home-page .nft-shop .nft-list .item {
+                width: 280px;
+                padding: 20px;
+                background: #fff;
+                border-radius: 18px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0,1);
+                transition: all 0.3s ease;
+            }
+
             .home-page .nft-shop .nft-list .item img {
                 width: 100%;
-                height: auto;
+                height: 280px;
+                object-fit:cover;
+                border-radius: 18px
             }
 
     .sellers {
@@ -320,5 +332,10 @@
             width: 100%;
         }
 }
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
 
 

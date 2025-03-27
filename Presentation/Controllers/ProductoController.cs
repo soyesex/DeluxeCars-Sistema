@@ -1,10 +1,13 @@
 ﻿using Aplicacion.Application.Services;
 using Aplicacion.Core.Interfaces;
 using Aplicacion.Core.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Aplicacion.Presentation.Controllers
 {
+    [Authorize(Roles = "Administrador")]
     public class ProductoController : Controller
     {
         private readonly IProductoService _productoService;
@@ -12,14 +15,20 @@ namespace Aplicacion.Presentation.Controllers
         {
             _productoService = productoService;
         }
-        public IActionResult Index(string filtro)
+        public async Task<IActionResult> Index(string filtro)
         {
-            var productos = string.IsNullOrEmpty(filtro)?_productoService.GetAll():_productoService.Search(filtro);
-
-            //Para que el input mantega el valor
-            ViewBag.FiltroActual = filtro;
-
-            return View(productos);
+            if (filtro.IsNullOrEmpty())
+            {
+                var productos = await _productoService.GetAll();
+                return View(productos);
+            }
+            else
+            {
+                //Para que el input mantega el valor
+                ViewBag.FiltroActual = filtro;
+                var productos = _productoService.Search(filtro);
+                return View(productos);
+            }
         }
         
     }

@@ -12,24 +12,23 @@ namespace Aplicacion.Presentation.Controllers
         }
 
         [HttpPost]
-        public IActionResult Confirmar(string cartItems)
+        public IActionResult Confirmar(string cartItemsInput)
         {
-            if (string.IsNullOrEmpty(cartItems))
+            System.Diagnostics.Debug.WriteLine("Datos recibidos en Confirmar: " + cartItemsInput);
+
+            if (string.IsNullOrEmpty(cartItemsInput))
             {
+                TempData["Error"] = "No se recibieron datos del carrito.";
                 return RedirectToAction("Index", "Catalogo");
             }
 
-            // Deserializar los ítems del carrito
-            var items = JsonSerializer.Deserialize<List<ProductoViewModel>>(cartItems);
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var pedido = JsonSerializer.Deserialize<List<ProductoViewModel>>(cartItemsInput, options);
 
-            if (items == null || !items.Any())
-            {
-                return RedirectToAction("Index", "Catalogo");
-            }
-
-            // Aquí puedes procesar el pedido (guardarlo en la base de datos, etc.)
-            // Por ahora, solo mostramos una vista de confirmación
-            return View(items);
+            return View(pedido);
         }
+
+
+
     }
 }
