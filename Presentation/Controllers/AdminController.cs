@@ -10,5 +10,9 @@ namespace Aplicacion.Presentation.Controllers
         {
             return View();
         }
+        public IActionResult Config()
+        {
+            return View();
+        }
     }
 }

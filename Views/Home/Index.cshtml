@@ -11,22 +11,24 @@
 
 <div class="home-page">
     <header id="info-page" class="py-5">
-        <div class="container mt-3 pt-3">
-            <div class="row align-items-center">
+        <div class="container">
+            <div class="d-flex align-items-center justify-content-between gap-5">
                 <!-- Columna 1: Texto -->
                 <div class="col-md-6">
-                    <div class="left text-center">
+                    <div class="text-start pe-4 left">
                         <h1 class="display-6">Encuentra las Mejores Autopartes en <span class="text-primary">Deluxe Cars</span></h1>
                         <p class="lead">Calidad, variedad y precios competitivos en un solo lugar.</p>
-                        <a href="#catalogo" class="btn btn-dark d-flex align-items-center justify-content-center gap-2">
-                            <i class='bx bx-search'></i>
-                            <span>Explora el Catálogo</span>
-                        </a>
+                        <div class="d-flex-center">
+                            <a asp-action="Index" asp-controller="Catalogo" class="btn btn-dark d-flex align-items-center justify-content-center gap-2">
+                                <i class='bx bx-search'></i>
+                                <span>Explora el Catálogo</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Columna 2: Imagen -->
-                <div class="col-md-6 text-center">
+                <!-- columna 2: imagen -->
+                <div class="col-md-6 text-end">
                     <img src="~/css/img/auto-rojo-main.jpg" alt="auto rojo" class="img-fluid rounded">
                 </div>
             </div>
@@ -106,7 +108,7 @@
         </div>
     </section>
     <section id="suppliers">
-        <h2 class="separator">Lo que Dicen Nuestros Clientes</h2>
+        <h2 class="separator">Nuestros servicios</h2>
         <div class="sellers">
             <div class="item">
                 <img src="../img/porfile 1.jpg" alt="Diana">
@@ -144,8 +146,8 @@
     <!-- Sección de Llamada a la Acción -->
     <section id="cta" class="py-5 text-center">
         <div class="container">
-            <h2 class="mb-4">¡Encuentra Todo lo que Necesitas para tu Vehículo!</h2>
-            <a href="#catalogo" class="btn btn-primary btn-lg">Ver Catálogo Completo</a>
+            <h2 class="mb-4">Contactanos!</h2>
+            <a asp-action="Contact" class="btn btn-primary btn-lg">Mensaje</a>
         </div>
     </section>
 </div>
