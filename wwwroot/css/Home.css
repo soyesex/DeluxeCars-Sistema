@@ -48,7 +48,9 @@
         color: #777;
     }
 
-    .home-page header d-flex-center a {
+    .home-page header d-flex-center a,
+    .home-page .view-more a,
+    .home-page #cta a {
         background-color: #000;
         color: white;
         font-size: 1.2rem;

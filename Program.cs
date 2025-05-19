@@ -1,8 +1,8 @@
-using Aplicacion.Application.Services;
 using Aplicacion.Application.ViewModels;
-using Aplicacion.Core.Interfaces;
 using Aplicacion.Core.Models;
-using Aplicacion.Infrastructure.Data;
+using Aplicacion.Data;
+using Aplicacion.Models.Interfaces;
+using Aplicacion.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

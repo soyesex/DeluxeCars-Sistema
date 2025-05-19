@@ -1,4 +1,6 @@
-﻿@model IEnumerable<Aplicacion.Application.ViewModels.ProductoViewModel>
+﻿@using Aplicacion.Models.ViewModels
+@using Aplicacion.ViewModels
+@model IEnumerable<ProductoViewModel>
 @{
     ViewData["Title"] = "Home Page";
 }
@@ -76,34 +78,44 @@
                 <button class="category-btn" data-category="Encendido">Encendido</button>
                 <button class="category-btn" data-category="Baterías">Baterías</button>
             </div>
+            @{
+                int contador = 0;
+            }
             <div class="container mt-5 pt-5">
                 <div class="row" id="product-catalog">
-                    @foreach (var producto in Model)
+                    @if (contador == 0 || contador <= 1)
                     {
-                        <div class="col-md-4 mb-4">
-                            <div class="card h-100">
-                                <img src="@producto.ImagenUrl" alt="@producto.Nombre" class="card-img-top" />
-                                <div class="card-body d-flex flex-column">
-                                    <h5 class="card-title">@producto.Nombre</h5>
-                                    <p class="card-text text-muted">$@producto.Precio</p>
-                                    <p class="card-text">
-                                        <small class="text-muted">@producto.Descripcion</small>
-                                    </p>
-                                    <p class="card-text">
-                                        <small class="text-muted">Stock: @producto.Stock</small>
-                                    </p>
-                                    <div class="mt-auto">
-                                        <button class="btn btn-success w-100">Agregar al Carrito</button>
+                        foreach (var producto in Model)
+                        {
+                            <div class="col-md-4 mb-4">
+                                <div class="card h-100">
+                                    <img src="@producto.ImagenUrl" alt="@producto.Nombre" class="card-img-top" />
+                                    <div class="card-body d-flex flex-column">
+                                        <h5 class="card-title">@producto.Nombre</h5>
+                                        <p class="card-text text-muted">$@producto.Precio</p>
+                                        <p class="card-text">
+                                            <small class="text-muted">@producto.Descripcion</small>
+                                        </p>
+                                        <p class="card-text">
+                                            <small class="text-muted">Stock: @producto.Stock</small>
+                                        </p>
+                                        <div class="mt-auto">
+                                            <button class="btn btn-success w-100">Agregar al Carrito</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                            contador++;
+                        }
                     }
+                    
                 </div>
             </div>
 
             <div class="view-more">
-                <a asp-controller="Catalogo" asp-action="Index" class="btn btn-primary mb-3">Ver mas</a>
+                <a asp-controller="Catalogo" asp-action="Index" class="btn btn-dark d-flex align-items-center justify-content-center">
+                    <span>Ver mas</span>
+                </a>
             </div>
         </div>
     </section>
@@ -147,79 +159,82 @@
     <section id="cta" class="py-5 text-center">
         <div class="container">
             <h2 class="mb-4">Contactanos!</h2>
-            <a asp-action="Contact" class="btn btn-primary btn-lg">Mensaje</a>
+            <div class="contact">
+                <a asp-action="Contact" class="btn btn-dark d-flex align-items-center justify-content-center">
+                    <span>Mensaje</span>
+                </a>
+            </div>
         </div>
     </section>
 </div>
 
 @section Scripts {
-    <script src="~/js/home.js" asp-append-version="true"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        let products = [];
+    // <script>
+    //     let products = [];
 
-        // Función para mostrar los productos en el catálogo
-        function displayProducts(filteredProducts) {
-            const catalog = document.getElementById("product-catalog");
-            catalog.innerHTML = ""; // Limpiamos el catálogo
+    //     // Función para mostrar los productos en el catálogo
+    //     function displayProducts(filteredProducts) {
+    //         const catalog = document.getElementById("product-catalog");
+    //         catalog.innerHTML = ""; // Limpiamos el catálogo
 
-            filteredProducts.forEach(product => {
-                const card = document.createElement("div");
-                card.className = "col-md-4 mb-4";
-                card.innerHTML = `
-                    <div class="card">
-                        <img src="${product.imagenUrl}" alt="${product.nombre}" class="card-img-top">
-                        <div class="card-body">
-                            <h5 class="card-title">${product.nombre}</h5>
-                            <p class="card-text">$${product.precio.toFixed(2)}</p>
-                            <p class="card-text"><small class="text-muted">${product.descripcion}</small></p>
-                            <p class="card-text"><small class="text-muted">Stock: ${product.stock}</small></p>
-                            <button class="btn btn-success" onclick="addToCart(${product.id})" ${product.stock === 0 ? 'disabled' : ''}>
-                                ${product.stock === 0 ? 'Sin Stock' : 'Agregar al Carrito'}
-                            </button>
-                        </div>
-                    </div>
-                `;
-                catalog.appendChild(card);
-            });
-        }
+    //         filteredProducts.forEach(product => {
+    //             const card = document.createElement("div");
+    //             card.className = "col-md-4 mb-4";
+    //             card.innerHTML = `
+    //                 <div class="card">
+    //                     <img src="${product.imagenUrl}" alt="${product.nombre}" class="card-img-top">
+    //                     <div class="card-body">
+    //                         <h5 class="card-title">${product.nombre}</h5>
+    //                         <p class="card-text">$${product.precio.toFixed(2)}</p>
+    //                         <p class="card-text"><small class="text-muted">${product.descripcion}</small></p>
+    //                         <p class="card-text"><small class="text-muted">Stock: ${product.stock}</small></p>
+    //                         <button class="btn btn-success" onclick="addToCart(${product.id})" ${product.stock === 0 ? 'disabled' : ''}>
+    //                             ${product.stock === 0 ? 'Sin Stock' : 'Agregar al Carrito'}
+    //                         </button>
+    //                     </div>
+    //                 </div>
+    //             `;
+    //             catalog.appendChild(card);
+    //         });
+    //     }
 
-        // Función para filtrar productos por categoría
-        function filterProducts(category) {
-            if (category === "all") {
-                displayProducts(products); // Mostrar todos los productos
-            } else {
-                const filtered = products.filter(product => product.nombreCategoria === category);
-                displayProducts(filtered);
-            }
-        }
+    //     // Función para filtrar productos por categoría
+    //     function filterProducts(category) {
+    //         if (category === "all") {
+    //             displayProducts(products); // Mostrar todos los productos
+    //         } else {
+    //             const filtered = products.filter(product => product.nombreCategoria === category);
+    //             displayProducts(filtered);
+    //         }
+    //     }
 
-        // Evento para cada botón de categoría
-        document.querySelectorAll(".category-btn").forEach(button => {
-            button.addEventListener("click", function () {
-                const category = this.getAttribute("data-category");
-                filterProducts(category);
-            });
-        });
+    //     // Evento para cada botón de categoría
+    //     document.querySelectorAll(".category-btn").forEach(button => {
+    //         button.addEventListener("click", function () {
+    //             const category = this.getAttribute("data-category");
+    //             filterProducts(category);
+    //         });
+    //     });
 
-        // Cargar productos desde el servidor
-        function loadProducts() {
-            $.ajax({
-                url: '/Catalogo/GetProducts',
-                type: 'GET',
-                success: function (data) {
-                    products = data; // Guardamos los productos
-                    displayProducts(products); // Mostramos los productos al cargar la página
-                },
-                error: function (err) {
-                    console.error("Error al cargar los productos", err);
-                }
-            });
-        }
+    //     // Cargar productos desde el servidor
+    //     function loadProducts() {
+    //         $.ajax({
+    //             url: '/Catalogo/GetProducts',
+    //             type: 'GET',
+    //             success: function (data) {
+    //                 products = data; // Guardamos los productos
+    //                 displayProducts(products); // Mostramos los productos al cargar la página
+    //             },
+    //             error: function (err) {
+    //                 console.error("Error al cargar los productos", err);
+    //             }
+    //         });
+    //     }
 
-        // Llamar a la función para cargar productos al cargar la página
-        window.onload = function () {
-            loadProducts();
-        };
+    //     // Llamar a la función para cargar productos al cargar la página
+    //     window.onload = function () {
+    //         loadProducts();
+    //     };
     </script>
 }
