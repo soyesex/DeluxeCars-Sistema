@@ -1,5 +1,6 @@
 ﻿using DeluxeCarsUI.Model;
 using DeluxeCarsUI.Repositories;
+using DeluxeCarsUI.View;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,7 @@ using System.Security.Principal;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace DeluxeCarsUI.ViewModel
@@ -81,8 +83,20 @@ namespace DeluxeCarsUI.ViewModel
         {
             userRepository = new UserRepository();
             LoginCommand = new ViewModelCommand(ExecuteLoginCommand, CanExecuteLoginCommand);
-            RecoverPasswordCommand = new ViewModelCommand(p => ExecuteRecoverPassCommand("",""));
+            RecoverPasswordCommand = new ViewModelCommand(ExecuteRecoverPassCommand);
         }
+        private void ExecuteRecoverPassCommand(object obj)
+        {
+            // 1) Instanciamos la ventana de recuperación
+            /*var recoverWindow = new DeluxeCarsUI.View.RecoverPasswordView();
+
+            // 2) La mostramos como diálogo (modal) para que el usuario ingrese datos
+            recoverWindow.Owner = Application.Current.Windows
+                                     .OfType<LoginView>()
+                                     .FirstOrDefault(); // que quede centrada respecto al LoginView
+            recoverWindow.ShowDialog();*/
+        }
+
         private bool CanExecuteLoginCommand(object obj)
         {
             bool validData;
@@ -99,18 +113,21 @@ namespace DeluxeCarsUI.ViewModel
             var isValidUser= userRepository.AuthenticateUser(new NetworkCredential(Username, Password));
             if(isValidUser)
             {
+                // Establecer identidad para el hilo actual
                 Thread.CurrentPrincipal = new GenericPrincipal(
                     new GenericIdentity(Username), null);
+
+                // Guardar el nombre de usuario en Settings para sesion persistente
+                Properties.Settings.Default.SavedUsername = Username;
+                Properties.Settings.Default.Save();
+
+                // Ocultar la vista de login (dispara el evento en App.xaml.cs)
                 IsViewVisible = false;
             }
             else
             {
-                ErrorMessage = "Invalid username or password";
+                ErrorMessage = "Nombre de usuario o contraseña invalido";
             }
-        }
-        private void ExecuteRecoverPassCommand(string username, string email)
-        {
-
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,17 +13,16 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace DeluxeCarsUI
+namespace DeluxeCarsUI.View
 {
     /// <summary>
-    /// Lógica de interacción para MainWindow.xaml
+    /// Lógica de interacción para ReportesView.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class ReportesView : UserControl
     {
-        public MainWindow()
+        public ReportesView()
         {
             InitializeComponent();
         }
     }
 }
-

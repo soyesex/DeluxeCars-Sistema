@@ -6,6 +6,10 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using DeluxeCarsUI.Properties;
+using System.Threading;
+using System.Security.Principal;
+
 
 
 namespace DeluxeCarsUI
@@ -17,17 +21,28 @@ namespace DeluxeCarsUI
     {
         protected void ApplicationStart(object sender, StartupEventArgs e)
         {
-            var loginView = new LoginView();
-            loginView.Show();
-            loginView.IsVisibleChanged += (s, ev) =>
+            // Leer el username guardado en Settings
+            var savedUsername = Settings.Default.SavedUsername; 
+
+            if (!string.IsNullOrEmpty(savedUsername))
             {
-                if (loginView.IsVisible == false && loginView.IsLoaded)
-                {
-                    var mainView = new MainView();
-                    mainView.Show();
-                    loginView.Close();
-                }
-            };
+                // Si existe, establece la identidad en el hilo
+                Thread.CurrentPrincipal = new GenericPrincipal(
+                    new GenericIdentity(savedUsername), null);
+
+                // Abre MainView directamente
+                var mainView = new MainView();
+                mainView.Show();
+            }
+            else
+            {
+                // Si no hay usuario guardado, muestra LoginView
+                var loginView = new LoginView();
+                loginView.Show();
+                
+            }
+
+            
         }
     }
 }

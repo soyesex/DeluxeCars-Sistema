@@ -7,12 +7,13 @@ using System.Data.SqlClient;
 
 namespace DeluxeCarsUI.Repositories
 {
+    // Clase Abstracta: "Aquí tienes código común + estos métodos que DEBES implementar"
     public abstract class RepositoryBase
     {
         private readonly string _connectionString;
         public RepositoryBase()
         {
-            _connectionString = "Server=PCANDRESZ\\SQLEXPRESS; Database= MVVMLoginDb; Integrated Security=true";
+            _connectionString = "Server=AEROPAD\\SQLEXPRESS; Database= MVVMLoginDb; Integrated Security=true";
         }
         protected SqlConnection GetConnection()
         {
@@ -20,3 +21,4 @@ namespace DeluxeCarsUI.Repositories
         }
     }
 }
+    

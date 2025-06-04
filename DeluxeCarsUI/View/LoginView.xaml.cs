@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DeluxeCarsUI.ViewModel;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,7 +23,28 @@ namespace DeluxeCarsUI.View
         public LoginView()
         {
             InitializeComponent();
+            // Cada vez que cambie la visibilidad de esta ventana,
+            // si se oculta (IsVisible == false), abrimos MainView:
+            this.IsVisibleChanged += LoginView_IsVisibleChanged;
         }
+        private void LoginView_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            // Cuando la vista se oculta porque el ViewModel hizo IsViewVisible = false
+            if (!this.IsVisible && this.IsLoaded)
+            {
+                var mainView = new MainView();
+                mainView.Show();
+                this.Close();
+            }
+        }
+        private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is LoginViewModel vm && sender is PasswordBox pb)
+            {
+                vm.Password = pb.SecurePassword;
+            }
+        }
+
         private void Window_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed)
