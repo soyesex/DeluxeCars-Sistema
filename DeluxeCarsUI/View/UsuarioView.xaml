@@ -7,13 +7,13 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp">
-    
+
     <UserControl.Resources>
-        <!-- Converters & Brushes -->
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <SolidColorBrush x:Key="PlaceholderBrush" Color="#b0b9c6" />
 
-        <!-- Column Header Style -->
+        <SolidColorBrush x:Key="color1" Color="#512bd4" />
+        <SolidColorBrush x:Key="color3" Color="#fff" />
         <Style x:Key="NoHoverColumnHeaderStyle" TargetType="DataGridColumnHeader">
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" />
@@ -23,149 +23,87 @@
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="BorderBrush" Value="Transparent" />
             <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <Style x:Key="CenterContentStyle" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="RoundedButton" TargetType="Button">
+            <Setter Property="Width" Value="120"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="FontFamily" Value="Montserrat"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="Foreground" Value="{StaticResource color3}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="15" Background="{StaticResource color1}">
+                            <ContentPresenter VerticalAlignment="Center"
+                                              HorizontalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#28AEED"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
     </UserControl.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto" />
-            <RowDefinition Height="40" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-
-
-        <Grid Grid.Row="0" Margin="5,20,20,15" HorizontalAlignment="Left" MinWidth="1200">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="250"/>
-                <ColumnDefinition Width="90"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- SEARCH AREA -->
-            <Border Grid.Column="0" Margin="0 0 50 0"
-                CornerRadius="14" Background="White" BorderBrush="#ced4da" BorderThickness="1" Padding="0">
-                <Grid>
-                    <!-- TextBox -->
-                    <TextBox x:Name="txtSearch" Padding="10,6,35,6" FontFamily="Montserrat" FontSize="14"
-                         BorderThickness="0" Background="Transparent" Foreground="#343a40" />
-
-                    <!-- Placeholder -->
-                    <TextBlock Text="Buscar usuario..." FontFamily="Montserrat" FontSize="14"
-                           Foreground="{StaticResource PlaceholderBrush}" IsHitTestVisible="False"
-                           Margin="10,6,0,6" VerticalAlignment="Center">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Visibility" Value="Collapsed" />
-                                <Style.Triggers>
-                                    <MultiDataTrigger>
-                                        <MultiDataTrigger.Conditions>
-                                            <Condition Binding="{Binding Text.Length, ElementName=txtSearch}" Value="0" />
-                                            <Condition Binding="{Binding IsFocused, ElementName=txtSearch}" Value="False" />
-                                        </MultiDataTrigger.Conditions>
-                                        <Setter Property="Visibility" Value="Visible" />
-                                    </MultiDataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
-
-                    <!-- Search Icon -->
-                    <fa:IconImage Icon="MagnifyingGlass" Width="16" Height="16"
-                              Foreground="{StaticResource PlaceholderBrush}"
-                              VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,12,0" />
-                </Grid>
-            </Border>
-
-            <Grid Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0 0 200 0">
-
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="250"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <Grid Grid.Column="0">
-                    <Button Width="120" Height="30" Content="Ver Productos"
-    FontFamily="Montserrat" FontWeight="Normal"
-    Foreground="{StaticResource color3}">
-
-                        <Button.Style>
-                            <Style TargetType="Button">
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#28AEED"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border CornerRadius="15" Background="{StaticResource color1}">
-                                    <ContentPresenter VerticalAlignment="Center"
-                HorizontalAlignment="Center"/>
-                                </Border>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
-                </Grid>
-
-                <Grid Grid.Column="1">
-                    <Button Width="120" Height="30" Content="Cambiar contraseña"
-                            FontFamily="Montserrat" FontWeight="Normal"
-                            Foreground="{StaticResource color3}">
-
-                        <Button.Style>
-                            <Style TargetType="Button">
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#28AEED"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border CornerRadius="15" Background="{StaticResource color1}">
-                                    <ContentPresenter VerticalAlignment="Center"
-                    HorizontalAlignment="Center"/>
-                                </Border>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
-                </Grid>
-                
-            </Grid>
-        </Grid>
-
-        <Grid Grid.Row="1">
-            <!-- Aquí podrías poner contenido como título, botones, etc. -->
-            <TextBlock Text="Usuarios"
+        <TextBlock Text="Usuarios"
                    Foreground="White"
                    FontSize="25"
                    FontWeight="Normal"
                    VerticalAlignment="Center"
-                   HorizontalAlignment="Center"
-                   Grid.Row="0"/>
-        </Grid>
+                   HorizontalAlignment="Left"
+                   Grid.Row="0"
+                   Margin="20,20,20,10" />
 
-        <Border Grid.Row="2">
-            <DataGrid x:Name="RolesDataGrid"
-                      AutoGenerateColumns="False"
-                      ItemsSource="{Binding ListaDeRoles}"
-                      CanUserAddRows="False"
-                      CanUserDeleteRows="False"
-                      Margin="20">
 
+            <TextBox Grid.Row="1" Margin="20,0,20,15" Style="{StaticResource SearchBoxStyle}" 
+                         Tag="Buscar producto..." />
+
+            <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right" Margin="20,0,20,15">
+            <Button Content="Nuevo Usuario" Style="{StaticResource DarkActionButtonStyle}"  Margin="0,0,10,0"/>
+
+            <Button Content="Cambiar contraseña" Style="{StaticResource DarkActionButtonStyle}"  Width="150"/>
+        </StackPanel>
+
+        <Border Grid.Row="3" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" 
+                BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
+            <DataGrid x:Name="ProductsDataGrid"
+                      Style="{StaticResource ElegantDataGridStyle}"
+                      ItemsSource="{Binding Productos}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
-                    <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="*"/>
-                    <DataGridTextColumn Header="Descripción" Binding="{Binding Descripcion}" Width="2*"/>
-                </DataGrid.Columns>
+                    <DataGridTemplateColumn Header="Imagen" Width="Auto">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border CornerRadius="5" Width="40" Height="40" Margin="5">
+                                    <Border.Background>
+                                        <ImageBrush ImageSource="{Binding ImageUrl}" Stretch="UniformToFill"/>
+                                    </Border.Background>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
+                    <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="2*"/>
+                </DataGrid.Columns>
             </DataGrid>
         </Border>
     </Grid>
 </UserControl>
-

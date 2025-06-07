@@ -5,177 +5,148 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DeluxeCarsUI.View"
              mc:Ignorable="d" 
-             xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
-            xmlns:sys="clr-namespace:System;assembly=mscorlib"
-             xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp">
+             xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
+             Background="Transparent"
+             FontFamily="Montserrat"
+             Foreground="#E0E6F1">
 
     <UserControl.Resources>
-        <!-- Converters & Brushes -->
-        <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <SolidColorBrush x:Key="PlaceholderBrush" Color="#b0b9c6" />
 
-        <!-- Column Header Style -->
-        <Style x:Key="NoHoverColumnHeaderStyle" TargetType="DataGridColumnHeader">
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" />
-            <Setter Property="Padding" Value="4,2" />
-            <Setter Property="HorizontalContentAlignment" Value="Center" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="BorderBrush" Value="Transparent" />
-            <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Style x:Key="DarkInputControlStyle" TargetType="Control">
+            <Setter Property="Background" Value="#1F2A44" />
+            <Setter Property="Foreground" Value="#E0E6F1" />
+            <Setter Property="BorderBrush" Value="#4D5B7C" />
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Control">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="15">
+                            <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#28AEED"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#28AEED"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
+
+        <Style x:Key="DarkComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource DarkInputControlStyle}"/>
+        <Style x:Key="DarkDatePickerStyle" TargetType="DatePicker" BasedOn="{StaticResource DarkInputControlStyle}"/>
+
+        <Style x:Key="DarkActionButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#1F2A44"/>
+            <Setter Property="Foreground" Value="#E0E6F1"/>
+            <Setter Property="BorderBrush" Value="#4D5B7C"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Width" Value="180"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" CornerRadius="15" 
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#2C3A5A"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#28AEED"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
     </UserControl.Resources>
 
-    <Grid>
+    <Grid Margin="20">
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto" />
-            <RowDefinition Height="40" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
+        <TextBlock Grid.Row="0"
+                   Text="Compras"
+                   FontSize="24"
+                   FontWeight="Bold"
+                   HorizontalAlignment="Center"
+                   Margin="0,0,0,25"/>
 
-
-        <Grid Grid.Row="0" Margin="5,20,20,15" HorizontalAlignment="Left" MinWidth="1200">
+        <Grid Grid.Row="1" Margin="0,0,0,20">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="250"/>
-                <ColumnDefinition Width="10"/>
-                <ColumnDefinition Width="500"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <!-- SEARCH AREA -->
-            <Border Grid.Column="0" Margin="0 0 0 0"
-                CornerRadius="14" Background="White" BorderBrush="#ced4da" BorderThickness="1" Padding="0">
-                <Grid>
-                    <!-- TextBox -->
-                    <TextBox x:Name="txtSearch" Padding="10,6,35,6" FontFamily="Montserrat" FontSize="14"
-                         BorderThickness="0" Background="Transparent" Foreground="#343a40" />
+            <StackPanel Grid.Column="0" Orientation="Vertical" Margin="0,0,20,0">
+                <TextBox Style="{StaticResource SearchBoxStyle}" 
+                         Tag="Buscar compras..." />
+                <Button Content="New pedido" 
+                        Style="{StaticResource DarkActionButtonStyle}" 
+                        HorizontalAlignment="Center"
+                        Margin="0,15,0,0"/>
+            </StackPanel>
 
-                    <!-- Placeholder -->
-                    <TextBlock Text="Buscar facturas..." FontFamily="Montserrat" FontSize="14"
-                           Foreground="{StaticResource PlaceholderBrush}" IsHitTestVisible="False"
-                           Margin="10,6,0,6" VerticalAlignment="Center">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Visibility" Value="Collapsed" />
-                                <Style.Triggers>
-                                    <MultiDataTrigger>
-                                        <MultiDataTrigger.Conditions>
-                                            <Condition Binding="{Binding Text.Length, ElementName=txtSearch}" Value="0" />
-                                            <Condition Binding="{Binding IsFocused, ElementName=txtSearch}" Value="False" />
-                                        </MultiDataTrigger.Conditions>
-                                        <Setter Property="Visibility" Value="Visible" />
-                                    </MultiDataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
-
-                    <!-- Search Icon -->
-                    <fa:IconImage Icon="MagnifyingGlass" Width="16" Height="16"
-                              Foreground="{StaticResource PlaceholderBrush}"
-                              VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,12,0" />
-                </Grid>
-            </Border>
-
-            <StackPanel Grid.Column="2" Orientation="Horizontal" 
-                        VerticalAlignment="Center" HorizontalAlignment="Center"
-                        Margin="0 0 0 0">
-
-                <ComboBox Width="100"
-                          Height="30"
-                          Margin="0,0,20,0"
-                          FontFamily="Montserrat"
-                          FontSize="14"
-                          Background="White"
-                          Foreground="#343a40"
-                          Padding="10,2"
-                          HorizontalContentAlignment="Left"
-                          VerticalContentAlignment="Center"
-                          BorderBrush="#ced4da"
-                          BorderThickness="1"
-                          SelectedIndex="0">    
-                    <ComboBox.Resources>
-                        <!-- Cambiar color del fondo al pasar el mouse -->
-                        <Style TargetType="ComboBoxItem">
-                            <Setter Property="FontFamily" Value="Montserrat"/>
-                            <Setter Property="FontSize" Value="14"/>
-                            <Setter Property="Padding" Value="8,4"/>
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#f1f3f5"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ComboBox.Resources>
-                    <!-- Opciones de ejemplo -->
-                    <ComboBoxItem Content="Todos" />
-                    <ComboBoxItem Content="Motor" />
-                    <ComboBoxItem Content="Suspensión" />
-                    <ComboBoxItem Content="Frenos" />
-                    <ComboBoxItem Content="Accesorios" />
+            <StackPanel Grid.Column="1" Orientation="Vertical">
+                <ComboBox x:Name="cbxProveedor"
+                          MinWidth="250"
+                          SelectedIndex="0">
+                    <ComboBoxItem Content="Proveedor"/>
                 </ComboBox>
 
-                <Button Width="120" Height="30" Content="Ver Productos"
-                    FontFamily="Montserrat" FontWeight="Normal"
-                    Foreground="{StaticResource color3}">
-
-                    <Button.Style>
-                        <Style TargetType="Button">
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#28AEED"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Border CornerRadius="15" Background="{StaticResource color1}">
-                                <ContentPresenter VerticalAlignment="Center"
-                                HorizontalAlignment="Center"/>
-                            </Border>
-                        </ControlTemplate>
-                    </Button.Template>
-                </Button>
-
-                <!-- Selector de fecha compacto -->
-                <DatePicker Width="160"
-                Height="30"
-                Margin="10,0,0,0"
-                FontFamily="Montserrat"
-                FontSize="14"
-                SelectedDate="{x:Static sys:DateTime.Now}" />
+                <DatePicker x:Name="datePickerMes"
+                            Style="{StaticResource DarkDatePickerStyle}"
+                            MinWidth="250"
+                            Margin="0,15,0,0"/>
             </StackPanel>
         </Grid>
 
-        <Grid Grid.Row="1">
-            <!-- Aquí podrías poner contenido como título, botones, etc. -->
-            <TextBlock Text="Gestión de Compras"
-                   Foreground="White"
-                   FontSize="20"
-                   FontWeight="Bold"
-                   VerticalAlignment="Center"
-                   HorizontalAlignment="Center"
-                   Grid.Row="0"/>
-        </Grid>
-
-        <Border Grid.Row="2">
-            <DataGrid x:Name="RolesDataGrid"
-                      AutoGenerateColumns="False"
-                      ItemsSource="{Binding ListaDeRoles}"
-                      CanUserAddRows="False"
-                      CanUserDeleteRows="False"
-                      Margin="20">
-
+        <Border Grid.Row="2" CornerRadius="10" Background="#1F2A44" BorderBrush="#4D5B7C" BorderThickness="1">
+            <DataGrid x:Name="ProductsDataGrid"
+                      Style="{StaticResource ElegantDataGridStyle}"
+                      ItemsSource="{Binding Productos}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
-                    <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="*"/>
-                    <DataGridTextColumn Header="Descripción" Binding="{Binding Descripcion}" Width="2*"/>
-                </DataGrid.Columns>
+                    <DataGridTemplateColumn Header="Imagen" Width="Auto">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border CornerRadius="5" Width="40" Height="40" Margin="5">
+                                    <Border.Background>
+                                        <ImageBrush ImageSource="{Binding ImageUrl}" Stretch="UniformToFill"/>
+                                    </Border.Background>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
+                    <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="2*"/>
+                </DataGrid.Columns>
             </DataGrid>
         </Border>
+
+        <TextBlock Grid.Row="3"
+                   Text="Total compras: $"
+                   FontSize="14"
+                   HorizontalAlignment="Left"
+                   Margin="10,15,0,0"/>
     </Grid>
 </UserControl>

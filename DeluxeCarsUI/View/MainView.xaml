@@ -64,7 +64,7 @@
 
 
         <Border CornerRadius="12"
-    BorderThickness="3">
+                BorderThickness="3">
 
         <Border.BorderBrush>
             <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
@@ -126,7 +126,7 @@
                                  Tag="{StaticResource color1}"
                                  IsChecked="True"
                                  Command="{Binding ShowHomeViewCommand}"
-                                 Margin="0,0,0,10">
+                                 Margin="0,0,0,5">
                         <StackPanel Orientation="Horizontal">
                             <fa:IconImage Icon="Home" Style="{StaticResource menuButtonIcon}"/>
                             <TextBlock Text="Panel" Style="{StaticResource menuButtonText}"/>
@@ -136,7 +136,7 @@
                     <RadioButton Style="{StaticResource menuButton1}"
                                 Tag="{StaticResource color3}"
                                 Command="{Binding ShowCatalogoViewCommand}"
-                                 Margin="0,0,0,10">
+                                 Margin="0,0,0,5">
                         <StackPanel Orientation="Horizontal">
                             <fa:IconImage Icon="List" Style="{StaticResource menuButtonIcon}"/>
                             <TextBlock Text="Catálogo" Style="{StaticResource menuButtonText}"/>
@@ -146,7 +146,7 @@
                     <RadioButton Style="{StaticResource menuButton1}"
                                  Tag="{StaticResource color4}"
                                  Command="{Binding ShowClienteViewCommand}"
-                                 Margin="0,0,0,10">
+                                 Margin="0,0,0,5">
                         <StackPanel Orientation="Horizontal">
                             <fa:IconImage Icon="Users" Style="{StaticResource menuButtonIcon}"/>
                             <TextBlock Text="Clientes" Style="{StaticResource menuButtonText}"/>
@@ -156,7 +156,7 @@
                     <RadioButton Style="{StaticResource menuButton1}"
                                  Tag="{StaticResource color5}"
                                  Command="{Binding ShowProveedorViewCommand}"
-                                 Margin="0,0,0,10">
+                                 Margin="0,0,0,5">
                         <StackPanel Orientation="Horizontal">
                             <fa:IconImage Icon="Wallet" Style="{StaticResource menuButtonIcon}"/>
                             <TextBlock Text="Proveedores" Style="{StaticResource menuButtonText}"/>
@@ -166,7 +166,7 @@
                     <RadioButton Style="{StaticResource menuButton1}"
                                  Tag="{StaticResource color6}"
                                  Command="{Binding ShowComprasViewCommand}"
-                                 Margin="0,0,0,10">
+                                 Margin="0,0,0,5">
                         <StackPanel Orientation="Horizontal">
                             <fa:IconImage Icon="ShoppingCart" Style="{StaticResource menuButtonIcon}"/>
                             <TextBlock Text="Compras" Style="{StaticResource menuButtonText}"/>
@@ -176,7 +176,7 @@
                     <RadioButton Style="{StaticResource menuButton1}"
                                  Tag="{StaticResource color7}"
                                  Command="{Binding ShowFacturacionViewCommand}"
-                                 Margin="0,0,0,10">
+                                 Margin="0,0,0,5">
                         <StackPanel Orientation="Horizontal">
                             <fa:IconImage Icon="FileInvoiceDollar" Style="{StaticResource menuButtonIcon}"/>
                             <TextBlock Text="Facturación" Style="{StaticResource menuButtonText}"/>
@@ -198,7 +198,7 @@
                                          Tag="{StaticResource color1}"
                                          IsChecked="True"
                                          Command="{Binding ShowRolViewCommand}"
-                                         Margin="0,0,0,10">
+                                         Margin="0,0,0,5">
                                 <StackPanel Orientation="Horizontal">
                                     <fa:IconImage Icon="CriticalRole" Style="{StaticResource menuButtonIcon}"/>
                                     <TextBlock Text="Roles" Style="{StaticResource menuButtonText}"/>
@@ -206,9 +206,19 @@
                             </RadioButton>
 
                             <RadioButton Style="{StaticResource menuButton1}"
+                                         Tag="{StaticResource color10}"
+                                         Command="{Binding ShowUsuarioViewCommand}"
+                                         Margin="0,0,0,5"> 
+                                <StackPanel Orientation="Horizontal">
+                                    <fa:IconImage Icon="UserFriends" Style="{StaticResource menuButtonIcon}"/>
+                                    <TextBlock Text="Usuarios" Style="{StaticResource menuButtonText}"/>
+                                </StackPanel>
+                            </RadioButton>
+
+                            <RadioButton Style="{StaticResource menuButton1}"
                                          Tag="{StaticResource color9}"
                                          Command="{Binding ShowConfiguracionViewCommand}"
-                                         Margin="0,0,0,10"> 
+                                         Margin="0,0,0,5">
                                 <StackPanel Orientation="Horizontal">
                                     <fa:IconImage Icon="Tools" Style="{StaticResource menuButtonIcon}"/>
                                     <TextBlock Text="Configuración" Style="{StaticResource menuButtonText}"/>

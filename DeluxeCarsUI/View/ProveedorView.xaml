@@ -6,299 +6,148 @@
              xmlns:local="clr-namespace:DeluxeCarsUI.View"
              xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
              mc:Ignorable="d"
-             Background="Transparent">
+             Background="Transparent"
+             FontFamily="Montserrat"
+             Foreground="#E0E6F1">
 
-    <!--==========================================================
-        Recursos compartidos: convertidores, pinceles, estilos
-    ==========================================================-->
     <UserControl.Resources>
-        <!-- Convierte booleanos a Visibility -->
-        <BooleanToVisibilityConverter x:Key="BoolToVis" />
-        <!-- Color para texto placeholder -->
         <SolidColorBrush x:Key="PlaceholderBrush" Color="#b0b9c6" />
 
-        <!-- Estilo para encabezados de DataGrid sin efecto hover -->
-        <Style x:Key="NoHoverColumnHeaderStyle" TargetType="DataGridColumnHeader">
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" />
-            <Setter Property="Padding" Value="4,2" />
-            <Setter Property="HorizontalContentAlignment" Value="Center" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="BorderBrush" Value="Transparent" />
-            <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Style x:Key="DarkInputControlStyle" TargetType="Control">
+            <Setter Property="Background" Value="#1F2A44" />
+            <Setter Property="Foreground" Value="#E0E6F1" />
+            <Setter Property="BorderBrush" Value="#4D5B7C" />
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Control">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="15">
+                            <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#28AEED"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#28AEED"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
+
+        <Style x:Key="DarkComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource DarkInputControlStyle}"/>
+
+        <Style x:Key="DarkActionButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#1F2A44"/>
+            <Setter Property="Foreground" Value="#E0E6F1"/>
+            <Setter Property="BorderBrush" Value="#4D5B7C"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Width" Value="180"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" CornerRadius="15" 
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#2C3A5A"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#28AEED"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
     </UserControl.Resources>
 
-    <!--=====================================
-         Diseño principal del UserControl
-    =====================================-->
-    <Grid>
-        <!-- Definición de filas:
-             1) Área de búsqueda y botones
-             2) Espacio reservado (ahora vacío)
-             3) Filtro adicional y botones de acción
-             4) DataGrid con contenido -->
+    <Grid Margin="20">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <!-- Row 0: Search + Ver Productos -->
-            <RowDefinition Height="40" />
-            <!-- Row 1: (sin título) -->
-            <RowDefinition Height="60" />
-            <!-- Row 2: Filtros y botones -->
-            <RowDefinition Height="*" />
-            <!-- Row 3: DataGrid -->
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!--==================================================
-             Row 0: Zona de búsqueda y botón "Ver Productos"
-        ==================================================-->
-        <Grid Grid.Row="0"
-              Margin="5,20,20,15"
-              HorizontalAlignment="Left"
-              MinWidth="1200">
+        <TextBlock Grid.Row="0"
+                   Text="Proveedores"
+                   FontSize="24"
+                   FontWeight="Bold"
+                   HorizontalAlignment="Center"
+                   Margin="0,0,0,25"/>
+
+        <Grid Grid.Row="1" Margin="0,0,0,20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="300" />
-                <!-- Col 0: Caja de búsqueda -->
-                <ColumnDefinition Width="90" />
-                <!-- Col 1: Espacio vacío -->
-                <ColumnDefinition Width="*" />
-                <!-- Col 2: Botón central -->
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!--=====================================
-                 Columna 0: Área de búsqueda (TextBox)
-            =====================================-->
-            <Border Grid.Column="0"
-                    Margin="0,0,50,0"
-                    CornerRadius="14"
-                    Background="White"
-                    BorderBrush="#ced4da"
-                    BorderThickness="1"
-                    Padding="0">
-                <Grid>
-                    <!-- TextBox para buscar -->
-                    <TextBox x:Name="txtSearch"
-                             Padding="10,6,35,6"
-                             FontFamily="Montserrat"
-                             FontSize="14"
-                             BorderThickness="0"
-                             Background="Transparent"
-                             Foreground="#343a40" />
+            <TextBox Style="{StaticResource SearchBoxStyle}" 
+                    Tag="Buscar proveedores..." />
+            <ComboBox x:Name="cbxDepartamento" Grid.Row="0" Grid.Column="2" Margin="10,0,0,10"
+                      Style="{StaticResource DarkComboBoxStyle}" SelectedIndex="0">
+                <ComboBoxItem Content="Departamento"/>
+            </ComboBox>
 
-                    <!-- Texto placeholder visible cuando TextBox está vacío y desenfocado -->
-                    <TextBlock Text="Buscar producto..."
-                               FontFamily="Montserrat"
-                               FontSize="14"
-                               Foreground="{StaticResource PlaceholderBrush}"
-                               IsHitTestVisible="False"
-                               Margin="10,6,0,6"
-                               VerticalAlignment="Center">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Visibility" Value="Collapsed" />
-                                <Style.Triggers>
-                                    <MultiDataTrigger>
-                                        <MultiDataTrigger.Conditions>
-                                            <Condition Binding="{Binding Text.Length, ElementName=txtSearch}" Value="0" />
-                                            <Condition Binding="{Binding IsFocused, ElementName=txtSearch}" Value="False" />
-                                        </MultiDataTrigger.Conditions>
-                                        <Setter Property="Visibility" Value="Visible" />
-                                    </MultiDataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
+            <ComboBox x:Name="cbxMunicipio" Grid.Row="1" Grid.Column="0" Margin="0,10,10,0"
+                      SelectedIndex="0">
+                <ComboBoxItem Content="Municipio"/>
+            </ComboBox>
 
-                    <!-- Icono de lupa para indicar búsqueda -->
-                    <fa:IconImage Icon="MagnifyingGlass"
-                                  Width="16"
-                                  Height="16"
-                                  Foreground="{StaticResource PlaceholderBrush}"
-                                  VerticalAlignment="Center"
-                                  HorizontalAlignment="Right"
-                                  Margin="0,0,12,0" />
-                </Grid>
-            </Border>
-
-            <!--=======================================
-                 Columna 2: Botón "Ver Productos"
-            =======================================-->
-            <StackPanel Grid.Column="2"
-                        Orientation="Horizontal"
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Center"
-                        Margin="0,0,-75,0">
-                <Button Width="120"
-                        Height="30"
-                        Content="Ver Productos"
-                        FontFamily="Montserrat"
-                        FontWeight="Normal"
-                        Foreground="{StaticResource color3}">
-                    <!-- Estilo para cambiar fondo al pasar el ratón -->
-                    <Button.Style>
-                        <Style TargetType="Button">
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#28AEED"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-
-                    <!-- Plantilla para esquinas redondeadas -->
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Border CornerRadius="15"
-                                    Background="{StaticResource color1}">
-                                <ContentPresenter VerticalAlignment="Center"
-                                                  HorizontalAlignment="Center"/>
-                            </Border>
-                        </ControlTemplate>
-                    </Button.Template>
-                </Button>
+            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                <Button Content="Nuevo proveedor" Style="{StaticResource DarkActionButtonStyle}" Margin="0,0,10,0"/>
+                <Button Content="Departamentos" Style="{StaticResource DarkActionButtonStyle}" Margin="10,0,0,0"/>
             </StackPanel>
         </Grid>
 
-        <!--====================================================
-             Row 1: Espacio reservado (se deja vacío intencionalmente)
-        =====================================================-->
-        <Grid Grid.Row="1">
-            <!-- Sin contenido para mantener espacio -->
-        </Grid>
-
-        <!--=====================================================
-             Row 2: Filtros adicionales y botones de acción    
-        ======================================================-->
-        <StackPanel Grid.Row="2"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Orientation="Horizontal">
-            <!--====================================
-                 ComboBox de filtro de categorías     
-            ====================================-->
-            <Border Margin="0,0,50,0">
-                <ComboBox x:Name="cbxFiltroCategoria"
-                          Width="160"
-                          Height="30"
-                          Margin="0,0,10,0"
-                          FontFamily="Montserrat"
-                          FontSize="14"
-                          Background="White"
-                          Foreground="#343a40"
-                          Padding="10,2"
-                          HorizontalContentAlignment="Left"
-                          VerticalContentAlignment="Center"
-                          BorderBrush="#ced4da"
-                          BorderThickness="1"
-                          SelectedIndex="0">
-                    <!-- Estilo para los ítems del ComboBox -->
-                    <ComboBox.Resources>
-                        <Style TargetType="ComboBoxItem">
-                            <Setter Property="FontFamily" Value="Montserrat"/>
-                            <Setter Property="FontSize" Value="14"/>
-                            <Setter Property="Padding" Value="8,4"/>
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#f1f3f5"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ComboBox.Resources>
-                    <!-- Opciones de ejemplo -->
-                    <ComboBoxItem Content="Municipio" />
-                    <ComboBoxItem Content="Motor" />
-                    <ComboBoxItem Content="Suspensión" />
-                    <ComboBoxItem Content="Frenos" />
-                    <ComboBoxItem Content="Accesorios" />
-                </ComboBox>
-            </Border>
-
-            <!--================================
-                 Botón "Nuevo Proveedor"     
-            =================================-->
-            <Button Width="120"
-                    Height="30"
-                    Content="Nuevo Proveedor"
-                    FontFamily="Montserrat"
-                    FontWeight="Normal"
-                    Foreground="{StaticResource color3}">
-                <!-- Estilo hover -->
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#28AEED"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-
-                <!-- Plantilla redondeada -->
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Border CornerRadius="15"
-                                Background="{StaticResource color1}">
-                            <ContentPresenter VerticalAlignment="Center"
-                                              HorizontalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Button.Template>
-            </Button>
-
-            <!--====================================
-                 Botón "Departamento"              
-            ====================================-->
-            <Border Margin="50,0,0,0">
-                <Button Width="120"
-                        Height="30"
-                        Content="Departamento"
-                        FontFamily="Montserrat"
-                        FontWeight="Normal"
-                        Foreground="{StaticResource color3}">
-                    <!-- Estilo hover -->
-                    <Button.Style>
-                        <Style TargetType="Button">
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#28AEED"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-
-                    <!-- Plantilla redondeada -->
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Border CornerRadius="15"
-                                    Background="{StaticResource color1}">
-                                <ContentPresenter VerticalAlignment="Center"
-                                                  HorizontalAlignment="Center"/>
-                            </Border>
-                        </ControlTemplate>
-                    </Button.Template>
-                </Button>
-            </Border>
-        </StackPanel>
-
-        <!--=====================================
-             Row 3: DataGrid con lista de proveedores  
-        =====================================-->
-        <Border Grid.Row="3">
-            <DataGrid x:Name="RolesDataGrid"
-                      AutoGenerateColumns="False"
-                      ItemsSource="{Binding ListaDeRoles}"
-                      CanUserAddRows="False"
-                      CanUserDeleteRows="False"
-                      Margin="20">
-
-                <!-- Columnas definidas -->
+        <Border Grid.Row="2" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" 
+                BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
+            <DataGrid x:Name="ProductsDataGrid"
+                      Style="{StaticResource ElegantDataGridStyle}"
+                      ItemsSource="{Binding Productos}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
-                    <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="*"/>
-                    <DataGridTextColumn Header="Descripción" Binding="{Binding Descripcion}" Width="2*"/>
+                    <DataGridTemplateColumn Header="Imagen" Width="Auto">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border CornerRadius="5" Width="40" Height="40" Margin="5">
+                                    <Border.Background>
+                                        <ImageBrush ImageSource="{Binding ImageUrl}" Stretch="UniformToFill"/>
+                                    </Border.Background>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="2*"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>
+
+        <TextBlock Grid.Row="3"
+                   Text="Total proveedores: $"
+                   FontSize="14"
+                   HorizontalAlignment="Left"
+                   Margin="10,15,0,0"/>
+
     </Grid>
 </UserControl>
