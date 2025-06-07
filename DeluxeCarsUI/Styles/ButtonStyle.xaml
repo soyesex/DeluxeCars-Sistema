@@ -3,6 +3,110 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:fa="clr-namespace:FontAwesome.Sharp;assembly=FontAwesome.Sharp">
 
+    <!-- Estilos Data Grid -->
+        <Style x:Key="CustomDataGridStyle" TargetType="DataGrid">
+            <Setter Property="Background" Value="#1F2A44"/>
+            <Setter Property="Foreground" Value="#b0b9c6"/>
+            <Setter Property="BorderBrush" Value="#2c3e50"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="RowBackground" Value="#2c3e50"/>
+            <Setter Property="AlternatingRowBackground" Value="#23304e"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#3b4c68"/>
+            <Setter Property="VerticalGridLinesBrush" Value="#3b4c68"/>
+            <Setter Property="GridLinesVisibility" Value="All"/>
+            <Setter Property="HeadersVisibility" Value="All"/>
+            <Setter Property="ColumnHeaderStyle">
+                <Setter.Value>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="Background" Value="#1a253b"/>
+                        <Setter Property="Foreground" Value="#e0e0e0"/>
+                        <Setter Property="FontWeight" Value="Bold"/>
+                        <Setter Property="Padding" Value="10"/>
+                        <Setter Property="BorderBrush" Value="#3b4c68"/>
+                        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="RowStyle">
+                <Setter.Value>
+                    <Style TargetType="DataGridRow">
+                        <Setter Property="Height" Value="35"/>
+                        <Setter Property="Margin" Value="2"/>
+                        <Setter Property="SnapsToDevicePixels" Value="True"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Effect">
+                            <Setter.Value>
+                                <DropShadowEffect BlurRadius="2" Opacity="0.2"/>
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="ToolTip" Value="{Binding}"/>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
+    <!-- Estilos contenedor del boton dentro de un control despegable -->
+    <Style TargetType="ContextMenu">
+        <Setter Property="OverridesDefaultStyle" Value="True"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ContextMenu">
+                    <Border 
+                    Background="Transparent"
+                    BorderThickness="0"
+                    SnapsToDevicePixels="True"
+                    CornerRadius="10"
+                    Padding="2">
+                        <StackPanel 
+                        IsItemsHost="True"
+                        KeyboardNavigation.DirectionalNavigation="Cycle"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Estilos del boton dentro de un control despegable -->
+    <Style x:Key="menuItemBotton" TargetType="MenuItem">
+        <Setter Property="Background" Value="#1F2A44"/>
+        <Setter Property="Foreground" Value="#b0b9c6"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontFamily" Value="Montserrat"/>
+        <Setter Property="Padding" Value="10 6"/>
+        <Setter Property="Width" Value="120"/>
+        <Setter Property="Height" Value="30"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="MenuItem">
+                    <Border 
+                    Background="{TemplateBinding Background}" 
+                    CornerRadius="15" 
+                    Padding="{TemplateBinding Padding}">
+                        <ContentPresenter 
+                        VerticalAlignment="Center" 
+                        HorizontalAlignment="Center" 
+                        ContentSource="Header" 
+                        RecognizesAccessKey="True"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
+        <Style.Triggers>
+            <!-- Efecto hover -->
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#2C3A5A"/>
+                <Setter Property="Foreground" Value="White"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Estilos barra de busquedad -->
     <Style x:Key="textBoxSearch" TargetType="TextBox">
         <Setter Property="Background" Value="#ffffff"/>
         <Setter Property="Foreground" Value="#b0b9c6"/>
@@ -35,7 +139,8 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
+    <!-- Estilos de la barra del Scroll -->
     <Style x:Key="CustomScrollBar" TargetType="ScrollBar">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Width" Value="6"/>

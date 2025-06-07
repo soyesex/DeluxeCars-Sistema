@@ -78,6 +78,8 @@ namespace DeluxeCarsUI.ViewModel
         public ICommand ShowComprasViewCommand { get; }
         public ICommand ShowFacturacionViewCommand { get; }
         public ICommand ShowReportesViewCommand { get; }
+        public ICommand ShowUsuarioViewCommand { get; }
+        public ICommand ShowRolViewCommand { get; }
         public ICommand ShowConfiguracionViewCommand { get; }
         public ICommand LogoutCommand { get; }
 
@@ -94,6 +96,9 @@ namespace DeluxeCarsUI.ViewModel
             ShowComprasViewCommand = new ViewModelCommand(ExecuteShowShoppingViewCommand);
             ShowFacturacionViewCommand = new ViewModelCommand(ExecuteShowBillingViewCommand);
             ShowReportesViewCommand = new ViewModelCommand(ExecuteShowReportViewCommand);
+            ShowUsuarioViewCommand = new ViewModelCommand(ExecuteShowUsuarioViewCommand);
+
+            ShowRolViewCommand = new ViewModelCommand(ExecuteShowRollViewCommand);
             ShowConfiguracionViewCommand = new ViewModelCommand(ExecuteShowConfigurationViewCommand);
 
             LogoutCommand = new ViewModelCommand(ExecuteLogout, CanExecuteLogout);
@@ -128,6 +133,19 @@ namespace DeluxeCarsUI.ViewModel
                                       .OfType<MainView>()
                                       .FirstOrDefault();
             ventanaMain?.Close();
+        }
+        private void ExecuteShowRollViewCommand(object obj)
+        {
+            CurrentChildView = new RolViewModel();
+            Caption = "Rol";
+            Icon = IconChar.CriticalRole;
+        }
+
+        private void ExecuteShowUsuarioViewCommand(object obj)
+        {
+            CurrentChildView = new UsuarioViewModel();
+            Caption = "Usuarios";
+            Icon = IconChar.User;
         }
 
         private void ExecuteShowCustomerViewCommand(object obj)
