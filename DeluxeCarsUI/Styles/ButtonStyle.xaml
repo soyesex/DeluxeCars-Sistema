@@ -194,7 +194,7 @@
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="FontFamily" Value="Montserrat"/>
-        <Setter Property="Height" Value="45"/>
+        <Setter Property="Height" Value="40"/>
         <Setter Property="Padding" Value="15,0,40,0"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Template">

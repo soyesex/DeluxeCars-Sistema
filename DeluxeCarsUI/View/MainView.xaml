@@ -4,6 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:DeluxeCarsUI.View"
+      xmlns:userControl="clr-namespace:DeluxeCarsUI.View.UserControls"
       xmlns:viewModel="clr-namespace:DeluxeCarsUI.ViewModel"
       xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
       mc:Ignorable="d" 
@@ -20,44 +21,44 @@
 
     <Window.Resources>
         
-        <DataTemplate DataType="{x:Type viewModel:HomeViewModel}">
-            <local:HomeView/>
+        <DataTemplate DataType="{x:Type viewModel:DashboardViewModel}">
+            <userControl:DashboardUserControl/>
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type viewModel:CatalogoViewModel}">
-            <local:CatalogoView/>
+            <userControl:CatalogoUserControl/>
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type viewModel:ClientesViewModel}">
-            <local:ClientesView/>
+            <userControl:ClienteUserControl/>
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type viewModel:ProveedorViewModel}">
-            <local:ProveedorView/>
+            <userControl:ProveedorUserControl/>
         </DataTemplate>
 
-        <DataTemplate DataType="{x:Type viewModel:ComprasViewModel}">
-            <local:ComprasView/>
+        <DataTemplate DataType="{x:Type viewModel:PedidoViewModel}">
+            <userControl:PedidoUserControl/>
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type viewModel:FacturacionViewModel}">
-            <local:FacturacionView/>
+            <userControl:FacturacionUserControl/>
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type viewModel:ReportesViewModel}">
-            <local:ReportesView/>
+            <userControl:ReportesUserControl/>
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type viewModel:ConfiguracionViewModel}">
-            <local:ConfiguracionView/>
+            <userControl:ConfiguracionUserControl/>
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type viewModel:UsuarioViewModel}">
-            <local:UsuarioView/>
+            <userControl:UsuarioUserControl/>
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type viewModel:RolViewModel}">
-            <local:RolView/>
+            <userControl:RolUserControl/>
         </DataTemplate>
 
     </Window.Resources>
@@ -195,8 +196,7 @@
 
                     
                             <RadioButton Style="{StaticResource menuButton1}"
-                                         Tag="{StaticResource color1}"
-                                         IsChecked="True"
+                                         Tag="{StaticResource secundaryBackColor2}"
                                          Command="{Binding ShowRolViewCommand}"
                                          Margin="0,0,0,5">
                                 <StackPanel Orientation="Horizontal">

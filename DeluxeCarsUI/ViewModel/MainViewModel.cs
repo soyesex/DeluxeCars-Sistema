@@ -1,6 +1,7 @@
 ﻿using DeluxeCarsUI.Model;
 using DeluxeCarsUI.Properties;
 using DeluxeCarsUI.Repositories;
+using DeluxeCarsUI.Services;
 using DeluxeCarsUI.View;
 using FontAwesome.Sharp;
 using System;
@@ -20,6 +21,8 @@ namespace DeluxeCarsUI.ViewModel
         private ViewModelBase _currentChildView;
         private string _caption;
         private IconChar _icon;
+        private readonly INavigationService _navigationService;
+
 
         private IUserRepository userRepository;
         public UserAccountModel CurrentUserAccount
@@ -71,6 +74,7 @@ namespace DeluxeCarsUI.ViewModel
         }
 
         // Commands
+        public ICommand ShowCatalogoCommand {  get; }
         public ICommand ShowHomeViewCommand { get; }
         public ICommand ShowCatalogoViewCommand { get; }
         public ICommand ShowClienteViewCommand { get; }
@@ -87,6 +91,7 @@ namespace DeluxeCarsUI.ViewModel
         {
             userRepository = new UserRepository();
             CurrentUserAccount = new UserAccountModel();
+            _navigationService = new NavigationService();
 
             // Initialize commands
             ShowHomeViewCommand = new ViewModelCommand(ExecuteShowHomeViewCommand);
@@ -157,7 +162,7 @@ namespace DeluxeCarsUI.ViewModel
 
         private void ExecuteShowHomeViewCommand(object obj)
         {
-            CurrentChildView = new HomeViewModel();
+            CurrentChildView = new DashboardViewModel();
             Caption = "Panel";
             Icon = IconChar.Home;
         }
@@ -178,7 +183,7 @@ namespace DeluxeCarsUI.ViewModel
 
         private void ExecuteShowShoppingViewCommand(object obj)
         {
-            CurrentChildView = new ComprasViewModel();
+            CurrentChildView = new PedidoViewModel();
             Caption = "Compras";
             Icon = IconChar.ShoppingCart;
         }

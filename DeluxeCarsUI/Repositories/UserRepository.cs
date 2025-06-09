@@ -139,27 +139,46 @@ namespace DeluxeCarsUI.Repositories
             try
             {
                 using (var connection = GetConnection())
-                using (var cmd = new SqlCommand())
                 {
                     connection.Open();
-                    cmd.Connection = connection;
-                    cmd.CommandText = @"UPDATE [User] 
-                                       SET username=@username, [password]=@password, name=@name, 
-                                           lastname=@lastname, email=@email 
-                                       WHERE id=@id";
 
-                    cmd.Parameters.Add("@id", SqlDbType.Int).Value = int.Parse(userModel.Id);
-                    cmd.Parameters.Add("@username", SqlDbType.NVarChar).Value = userModel.Username;
-                    // Solo hashear si se está actualizando la contraseña
-                    var hashedPassword = string.IsNullOrEmpty(userModel.Password) ?
-                                        userModel.Password :
-                                        HashPassword(userModel.Password);
-                    cmd.Parameters.Add("@password", SqlDbType.NVarChar).Value = hashedPassword;
-                    cmd.Parameters.Add("@name", SqlDbType.NVarChar).Value = userModel.Name ?? string.Empty;
-                    cmd.Parameters.Add("@lastname", SqlDbType.NVarChar).Value = userModel.LastName ?? string.Empty;
-                    cmd.Parameters.Add("@email", SqlDbType.NVarChar).Value = userModel.Email ?? string.Empty;
+                    string passwordToUse;
 
-                    cmd.ExecuteNonQuery(); // 
+                    if (!string.IsNullOrWhiteSpace(userModel.Password))
+                    {
+                        // Se proporcionó nueva contraseña
+                        passwordToUse = HashPassword(userModel.Password);
+                    }
+                    else
+                    {
+                        // Obtener contraseña actual de la base de datos
+                        using (var selectCmd = new SqlCommand("SELECT [password] FROM [User] WHERE id = @id", connection))
+                        {
+                            selectCmd.Parameters.Add("@id", SqlDbType.Int).Value = int.Parse(userModel.Id);
+
+                            var result = selectCmd.ExecuteScalar();
+                            if (result == null || string.IsNullOrWhiteSpace(result.ToString()))
+                                throw new InvalidOperationException("No se pudo obtener la contraseña actual.");
+
+                            passwordToUse = result.ToString();
+                        }
+                    }
+
+                    // Ahora sí ejecutamos el UPDATE
+                    using (var updateCmd = new SqlCommand(@"UPDATE [User] 
+                                                    SET username=@username, [password]=@password, 
+                                                        name=@name, lastname=@lastname, email=@email 
+                                                    WHERE id=@id", connection))
+                    {
+                        updateCmd.Parameters.Add("@id", SqlDbType.Int).Value = int.Parse(userModel.Id);
+                        updateCmd.Parameters.Add("@username", SqlDbType.NVarChar).Value = userModel.Username;
+                        updateCmd.Parameters.Add("@password", SqlDbType.NVarChar).Value = passwordToUse;
+                        updateCmd.Parameters.Add("@name", SqlDbType.NVarChar).Value = userModel.Name ?? string.Empty;
+                        updateCmd.Parameters.Add("@lastname", SqlDbType.NVarChar).Value = userModel.LastName ?? string.Empty;
+                        updateCmd.Parameters.Add("@email", SqlDbType.NVarChar).Value = userModel.Email ?? string.Empty;
+
+                        updateCmd.ExecuteNonQuery();
+                    }
                 }
             }
             catch (SqlException ex)
@@ -167,6 +186,7 @@ namespace DeluxeCarsUI.Repositories
                 throw new InvalidOperationException($"Error al actualizar usuario: {ex.Message}", ex);
             }
         }
+
         public IEnumerable<UserModel> GetByAll()
         {
             using (var connection = GetConnection())
@@ -285,7 +305,7 @@ namespace DeluxeCarsUI.Repositories
                     connection.Open();
                     cmd.Connection = connection;
                     cmd.CommandText = "SELECT id, username, name, lastname, email FROM [User] WHERE email=@email";
-                    cmd.Parameters.Add("@username", SqlDbType.NVarChar).Value = email;
+                    cmd.Parameters.Add("@email", SqlDbType.NVarChar).Value = email;
 
                     using (var reader = cmd.ExecuteReader())
                     {
@@ -326,10 +346,7 @@ namespace DeluxeCarsUI.Repositories
                     cmd.CommandText = "DELETE FROM [User] WHERE id=@id";
                     cmd.Parameters.Add("@id", SqlDbType.Int).Value = id;
 
-                    int rowsAffected = cmd.ExecuteNonQuery();
-
-                    if (rowsAffected == 0)
-                        throw new InvalidOperationException($"No se encontró usuario con ID {id}");
+                    cmd.ExecuteNonQuery();
                 }
             }
             catch (SqlException ex)
