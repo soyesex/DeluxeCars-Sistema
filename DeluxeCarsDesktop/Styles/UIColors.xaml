@@ -1,0 +1,63 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Background Colors – Tonos Azul profundo y casi negro -->
+    <!-- Azul profundo elegante -->
+    <Color x:Key="primaryBackColor1">#0A0E21</Color>
+    <!-- Azul marino profundo -->
+    <Color x:Key="primaryBackColor2">#151933</Color>
+    <!-- Azul oscuro secundario -->
+    <Color x:Key="secundaryBackColor1">#1F2A44</Color>
+    <!-- Azul medio secundario -->
+    <Color x:Key="secundaryBackColor2">#273353</Color>
+    <!-- Azul claro oscuro (sirve para resaltar ligeros contrastes) -->
+    <Color x:Key="secundaryBackColor3">#2E3B5C</Color>
+
+    <!-- Window Border Colors – Acentos en Azul medio y oscuro -->
+    <Color x:Key="winBorderColor1">#336699</Color>
+    <Color x:Key="winBorderColor2">#6699CC</Color>
+    <Color x:Key="winBorderColor3">#004488</Color>
+
+    <!-- Color Palette – Acentos en distintos tonos de azul y gris profesional -->
+    <SolidColorBrush x:Key="color1" Color="#336699"/>
+    <!-- Azul marino medio -->
+    <SolidColorBrush x:Key="color2" Color="#6699CC"/>
+    <!-- Azul claro elegante -->
+    <SolidColorBrush x:Key="color3" Color="#99CCFF"/>
+    <!-- Azul muy claro -->
+    <SolidColorBrush x:Key="color4" Color="#CCCCFF"/>
+    <!-- Lavanda suave -->
+    <SolidColorBrush x:Key="color5" Color="#FFCC66"/>
+    <!-- Amarillo desgastado -->
+    <SolidColorBrush x:Key="color6" Color="#FF9966"/>
+    <!-- Coral suave -->
+    <SolidColorBrush x:Key="color7" Color="#CC6699"/>
+    <!-- Rosa oscuro elegante -->
+    <SolidColorBrush x:Key="color8" Color="#9966CC"/>
+    <!-- Púrpura profesional -->
+    <SolidColorBrush x:Key="color9" Color="#66CCCC"/>
+    <!-- Turquesa claro -->
+    <SolidColorBrush x:Key="color10" Color="#669966"/>
+    <!-- Verde grisáceo -->
+
+    <!-- Font Colors – Tonos claros/grises para contraste sobre fondo oscuro -->
+    <SolidColorBrush x:Key="titleColor1" Color="#E0E0E0"/>
+    <!-- Gris claro suave -->
+    <SolidColorBrush x:Key="titleColor2" Color="#C8C8C8"/>
+    <!-- Gris medio -->
+    <SolidColorBrush x:Key="titleColor3" Color="#AFAFB5"/>
+    <!-- Gris oscuro claro -->
+    <SolidColorBrush x:Key="plainTextColor1" Color="#808080"/>
+    <!-- Gris neutro -->
+    <SolidColorBrush x:Key="plainTextColor2" Color="#606060"/>
+    <!-- Gris oscuro -->
+    <SolidColorBrush x:Key="plainTextColor3" Color="#404040"/>
+    <!-- Gris muy oscuro -->
+
+    <!-- Panel Colors – Paneles oscuros con hover en azul oscuro -->
+    <SolidColorBrush x:Key="panelColor" Color="#191F28"/>
+    <!-- Gris casi negro -->
+    <SolidColorBrush x:Key="panelOverColor" Color="#212831"/>
+    <!-- Gris azulado oscuro -->
+    <SolidColorBrush x:Key="panelActivateColor" Color="#2A3445"/>
+    <!-- Azul grisáceo oscuro -->
+</ResourceDictionary>
