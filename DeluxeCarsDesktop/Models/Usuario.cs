@@ -41,6 +41,9 @@ namespace DeluxeCarsDesktop.Models
         // Propiedad de navegación: Un Usuario tiene un Rol.
         [ForeignKey("IdRol")]
         public virtual Roles Rol { get; set; }
+        public virtual ICollection<Pedido> Pedidos { get; set; }
+        public virtual ICollection<Factura> Facturas { get; set; }
+        public virtual ICollection<PasswordReset> PasswordResets { get; set; }
 
     }
 }

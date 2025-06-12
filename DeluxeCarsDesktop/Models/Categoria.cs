@@ -18,5 +18,8 @@ namespace DeluxeCarsDesktop.Models
 
         [StringLength(150)]
         public string Descripcion { get; set; }
+
+        // Navigation Property
+        public virtual ICollection<Producto> Productos { get; set; }
     }
 }

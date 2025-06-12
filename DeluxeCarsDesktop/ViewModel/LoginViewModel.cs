@@ -93,6 +93,17 @@ namespace DeluxeCarsDesktop.ViewModel
         private void ExecuteShowRegisterView(object obj)
         {
             var registerView = _serviceProvider.GetService<RegistroView>();
+
+            var registerViewModel = registerView.DataContext as RegistroViewModel;
+
+            if(registerViewModel != null)
+            {
+                registerViewModel.RegistrationCancelled += () =>
+                {
+                    registerView.Close();
+                };
+            }
+
             registerView.ShowDialog();
         }
         private void ExecuteRecoverPassCommand(object obj)

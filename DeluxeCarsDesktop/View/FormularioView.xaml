@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:DeluxeCarsDesktop.View"
         mc:Ignorable="d"
         xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
-        Title="Formulario" Height="500" Width="800"
+        Title="Formulario" Height="800" Width="900"
         WindowStyle="None"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
@@ -15,8 +15,6 @@
         xmlns:viewModel="clr-namespace:DeluxeCarsDesktop.ViewModel"
         xmlns:userControl="clr-namespace:DeluxeCarsDesktop.View.UserControls"
         MouseDown="Window_MouseDown_1">
-
-    
     
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibility"/>
@@ -122,7 +120,7 @@
 
             <Border CornerRadius="0,10,10,0"
         Grid.Column="1">
-
+                
                 <Border.Background>
                     <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
                         <GradientStop Color="{StaticResource primaryBackColor1}" Offset="0"/>
@@ -230,7 +228,8 @@
                     </Grid>
 
                     <!--Content section / Child views-->
-                    <ContentControl Content="{Binding CurrentChildView}"
+                    <ContentControl x:Name="FormContentControl" 
+                        Content="{Binding CurrentChildView}"
                         Grid.Row="2"
                         Margin="25 10"/>
                 </Grid>

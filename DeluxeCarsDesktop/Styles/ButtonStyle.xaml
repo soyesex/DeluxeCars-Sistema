@@ -18,21 +18,29 @@
 
     <Style x:Key="DarkComboBoxItemStyle" TargetType="ComboBoxItem">
         <Setter Property="Padding" Value="12,10"/>
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
+        <Setter Property="Background" Value="{StaticResource ButtonDisabledBackground}"/>
+        <Setter Property="Foreground" Value="{DynamicResource ButtonDisabledForeground}"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBoxItem">
-                    <Border x:Name="border" Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                    <!-- 
+                    MEJORA: Se añaden CornerRadius y Margin para una mejor apariencia visual
+                    de los items en la lista desplegable.
+                -->
+                    <Border x:Name="border" Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}"
+                            SnapsToDevicePixels="True" CornerRadius="5" Margin="2">
                         <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center" />
                     </Border>
                     <ControlTemplate.Triggers>
+                        <!-- 
+                        MEJORA: Se cambia el color del hover a uno más sutil para una mejor UX.
+                    -->
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="{DynamicResource PrimaryBackgroundColor}"/>
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource ButtonSecondaryHover}"/>
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="{DynamicResource ButtonPrimaryBackground}"/>
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource HighlightBorderColor}"/>
                             <Setter Property="Foreground" Value="White"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
@@ -42,6 +50,7 @@
     </Style>
 
     <Style x:Key="DarkComboBoxStyle" TargetType="ComboBox">
+        <!-- Propiedades base del ComboBox -->
         <Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
         <Setter Property="Background" Value="{DynamicResource PrimaryBackgroundColor}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBorderColor}"/>
@@ -49,65 +58,111 @@
         <Setter Property="Height" Value="40"/>
         <Setter Property="Padding" Value="15,0"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <!-- Aplica nuestro estilo personalizado a cada item del desplegable -->
         <Setter Property="ItemContainerStyle" Value="{StaticResource DarkComboBoxItemStyle}"/>
 
+        <!-- 
+        ==================================================================
+        SECCIÓN 1: EL CONTROL TEMPLATE (LA ESTRUCTURA VISUAL)
+        ==================================================================
+    -->
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBox">
                     <Grid x:Name="templateRoot" SnapsToDevicePixels="true">
 
-                        <Popup x:Name="PART_Popup"
-                           AllowsTransparency="true"
-                           IsOpen="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}"
-                           PopupAnimation="Slide"
-                           Placement="Bottom">
-                            <Border x:Name="dropDownBorder"
-                                MaxHeight="{TemplateBinding MaxDropDownHeight}"
-                                MinWidth="{Binding ActualWidth, ElementName=templateRoot}"
-                                Background="{DynamicResource SecondaryBackgroundColor}"
-                                BorderBrush="{DynamicResource HighlightBorderColor}"
-                                BorderThickness="1"
-                                CornerRadius="10"
-                                Margin="0,5,0,0">
+                        <!-- El Popup desplegable -->
+                        <Popup x:Name="PART_Popup" AllowsTransparency="true" IsOpen="{Binding IsDropDownOpen, 
+                            RelativeSource={RelativeSource TemplatedParent}}" PopupAnimation="Slide" Placement="Bottom">
+                            <Border x:Name="dropDownBorder" MaxHeight="{TemplateBinding MaxDropDownHeight}" MinWidth="{Binding ActualWidth,
+                                ElementName=templateRoot}" Background="{DynamicResource secundaryBackColor2}" BorderBrush="{DynamicResource 
+                                HighlightBorderColor}" BorderThickness="1" CornerRadius="10" Margin="0,5,0,0">
                                 <ScrollViewer x:Name="DropDownScrollViewer">
                                     <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained"/>
                                 </ScrollViewer>
                             </Border>
                         </Popup>
 
-                        <ToggleButton x:Name="toggleButton"
-                                  Background="{TemplateBinding Background}"
-                                  BorderBrush="{TemplateBinding BorderBrush}"
-                                  BorderThickness="{TemplateBinding BorderThickness}"
-                                  IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
-                            <ToggleButton.Style>
-                                <Style TargetType="ToggleButton">
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="ToggleButton">
-                                                <Border x:Name="templateBorder" CornerRadius="15" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
-                                                    <Path x:Name="arrow" Data="M 0 0 L 4 4 L 8 0 Z" Fill="{DynamicResource PrimaryTextColor}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0"/>
-                                                </Border>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </ToggleButton.Style>
-                        </ToggleButton>
+                        <!-- El borde principal que vemos -->
+                        <Border x:Name="mainBorder" 
+                            CornerRadius="15" 
+                            Background="{TemplateBinding Background}" 
+                            BorderBrush="{TemplateBinding BorderBrush}" 
+                            BorderThickness="{TemplateBinding BorderThickness}">
 
-                        <TextBlock Text="{Binding SelectionBoxItem.Content, RelativeSource={RelativeSource TemplatedParent}}"
-                               HorizontalAlignment="Left"
-                               VerticalAlignment="Center"
-                               Margin="15,0,0,0"
-                               IsHitTestVisible="False"/>
+                            <Grid>
+                                <!-- El contenido visual (placeholder o item seleccionado) -->
+                                <TextBlock x:Name="placeholder" Text="{TemplateBinding Tag}" Foreground="{DynamicResource PlaceholderTextColor}"
+                                           IsHitTestVisible="False" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                           Margin="{TemplateBinding Padding}" Visibility="Collapsed"/>
+                                <TextBlock x:Name="selectedContent" 
+                                           Text="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}"
+                                           HorizontalAlignment="Left" VerticalAlignment="Center" 
+                                           Margin="{TemplateBinding Padding}" IsHitTestVisible="False" />   
+
+                                <!-- La flecha animada -->
+                                <Path x:Name="arrow" Data="M 0 0 L 4 4 L 8 0 Z" Fill="{DynamicResource PrimaryTextColor}"
+                                      HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0">
+                                    <Path.RenderTransform>
+                                        <RotateTransform CenterY="1"/>
+                                    </Path.RenderTransform>
+                                </Path>
+                            </Grid>
+                        </Border>
+
+                        <!-- 
+                        CORRECCIÓN TÉCNICA:
+                        El ToggleButton ahora es un overlay completamente transparente que se encarga
+                        de capturar el clic para abrir el menú, sin tener ninguna apariencia propia.
+                        Esto previene que el efecto de hover por defecto de WPF aparezca.
+                    -->
+                        <ToggleButton x:Name="toggleButton"
+                      IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                      Focusable="False">
+                            <ToggleButton.Template>
+                                <ControlTemplate TargetType="ToggleButton">
+                                    <Border Background="Transparent" />
+                                </ControlTemplate>
+                            </ToggleButton.Template>
+                        </ToggleButton>
                     </Grid>
 
+                    <!-- 
+                    ==================================================================
+                    SECCIÓN 2: LOS TRIGGERS (REACCIONES A ESTADOS)
+                    ==================================================================
+                -->
                     <ControlTemplate.Triggers>
+                        <!-- Trigger para el hover, ahora afecta al borde principal. -->
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="BorderBrush" Value="{DynamicResource HighlightBorderColor}"/>
+                            <Setter TargetName="mainBorder" Property="BorderBrush" Value="{DynamicResource HighlightBorderColor}"/>
                         </Trigger>
+
+                        <!-- Trigger para el placeholder, ahora verifica el SelectionBoxItem. -->
+                        <Trigger Property="SelectedItem" Value="{x:Null}">
+                            <Setter TargetName="placeholder" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.5"/>
+                        </Trigger>
+
+                        <!-- Trigger para la animación de la flecha. -->
+                        <Trigger Property="IsDropDownOpen" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="arrow" Storyboard.TargetProperty="RenderTransform.Angle" To="180" Duration="0:0:0.2"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="arrow" Storyboard.TargetProperty="RenderTransform.Angle" To="0" Duration="0:0:0.2"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -123,7 +178,7 @@
 
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Height" Value="40"/>
-        <Setter Property="MinWidth" Value="180"/>
+        <Setter Property="MinWidth" Value="120"/>
         <Setter Property="FontFamily" Value="Montserrat"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Cursor" Value="Hand"/>
@@ -187,6 +242,7 @@
         </Setter>
     </Style>
 
+    <!-- Estilo para la barra de búsqueda principal -->
     <Style x:Key="SearchBoxStyle" TargetType="TextBox">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{StaticResource PrimaryTextColor}" />
@@ -196,111 +252,38 @@
         <Setter Property="Height" Value="40"/>
         <Setter Property="Padding" Value="15,0,40,0"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
+
+        <!-- 
+            CAMBIO TÉCNICO:
+            La propiedad 'CaretBrush' controla el color del cursor de texto parpadeante.
+            La enlazamos a nuestro 'PrimaryTextColor' para que coincida con el color
+            del texto que el usuario está escribiendo, creando una experiencia visual coherente.
+        -->
+        <Setter Property="CaretBrush" Value="{StaticResource PrimaryTextColor}"/>
+
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
-                    <Border x:Name="border" 
-                        CornerRadius="15" 
-                        Background="{StaticResource PrimaryBackgroundColor}"
-                        BorderBrush="{StaticResource PrimaryBorderColor}"
-                        BorderThickness="1">
-
+                    <Border x:Name="border" CornerRadius="15" Background="{StaticResource PrimaryBackgroundColor}" BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
                         <Grid>
-                            <ScrollViewer x:Name="PART_ContentHost" 
-                                      VerticalAlignment="Center" 
-                                      Focusable="false" 
-                                      HorizontalScrollBarVisibility="Hidden" 
-                                      VerticalScrollBarVisibility="Hidden"/>
-
-                            <TextBlock Text="{TemplateBinding Tag}" 
-                                   Foreground="{StaticResource PlaceholderTextColor}"
-                                   IsHitTestVisible="False"
-                                   VerticalAlignment="Center"
-                                   HorizontalAlignment="Left"
-                                   Margin="{TemplateBinding Padding}">
+                            <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
+                            <TextBlock Text="{TemplateBinding Tag}" Foreground="{StaticResource PlaceholderTextColor}" IsHitTestVisible="False" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="{TemplateBinding Padding}">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Visibility" Value="Collapsed"/>
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="" />
+                                                    <Condition Binding="{Binding IsKeyboardFocused, RelativeSource={RelativeSource TemplatedParent}}" Value="False" />
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </MultiDataTrigger>
                                         </Style.Triggers>
                                     </Style>
                                 </TextBlock.Style>
                             </TextBlock>
-
-                            <fa:IconImage Icon="MagnifyingGlass" 
-                                      Width="16" Height="16"
-                                      Foreground="{Binding BorderBrush, ElementName=border}"
-                                      VerticalAlignment="Center" 
-                                      HorizontalAlignment="Right" 
-                                      Margin="0,0,15,0" />
-                        </Grid>
-                    </Border>
-
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource HighlightBorderColor}"/>
-                        </Trigger>
-                        <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource HighlightBorderColor}"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-
-    <Style x:Key="SearchBoxStyle1" TargetType="TextBox">
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="Foreground" Value="{StaticResource PrimaryTextColor}" />
-        <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="FontSize" Value="14"/>
-        <Setter Property="FontFamily" Value="Montserrat"/>
-        <Setter Property="Height" Value="45"/>
-        <Setter Property="Padding" Value="15,0,40,0"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="TextBox">
-                    <Border x:Name="border" 
-                            CornerRadius="15" 
-                            Background="{StaticResource PrimaryBackgroundColor}"
-                            BorderBrush="{StaticResource PrimaryBorderColor}"
-                            BorderThickness="1">
-                        <Grid>
-                            <ScrollViewer x:Name="PART_ContentHost" 
-                                          VerticalAlignment="Center" 
-                                          Focusable="false" 
-                                          HorizontalScrollBarVisibility="Hidden" 
-                                          VerticalScrollBarVisibility="Hidden"/>
-
-                            <TextBlock Text="{TemplateBinding Tag}" 
-                                       Foreground="{StaticResource PlaceholderTextColor}"
-                                       IsHitTestVisible="False"
-                                       VerticalAlignment="Center"
-                                       HorizontalAlignment="Left"
-                                       Margin="{TemplateBinding Padding}">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-
-                            <fa:IconImage Icon="MagnifyingGlass" 
-                                          Width="16" Height="16"
-                                          Foreground="{Binding BorderBrush, ElementName=border}"
-                                          VerticalAlignment="Center" 
-                                          HorizontalAlignment="Right" 
-                                          Margin="0,0,15,0" />
+                            <fa:IconImage Icon="MagnifyingGlass" Width="16" Height="16" Foreground="{Binding BorderBrush, ElementName=border}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,15,0" />
                         </Grid>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -319,9 +302,20 @@
     <!-- Estilos Data Grid -->
     <Style x:Key="ElegantDataGridStyle" TargetType="DataGrid">
         <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="Foreground" Value="{DynamicResource PrimaryBackgroundColor}"/>
+
+        <!-- Este recurso 'titleColor1' ya es un Brush, así que está bien. -->
+        <Setter Property="Foreground" Value="{StaticResource titleColor1}"/>
+
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="GridLinesVisibility" Value="None"/>
+        <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+
+        <!-- CORRECCIÓN #1: Creamos el Brush inline usando el recurso de Color. -->
+        <Setter Property="HorizontalGridLinesBrush">
+            <Setter.Value>
+                <SolidColorBrush Color="{StaticResource secundaryBackColor3}"/>
+            </Setter.Value>
+        </Setter>
+
         <Setter Property="HeadersVisibility" Value="Column"/>
         <Setter Property="CanUserAddRows" Value="False"/>
         <Setter Property="IsReadOnly" Value="True"/>
@@ -329,17 +323,25 @@
         <Setter Property="SelectionMode" Value="Single"/>
         <Setter Property="SelectionUnit" Value="FullRow"/>
 
+        <!-- AÑADIDO: Deshabilita la ordenación por defecto al hacer clic en las columnas. -->
+        <Setter Property="CanUserSortColumns" Value="False"/>
+
         <Setter Property="ColumnHeaderStyle">
             <Setter.Value>
                 <Style TargetType="DataGridColumnHeader">
                     <Setter Property="Background" Value="Transparent"/>
-                    <Setter Property="Foreground" Value="{DynamicResource  PrimaryTextColor}"/>
+                    <Setter Property="Foreground" Value="{StaticResource titleColor2}"/>
                     <Setter Property="FontWeight" Value="Bold"/>
                     <Setter Property="FontSize" Value="14"/>
                     <Setter Property="Padding" Value="10"/>
                     <Setter Property="HorizontalContentAlignment" Value="Center"/>
                     <Setter Property="BorderThickness" Value="0,0,0,2"/>
-                    <Setter Property="BorderBrush" Value="{DynamicResource  PrimaryBorderColor}"/>
+                    <!-- CORRECCIÓN #2: Creamos el Brush inline. -->
+                    <Setter Property="BorderBrush">
+                        <Setter.Value>
+                            <SolidColorBrush Color="{StaticResource winBorderColor2}"/>
+                        </Setter.Value>
+                    </Setter>
                 </Style>
             </Setter.Value>
         </Setter>
@@ -352,10 +354,16 @@
                     <Setter Property="MinHeight" Value="45"/>
                     <Style.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="{DynamicResource  SecondaryBackgroundColor}"/>
+                            <!-- CORRECCIÓN #3: Creamos el Brush inline para el hover. -->
+                            <Setter Property="Background">
+                                <Setter.Value>
+                                    <SolidColorBrush Color="{StaticResource secundaryBackColor2}"/>
+                                </Setter.Value>
+                            </Setter>
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Background" Value="{DynamicResource  ButtonPrimaryColor}"/>
+                            <!-- 'color1' ya es un Brush, así que este está bien. -->
+                            <Setter Property="Background" Value="{StaticResource color1}"/>
                             <Setter Property="Foreground" Value="White"/>
                             <Setter Property="FontWeight" Value="SemiBold"/>
                         </Trigger>
@@ -367,6 +375,8 @@
         <Setter Property="CellStyle">
             <Setter.Value>
                 <Style TargetType="DataGridCell">
+                    <!-- AÑADIDO: Establece la fuente para el contenido de las celdas. -->
+                    <Setter Property="FontFamily" Value="Montserrat"/>
                     <Setter Property="Padding" Value="10,5"/>
                     <Setter Property="BorderThickness" Value="0"/>
                     <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
@@ -389,7 +399,8 @@
 
         <Setter Property="AlternatingRowBackground" >
             <Setter.Value>
-                <SolidColorBrush Color="#2C3A5A" Opacity="0.3"/>
+                <!-- CORRECCIÓN #4: Creamos el Brush inline para la fila alterna. -->
+                <SolidColorBrush Color="{StaticResource secundaryBackColor1}" Opacity="0.5"/>
             </Setter.Value>
         </Setter>
     </Style>

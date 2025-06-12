@@ -28,9 +28,9 @@
             <userControl:CatalogoUserControl/>
         </DataTemplate>
 
-        <!--<DataTemplate DataType="{x:Type viewModel:ClientesViewModel}">
+        <DataTemplate DataType="{x:Type viewModel:ClientesViewModel}">
             <userControl:ClienteUserControl/>
-        </DataTemplate>-->
+        </DataTemplate>
 
         <DataTemplate DataType="{x:Type viewModel:ProveedorViewModel}">
             <userControl:ProveedorUserControl/>
@@ -139,7 +139,7 @@
                                  Margin="0,0,0,5">
                                 <StackPanel Orientation="Horizontal">
                                     <fa:IconImage Icon="List" Style="{StaticResource menuButtonIcon}"/>
-                                    <TextBlock Text="Catálogo" Style="{StaticResource menuButtonText}"/>
+                                    <TextBlock Text="Inventario" Style="{StaticResource menuButtonText}"/>
                                 </StackPanel>
                             </RadioButton>
 

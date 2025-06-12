@@ -30,7 +30,7 @@ namespace DeluxeCarsDesktop.ViewModel
         public Roles RolSeleccionado { get; set; }
         private readonly IRolesRepository _rolRepository; // Repositorio para obtener roles
         private readonly IUsuarioRepository _usuarioRepository; // Repositorio para registrar usuarios
-
+        public event Action RegistrationCancelled;
 
         // Propiedades Públicas (enlazadas a la Vista)
         public string NombreUsuario
@@ -115,6 +115,7 @@ namespace DeluxeCarsDesktop.ViewModel
 
         // Comandos
         public ICommand RegistrarCommand { get; }
+        public ICommand NavigateBackToLoginCommand { get; }
 
         // Constructor
         public RegistroViewModel(IUsuarioRepository usuarioRepository, IRolesRepository rolesRepository)
@@ -124,9 +125,15 @@ namespace DeluxeCarsDesktop.ViewModel
 
             // Inicializamos el comando
             RegistrarCommand = new ViewModelCommand(ExecuteRegistrarCommand, CanExecuteRegistrarCommand);
+            NavigateBackToLoginCommand = new ViewModelCommand(ExecuteBackToLoginCommand);
 
             RolesDisponibles = new ObservableCollection<Roles>();
             CargarRoles(); // Llama a un método que llena la lista
+        }
+
+        private void ExecuteBackToLoginCommand(object obj)
+        {
+            RegistrationCancelled?.Invoke();
         }
 
         private async void CargarRoles()

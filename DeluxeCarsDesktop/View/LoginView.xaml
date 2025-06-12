@@ -25,7 +25,7 @@
 
     <Border CornerRadius="15">
         <Border.Background>
-            <ImageBrush ImageSource="/Images/background-car-image.jpg"/>
+            <ImageBrush ImageSource="C:\Users\suare\Source\Repos\DeluxeCarsUI\DeluxeCarsDesktop\Images\login.jpg"/>
         </Border.Background>
 
         <Border CornerRadius="12"
@@ -236,13 +236,12 @@
                         </Button.Template>
                     </Button>
 
-                    <StackPanel Orientation="Horizontal"
+                    <StackPanel Orientation="Vertical"
                                 HorizontalAlignment="Center"
                                 Margin="0,15,0,0">
 
-                        <Button x:Name="btnRecoverPassword"
-                                Command="{Binding RecoverPasswordCommand}"
-                                Content="Recuperar contraseña"
+                        <Button Content="Registrarse" 
+                                Command="{Binding ShowRegisterViewCommand}"
                                 Foreground="White"
                                 FontSize="12"
                                 FontFamily="Montserrat"
@@ -267,12 +266,44 @@
                                             CornerRadius="10"
                                             Background="{TemplateBinding Background}">
                                         <ContentPresenter VerticalAlignment="Center"
+                                                          HorizontalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+
+                        <Button x:Name="btnRecoverPassword"
+                                Command="{Binding RecoverPasswordCommand}"
+                                Content="Recuperar contraseña"
+                                Foreground="White"
+                                FontSize="12"
+                                FontFamily="Montserrat"
+                                Cursor="Hand"
+                                Grid.Column="2"
+                                Margin="0,5,10,0">
+
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#28AEED"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Width="150" Height="20"
+                                            CornerRadius="10"
+                                            Background="{TemplateBinding Background}">      
+                                        <ContentPresenter VerticalAlignment="Center"
                                             HorizontalAlignment="Center"/>
                                     </Border>
                                 </ControlTemplate>
                             </Button.Template>
                         </Button>
-                        <Button Content="Registrarse" Command="{Binding ShowRegisterViewCommand}"/>
 
                     </StackPanel>
 

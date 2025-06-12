@@ -46,6 +46,8 @@ public partial class App : Application
         services.AddScoped<IUsuarioRepository, UsuarioRepository>();
         services.AddScoped<IRolesRepository, RolesRepository>();
         services.AddScoped<INavigationService, NavigationService>();
+        services.AddScoped<ICategoriaRepository, CategoriaRepository>();
+        services.AddScoped<IProductoRepository, ProductoRepository>();
 
         // Registrar tus ViewModels. Transient significa que se creará una nueva instancia cada vez que se pida.
         services.AddTransient<LoginViewModel>();
@@ -62,11 +64,15 @@ public partial class App : Application
         services.AddTransient<ReportesViewModel>();
         services.AddTransient<ConfiguracionViewModel>();
 
+        // User Controls Hijos
+        services.AddTransient<CategoriaFormViewModel>();
+
         // Registra tus Vistas (las ventanas). Singleton o Transient son opciones comunes.
         // Usaremos Transient para asegurar que siempre se abran limpias.
         services.AddTransient<LoginView>();
         services.AddTransient<MainView>();
         services.AddTransient<RegistroView>();
+        services.AddTransient<FormularioView>();
     }
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -82,36 +88,52 @@ public partial class App : Application
 
             // Establecemos la identidad del usuario para toda la aplicación.
             Thread.CurrentPrincipal = new GenericPrincipal(new GenericIdentity(savedUsername), null);
-
-            // Pedimos la MainView al contenedor y la mostramos. FIN.
-            var mainView = _serviceProvider.GetService<MainView>();
-            mainView.Show();
+            ShowMainViewAndSubscribe();
         }
         else
         {
-            // NO -> No hay sesión. Debemos mostrar la pantalla de login.
-
-            // Pedimos la LoginView al contenedor.
-            var loginView = _serviceProvider.GetService<LoginView>();
-
-            // Obtenemos su ViewModel para poder suscribirnos a su evento de éxito.
-            var loginViewModel = loginView.DataContext as LoginViewModel;
-
-            if (loginViewModel != null)
-            {
-                // Nos suscribimos al evento. Esto prepara a la aplicación para reaccionar
-                // CUANDO el usuario finalmente inicie sesión de forma correcta.
-                loginViewModel.LoginSuccess += () =>
-                {
-                    var mainView = _serviceProvider.GetService<MainView>();
-                    mainView.Show();
-                    loginView.Close();
-                };
-            }
-
-            // Mostramos la LoginView para que el usuario pueda iniciar sesión.
-            loginView.Show();
+            ShowLoginView();
         }
+    }
+
+    // MÉTODO AUXILIAR PARA MOSTRAR LA VISTA DE LOGIN
+    private void ShowLoginView()
+    {
+        var loginView = _serviceProvider.GetService<LoginView>();
+        var loginViewModel = loginView.DataContext as LoginViewModel;
+
+        if (loginViewModel != null)
+        {
+            // Cuando el login es exitoso...
+            loginViewModel.LoginSuccess += () =>
+            {
+                // ... cerramos el login y mostramos el MainView
+                ShowMainViewAndSubscribe();
+                loginView.Close();
+            };
+        }
+        loginView.Show();
+    }
+
+    // MÉTODO AUXILIAR PARA MOSTRAR LA VISTA PRINCIPAL Y SUSCRIBIR SU EVENTO DE LOGOUT
+    private void ShowMainViewAndSubscribe()
+    {
+        var mainView = _serviceProvider.GetService<MainView>();
+        var mainViewModel = mainView.DataContext as MainViewModel;
+
+        if (mainViewModel != null)
+        {
+            // ¡AQUÍ ESTÁ LA NUEVA LÓGICA!
+            // Nos suscribimos al evento de Logout.
+            mainViewModel.LogoutSuccess += () =>
+            {
+                // Cuando el logout es exitoso...
+                // ... cerramos el MainView y mostramos el LoginView de nuevo.
+                ShowLoginView();
+                mainView.Close();
+            };
+        }
+        mainView.Show();
     }
 }
 

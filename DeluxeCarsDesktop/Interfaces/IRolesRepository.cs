@@ -7,12 +7,7 @@ using System.Threading.Tasks;
 
 namespace DeluxeCarsDesktop.Interfaces
 {
-    public interface IRolesRepository
+    public interface IRolesRepository : IGenericRepository<Roles>
     {
-        Task<IEnumerable<Roles>> GetAllAsync();
-        Task<Roles?> ObtenerPorIdAsync(int id);
-        Task<bool> CrearAsync(Roles rol);
-        Task<bool> ActualizarAsync(Roles rol);
-        Task<bool> EliminarAsync(int id);
     }
 }

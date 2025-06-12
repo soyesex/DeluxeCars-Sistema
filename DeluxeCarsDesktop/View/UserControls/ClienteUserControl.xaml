@@ -48,10 +48,6 @@
 
     </UserControl.Resources>
 
-    <UserControl.DataContext>
-        <viewModel:ClientesViewModel/>
-    </UserControl.DataContext>
-
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

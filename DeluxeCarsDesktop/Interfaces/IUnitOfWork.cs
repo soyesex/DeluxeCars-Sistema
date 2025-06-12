@@ -1,0 +1,27 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace DeluxeCarsDesktop.Interfaces
+{
+    public interface IUnitOfWork : IDisposable
+    {
+        IProductoRepository Productos { get; }
+        ICategoriaRepository Categorias { get; }
+        IClienteRepository Clientes { get; }
+        IFacturaRepository Facturas { get; }
+        IPedidoRepository Pedidos { get; }
+        IProveedorRepository Proveedores { get; }
+        IUsuarioRepository Usuarios { get; }
+        IRolesRepository Rol { get; }
+        // ...Añadir aquí todas las demás interfaces de repositorio
+
+        /// <summary>
+        /// Guarda todos los cambios realizados en este contexto en la base de datos.
+        /// </summary>
+        /// <returns>El número de objetos de estado escritos en la base de datos.</returns>
+        Task<int> CompleteAsync();
+    }
+}

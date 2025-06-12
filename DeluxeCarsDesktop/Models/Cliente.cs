@@ -25,5 +25,8 @@ namespace DeluxeCarsDesktop.Models
 
         [Required]
         public bool Estado { get; set; }
+        
+        // Navigation Property
+        public virtual ICollection<Factura> Facturas { get; set; }
     }
 }

@@ -21,35 +21,6 @@ namespace DeluxeCarsDesktop.Repositories
         {
             _context = context;
         }
-        public void Add(UserModel userModel)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool AuthenticateUser(NetworkCredential credential)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Edit(UserModel userModel)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<UserModel> GetByAll()
-        {
-            throw new NotImplementedException();
-        }
-
-        public UserModel GetById(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public UserModel GetByUsername(string username)
-        {
-            throw new NotImplementedException();
-        }
 
         public bool RecoverPassword(string usernameOrEmail)
         {
@@ -125,6 +96,31 @@ namespace DeluxeCarsDesktop.Repositories
             return await _context.Usuarios
                           .Include(u => u.Rol)
                           .FirstOrDefaultAsync(u => u.Email == email);
+        }
+
+        public Task<bool> ChangePassword(int userId, string oldPassword, string newPassword)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Usuario> GetByIdAsync(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<Usuario>> GetAllAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateAsync(Usuario user)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task DeactivateAsync(int id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

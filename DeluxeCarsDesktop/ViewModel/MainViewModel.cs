@@ -24,7 +24,7 @@ namespace DeluxeCarsDesktop.ViewModel
         private string _caption;
         private IconChar _icon;
         private readonly INavigationService _navigationService;
-
+        public event Action LogoutSuccess;
 
         private IUsuarioRepository _usuarioRepository;
         private IServiceProvider _serviceProvider;
@@ -138,7 +138,7 @@ namespace DeluxeCarsDesktop.ViewModel
             System.Diagnostics.Process.Start(Application.ResourceAssembly.Location);
 
             // Cierra la instancia actual por completo.
-            Application.Current.Shutdown();
+            LogoutSuccess?.Invoke();
         }
         private void ExecuteShowRollViewCommand(object obj)
         {

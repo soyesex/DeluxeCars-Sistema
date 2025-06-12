@@ -18,25 +18,6 @@ namespace DeluxeCarsDesktop.Repositories
         {
             _context = context;
         }
-        public Task<bool> ActualizarAsync(Roles rol)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> CrearAsync(Roles rol)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> EliminarAsync(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Roles?> ObtenerPorIdAsync(int id)
-        {
-            throw new NotImplementedException();
-        }
 
         public async Task<IEnumerable<Roles>> GetAllAsync()
         {
@@ -47,6 +28,26 @@ namespace DeluxeCarsDesktop.Repositories
 
             // 4. Simplemente retornas la lista. El compilador se encarga de envolverla en una Task.
             return roles;
+        }
+
+        public Task<Roles> GetByIdAsync(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task AddAsync(Roles entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateAsync(Roles entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task RemoveAsync(Roles entity)
+        {
+            throw new NotImplementedException();
         }
     }
 }
