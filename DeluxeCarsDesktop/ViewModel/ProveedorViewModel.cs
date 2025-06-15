@@ -1,46 +1,230 @@
-﻿using DeluxeCarsDesktop.Services;
+﻿using DeluxeCarsDesktop.Interfaces;
+using DeluxeCarsDesktop.Models;
+using DeluxeCarsDesktop.Services;
+using DeluxeCarsDesktop.Utils;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
     public class ProveedorViewModel : ViewModelBase
     {
+        // --- Dependencias ---
+        private readonly IUnitOfWork _unitOfWork;
         private readonly INavigationService _navigationService;
-        private bool _isViewVisible = true;
-        public bool IsViewVisible
+
+        // --- Listas Maestras (Caché) ---
+        private List<Proveedor> _todosLosProveedores;
+        private List<Municipio> _todosLosMunicipios;
+
+        // --- Propiedades Públicas para Binding ---
+        public bool IsViewVisible { get; set; } = true;
+
+        private string _searchText;
+        public string SearchText { get => _searchText; set { SetProperty(ref _searchText, value); FiltrarProveedores(); } }
+
+        private ObservableCollection<Proveedor> _proveedores;
+        public ObservableCollection<Proveedor> Proveedores { get => _proveedores; private set => SetProperty(ref _proveedores, value); }
+
+        private Proveedor _proveedorSeleccionado;
+        public Proveedor ProveedorSeleccionado
         {
-            get
-            {
-                return _isViewVisible;
-            }
+            get => _proveedorSeleccionado;
             set
             {
-                _isViewVisible = value;
-                OnPropertyChanged(nameof(IsViewVisible));
+                SetProperty(ref _proveedorSeleccionado, value);
+                (EditarProveedorCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+                (ToggleEstadoCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
             }
         }
 
-        // commands
-        public ICommand ShowProveedorFormCommand { get; }
-        public ICommand ShowDepartamentosFormCommand { get; }
-        public ProveedorViewModel(INavigationService navigationService)
+        // --- NUEVAS PROPIEDADES PARA FILTROS DE UBICACIÓN ---
+        public ObservableCollection<Departamento> Departamentos { get; private set; }
+        public ObservableCollection<Municipio> MunicipiosDisponibles { get; private set; }
+
+        private Departamento _departamentoFiltro;
+        public Departamento DepartamentoFiltro
         {
+            get => _departamentoFiltro;
+            set
+            {
+                SetProperty(ref _departamentoFiltro, value);
+                CargarMunicipiosPorDepartamento(); // Lógica en cascada
+                FiltrarProveedores();
+            }
+        }
+
+        private Municipio _municipioFiltro;
+        public Municipio MunicipioFiltro { get => _municipioFiltro; set { SetProperty(ref _municipioFiltro, value); FiltrarProveedores(); } }
+
+        // --- Comandos ---
+        public ICommand NuevoProveedorCommand { get; }
+        public ICommand EditarProveedorCommand { get; }
+        public ICommand ToggleEstadoCommand { get; }
+        public ICommand GestionarProductosCommand { get; }
+
+        // --- Constructor ---
+        public ProveedorViewModel(IUnitOfWork unitOfWork, INavigationService navigationService)
+        {
+            _unitOfWork = unitOfWork;
             _navigationService = navigationService;
-            ShowProveedorFormCommand = new ViewModelCommand(ExecuteShowProveedorFormCommand);
-            ShowDepartamentosFormCommand = new ViewModelCommand(ExecuteShowDepartamentosFormCommand);
+
+            _todosLosProveedores = new List<Proveedor>();
+            _todosLosMunicipios = new List<Municipio>();
+            Proveedores = new ObservableCollection<Proveedor>();
+            Departamentos = new ObservableCollection<Departamento>();
+            MunicipiosDisponibles = new ObservableCollection<Municipio>();
+
+            NuevoProveedorCommand = new ViewModelCommand(async p => await ExecuteNuevoProveedorCommand());
+            EditarProveedorCommand = new ViewModelCommand(async p => await ExecuteEditarProveedorCommand(), p => CanExecuteActions());
+            ToggleEstadoCommand = new ViewModelCommand(async p => await ExecuteToggleEstadoCommand(), p => CanExecuteActions());
+
+            GestionarProductosCommand = new ViewModelCommand( async p => await ExecuteGestionarProductos(), p => ProveedorSeleccionado != null);
+
+            LoadInitialDataAsync(); // <-- Se llama a un método de carga general
         }
-        private void ExecuteShowDepartamentosFormCommand(object obj)
+
+        // --- Métodos de Lógica ---
+
+        private async Task LoadInitialDataAsync()
         {
-            _navigationService.OpenFormWindow(Utils.FormType.Departamentos);
+            await LoadUbicacionesAsync();
+            await LoadProveedoresAsync();
         }
-        private void ExecuteShowProveedorFormCommand(object obj)
+
+        private async Task LoadUbicacionesAsync()
         {
-            _navigationService.OpenFormWindow(Utils.FormType.Proveedor);
+            try
+            {
+                var depts = await _unitOfWork.Departamentos.GetAllAsync();
+                _todosLosMunicipios = (await _unitOfWork.Municipios.GetAllAsync()).ToList();
+
+                Departamentos.Clear();
+                Departamentos.Add(new Departamento { Id = 0, Nombre = "Todos los Deptos." });
+                foreach (var d in depts.OrderBy(d => d.Nombre)) Departamentos.Add(d);
+
+                DepartamentoFiltro = Departamentos.FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error cargando ubicaciones: {ex.Message}", "Error de Carga", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void CargarMunicipiosPorDepartamento()
+        {
+            var municipioSeleccionadoAnteriormente = MunicipioFiltro;
+            MunicipiosDisponibles.Clear();
+            MunicipiosDisponibles.Add(new Municipio { Id = 0, Nombre = "Todos los Municipios" });
+
+            if (DepartamentoFiltro != null && DepartamentoFiltro.Id != 0)
+            {
+                foreach (var m in _todosLosMunicipios.Where(m => m.IdDepartamento == DepartamentoFiltro.Id).OrderBy(m => m.Nombre))
+                {
+                    MunicipiosDisponibles.Add(m);
+                }
+            }
+
+            // Intentar re-seleccionar el municipio si aún existe en la nueva lista
+            MunicipioFiltro = MunicipiosDisponibles.FirstOrDefault(m => m.Id == municipioSeleccionadoAnteriormente?.Id) ?? MunicipiosDisponibles.FirstOrDefault();
+        }
+
+        private async Task LoadProveedoresAsync()
+        {
+            try
+            {
+                var proveedoresDesdeRepo = await _unitOfWork.Proveedores.GetAllWithLocationAsync();
+                _todosLosProveedores = proveedoresDesdeRepo.ToList();
+                FiltrarProveedores();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"No se pudieron cargar los proveedores: {ex.Message}", "Error de Carga", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // --- MÉTODO DE FILTRADO MEJORADO ---
+        private async Task ExecuteGestionarProductos()
+        {
+            // Necesitarás un nuevo FormType para esto
+            await _navigationService.OpenFormWindow(FormType.GestionarProductosProveedor, ProveedorSeleccionado.Id);
+        }
+
+        private void FiltrarProveedores()
+        {
+            IEnumerable<Proveedor> itemsFiltrados = _todosLosProveedores;
+
+            if (DepartamentoFiltro != null && DepartamentoFiltro.Id != 0)
+            {
+                itemsFiltrados = itemsFiltrados.Where(p => p.Municipio?.IdDepartamento == DepartamentoFiltro.Id);
+            }
+
+            if (MunicipioFiltro != null && MunicipioFiltro.Id != 0)
+            {
+                itemsFiltrados = itemsFiltrados.Where(p => p.IdMunicipio == MunicipioFiltro.Id);
+            }
+
+            if (!string.IsNullOrWhiteSpace(SearchText))
+            {
+                itemsFiltrados = itemsFiltrados.Where(p => p.RazonSocial.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
+            }
+
+            Proveedores = new ObservableCollection<Proveedor>(itemsFiltrados.OrderBy(p => p.RazonSocial));
+        }
+
+        private bool CanExecuteActions() => ProveedorSeleccionado != null;
+
+        private async Task ExecuteNuevoProveedorCommand()
+        {
+            await _navigationService.OpenFormWindow(FormType.Proveedor, 0);
+            await LoadProveedoresAsync();
+        }
+
+        private async Task ExecuteEditarProveedorCommand()
+        {
+            await _navigationService.OpenFormWindow(FormType.Proveedor, ProveedorSeleccionado.Id);
+            await LoadProveedoresAsync();
+        }
+
+        private async Task ExecuteToggleEstadoCommand()
+        {
+            var proveedorId = ProveedorSeleccionado.Id; // Captura el Id
+            string accion = ProveedorSeleccionado.Estado ? "desactivar" : "activar";
+
+            var result = MessageBox.Show($"¿Estás seguro de que deseas {accion} al proveedor '{ProveedorSeleccionado.RazonSocial}'?", "Confirmar Cambio", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.No) return;
+
+            try
+            {
+                // Cargar la entidad desde el contexto actual de la UoW
+                var proveedorToUpdate = await _unitOfWork.Proveedores.GetByIdAsync(proveedorId);
+
+                if (proveedorToUpdate == null)
+                {
+                    MessageBox.Show("El proveedor no fue encontrado.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                proveedorToUpdate.Estado = !proveedorToUpdate.Estado; // Modifica la entidad trackeada
+
+                // No necesitas llamar a UpdateAsync si tu UnitOfWork ya maneja el seguimiento
+                // Simplemente el CompleteAsync (SaveChanges) detectará el cambio
+                await _unitOfWork.CompleteAsync();
+
+                FiltrarProveedores(); // Refresca la UI
+                MessageBox.Show($"Proveedor {accion}do exitosamente.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
+                LoadInitialDataAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"No se pudo cambiar el estado del proveedor.\n\nError: {ex.Message}", "Error de Actualización", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

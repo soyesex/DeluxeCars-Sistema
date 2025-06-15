@@ -22,5 +22,8 @@ namespace DeluxeCarsDesktop.Models
 
         [Required]
         public bool Disponible { get; set; }
+        // --- AÑADE ESTAS DOS LÍNEAS ---
+        public virtual ICollection<Factura> Facturas { get; set; }
+        public virtual ICollection<Pedido> Pedidos { get; set; }
     }
 }

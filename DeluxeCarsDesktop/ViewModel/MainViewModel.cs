@@ -19,139 +19,115 @@ namespace DeluxeCarsDesktop.ViewModel
 {
     public class MainViewModel : ViewModelBase
     {
+        // --- Dependencias y Estado ---
+        private readonly IUnitOfWork _unitOfWork; // <-- CAMBIO: Ahora usamos UnitOfWork
+        private readonly IServiceProvider _serviceProvider;
+        private readonly INavigationService _navigationService;
+        private readonly ICurrentUserService _currentUserService;
+
+        // Nueva propiedad para el binding en XAML
+        public bool IsAdmin => _currentUserService.IsAdmin;
+
         private UserAccountModel _currentUserAccount;
         private ViewModelBase _currentChildView;
         private string _caption;
         private IconChar _icon;
-        private readonly INavigationService _navigationService;
+
         public event Action LogoutSuccess;
 
-        private IUsuarioRepository _usuarioRepository;
-        private IServiceProvider _serviceProvider;
-        
-        public UserAccountModel CurrentUserAccount
-        {
-            get
-            {
-                return _currentUserAccount;
-            }
-            set
-            {
-                _currentUserAccount = value;
-                OnPropertyChanged(nameof(CurrentUserAccount));
-            }
-        }
+        // --- Propiedades Públicas para Binding ---
+        public UserAccountModel CurrentUserAccount { get => _currentUserAccount; set => SetProperty(ref _currentUserAccount, value); }
+        public ViewModelBase CurrentChildView { get => _currentChildView; set => SetProperty(ref _currentChildView, value); }
+        public string Caption { get => _caption; set => SetProperty(ref _caption, value); }
+        public IconChar Icon { get => _icon; set => SetProperty(ref _icon, value); }
 
-        public ViewModelBase CurrentChildView
-        {
-            get
-            {
-                return _currentChildView;
-            }
-            set
-            {
-                _currentChildView = value;
-                OnPropertyChanged(nameof(CurrentChildView));
-            }
-        }
-        public string Caption
-        {
-            get
-            {
-                return _caption;
-            }
-            set
-            {
-                _caption = value;
-                OnPropertyChanged(nameof(Caption));
-            }
-        }
-        public IconChar Icon
-        {
-            get
-            {
-                return _icon;
-            }
-            set
-            {
-                _icon = value;
-                OnPropertyChanged(nameof(Icon));
-            }
-        }
-
-        // Commands
-        public ICommand ShowCatalogoCommand { get; }
+        // --- Comandos ---
         public ICommand ShowHomeViewCommand { get; }
         public ICommand ShowCatalogoViewCommand { get; }
         public ICommand ShowClienteViewCommand { get; }
         public ICommand ShowProveedorViewCommand { get; }
         public ICommand ShowComprasViewCommand { get; }
-        public ICommand ShowFacturacionViewCommand { get; }
+        public ICommand ShowPuntoDeVentaCommand { get; }
+        public ICommand ShowHistorialVentasCommand { get; }
         public ICommand ShowReportesViewCommand { get; }
         public ICommand ShowUsuarioViewCommand { get; }
         public ICommand ShowRolViewCommand { get; }
         public ICommand ShowConfiguracionViewCommand { get; }
         public ICommand LogoutCommand { get; }
 
-        public MainViewModel(IUsuarioRepository usuarioRepository, IServiceProvider serviceProvider, INavigationService navigationService)
+        public MainViewModel(ICurrentUserService currentUserService, IUnitOfWork unitOfWork, IServiceProvider serviceProvider, INavigationService navigationService)
         {
-            _usuarioRepository = usuarioRepository;
+            // --- Inyección de Dependencias (CAMBIO) ---
+            _unitOfWork = unitOfWork;
             _serviceProvider = serviceProvider;
             _navigationService = navigationService;
+            _currentUserService = currentUserService;
 
-            CurrentUserAccount = new UserAccountModel();
-            
-
-            // Initialize commands
+            // --- Inicialización de Comandos ---
             ShowHomeViewCommand = new ViewModelCommand(ExecuteShowHomeViewCommand);
             ShowCatalogoViewCommand = new ViewModelCommand(ExecuteShowCatalogViewCommand);
             ShowClienteViewCommand = new ViewModelCommand(ExecuteShowCustomerViewCommand);
             ShowProveedorViewCommand = new ViewModelCommand(ExecuteShowSupplierViewCommand);
             ShowComprasViewCommand = new ViewModelCommand(ExecuteShowShoppingViewCommand);
-            ShowFacturacionViewCommand = new ViewModelCommand(ExecuteShowBillingViewCommand);
+            ShowPuntoDeVentaCommand = new ViewModelCommand(ExecuteShowPuntoDeVentaCommand);
+            ShowHistorialVentasCommand = new ViewModelCommand(ExecuteShowHistorialVentasCommand);
             ShowReportesViewCommand = new ViewModelCommand(ExecuteShowReportViewCommand);
             ShowUsuarioViewCommand = new ViewModelCommand(ExecuteShowUsuarioViewCommand);
-
             ShowRolViewCommand = new ViewModelCommand(ExecuteShowRollViewCommand);
             ShowConfiguracionViewCommand = new ViewModelCommand(ExecuteShowConfigurationViewCommand);
-
             LogoutCommand = new ViewModelCommand(ExecuteLogout);
 
-            // Default view
-            ExecuteShowHomeViewCommand(null);
-
-            // Carga datos del usuario actual según Thread.CurrentPrincipal
-            LoadCurrentUserData();
+            // --- Carga Inicial ---
+            ExecuteShowHomeViewCommand(null); // Vista por defecto
         }
 
+        // --- Métodos de Ejecución de Comandos ---
+        // --- NUEVO MÉTODO DE INICIALIZACIÓN ASÍNCRONA ---
+        public async Task InitializeAsync()
+        {
+            await LoadCurrentUserData();
+            ExecuteShowHomeViewCommand(null); // Carga la vista por defecto
+        }
         private void ExecuteLogout(object obj)
         {
-            // 1. LIMPIAR la sesión guardada en Settings (esto está perfecto)
+            // Limpiamos la sesión guardada
             Properties.Settings.Default.SavedUsername = string.Empty;
             Properties.Settings.Default.Save();
 
-            // 2. LIMPIAR la identidad de seguridad del hilo actual (buena práctica)
+            // Limpiamos la identidad del hilo
             Thread.CurrentPrincipal = new GenericPrincipal(new GenericIdentity(string.Empty), null);
 
-            // 3. REINICIAR LA APLICACIÓN
-            // Inicia una nueva instancia del ejecutable de la aplicación.
-            System.Diagnostics.Process.Start(Application.ResourceAssembly.Location);
-
-            // Cierra la instancia actual por completo.
+            // Invocamos el evento. App.xaml.cs se encargará de cerrar esta ventana y abrir el Login.
+            // Es más limpio que reiniciar la aplicación.
             LogoutSuccess?.Invoke();
         }
-        private void ExecuteShowRollViewCommand(object obj)
+        private void ExecuteShowPuntoDeVentaCommand(object obj)
         {
-            CurrentChildView = _serviceProvider.GetService<RolViewModel>();
-            Caption = "Rol";
-            Icon = IconChar.CriticalRole;
+            // Carga el ViewModel del Punto de Venta
+            CurrentChildView = _serviceProvider.GetService<FacturacionViewModel>();
+            Caption = "Punto de Venta (POS)";
+            Icon = IconChar.CashRegister;
         }
 
-        private void ExecuteShowUsuarioViewCommand(object obj)
+        private void ExecuteShowHistorialVentasCommand(object obj)
         {
-            CurrentChildView = _serviceProvider.GetService<UsuarioViewModel>();
-            Caption = "Usuarios";
-            Icon = IconChar.User;
+            // Carga el ViewModel del Historial
+            CurrentChildView = _serviceProvider.GetService<FacturasHistorialViewModel>();
+            Caption = "Historial de Ventas";
+            Icon = IconChar.History;
+        }
+        private void ExecuteShowHomeViewCommand(object obj)
+        {
+            CurrentChildView = _serviceProvider.GetService<DashboardViewModel>();
+            Caption = "Panel Principal";
+            Icon = IconChar.Home;
+        }
+
+        private void ExecuteShowCatalogViewCommand(object obj)
+        {
+            CurrentChildView = _serviceProvider.GetService<CatalogoViewModel>();
+            Caption = "Inventario";
+            Icon = IconChar.List;
         }
 
         private void ExecuteShowCustomerViewCommand(object obj)
@@ -161,38 +137,24 @@ namespace DeluxeCarsDesktop.ViewModel
             Icon = IconChar.Users;
         }
 
-        private void ExecuteShowHomeViewCommand(object obj)
-        {
-            CurrentChildView = _serviceProvider.GetService<DashboardViewModel>();
-            Caption = "Panel";
-            Icon = IconChar.Home;
-        }
-
-        private void ExecuteShowCatalogViewCommand(object obj)
-        {
-            CurrentChildView = _serviceProvider.GetService<CatalogoViewModel>(); // Pide la instancia al contenedor
-            Caption = "Catalogo";
-            Icon = IconChar.List;
-        }
-
         private void ExecuteShowSupplierViewCommand(object obj)
         {
             CurrentChildView = _serviceProvider.GetService<ProveedorViewModel>();
             Caption = "Proveedores";
-            Icon = IconChar.Wallet;
+            Icon = IconChar.Truck;
         }
 
         private void ExecuteShowShoppingViewCommand(object obj)
         {
             CurrentChildView = _serviceProvider.GetService<PedidoViewModel>();
-            Caption = "Compras";
+            Caption = "Pedidos";
             Icon = IconChar.ShoppingCart;
         }
 
         private void ExecuteShowBillingViewCommand(object obj)
         {
             CurrentChildView = _serviceProvider.GetService<FacturacionViewModel>();
-            Caption = "Facturacion";
+            Caption = "Facturación (Punto de Venta)";
             Icon = IconChar.FileInvoiceDollar;
         }
 
@@ -200,50 +162,74 @@ namespace DeluxeCarsDesktop.ViewModel
         {
             CurrentChildView = _serviceProvider.GetService<ReportesViewModel>();
             Caption = "Reportes";
-            Icon = IconChar.FileAlt;
+            Icon = IconChar.ChartColumn;
+        }
+
+        private void ExecuteShowUsuarioViewCommand(object obj)
+        {
+            CurrentChildView = _serviceProvider.GetService<UsuarioViewModel>();
+            Caption = "Usuarios";
+            Icon = IconChar.UserGear;
+        }
+
+        private void ExecuteShowRollViewCommand(object obj)
+        {
+            CurrentChildView = _serviceProvider.GetService<RolViewModel>();
+            Caption = "Roles de Usuario";
+            Icon = IconChar.UserShield;
         }
 
         private void ExecuteShowConfigurationViewCommand(object obj)
         {
             CurrentChildView = _serviceProvider.GetService<ConfiguracionViewModel>();
-            Caption = "Configuracion";
+            Caption = "Configuración";
             Icon = IconChar.Tools;
         }
 
-        private async void LoadCurrentUserData()
+        private async Task LoadCurrentUserData()
         {
-            var identity = Thread.CurrentPrincipal?.Identity;
-            if (identity == null || !identity.IsAuthenticated || string.IsNullOrWhiteSpace(identity.Name))
+            var identityName = Thread.CurrentPrincipal?.Identity?.Name;
+            if (string.IsNullOrWhiteSpace(identityName))
             {
-                CurrentUserAccount.DisplayName = "Usuario no autenticado";
-                return;
+                _currentUserService.ClearCurrentUser();
+                CurrentUserAccount = new UserAccountModel { DisplayName = "Usuario no autenticado" };
+            }
+            else
+            {
+                try
+                {
+                    // El repositorio ya nos trae el usuario CON su rol
+                    var user = await _unitOfWork.Usuarios.GetUserByEmail(identityName);
+                    if (user != null && user.Activo)
+                    {
+                        // Guardamos el usuario completo en nuestro servicio de sesión
+                        _currentUserService.SetCurrentUser(user);
+
+                        // Actualizamos la UI con los datos de la cuenta
+                        CurrentUserAccount = new UserAccountModel
+                        {
+                            Username = user.Email,
+                            DisplayName = $"Bienvenido, {user.Nombre}",
+                        };
+                    }
+                    else
+                    {
+                        _currentUserService.ClearCurrentUser();
+                        CurrentUserAccount = new UserAccountModel { DisplayName = "Usuario no encontrado o inactivo" };
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _currentUserService.ClearCurrentUser();
+                    CurrentUserAccount = new UserAccountModel { DisplayName = "Error al cargar" };
+                    System.Diagnostics.Debug.WriteLine($"Error cargando datos de usuario: {ex.Message}");
+                }
             }
 
-            try
-            {
-                var user = await _usuarioRepository.GetUserByEmail(identity.Name);
-                if (user != null)
-                {
-                    CurrentUserAccount = new UserAccountModel
-                    {
-                        Username = user.Email,
-                        DisplayName = $"Bienvenido/a {user.Nombre}",
-                        //ProfilePicture = user.ProfilePicture // Asignar la foto de perfil si está disponible
-                    };
-                    //CurrentUserAccount.Username = user.Username;
-                    //CurrentUserAccount.DisplayName = $"Bienvenido/a {user.Name}";
-                    //CurrentUserAccount.ProfilePicture = null;
-                }
-                else
-                {
-                    CurrentUserAccount.DisplayName = "Usuario inválido";
-                }
-            }
-            catch (ArgumentException)
-            {
-                // En caso de que GetByUsername siga recibiendo algo inválido, lo tomamos aquí
-                CurrentUserAccount.DisplayName = "Error al cargar usuario";
-            }
+            // --- LÍNEA CLAVE AÑADIDA ---
+            // Después de todo el proceso, notificamos a la UI que el valor de 'IsAdmin'
+            // (y cualquier otra propiedad que dependa del usuario) debe ser re-evaluado.
+            OnPropertyChanged(nameof(IsAdmin));
         }
     }
 }

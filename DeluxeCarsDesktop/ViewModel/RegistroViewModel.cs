@@ -11,124 +11,55 @@ using System.Linq;
 using System.Security;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
     public class RegistroViewModel : ViewModelBase
     {
-        // Campos Privados
+        // --- Dependencia ---
+        private readonly IUnitOfWork _unitOfWork;
+
+        // --- Campos Privados ---
         private string _nombreUsuario;
         private string _telefonoUsuario;
         private string _emailUsuario;
         private SecureString _password;
         private SecureString _confirmPassword;
-        private string _rolUsuario; // Temporalmente como string para coincidir con tu TextBox
         private string _errorMessage;
         private bool _isViewVisible = true;
-        public ObservableCollection<Roles> RolesDisponibles { get; set; }
-        public Roles RolSeleccionado { get; set; }
-        private readonly IRolesRepository _rolRepository; // Repositorio para obtener roles
-        private readonly IUsuarioRepository _usuarioRepository; // Repositorio para registrar usuarios
+
+        public ObservableCollection<Rol> RolesDisponibles { get; private set; }
+        private Rol _rolSeleccionado;
+
         public event Action RegistrationCancelled;
+        public Action CloseAction { get => RegistrationCancelled; set => RegistrationCancelled = value; }
 
-        // Propiedades Públicas (enlazadas a la Vista)
-        public string NombreUsuario
-        {
-            get => _nombreUsuario;
-            set
-            {
-                _nombreUsuario = value;
-                OnPropertyChanged(nameof(NombreUsuario));
-            }
-        }
+        // --- Propiedades Públicas (Se respetan los nombres de tu XAML) ---
+        public string NombreUsuario { get => _nombreUsuario; set => SetProperty(ref _nombreUsuario, value); }
+        public string TelefonoUsuario { get => _telefonoUsuario; set => SetProperty(ref _telefonoUsuario, value); }
+        public string EmailUsuario { get => _emailUsuario; set => SetProperty(ref _emailUsuario, value); }
+        public SecureString Password { get => _password; set => SetProperty(ref _password, value); }
+        public SecureString ConfirmPassword { get => _confirmPassword; set => SetProperty(ref _confirmPassword, value); }
+        public Rol RolSeleccionado { get => _rolSeleccionado; set => SetProperty(ref _rolSeleccionado, value); }
+        public string ErrorMessage { get => _errorMessage; set => SetProperty(ref _errorMessage, value); }
+        public bool IsViewVisible { get => _isViewVisible; set => SetProperty(ref _isViewVisible, value); }
 
-        public string TelefonoUsuario
-        {
-            get => _telefonoUsuario;
-            set
-            {
-                _telefonoUsuario = value;
-                OnPropertyChanged(nameof(TelefonoUsuario));
-            }
-        }
-
-        public string EmailUsuario
-        {
-            get => _emailUsuario;
-            set
-            {
-                _emailUsuario = value;
-                OnPropertyChanged(nameof(EmailUsuario));
-            }
-        }
-
-        public SecureString Password
-        {
-            get => _password;
-            set
-            {
-                _password = value;
-                OnPropertyChanged(nameof(Password));
-            }
-        }
-
-        public SecureString ConfirmPassword
-        {
-            get => _confirmPassword;
-            set
-            {
-                _confirmPassword = value;
-                OnPropertyChanged(nameof(ConfirmPassword));
-            }
-        }
-
-        public string RolUsuario
-        {
-            get => _rolUsuario;
-            set
-            {
-                _rolUsuario = value;
-                OnPropertyChanged(nameof(RolUsuario));
-            }
-        }
-
-        public string ErrorMessage
-        {
-            get => _errorMessage;
-            set
-            {
-                _errorMessage = value;
-                OnPropertyChanged(nameof(ErrorMessage));
-            }
-        }
-
-        public bool IsViewVisible
-        {
-            get => _isViewVisible;
-            set
-            {
-                _isViewVisible = value;
-                OnPropertyChanged(nameof(IsViewVisible));
-            }
-        }
-
-        // Comandos
+        // --- Comandos (Se respetan los nombres de tu XAML) ---
         public ICommand RegistrarCommand { get; }
         public ICommand NavigateBackToLoginCommand { get; }
 
-        // Constructor
-        public RegistroViewModel(IUsuarioRepository usuarioRepository, IRolesRepository rolesRepository)
+        // --- Constructor (Ahora pide IUnitOfWork) ---
+        public RegistroViewModel(IUnitOfWork unitOfWork)
         {
-            _usuarioRepository = usuarioRepository;
-            _rolRepository = rolesRepository;
+            _unitOfWork = unitOfWork;
 
-            // Inicializamos el comando
             RegistrarCommand = new ViewModelCommand(ExecuteRegistrarCommand, CanExecuteRegistrarCommand);
             NavigateBackToLoginCommand = new ViewModelCommand(ExecuteBackToLoginCommand);
 
-            RolesDisponibles = new ObservableCollection<Roles>();
-            CargarRoles(); // Llama a un método que llena la lista
+            RolesDisponibles = new ObservableCollection<Rol>();
+            CargarRoles();
         }
 
         private void ExecuteBackToLoginCommand(object obj)
@@ -138,75 +69,78 @@ namespace DeluxeCarsDesktop.ViewModel
 
         private async void CargarRoles()
         {
-            // Lógica para obtener los roles de la base de datos y añadirlos a RolesDisponibles
-            var roles = await _rolRepository.GetAllAsync();
-            foreach (var rol in roles)
+            try
             {
-                RolesDisponibles.Add(rol);
+                // Ahora usa el UnitOfWork para obtener los roles
+                var roles = await _unitOfWork.Roles.GetAllAsync();
+                foreach (var rol in roles.OrderBy(r => r.Nombre))
+                {
+                    RolesDisponibles.Add(rol);
+                }
+                // Seleccionamos "Empleado" por defecto, si existe.
+                RolSeleccionado = RolesDisponibles.FirstOrDefault(r => r.Nombre == "Empleado");
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "No se pudieron cargar los roles.";
+                System.Diagnostics.Debug.WriteLine($"ERROR Cargando Roles: {ex.Message}");
             }
         }
 
-        // Lógica del Comando
         private bool CanExecuteRegistrarCommand(object obj)
         {
-            // El botón de registrar estará habilitado solo si todos los campos requeridos no están vacíos.
             return !string.IsNullOrWhiteSpace(NombreUsuario) &&
                    !string.IsNullOrWhiteSpace(EmailUsuario) &&
                    Password != null && Password.Length > 0 &&
-                   ConfirmPassword != null && ConfirmPassword.Length > 0;
+                   ConfirmPassword != null && ConfirmPassword.Length > 0 &&
+                   RolSeleccionado != null; // Se añade validación de rol
         }
 
         private async void ExecuteRegistrarCommand(object obj)
         {
             ErrorMessage = "";
-
-            // --- VALIDACIÓN #1: Asegurarnos de que se ha seleccionado un Rol ---
-            if (RolSeleccionado == null)
-            {
-                ErrorMessage = "Por favor, seleccione un rol para el usuario.";
-                return;
-            }
-
             if (Password.Unsecure() != ConfirmPassword.Unsecure())
             {
                 ErrorMessage = "Las contraseñas no coinciden.";
                 return;
             }
+            if (RolSeleccionado == null)
+            {
+                ErrorMessage = "Por favor, seleccione un rol.";
+                return;
+            }
+
+            var newUser = new Usuario
+            {
+                Nombre = this.NombreUsuario,
+                Telefono = this.TelefonoUsuario,
+                Email = this.EmailUsuario,
+                IdRol = this.RolSeleccionado.Id,
+                Activo = true
+            };
 
             try
             {
-                var newUser = new Usuario
-                {
-                    Nombre = this.NombreUsuario,
-                    Telefono = this.TelefonoUsuario,
-                    Email = this.EmailUsuario,
-                    // Asignamos el Id del rol que SÍ seleccionó el usuario
-                    IdRol = this.RolSeleccionado.Id
-                };
+                // Usamos el repositorio a través del UnitOfWork
+                await _unitOfWork.Usuarios.RegisterUser(newUser, Password.Unsecure());
 
-                // Usamos el repositorio que nos fue inyectado
-                await _usuarioRepository.RegisterUser(newUser, Password.Unsecure());
+                // ¡PASO CRUCIAL AÑADIDO! Guardamos los cambios en la base de datos.
+                await _unitOfWork.CompleteAsync();
 
-                ErrorMessage = "¡Usuario registrado con éxito!";
+                MessageBox.Show("¡Usuario registrado con éxito!", "Registro Exitoso", MessageBoxButton.OK, MessageBoxImage.Information);
+                CloseAction?.Invoke(); // Cierra la ventana
             }
             catch (Exception ex)
             {
-                // --- AQUÍ ESTÁ LA MEJORA CLAVE ---
-                // Construimos un mensaje de error mucho más detallado
-                // que incluye los mensajes de todas las excepciones internas.
+                // Tu excelente lógica para mostrar errores detallados
                 var fullErrorMessage = new StringBuilder();
                 fullErrorMessage.AppendLine($"Error principal: {ex.Message}");
-
                 Exception innerEx = ex.InnerException;
-                int level = 1;
                 while (innerEx != null)
                 {
-                    fullErrorMessage.AppendLine($"  -> Error Interno (Nivel {level}): {innerEx.Message}");
+                    fullErrorMessage.AppendLine($"  -> Error Interno: {innerEx.Message}");
                     innerEx = innerEx.InnerException;
-                    level++;
                 }
-
-                // Mostramos el informe completo en nuestra UI
                 ErrorMessage = fullErrorMessage.ToString();
             }
         }

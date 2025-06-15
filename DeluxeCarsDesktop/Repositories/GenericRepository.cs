@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,6 +21,12 @@ namespace DeluxeCarsDesktop.Repositories
             _dbSet = context.Set<T>();
         }
 
+        // --- AÑADE LA IMPLEMENTACIÓN DE ESTE MÉTODO ---
+        public async Task<IEnumerable<T>> GetByConditionAsync(Expression<Func<T, bool>> condition)
+        {
+            // Ejecuta la consulta con la condición 'WHERE' que le pasemos
+            return await _dbSet.Where(condition).AsNoTracking().ToListAsync();
+        }
 
         public async Task AddAsync(T entity)
         {
@@ -28,8 +35,7 @@ namespace DeluxeCarsDesktop.Repositories
 
         public async Task<IEnumerable<T>> GetAllAsync()
         {
-            // AsNoTracking mejora el rendimiento para operaciones de solo lectura.
-            return await _dbSet.AsNoTracking().ToListAsync();
+            return await _dbSet.ToListAsync();
         }
 
         public async Task<T> GetByIdAsync(int id)

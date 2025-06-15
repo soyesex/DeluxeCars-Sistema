@@ -6,85 +6,75 @@
         xmlns:local="clr-namespace:DeluxeCarsDesktop.View"
         mc:Ignorable="d"
         xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
-        Title="Formulario" Height="800" Width="900"
+        Title="Formulario" MinHeight="200" MinWidth="900"
         WindowStyle="None"
         ResizeMode="NoResize"
+        SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterScreen"
         Background="Transparent"
         AllowsTransparency="True" 
         xmlns:viewModel="clr-namespace:DeluxeCarsDesktop.ViewModel"
-        xmlns:userControl="clr-namespace:DeluxeCarsDesktop.View.UserControls"
-        MouseDown="Window_MouseDown_1">
+        xmlns:userControl="clr-namespace:DeluxeCarsDesktop.View.UserControls">
     
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibility"/>
 
-        <!-- Productos -->
+        <DataTemplate DataType="{x:Type viewModel:GestionarProductosProveedorViewModel}">
+            <userControl:GestionarProductosProveedorUserControl />
+        </DataTemplate>
+
         <DataTemplate DataType="{x:Type viewModel:ProductoFormViewModel}">
             <userControl:ProductoFormUserControl />
         </DataTemplate>
 
-        <!-- Categorías -->
         <DataTemplate DataType="{x:Type viewModel:CategoriaFormViewModel}">
             <userControl:CategoriaFormUserControl />
         </DataTemplate>
 
-        <!-- Clientes -->
         <DataTemplate DataType="{x:Type viewModel:ClienteFormViewModel}">
             <userControl:ClienteFormUserControl />
         </DataTemplate>
-
-        <!-- Proveedores -->
+        
         <DataTemplate DataType="{x:Type viewModel:ProveedorFormViewModel}">
             <userControl:ProveedorFormUserControl />
         </DataTemplate>
 
-        <!--Departamentos-->
         <DataTemplate DataType="{x:Type viewModel:DepartamentoFormViewModel}">
             <userControl:DepartamentoFormUserControl />
         </DataTemplate>
 
-        <!--Municipios-->
         <DataTemplate DataType="{x:Type viewModel:MunicipioFormViewModel}">
             <userControl:MunicipioFormUserControl />
         </DataTemplate>
 
-        <!--Pedidos-->
         <DataTemplate DataType="{x:Type viewModel:PedidoFormViewModel}">
             <userControl:PedidoFormUserControl />
         </DataTemplate>
 
-        <!--Facturas-->
         <DataTemplate DataType="{x:Type viewModel:FacturaFormViewModel}">
             <userControl:FacturaFormUserControl />
         </DataTemplate>
 
-        <!--Servicios-->
         <DataTemplate DataType="{x:Type viewModel:ServicioFormViewModel}">
             <userControl:ServicioFormUserControl />
         </DataTemplate>
 
-        <!--Métodos de Pago-->
         <DataTemplate DataType="{x:Type viewModel:MetodoPagoFormViewModel}">
             <userControl:MetodoPagoFormUserControl />
         </DataTemplate>
 
-        <!--Detalles de Factura-->
         <DataTemplate DataType="{x:Type viewModel:DetalleFacturaFormViewModel}">
             <userControl:DetalleFacturaFormUserControl />
         </DataTemplate>
 
-        <!--Roles-->
         <DataTemplate DataType="{x:Type viewModel:RolFormViewModel}">
             <userControl:RolFormUserControl />
         </DataTemplate>
 
-        <!--Usuarios-->
         <DataTemplate DataType="{x:Type viewModel:UsuarioFormViewModel}">
             <userControl:UsuarioFormUserControl />
         </DataTemplate>
 
-        <!--Cambio de Contraseña-->
         <DataTemplate DataType="{x:Type viewModel:CambiarPasswordViewModel}">
             <userControl:CambiarPasswordUserControl />
         </DataTemplate>
@@ -94,8 +84,8 @@
     <Border CornerRadius="15">
         <Border.Background>
             <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
-                <GradientStop Color="{StaticResource primaryBackColor1}" Offset="0"/>
-                <GradientStop Color="{StaticResource primaryBackColor2}" Offset="1"/>
+                <GradientStop Color="{StaticResource Color.PrimaryBack1}" Offset="0"/>
+                <GradientStop Color="{StaticResource Color.PrimaryBack2}" Offset="1"/>
             </LinearGradientBrush>
         </Border.Background>
 
@@ -105,26 +95,25 @@
 
             <Border.BorderBrush>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="{StaticResource winBorderColor1}" Offset="0"/>
-                    <GradientStop Color="{StaticResource winBorderColor2}" Offset="0.75"/>
-                    <GradientStop Color="{StaticResource winBorderColor3}" Offset="1"/>
+                    <GradientStop Color="{StaticResource Color.WinBorder1}" Offset="0"/>
+                    <GradientStop Color="{StaticResource Color.WinBorder2}" Offset="0.75"/>
+                    <GradientStop Color="{StaticResource Color.WinBorder3}" Offset="1"/>
                 </LinearGradientBrush>
             </Border.BorderBrush>
 
             <Border.Background>
                 <LinearGradientBrush StartPoint="0,1" EndPoint="1,0">
-                    <GradientStop Color="{StaticResource primaryBackColor1}" Offset="0"/>
-                    <GradientStop Color="{StaticResource primaryBackColor2}" Offset="0.75"/>
+                    <GradientStop Color="{StaticResource Color.PrimaryBack1}" Offset="0"/>
+                    <GradientStop Color="{StaticResource Color.PrimaryBack2}" Offset="0.75"/>
                 </LinearGradientBrush>
             </Border.Background>
 
-            <Border CornerRadius="0,10,10,0"
-        Grid.Column="1">
+            <Border CornerRadius="10">
                 
                 <Border.Background>
                     <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
-                        <GradientStop Color="{StaticResource primaryBackColor1}" Offset="0"/>
-                        <GradientStop Color="{StaticResource primaryBackColor2}" Offset="1"/>
+                        <GradientStop Color="{StaticResource Color.PrimaryBack1}" Offset="0"/>
+                        <GradientStop Color="{StaticResource Color.PrimaryBack2}" Offset="1"/>
                     </LinearGradientBrush>
                 </Border.Background>
 
@@ -146,7 +135,7 @@
                     Background="Transparent"
                     Margin="0,0,5,0"
                     MouseLeftButtonDown="pnlControlBar_MouseLeftButtonDown"
-                    MouseEnter="pnlControlBar_MouseEnter_2">
+                    MouseEnter="pnlControlBar_MouseEnter">
                         <Button x:Name="btnClose"
                     Style="{StaticResource controlButton}"
                     Tag="{StaticResource color4}"
@@ -158,7 +147,7 @@
                         <Button x:Name="btnMaximize"
                     Style="{StaticResource controlButton}"
                     Tag="{StaticResource color6}"
-                    Click="btnMaximize_Click_1">
+                    Click="btnMaximize_Click">
                             <fa:IconImage Icon="Square" Style="{StaticResource controlButtonIcon}"/>
 
                         </Button>

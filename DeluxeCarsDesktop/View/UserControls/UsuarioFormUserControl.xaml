@@ -5,57 +5,57 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800"
-             xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp">
+             xmlns:customcontrols="clr-namespace:DeluxeCarsDesktop.CustomControls"
+             d:DesignHeight="550" d:DesignWidth="600">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibility"/>
+    </UserControl.Resources>
+    <StackPanel Margin="20">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+            <Label Grid.Row="0" Style="{StaticResource DarkLableForm}" Content="Nombre Completo:"/>
+            <TextBox Grid.Row="0" Grid.Column="1" Style="{StaticResource DarkInputControlStyle}" Text="{Binding Nombre, UpdateSourceTrigger=PropertyChanged}"/>
 
-        <TextBlock Text="Usuarios"
-                   Foreground="White"
-                   FontSize="25"
-                   FontWeight="Normal"
-                   VerticalAlignment="Center"
-                   HorizontalAlignment="Left"
-                   Grid.Row="0"
-                   Margin="20,20,20,10" />
+            <Label Grid.Row="1" Style="{StaticResource DarkLableForm}" Content="Email:"/>
+            <TextBox Grid.Row="1" Grid.Column="1" Style="{StaticResource DarkInputControlStyle}" Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"/>
 
+            <Label Grid.Row="2" Style="{StaticResource DarkLableForm}" Content="Teléfono:"/>
+            <TextBox Grid.Row="2" Grid.Column="1" Style="{StaticResource DarkInputControlStyle}" Text="{Binding Telefono, UpdateSourceTrigger=PropertyChanged}"/>
 
-        <TextBox Grid.Row="1" Margin="20,0,20,15" Style="{StaticResource SearchBoxStyle}" 
-                         Tag="Buscar categoria..." />
+            <Label Grid.Row="3" Style="{StaticResource DarkLableForm}" Content="Rol:"/>
+            <ComboBox Grid.Row="3" Grid.Column="1" Style="{StaticResource DarkComboBoxStyle}"
+                      ItemsSource="{Binding RolesDisponibles}"
+                      SelectedItem="{Binding RolSeleccionado}"
+                      DisplayMemberPath="Nombre"/>
 
-        <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right" Margin="20,0,20,15">
-            <Button Content="Nueva Categoria" Style="{StaticResource DarkActionButtonStyle}"  Margin="0,0,10,0"/>
+            <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Visibility="{Binding IsCreateMode, Converter={StaticResource BooleanToVisibility}}">
+                <Label Style="{StaticResource DarkLableForm}" Content="Contraseña:"/>
+                <customcontrols:BindablePasswordBox Password="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
-            <Button Content="Filtrar Categoria" Style="{StaticResource DarkActionButtonStyle}"  Width="150"/>
+                <Label Style="{StaticResource DarkLableForm}" Content="Confirmar Contraseña:" Margin="0,10,0,0"/>
+                <customcontrols:BindablePasswordBox Password="{Binding ConfirmPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            </StackPanel>
+
+            <Label Grid.Row="5" Style="{StaticResource DarkLableForm}" Content="Activo:"/>
+            <CheckBox Grid.Row="5" Grid.Column="1" IsChecked="{Binding Estado}" VerticalAlignment="Center"/>
+        </Grid>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button Content="Guardar" Style="{StaticResource DarkActionButtonStyle}" Command="{Binding GuardarCommand}" Width="100"/>
+            <Button Content="Cancelar" Style="{StaticResource DarkActionButtonStyle}" Command="{Binding CancelarCommand}" Width="100" Margin="10,0,0,0"/>
         </StackPanel>
-
-        <Border Grid.Row="3" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" 
-                BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
-            <DataGrid x:Name="ProductsDataGrid"
-                      Style="{StaticResource ElegantDataGridStyle}"
-                      ItemsSource="{Binding Productos}">
-                <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="Imagen" Width="Auto">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Border CornerRadius="5" Width="40" Height="40" Margin="5">
-                                    <Border.Background>
-                                        <ImageBrush ImageSource="{Binding ImageUrl}" Stretch="UniformToFill"/>
-                                    </Border.Background>
-                                </Border>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-
-                    <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="2*"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </Border>
-    </Grid>
+    </StackPanel>
 </UserControl>

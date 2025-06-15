@@ -1,4 +1,4 @@
-﻿using DeluxeCarsDesktop.Models;
+﻿    using DeluxeCarsDesktop.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -20,7 +20,7 @@ namespace DeluxeCarsDesktop.Data
         public DbSet<Departamento> Departamentos { get; set; }
         public DbSet<Municipio> Municipios { get; set; }
         public DbSet<MetodoPago> MetodosPago { get; set; }
-        public DbSet<Roles> Roles { get; set; }
+        public DbSet<Rol> Roles { get; set; }
         public DbSet<TipoServicio> TiposServicios { get; set; }
         public DbSet<EstadoFacturaElectronica> EstadosFacturaElectronica { get; set; }
         public DbSet<TipoDocumentoElectronico> TiposDocumentoElectronico { get; set; }
@@ -78,20 +78,41 @@ namespace DeluxeCarsDesktop.Data
                 .IsUnique();
 
             // Configuración para la llave única compuesta en la tabla de unión ProductoProveedor.
-            modelBuilder.Entity<ProductoProveedor>()
-                .HasIndex(pp => new { pp.IdProveedor, pp.IdProducto })
-                .IsUnique();
+            // Configuración para la entidad ProductoProveedor.
+            modelBuilder.Entity<ProductoProveedor>(entity =>
+            {
+                // Le decimos a EF que la tabla en SQL se llama 'ProductoProveedor' (singular)
+                entity.ToTable("ProductoProveedor");
+
+                // Esta configuración para la llave única ya la tenías y está perfecta.
+                entity.HasIndex(pp => new { pp.IdProveedor, pp.IdProducto }).IsUnique();
+            });
 
             // --- SECCIÓN 2: Configuraciones de Comportamiento al Eliminar (ON DELETE) ---
             // Define qué sucede con las entidades relacionadas cuando una entidad principal es eliminada.
 
             // ON DELETE SET NULL: Si se borra un Usuario, el IdUsuario en la Factura se establece a NULL.
             // Esto conserva el registro de la factura incluso si el empleado ya no trabaja en la empresa.
-            modelBuilder.Entity<Factura>()
-                .HasOne(f => f.Usuario)
-                .WithMany(u => u.Facturas)
-                .HasForeignKey(f => f.IdUsuario)
-                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Factura>(entity =>
+            {
+                // Esta es la relación que causa el error actual
+                entity.HasOne(f => f.Cliente)
+                      .WithMany(c => c.Facturas)
+                      .HasForeignKey(f => f.IdCliente) // Le decimos que la columna se llama IdCliente
+                      .OnDelete(DeleteBehavior.NoAction);
+
+                // Aprovechamos para configurar las otras relaciones de Factura
+                entity.HasOne(f => f.Usuario)
+                      .WithMany(u => u.Facturas)
+                      .HasForeignKey(f => f.IdUsuario)
+                      .OnDelete(DeleteBehavior.SetNull); // No borrar facturas si se elimina un usuario
+
+                entity.HasOne(f => f.MetodoPago)
+                      .WithMany(mp => mp.Facturas)
+                      .HasForeignKey(f => f.IdMetodoPago)
+                      .OnDelete(DeleteBehavior.NoAction);
+            });
 
             // ON DELETE CASCADE: Si se borra una entidad principal, sus detalles asociados también se borran.
             // Ejemplo: Al eliminar un Pedido, se eliminan todas sus líneas de DetallePedido.
@@ -116,6 +137,51 @@ namespace DeluxeCarsDesktop.Data
                 .HasForeignKey(p => p.IdCategoria)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Configuración para la entidad Pedido
+            modelBuilder.Entity<Pedido>(entity =>
+            {
+                // La relación con Proveedor usa la clave foránea 'IdProveedor'
+                entity.HasOne(p => p.Proveedor)
+                      .WithMany(prov => prov.Pedidos)
+                      .HasForeignKey(p => p.IdProveedor)
+                      .OnDelete(DeleteBehavior.NoAction); // Coincide con tu ON DELETE NO ACTION
+
+                // La relación con Usuario usa la clave foránea 'IdUsuario'
+                entity.HasOne(p => p.Usuario)
+                      .WithMany(u => u.Pedidos)
+                      .HasForeignKey(p => p.IdUsuario)
+                      .OnDelete(DeleteBehavior.NoAction);
+
+                // La relación con MetodoPago usa la clave foránea 'IdMetodoPago'
+                entity.HasOne(p => p.MetodoPago)
+                      .WithMany(mp => mp.Pedidos)
+                      .HasForeignKey(p => p.IdMetodoPago)
+                      .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            // Hacemos lo mismo para Proveedor y su relación con Municipio
+            modelBuilder.Entity<Proveedor>(entity =>
+            {
+                // La relación con Municipio usa la clave foránea 'IdMunicipio'
+                entity.HasOne(p => p.Municipio)
+                      .WithMany(m => m.Proveedores)
+                      .HasForeignKey(p => p.IdMunicipio)
+                      .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            // Y para Factura, que también se relaciona con Usuario y MetodoPago
+            modelBuilder.Entity<Factura>(entity =>
+            {
+                entity.HasOne(f => f.Usuario)
+                     .WithMany(u => u.Facturas)
+                     .HasForeignKey(f => f.IdUsuario)
+                     .OnDelete(DeleteBehavior.SetNull); // Este ya lo tenías, pero lo agrupamos
+
+                entity.HasOne(f => f.MetodoPago)
+                     .WithMany(mp => mp.Facturas)
+                     .HasForeignKey(f => f.IdMetodoPago)
+                     .OnDelete(DeleteBehavior.NoAction);
+            });
 
             // --- SECCIÓN 3: Configuraciones de Precisión para Campos Decimales ---
             // Define el tipo de dato SQL exacto para todos los campos monetarios y decimales.
@@ -123,7 +189,7 @@ namespace DeluxeCarsDesktop.Data
 
             // Modelo: Producto
             modelBuilder.Entity<Producto>().Property(p => p.Precio).HasColumnType("decimal(18, 2)");
-            modelBuilder.Entity<Producto>().Property(p => p.UltimoPrecioCompra).HasColumnType("decimal(18, 2)");
+            //modelBuilder.Entity<Producto>().Property(p => p.UltimoPrecioCompra).HasColumnType("decimal(18, 2)");
 
             // Modelo: Servicio
             modelBuilder.Entity<Servicio>().Property(s => s.Precio).HasColumnType("decimal(18, 2)");
@@ -161,6 +227,11 @@ namespace DeluxeCarsDesktop.Data
             modelBuilder.Entity<DetalleFactura>()
                 .Property(df => df.Total)
                 .HasComputedColumnSql("((Cantidad * PrecioUnitario - ISNULL(Descuento, 0)) * (1 + ISNULL(IVA, 0)/100))", stored: true);
+            // --- AÑADE ESTAS DOS LÍNEAS AL FINAL ---
+            modelBuilder.Entity<Producto>().Ignore(p => p.FechaIngreso);
+            modelBuilder.Entity<Producto>().Ignore(p => p.UltimoPrecioCompra);
+
+
         }
 
     }

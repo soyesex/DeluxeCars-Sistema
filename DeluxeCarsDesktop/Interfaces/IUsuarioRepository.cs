@@ -14,6 +14,7 @@ namespace DeluxeCarsDesktop.Interfaces
         Task<Usuario> AuthenticateUser(string email, string password);
         Task<Usuario> GetUserByEmail(string email); 
         Task<bool> ChangePassword(int userId, string oldPassword, string newPassword);
+        Task<IEnumerable<Usuario>> GetAllWithRolAsync();
 
         // Métodos CRUD para la gestión de usuarios
         Task<Usuario> GetByIdAsync(int id);

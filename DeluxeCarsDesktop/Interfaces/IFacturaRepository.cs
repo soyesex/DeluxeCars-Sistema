@@ -17,5 +17,6 @@ namespace DeluxeCarsDesktop.Interfaces
 
         // Obtiene el historial de facturas para un cliente específico.
         Task<IEnumerable<Factura>> GetFacturasByClienteAsync(int clienteId);
+        Task<IEnumerable<Factura>> GetAllWithClienteYMetodoPagoAsync();
     }
 }

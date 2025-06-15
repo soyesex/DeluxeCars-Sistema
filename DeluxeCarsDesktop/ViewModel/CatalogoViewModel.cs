@@ -2,6 +2,7 @@
 using DeluxeCarsDesktop.Models;
 using DeluxeCarsDesktop.Repositories;
 using DeluxeCarsDesktop.Services;
+using DeluxeCarsDesktop.Utils;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
@@ -11,16 +12,16 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
     public class CatalogoViewModel : ViewModelBase
     {
-        // --- Dependencias Inyectadas ---
+        // --- Dependencias ---
+        private readonly IUnitOfWork _unitOfWork;
         private readonly INavigationService _navigationService;
-        private readonly IProductoRepository _productoRepository;
-        private readonly ICategoriaRepository _categoriaRepository;
 
         // --- Estado Interno ---
         private List<Producto> _todosLosProductos;
@@ -32,8 +33,7 @@ namespace DeluxeCarsDesktop.ViewModel
             get => _searchText;
             set
             {
-                _searchText = value;
-                OnPropertyChanged(nameof(SearchText));
+                SetProperty(ref _searchText, value);
                 FiltrarProductos();
             }
         }
@@ -42,11 +42,7 @@ namespace DeluxeCarsDesktop.ViewModel
         public ObservableCollection<Producto> Productos
         {
             get => _productos;
-            private set
-            {
-                _productos = value;
-                OnPropertyChanged(nameof(Productos));
-            }
+            private set => SetProperty(ref _productos, value);
         }
 
         private Producto _productoSeleccionado;
@@ -55,8 +51,9 @@ namespace DeluxeCarsDesktop.ViewModel
             get => _productoSeleccionado;
             set
             {
-                _productoSeleccionado = value;
-                OnPropertyChanged(nameof(ProductoSeleccionado));
+                SetProperty(ref _productoSeleccionado, value);
+                (EditarProductoCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+                (EliminarProductoCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
             }
         }
 
@@ -64,11 +61,7 @@ namespace DeluxeCarsDesktop.ViewModel
         public ObservableCollection<Categoria> CategoriasDisponibles
         {
             get => _categoriasDisponibles;
-            set
-            {
-                _categoriasDisponibles = value;
-                OnPropertyChanged(nameof(CategoriasDisponibles));
-            }
+            private set => SetProperty(ref _categoriasDisponibles, value);
         }
 
         private Categoria _categoriaFiltroSeleccionada;
@@ -77,9 +70,7 @@ namespace DeluxeCarsDesktop.ViewModel
             get => _categoriaFiltroSeleccionada;
             set
             {
-                _categoriaFiltroSeleccionada = value;
-                OnPropertyChanged(nameof(CategoriaFiltroSeleccionada));
-                // Cuando el usuario cambia la selección, volvemos a filtrar los productos.
+                SetProperty(ref _categoriaFiltroSeleccionada, value);
                 FiltrarProductos();
             }
         }
@@ -88,117 +79,118 @@ namespace DeluxeCarsDesktop.ViewModel
         public ICommand NuevoProductoCommand { get; }
         public ICommand EditarProductoCommand { get; }
         public ICommand EliminarProductoCommand { get; }
-        public ICommand ShowCategoriaViewCommand { get; }
 
         // --- Constructor ---
-        public CatalogoViewModel(ICategoriaRepository categoriaRepository, IProductoRepository productoRepository, INavigationService navigationService)
+        public CatalogoViewModel(IUnitOfWork unitOfWork, INavigationService navigationService)
         {
+            _unitOfWork = unitOfWork;
             _navigationService = navigationService;
-            _productoRepository = productoRepository;
-            _categoriaRepository = categoriaRepository;
 
             Productos = new ObservableCollection<Producto>();
             CategoriasDisponibles = new ObservableCollection<Categoria>();
             _todosLosProductos = new List<Producto>();
 
-            NuevoProductoCommand = new ViewModelCommand(ExecuteNuevoProductoCommand);
-            EditarProductoCommand = new ViewModelCommand(ExecuteEditarProductoCommand, CanExecuteEditDelete);
-            EliminarProductoCommand = new ViewModelCommand(ExecuteEliminarProductoCommand, CanExecuteEditDelete);
-            ShowCategoriaViewCommand = new ViewModelCommand(ExecuteShowCategoriaView);
+            NuevoProductoCommand = new ViewModelCommand(async p => await ExecuteNuevoProductoCommand());
+            EditarProductoCommand = new ViewModelCommand(async p => await ExecuteEditarProductoCommand(), p => CanExecuteEditDelete());
+            EliminarProductoCommand = new ViewModelCommand(async p => await ExecuteEliminarProductoCommand(), p => CanExecuteEditDelete());
 
-            // Cargar los datos al iniciar.
             LoadInitialDataAsync();
         }
 
         // --- Métodos de Lógica ---
-        private async void LoadInitialDataAsync()
+        private async Task LoadInitialDataAsync()
         {
             await LoadCategoriasAsync();
             await LoadProductosAsync();
         }
+
         private async Task LoadCategoriasAsync()
         {
             try
             {
-                var categoriasDesdeRepo = await _categoriaRepository.GetAllAsync();
+                var categoriasDesdeRepo = await _unitOfWork.Categorias.GetAllAsync();
+                var categoriasOrdenadas = categoriasDesdeRepo.OrderBy(c => c.Nombre).ToList();
+
                 CategoriasDisponibles.Clear();
-                // Añadimos una opción "Todas" al principio para poder limpiar el filtro.
                 CategoriasDisponibles.Add(new Categoria { Id = 0, Nombre = "Todas las Categorías" });
-                foreach (var cat in categoriasDesdeRepo)
-                {
-                    CategoriasDisponibles.Add(cat);
-                }
+                categoriasOrdenadas.ForEach(cat => CategoriasDisponibles.Add(cat));
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"!!! ERROR AL CARGAR CATEGORÍAS: {ex.Message}");
+                MessageBox.Show("Ocurrió un error al cargar las categorías.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
         private async Task LoadProductosAsync()
         {
             try
             {
-                var productosDesdeRepo = await _productoRepository.GetAllAsync();
+                // --- CÓDIGO RESTAURADO A SU VERSIÓN FINAL ---
+                // Usamos el método que incluye las categorías para mostrar el nombre en el DataGrid.
+                var productosDesdeRepo = await _unitOfWork.Productos.GetAllWithCategoriaAsync();
+
                 _todosLosProductos = productosDesdeRepo.ToList();
                 FiltrarProductos();
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"!!! ERROR AL CARGAR PRODUCTOS: {ex.Message}");
+                MessageBox.Show($"Ocurrió un error crítico al cargar los productos: {ex.Message}\n\nAsegúrate de que el modelo Producto.cs coincide con la base de datos.", "Error Fatal", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         private void FiltrarProductos()
         {
-            // Empezamos con la lista completa de productos.
             IEnumerable<Producto> itemsFiltrados = _todosLosProductos;
 
-            // 1. Aplicamos el filtro por categoría seleccionada.
-            // Si hay una categoría seleccionada y su ID no es 0 (nuestra opción "Todas"), filtramos.
             if (CategoriaFiltroSeleccionada != null && CategoriaFiltroSeleccionada.Id != 0)
             {
                 itemsFiltrados = itemsFiltrados.Where(p => p.IdCategoria == CategoriaFiltroSeleccionada.Id);
             }
 
-            // 2. Sobre la lista ya filtrada, aplicamos el filtro por texto de búsqueda.
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
                 itemsFiltrados = itemsFiltrados.Where(p => p.Nombre.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
             }
 
-            // Actualizamos la colección final que se muestra en la UI.
-            Productos = new ObservableCollection<Producto>(itemsFiltrados);
+            Productos = new ObservableCollection<Producto>(itemsFiltrados.OrderBy(p => p.Id));
         }
 
-        private bool CanExecuteEditDelete(object obj)
+        private bool CanExecuteEditDelete() => ProductoSeleccionado != null;
+
+        private async Task ExecuteNuevoProductoCommand()
         {
-            return ProductoSeleccionado != null;
+            await _navigationService.OpenFormWindow(FormType.Producto, 0);
+            await LoadProductosAsync();
         }
 
-        private void ExecuteNuevoProductoCommand(object obj)
+        private async Task ExecuteEditarProductoCommand()
         {
-            _navigationService.OpenFormWindow(Utils.FormType.Producto);
-            LoadProductosAsync();
+            await _navigationService.OpenFormWindow(FormType.Producto, ProductoSeleccionado.Id);
+            await LoadProductosAsync();
         }
 
-        private void ExecuteEditarProductoCommand(object obj)
+        private async Task ExecuteEliminarProductoCommand()
         {
-            // Lógica futura para editar el ProductoSeleccionado.
-        }
+            var productoAEliminar = ProductoSeleccionado;
+            var result = MessageBox.Show($"¿Estás seguro de que deseas eliminar el producto '{productoAEliminar.Nombre}'?", "Confirmar Eliminación", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (result == MessageBoxResult.No) return;
 
-        private async void ExecuteEliminarProductoCommand(object obj)
-        {
-            if (ProductoSeleccionado != null)
+            try
             {
-                // Aquí podrías añadir una confirmación para el usuario.
-                await _productoRepository.RemoveAsync(ProductoSeleccionado.Id);
-                LoadProductosAsync();
-            }
-        }
+                await _unitOfWork.Productos.RemoveAsync(productoAEliminar);
+                await _unitOfWork.CompleteAsync();
 
-        private void ExecuteShowCategoriaView(object obj)
-        {
-            _navigationService.OpenFormWindow(Utils.FormType.Categoria);
+                _todosLosProductos.Remove(productoAEliminar);
+                FiltrarProductos();
+
+                MessageBox.Show("Producto eliminado exitosamente.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ocurrió un error al eliminar el producto. Es posible que esté asociado a una factura o pedido.\n\nError: {ex.Message}", "Error de Eliminación", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

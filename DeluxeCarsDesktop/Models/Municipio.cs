@@ -22,5 +22,6 @@ namespace DeluxeCarsDesktop.Models
         // El atributo [ForeignKey] le dice a EF a qué propiedad de clave foránea está ligada esta navegación.
         [ForeignKey("IdDepartamento")]
         public virtual Departamento Departamento { get; set; }
+        public virtual ICollection<Proveedor> Proveedores { get; set; }
     }
 }

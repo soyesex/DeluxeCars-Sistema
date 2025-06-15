@@ -5,109 +5,59 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
              mc:Ignorable="d" 
-             xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="600">
+    <StackPanel Margin="20">
 
-    <UserControl.Resources>
-        <Style x:Key="FormLabelStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Margin" Value="0,0,15,0"/>
-        </Style>
-
-        <Style x:Key="FormInputStyle" TargetType="TextBox">
-            <Setter Property="Background" Value="#1F2A44" />
-            <Setter Property="Foreground" Value="#E0E6F1" />
-            <Setter Property="BorderBrush" Value="#4D5B7C" />
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Height" Value="35"/>
-            <Setter Property="Padding" Value="10,0"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="TextBox">
-                        <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10">
-                            <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="#28AEED"/>
-                            </Trigger>
-                            <Trigger Property="IsKeyboardFocused" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="#28AEED"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="ActionButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="#1F2A44"/>
-            <Setter Property="Foreground" Value="#E0E6F1"/>
-            <Setter Property="BorderBrush" Value="#4D5B7C"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="MinWidth" Value="180"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border" CornerRadius="15" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
-                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#2C3A5A"/>
-                                <Setter TargetName="border" Property="BorderBrush" Value="#28AEED"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </UserControl.Resources>
-
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2.5*"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-
-        <Grid Grid.Column="0">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/> 
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Row="0" Grid.Column="0" Text="Dirección" Style="{StaticResource FormLabelStyle}"/>
-            <TextBox   Grid.Row="0" Grid.Column="1" Style="{StaticResource FormInputStyle}" Margin="0,5"/>
+            <Label Grid.Row="0" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="Nombre" VerticalAlignment="Center"/>
+            <TextBox Grid.Row="0"  Grid.Column="1"
+                     Style="{StaticResource DarkInputControlStyle}"
+                     Text="{Binding Nombre, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="5"/>
 
-            <TextBlock Grid.Row="1" Grid.Column="0" Text="Teléfono" Style="{StaticResource FormLabelStyle}"/>
-            <TextBox   Grid.Row="1" Grid.Column="1" Style="{StaticResource FormInputStyle}" Margin="0,5"/>
+            <Label Grid.Row="1" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="OEM" VerticalAlignment="Center"/>
+            <TextBox Grid.Row="1" 
+                     Style="{StaticResource DarkInputControlStyle}"
+                     Grid.Column="1" Text="{Binding OEM, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
 
-            <TextBlock Grid.Row="2" Grid.Column="0" Text="Email" Style="{StaticResource FormLabelStyle}"/>
-            <TextBox   Grid.Row="2" Grid.Column="1" Style="{StaticResource FormInputStyle}" Margin="0,5"/>
+            <Label Grid.Row="2" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="Categoría" VerticalAlignment="Center"/>
+            <ComboBox Grid.Row="2" Grid.Column="1" 
+                      Style="{StaticResource DarkComboBoxStyle}"
+                      ItemsSource="{Binding Categorias}"
+                      SelectedItem="{Binding CategoriaSeleccionada}"
+                      DisplayMemberPath="Nombre" Margin="5"/>
 
-            <TextBlock Grid.Row="3" Grid.Column="0" Text="Horario de Atención" Style="{StaticResource FormLabelStyle}"/>
-            <TextBox   Grid.Row="3" Grid.Column="1" Style="{StaticResource FormInputStyle}" Margin="0,5"/>
+            <Label Grid.Row="3" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="Precio" VerticalAlignment="Center"/>
+            <TextBox Grid.Row="3" Grid.Column="1" Style="{StaticResource DarkInputControlStyle}" Text="{Binding Precio, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
 
-            <TextBlock Grid.Row="4" Grid.Column="0" Text="Descripción" Style="{StaticResource FormLabelStyle}"/>
-            <TextBox   Grid.Row="4" Grid.Column="1" Style="{StaticResource FormInputStyle}" Margin="0,5"/>
+            <Label Grid.Row="4" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="Stock" VerticalAlignment="Center"/>
+            <TextBox Grid.Row="4" Style="{StaticResource DarkInputControlStyle}" Grid.Column="1" Text="{Binding Stock, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+
+            <Label Grid.Row="5" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="Descripción" VerticalAlignment="Center"/>
+            <TextBox Grid.Row="5" Grid.Column="1" Style="{StaticResource DarkInputControlStyle}"
+                     Text="{Binding Descripcion, UpdateSourceTrigger=PropertyChanged}" Margin="5" Height="80" TextWrapping="Wrap" AcceptsReturn="True"/>
+
+            <Label Grid.Row="6" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="Activo" VerticalAlignment="Center"/>
+            <CheckBox Grid.Row="6" Grid.Column="1" IsChecked="{Binding Estado}" VerticalAlignment="Center" Margin="5"/>
         </Grid>
 
-        <StackPanel Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Top">
-            <Border Width="150" Height="150" CornerRadius="10" BorderBrush="#4D5B7C" BorderThickness="1" Background="#1F2A44" Margin="0,5,0,0">
-                <fa:IconImage Icon="Image" Foreground="#4D5B7C" Width="60" Height="60"/>
-            </Border>
-            <Button Content="Cambiar logo" Style="{StaticResource ActionButtonStyle}" Margin="0,15,0,0" Width="150"/>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button Content="Guardar" Style="{StaticResource DarkActionButtonStyle}" Command="{Binding GuardarCommand}" Width="100"/>
+            <Button Content="Cancelar" Style="{StaticResource DarkActionButtonStyle}" Command="{Binding CancelarCommand}" Width="100" Margin="10,0,0,0"/>
         </StackPanel>
-    </Grid>
+    </StackPanel>
 </UserControl>

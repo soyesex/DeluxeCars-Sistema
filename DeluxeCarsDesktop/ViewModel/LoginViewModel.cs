@@ -18,164 +18,100 @@ namespace DeluxeCarsDesktop.ViewModel
 {
     public class LoginViewModel : ViewModelBase
     {
-        //Fields
-        private string _username;
-        private SecureString _password;
-        private string _errorMessage;
-        private bool _isViewVisible = true;
-        public event Action LoginSuccess;
-
+        // --- Dependencias ---
+        private readonly IUnitOfWork _unitOfWork; // <-- CAMBIO: Ahora usamos UnitOfWork
         private readonly IServiceProvider _serviceProvider;
 
-        private IUsuarioRepository _usuarioRepository;
+        // --- Propiedades para Binding ---
+        private string _username;
+        public string Username { get => _username; set => SetProperty(ref _username, value); }
 
-        //properties
-        public string Username
-        {
-            get => _username;
-            set
-            {
-                _username = value;
-                OnPropertyChanged(nameof(Username));  // 👈 aquí
-            }
-        }
-        public SecureString Password
-        {
-            get
-            {
-                return _password;
-            }
-            set
-            {
-                _password = value;
-                OnPropertyChanged(nameof(Password));
-            }
-        }
-        public string ErrorMessage
-        {
-            get
-            {
-                return _errorMessage;
-            }
-            set
-            {
-                _errorMessage = value;
-                OnPropertyChanged(nameof(ErrorMessage));
-            }
-        }
-        public bool IsViewVisible
-        {
-            get
-            {
-                return _isViewVisible;
-            }
-            set
-            {
-                _isViewVisible = value;
-                OnPropertyChanged(nameof(IsViewVisible));
-            }
-        }
+        private SecureString _password;
+        public SecureString Password { get => _password; set => SetProperty(ref _password, value); }
 
-        // commands
+        private string _errorMessage;
+        public string ErrorMessage { get => _errorMessage; set => SetProperty(ref _errorMessage, value); }
+
+        private bool _isViewVisible = true;
+        public bool IsViewVisible { get => _isViewVisible; set => SetProperty(ref _isViewVisible, value); }
+
+        // --- Eventos y Comandos ---
+        public event Action LoginSuccess;
         public ICommand LoginCommand { get; }
         public ICommand RecoverPasswordCommand { get; }
-        public ICommand ShowPasswordCommand { get; }
-        public ICommand RememberPasswordCommand { get; }
         public ICommand ShowRegisterViewCommand { get; }
-        public LoginViewModel(IUsuarioRepository usuarioRepository, IServiceProvider serviceProvider)
+
+        // --- Constructor (CAMBIO EN LA FIRMA) ---
+        public LoginViewModel(IUnitOfWork unitOfWork, IServiceProvider serviceProvider)
         {
-            _usuarioRepository = usuarioRepository;
+            _unitOfWork = unitOfWork;
+            _serviceProvider = serviceProvider;
+
             LoginCommand = new ViewModelCommand(ExecuteLoginCommand, CanExecuteLoginCommand);
             RecoverPasswordCommand = new ViewModelCommand(ExecuteRecoverPassCommand);
             ShowRegisterViewCommand = new ViewModelCommand(ExecuteShowRegisterView);
-            _serviceProvider = serviceProvider;
         }
+
+        private bool CanExecuteLoginCommand(object obj)
+        {
+            return !string.IsNullOrWhiteSpace(Username) && Password != null && Password.Length > 0;
+        }
+
+        private async void ExecuteLoginCommand(object obj)
+        {
+            ErrorMessage = ""; // Limpiar error
+            try
+            {
+                // CAMBIO: Usamos el repositorio a través del UnitOfWork
+                var authenticatedUser = await _unitOfWork.Usuarios.AuthenticateUser(Username, new NetworkCredential(string.Empty, Password).Password);
+
+                if (authenticatedUser != null && authenticatedUser.Activo)
+                {
+                    // Guardar el nombre de usuario para sesión persistente
+                    Properties.Settings.Default.SavedUsername = Username;
+                    Properties.Settings.Default.Save();
+
+                    // Establecer identidad para el hilo actual
+                    Thread.CurrentPrincipal = new GenericPrincipal(new GenericIdentity(Username), null);
+
+                    // Lanzar el evento para que App.xaml.cs muestre el MainView
+                    LoginSuccess?.Invoke();
+                }
+                else if (authenticatedUser != null && !authenticatedUser.Activo)
+                {
+                    ErrorMessage = "❌ Este usuario ha sido desactivado.";
+                }
+                else
+                {
+                    ErrorMessage = "❌ Email o contraseña inválidos.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Error al iniciar sesión: {ex.Message}";
+            }
+        }
+
+        private void ExecuteRecoverPassCommand(object obj)
+        {
+            // La lógica para la recuperación de contraseña iría aquí.
+            ErrorMessage = "Funcionalidad de recuperar contraseña no implementada.";
+        }
+
         private void ExecuteShowRegisterView(object obj)
         {
+            // Esta lógica para mostrar la vista de registro está bien.
             var registerView = _serviceProvider.GetService<RegistroView>();
-
             var registerViewModel = registerView.DataContext as RegistroViewModel;
 
-            if(registerViewModel != null)
+            if (registerViewModel != null)
             {
                 registerViewModel.RegistrationCancelled += () =>
                 {
                     registerView.Close();
                 };
             }
-
             registerView.ShowDialog();
-        }
-        private void ExecuteRecoverPassCommand(object obj)
-        {
-            // 1) Instanciamos la ventana de recuperación
-            //var recoverWindow = new DeluxeCarsUI.View.RecoverPasswordView();
-
-            //// 2) La mostramos como diálogo (modal) para que el usuario ingrese datos
-            //recoverWindow.Owner = Application.Current.Windows
-            //                         .OfType<LoginView>()
-            //                         .FirstOrDefault(); // que quede centrada respecto al LoginView
-            //recoverWindow.ShowDialog();
-        }
-
-        private bool CanExecuteLoginCommand(object obj)
-        {
-            bool validData;
-            if (string.IsNullOrWhiteSpace(Username) || Username.Length < 3 ||
-                Password == null || Password.Length < 3)
-                validData = false;
-            else
-                validData = true;
-            return validData;
-
-        }
-        // La lógica de Login se vuelve asíncrona y usa el nuevo repositorio
-        private async void ExecuteLoginCommand(object obj)
-        {
-            ErrorMessage = ""; // Limpiar error
-            try
-            {
-                // Usamos el metodo que devuelven un objeto Usuario, no un bool
-                var authenticatedUser = await _usuarioRepository.AuthenticateUser(Username, Password.Unsecure());
-
-                if (authenticatedUser != null)
-                {
-                    // Si el método devuelve un objeto Usuario, significa que el login fue exitoso.
-                    // ...lógica de éxito...
-                    // Establecer identidad para el hilo actual
-                    Thread.CurrentPrincipal = new GenericPrincipal(
-                        new GenericIdentity(Username), null);
-
-                    // Guardar el nombre de usuario en Settings para sesion persistente
-                    Properties.Settings.Default.SavedUsername = Username;
-                    Properties.Settings.Default.Save();
-
-                    // Ocultar la vista de login (dispara el evento en App.xaml.cs)
-                    LoginSuccess?.Invoke();
-                }
-                else
-                {
-                    // Si devuelve null, significa que el email o la contraseña eran incorrectos.
-                    ErrorMessage = "Email o contraseña inválido.";
-                }
-
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage = $"Error al iniciar sesión: {ex.Message}";
-                return;
-            }
-
-
-            //var isValidUser = userRepository.AuthenticateUser(new NetworkCredential(Username, Password));
-            //if (isValidUser)
-            //{
-            //    
-            //}
-            //else
-            //{
-            //    ErrorMessage = "Nombre de usuario o contraseña invalido";
-            //}
         }
     }
 }

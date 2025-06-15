@@ -10,44 +10,12 @@ using System.Threading.Tasks;
 
 namespace DeluxeCarsDesktop.Repositories
 {
-    public class RolesRepository : IRolesRepository
+    public class RolesRepository : GenericRepository<Rol>, IRolesRepository
     {
         private readonly AppDbContext _context;
 
-        public RolesRepository(AppDbContext context)
-        {
-            _context = context;
-        }
+        public RolesRepository(AppDbContext context) : base(context)
+        { }
 
-        public async Task<IEnumerable<Roles>> GetAllAsync()
-        {
-            // 1. 'await' pausa la ejecución del método aquí, sin bloquear la aplicación.
-            // 2. Cuando la base de datos responde, la ejecución continúa.
-            // 3. El resultado de ToListAsync() se asigna a la variable 'roles'.
-            var roles = await _context.Roles.ToListAsync();
-
-            // 4. Simplemente retornas la lista. El compilador se encarga de envolverla en una Task.
-            return roles;
-        }
-
-        public Task<Roles> GetByIdAsync(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task AddAsync(Roles entity)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task UpdateAsync(Roles entity)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task RemoveAsync(Roles entity)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

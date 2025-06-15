@@ -21,6 +21,13 @@ namespace DeluxeCarsDesktop.Repositories
         {
             _context = context;
         }
+        public async Task<IEnumerable<Usuario>> GetAllWithRolAsync()
+        {
+            return await _context.Usuarios
+                                 .Include(u => u.Rol)
+                                 .AsNoTracking()
+                                 .ToListAsync();
+        }
 
         public bool RecoverPassword(string usernameOrEmail)
         {
@@ -39,28 +46,27 @@ namespace DeluxeCarsDesktop.Repositories
 
         public async Task<Usuario> RegisterUser(Usuario newUser, string password)
         {
-            // 1. Verificar si el email ya está en uso.
+            // 1. Verificar si el email ya está en uso. (Perfecto)
             if (await _context.Usuarios.AnyAsync(u => u.Email == newUser.Email))
             {
-                // Lanzamos una excepción que será capturada por el ViewModel.
                 throw new InvalidOperationException("El correo electrónico ya está registrado.");
             }
 
-            // 2. Crear el hash y la sal de la contraseña usando nuestro helper.
+            // 2. Crear el hash y la sal de la contraseña. (Perfecto)
             PasswordHelper.CreatePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
 
-            // 3. Asignar los valores al objeto de usuario.
+            // 3. Asignar los valores al objeto de usuario. (Perfecto)
             newUser.PasswordHash = passwordHash;
             newUser.PasswordSalt = passwordSalt;
-            newUser.Activo = true; // Los usuarios nuevos deben estar activos por defecto.
+            newUser.Activo = true;
 
-            // 4. Añadir el nuevo usuario al contexto de Entity Framework.
-            _context.Usuarios.Add(newUser);
+            // 4. Añadir el nuevo usuario al contexto de Entity Framework. (Perfecto)
+            await _context.Usuarios.AddAsync(newUser); // Se usa await aquí porque AddAsync devuelve un ValueTask
 
-            // 5. Guardar los cambios en la base de datos.
-            await _context.SaveChangesAsync();
+            // 5. --- LÍNEA ELIMINADA ---
+            // await _context.SaveChangesAsync(); // Se quita esta línea. El UnitOfWork se encargará de guardar.
 
-            // 6. Devolver el objeto de usuario (ahora con su Id asignado por la BD).
+            // 6. Devolver el objeto de usuario preparado. (Perfecto)
             return newUser;
         }
 
@@ -90,35 +96,27 @@ namespace DeluxeCarsDesktop.Repositories
             // 4. ¡Autenticación exitosa! Devolvemos el objeto de usuario completo.
             return user;
         }
-
-        public async Task<Usuario> GetUserByEmail(string email)
+        public async Task<Usuario> GetByIdAsync(int id) => await _context.Usuarios.FindAsync(id);
+        public async Task<IEnumerable<Usuario>> GetAllAsync() => await _context.Usuarios.Include(u => u.Rol).AsNoTracking().ToListAsync();
+        public async Task<Usuario> GetUserByEmail(string email) => await _context.Usuarios.Include(u => u.Rol).FirstOrDefaultAsync(u => u.Email == email);
+        
+        public Task UpdateAsync(Usuario user)
         {
-            return await _context.Usuarios
-                          .Include(u => u.Rol)
-                          .FirstOrDefaultAsync(u => u.Email == email);
+            _context.Usuarios.Update(user);
+            return Task.CompletedTask;
+        }
+
+        public async Task DeactivateAsync(int id)
+        {
+            var user = await GetByIdAsync(id);
+            if (user != null)
+            {
+                user.Activo = false;
+                _context.Usuarios.Update(user);
+            }
         }
 
         public Task<bool> ChangePassword(int userId, string oldPassword, string newPassword)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Usuario> GetByIdAsync(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<Usuario>> GetAllAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task UpdateAsync(Usuario user)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task DeactivateAsync(int id)
         {
             throw new NotImplementedException();
         }

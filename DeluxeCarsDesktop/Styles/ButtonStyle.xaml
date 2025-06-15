@@ -15,11 +15,148 @@
     <SolidColorBrush x:Key="ButtonDestructiveHover" Color="#D93A3A"/>
     <SolidColorBrush x:Key="ButtonDisabledBackground" Color="#2D3748"/>
     <SolidColorBrush x:Key="ButtonDisabledForeground" Color="#6A7383"/>
+    
 
-    <Style x:Key="DarkComboBoxItemStyle" TargetType="ComboBoxItem">
-        <Setter Property="Padding" Value="12,10"/>
+    <Color x:Key="Color.WinBorder1">#8A2BE2</Color>
+    <Color x:Key="Color.WinBorder2">#ADFF2F</Color>
+    <Color x:Key="Color.WinBorder3">#FFD700</Color>
+    <Color x:Key="Color.PrimaryBack1">#1C2630</Color>
+    <Color x:Key="Color.PrimaryBack2">#080C0F</Color>
+
+    <SolidColorBrush x:Key="TextPrimaryColor" Color="#E0E0E0"/>
+    <SolidColorBrush x:Key="TextSecondaryColor" Color="#A9A9A9"/>
+    <SolidColorBrush x:Key="TextErrorColor" Color="#D7596D"/>
+
+    <Style x:Key="CardDescriptionStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Opacity" Value="0.7"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+        <Setter Property="TextAlignment" Value="Center"/>
+        <Setter Property="Margin" Value="0,10,0,0"/>
+    </Style>
+
+    <Style x:Key="ReportCardStyle" TargetType="ListBoxItem">
+        <Setter Property="Background" Value="{StaticResource secundaryBackColor1}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource PrimaryBorderColor}"/>
+        <Setter Property="Foreground" Value="{StaticResource PrimaryTextColor}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Margin" Value="5"/>
+        <Setter Property="Padding" Value="15"/>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                    <Border x:Name="border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="15"
+                            SnapsToDevicePixels="True">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}" 
+                                          Margin="{TemplateBinding Padding}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource HighlightBorderColor}"/>
+                            <Setter TargetName="border" Property="Background" Value="{StaticResource secundaryBackColor2}"/>
+                        </Trigger>
+
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource HighlightBorderColor}"/>
+                            <Setter TargetName="border" Property="BorderThickness" Value="2"/>
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="CardTitleStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="18"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource PrimaryTextColor}"/>
+        <Setter Property="Margin" Value="0,0,0,10"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+    </Style>
+
+    <Style x:Key="CardButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource secundaryBackColor1}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource PrimaryBorderColor}"/>
+        <Setter Property="Foreground" Value="{StaticResource PrimaryTextColor}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="20"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="border"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="15"
+                        SnapsToDevicePixels="True">
+                        <Viewbox Stretch="Uniform">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10" />
+                        </Viewbox>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource HighlightBorderColor}"/>
+                            <Setter TargetName="border" Property="Background" Value="{StaticResource secundaryBackColor2}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="{StaticResource primaryBackColor2}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    
+    <Style x:Key="DarkDatePickerStyle" TargetType="DatePicker">
+        <Setter Property="Background" Value="{StaticResource PrimaryBackgroundColor}"/>
+        <Setter Property="Foreground" Value="{StaticResource PrimaryBackgroundColor}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource PrimaryBorderColor}"/>
+        <Setter Property="FontFamily" Value="Montserrat"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="Padding" Value="10,0"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="BorderBrush" Value="{StaticResource HighlightBorderColor}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    
+    <Style x:Key="DarkLableForm" TargetType="Label">
+        <Setter Property="Foreground" Value="{StaticResource PrimaryTextColor}"/>
+        <Setter Property="FontFamily" Value="Montserrat"/>
+        <Setter Property="FontSize" Value="14"/>
+    </Style>
+
+    <Style x:Key="DarkComboBoxRegisterItem" TargetType="ComboBoxItem">
+        
+    </Style>
+
+
+        <Style x:Key="DarkComboBoxItemStyle" TargetType="ComboBoxItem">
+        <Setter Property="Padding" Value="10,10"/>
+        <Setter Property="Margin" Value="0 0 0 0"/>
         <Setter Property="Background" Value="{StaticResource ButtonDisabledBackground}"/>
         <Setter Property="Foreground" Value="{DynamicResource ButtonDisabledForeground}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBorderColor}"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="FontFamily" Value="Montserrat"/>
+
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -52,6 +189,7 @@
     <Style x:Key="DarkComboBoxStyle" TargetType="ComboBox">
         <!-- Propiedades base del ComboBox -->
         <Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
+        <Setter Property="FontFamily" Value="Montserrat"/>
         <Setter Property="Background" Value="{DynamicResource PrimaryBackgroundColor}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBorderColor}"/>
         <Setter Property="BorderThickness" Value="1"/>
@@ -215,6 +353,7 @@
         <Setter Property="Background" Value="#1F2A44" />
         <Setter Property="Foreground" Value="#E0E6F1" />
         <Setter Property="BorderBrush" Value="#4D5B7C" />
+        <Setter Property="FontFamily" Value="Montserrat"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Height" Value="40"/>
         <Setter Property="Padding" Value="10,0"/>
@@ -304,7 +443,7 @@
         <Setter Property="Background" Value="Transparent"/>
 
         <!-- Este recurso 'titleColor1' ya es un Brush, así que está bien. -->
-        <Setter Property="Foreground" Value="{StaticResource titleColor1}"/>
+        <Setter Property="Foreground" Value="{StaticResource titleColor2}"/>
 
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="GridLinesVisibility" Value="Horizontal"/>
@@ -312,7 +451,7 @@
         <!-- CORRECCIÓN #1: Creamos el Brush inline usando el recurso de Color. -->
         <Setter Property="HorizontalGridLinesBrush">
             <Setter.Value>
-                <SolidColorBrush Color="{StaticResource secundaryBackColor3}"/>
+                <SolidColorBrush Color="{StaticResource Color.SecundaryBack2}"/>
             </Setter.Value>
         </Setter>
 
@@ -339,7 +478,7 @@
                     <!-- CORRECCIÓN #2: Creamos el Brush inline. -->
                     <Setter Property="BorderBrush">
                         <Setter.Value>
-                            <SolidColorBrush Color="{StaticResource winBorderColor2}"/>
+                            <SolidColorBrush Color="{StaticResource Color.WinBorder2}"/>
                         </Setter.Value>
                     </Setter>
                 </Style>
@@ -357,7 +496,7 @@
                             <!-- CORRECCIÓN #3: Creamos el Brush inline para el hover. -->
                             <Setter Property="Background">
                                 <Setter.Value>
-                                    <SolidColorBrush Color="{StaticResource secundaryBackColor2}"/>
+                                    <SolidColorBrush Color="{StaticResource Color.SecundaryBack2}"/>
                                 </Setter.Value>
                             </Setter>
                         </Trigger>
@@ -400,7 +539,7 @@
         <Setter Property="AlternatingRowBackground" >
             <Setter.Value>
                 <!-- CORRECCIÓN #4: Creamos el Brush inline para la fila alterna. -->
-                <SolidColorBrush Color="{StaticResource secundaryBackColor1}" Opacity="0.5"/>
+                <SolidColorBrush Color="{StaticResource Color.SecundaryBack1}" Opacity="0.5"/>
             </Setter.Value>
         </Setter>
     </Style>
@@ -617,7 +756,7 @@
                 <Setter Property="Height" Value="50"/>
                 <Setter Property="Margin" Value="0,0,0,5"/>
                 <Setter Property="Background" Value="{StaticResource panelOverColor}"/>
-                <Setter Property="Foreground" Value="{StaticResource titleColor3}"/>
+                <Setter Property="Foreground" Value="#C8C8C8"/>
                 <Setter Property="BorderBrush" Value="{Binding Path=Tag, RelativeSource={RelativeSource Self}}"/>
             </Trigger>
 

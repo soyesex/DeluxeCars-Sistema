@@ -4,122 +4,87 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
-             mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="1000"
              xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
-             Background="Transparent"
-             FontFamily="Montserrat"
-             Foreground="#E0E6F1">
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="1000">
 
-    <UserControl.Resources>
-        <Style x:Key="ReportCardStyle" TargetType="RadioButton">
-            <Setter Property="Background" Value="#1F2A44"/>
-            <Setter Property="BorderBrush" Value="#4D5B7C"/>
-            <Setter Property="Foreground" Value="#E0E6F1"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="25"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="RadioButton">
-                        <Border x:Name="border"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="15"
-                                SnapsToDevicePixels="True">
-                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="#28AEED"/>
-                                <Setter TargetName="border" Property="Background" Value="#2C3A5A"/>
-                            </Trigger>
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="#00BFFF"/>
-                                <Setter TargetName="border" Property="BorderThickness" Value="2"/>
-                                <Setter Property="Foreground" Value="White"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" MinWidth="280"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-        <Style x:Key="CardTitleStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="20"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="HorizontalAlignment" Value="Center"/>
-        </Style>
-        <Style x:Key="CardDescriptionStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="Opacity" Value="0.7"/>
-            <Setter Property="TextWrapping" Value="Wrap"/>
-            <Setter Property="TextAlignment" Value="Center"/>
-            <Setter Property="Margin" Value="0,10,0,0"/>
-        </Style>
+        <Border Grid.Column="0" Background="{StaticResource secundaryBackColor1}" CornerRadius="10,0,0,10">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
 
-        <Style x:Key="ExportButtonStyle" TargetType="Button" BasedOn="{StaticResource ReportCardStyle}">
-            <Setter Property="Width" Value="200"/>
-            <Setter Property="Height" Value="50"/>
-        </Style>
+                <ListBox ItemsSource="{Binding AvailableReports}" 
+                         SelectedItem="{Binding SelectedReport, Mode=TwoWay}"
+                         Background="Transparent" 
+                         BorderThickness="0"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
-    </UserControl.Resources>
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="1" Margin="10"/>
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
 
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border Margin="5">
+                                <!--Style="{StaticResource ReportCardStyle}"-->
+                                <StackPanel MinWidth="200">
+                                    <fa:IconImage Icon="{Binding Icon}" Height="32" Width="32" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                                    <TextBlock Text="{Binding Title}" Style="{StaticResource CardTitleStyle}"/>
+                                    <TextBlock Text="{Binding Description}" Style="{StaticResource CardDescriptionStyle}"/>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
 
-        <TextBlock Grid.Row="0"
-                   Text="Reportes"
-                   FontSize="28"
-                   FontWeight="Bold"
-                   HorizontalAlignment="Center"
-                   Margin="0,0,0,30"/>
+                    <!--<ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <ContentPresenter/>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>-->
 
-        <UniformGrid Grid.Row="1" Columns="3" Rows="2" VerticalAlignment="Center">
-            <RadioButton Style="{StaticResource ReportCardStyle}" Margin="15" IsChecked="True">
-                <StackPanel>
-                    <TextBlock Text="Inventario Actual" Style="{StaticResource CardTitleStyle}"/>
-                    <TextBlock Text="Visualice el stock actual de todos los productos." Style="{StaticResource CardDescriptionStyle}"/>
+                </ListBox>
+            </ScrollViewer>
+        </Border>
+
+        <Grid Grid.Column="1" Margin="15">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" BorderBrush="#4D5B7C" BorderThickness="0,0,0,1" Padding="5" Margin="0,0,0,10">
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Desde:" Style="{StaticResource DarkLableForm}"/>
+                    <DatePicker SelectedDate="{Binding FechaInicio}" Style="{StaticResource DarkDatePickerStyle}" Margin="5,0"/>
+
+                    <Label Content="Hasta:" Style="{StaticResource DarkLableForm}" Margin="15,0,0,0"/>
+                    <DatePicker SelectedDate="{Binding FechaFin}" Style="{StaticResource DarkDatePickerStyle}" Margin="5,0"/>
+
+                    <Button Content="Generar Reporte" Command="{Binding GenerarReporteCommand}" 
+                            Style="{StaticResource DarkActionButtonStyle}" Margin="20,0"/>
                 </StackPanel>
-            </RadioButton>
+            </Border>
 
-            <RadioButton Style="{StaticResource ReportCardStyle}" Margin="15">
-                <StackPanel>
-                    <TextBlock Text="Productos sin Movimiento" Style="{StaticResource CardTitleStyle}"/>
-                    <TextBlock Text="Identifique productos que no se han vendido en un período." Style="{StaticResource CardDescriptionStyle}"/>
-                </StackPanel>
-            </RadioButton>
-
-            <RadioButton Style="{StaticResource ReportCardStyle}" Margin="15">
-                <StackPanel>
-                    <TextBlock Text="Histórico Facturación" Style="{StaticResource CardTitleStyle}"/>
-                    <TextBlock Text="Consulte el historial completo de facturas emitidas." Style="{StaticResource CardDescriptionStyle}"/>
-                </StackPanel>
-            </RadioButton>
-
-            <RadioButton Style="{StaticResource ReportCardStyle}" Margin="15">
-                <StackPanel>
-                    <TextBlock Text="Ventas por Cliente" Style="{StaticResource CardTitleStyle}"/>
-                    <TextBlock Text="Analice el total de ventas para cada cliente." Style="{StaticResource CardDescriptionStyle}"/>
-                </StackPanel>
-            </RadioButton>
-
-            <RadioButton Style="{StaticResource ReportCardStyle}" Margin="15">
-                <StackPanel>
-                    <TextBlock Text="Compras a Proveedores" Style="{StaticResource CardTitleStyle}"/>
-                    <TextBlock Text="Revise el historial de compras realizadas a proveedores." Style="{StaticResource CardDescriptionStyle}"/>
-                </StackPanel>
-            </RadioButton>
-        </UniformGrid>
-
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,30,0,0">
-            <Button Content="Exportar Excel"  Margin="0,0,20,0"/>
-            <Button Content="Exportar PDF" />
-        </StackPanel>
+            <Border Grid.Row="1" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" 
+                    BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
+                <DataGrid ItemsSource="{Binding ReportResults}"
+                          Style="{StaticResource ElegantDataGridStyle}"
+                          CanUserAddRows="False" 
+                          AutoGenerateColumns="True"
+                          IsReadOnly="True"/>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>

@@ -5,99 +5,53 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
              xmlns:viewModel="clr-namespace:DeluxeCarsDesktop.ViewModel"
-             mc:Ignorable="d" 
-             d:DesignHeight="550" d:DesignWidth="900"
-             xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
-             Background="Transparent"
-             FontFamily="Montserrat">
-
-    <Grid Margin="15">
+             mc:Ignorable="d"  
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
         <Grid.RowDefinitions>
-            <!-- CORRECCIÓN 1: Se definen 3 filas para una mejor organización -->
-            <RowDefinition Height="Auto" />
-            <!-- Fila 1: Búsqueda y Filtros -->
-            <RowDefinition Height="Auto" />
-            <!-- Fila 2: Botones de Acción -->
-            <RowDefinition Height="*" />
-            <!-- Fila 3: DataGrid -->
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Panel de Búsqueda y Filtros (Fila 0) -->
-        <Grid Grid.Row="0" Margin="5,5,5,10">
-            <StackPanel Orientation="Horizontal">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" 
+                      Style="{StaticResource SearchBoxStyle}" 
+                     Width="200" VerticalAlignment="Center"
+                     Tag="Buscar por nombre u OEM..."/>
 
-                <!-- TextBox para búsqueda por nombre -->
-                <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                         Style="{StaticResource SearchBoxStyle}" 
-                         Tag="Buscar productos..." 
-                         Width="300"/>
+            <ComboBox ItemsSource="{Binding CategoriasDisponibles}"
+                      SelectedItem="{Binding CategoriaFiltroSeleccionada}"
+                      Style="{StaticResource DarkComboBoxStyle}"
+                      DisplayMemberPath="Nombre"
+                      Width="200" Margin="10,0,0,0" VerticalAlignment="Center"/>
 
-                <!-- ComboBox para filtrar por categoría -->
-                <ComboBox Margin="15,0,0,0" 
-                          Width="200"
-                          Style="{StaticResource DarkComboBoxStyle}"
-                          ItemsSource="{Binding CategoriasDisponibles}"
-                          SelectedItem="{Binding CategoriaFiltroSeleccionada}"
-                          DisplayMemberPath="Nombre" />
-            </StackPanel>
-        </Grid>
+            <Button Content="Nuevo Producto" Style="{StaticResource DarkActionButtonStyle}" 
+                    Command="{Binding NuevoProductoCommand}" Margin="20,0,0,0" VerticalAlignment="Center"/>
 
-        <!-- Panel de Botones de Acción (Fila 1) -->
-        <Grid Grid.Row="1" Margin="5,0,5,15">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Editar" Style="{StaticResource DarkActionButtonStyle}" 
+                    Command="{Binding EditarProductoCommand}" Margin="10,0,0,0" VerticalAlignment="Center"/>
+            
+            <Button Content="Eliminar" Style="{StaticResource DarkActionButtonStyle}" 
+                    Command="{Binding EliminarProductoCommand}" Margin="10,0,0,0" VerticalAlignment="Center"/>
+        </StackPanel>
 
-                <Button Content="Categorías"
-                        Command="{Binding ShowCategoriaViewCommand}"
-                        Style="{StaticResource DarkActionButtonStyle}" 
-                        Margin="0,0,10,0"/>
-
-                <Button Content="Añadir"
-                        Command="{Binding NuevoProductoCommand}"
-                        Style="{StaticResource DarkActionButtonStyle}" 
-                        Margin="0,0,10,0"/>
-
-                <Button Content="Editar" 
-                        Command="{Binding EditarProductoCommand}"
-                        Style="{StaticResource DarkActionButtonStyle}" 
-                        Margin="0,0,10,0"/>
-
-                <Button Content="Eliminar" 
-                        Command="{Binding EliminarProductoCommand}"
-                        Style="{StaticResource DarkActionButtonStyle}"/>
-            </StackPanel>
-        </Grid>
-
-        <!-- DataGrid (Fila 2) -->
-        <Border Grid.Row="2" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" 
-                BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
-            <DataGrid x:Name="ProductosDataGrid"
-                      ItemsSource="{Binding Productos}" 
+        <Border Grid.Row="1" CornerRadius="10" 
+                Background="{StaticResource PrimaryBackgroundColor}" 
+                 BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
+            <DataGrid ItemsSource="{Binding Productos}"
                       SelectedItem="{Binding ProductoSeleccionado}"
                       Style="{StaticResource ElegantDataGridStyle}"
-                      AutoGenerateColumns="False" 
-                      IsReadOnly="True"
-                      ScrollViewer.CanContentScroll="True"
-                      ScrollViewer.VerticalScrollBarVisibility="Auto"
-                      ScrollViewer.HorizontalScrollBarVisibility="Auto">
-
+                      CanUserAddRows="False"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Id" Binding="{Binding Id}" Width="SizeToHeader"/>
-                    <DataGridTextColumn Header="Código OEM" Binding="{Binding OriginalEquipamentManufacture}" Width="Auto"/>
+                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
                     <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="*"/>
-                    <DataGridTextColumn Header="Precio" Binding="{Binding Precio, StringFormat=C, ConverterCulture=es-CO}" Width="Auto"/>
-                    <DataGridTextColumn Header="Stock" Binding="{Binding Stock}" Width="Auto"/>
-
-                    <DataGridTemplateColumn Header="Descripción" Width="2*">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Descripcion}" TextWrapping="Wrap" VerticalAlignment="Center" Padding="5"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-
-                    <DataGridTextColumn Header="Estado" Binding="{Binding Estado}" Width="Auto"/>
-                    <DataGridTextColumn Header="Costo" Binding="{Binding CostoUnitario, StringFormat=C, ConverterCulture=es-CO}" Width="Auto"/>
-                    <DataGridTextColumn Header="Fecha Ingreso" Binding="{Binding FechaIngreso, StringFormat=d}" Width="Auto"/>
+                    <DataGridTextColumn Header="OEM" Binding="{Binding OriginalEquipamentManufacture}" Width="120"/>
+                    <DataGridTextColumn Header="ID Categoría" Binding="{Binding IdCategoria}" Width="150"/>
+                    <DataGridTextColumn Header="Precio" Binding="{Binding Precio, StringFormat=C, ConverterCulture=es-CO}" Width="100"/>
+                    <DataGridTextColumn Header="Stock" Binding="{Binding Stock}" Width="70"/>
+                    <DataGridCheckBoxColumn Header="Activo" Binding="{Binding Estado}" Width="70"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>

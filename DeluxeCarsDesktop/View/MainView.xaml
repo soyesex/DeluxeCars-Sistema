@@ -10,13 +10,15 @@
         mc:Ignorable="d" 
         xmlns:utils="clr-namespace:DeluxeCarsDesktop.Utils"
         x:Name="MainViewWindow"
-        Title="MainWindowView" Height="700" Width="1200"
+        Title="Deluxe Cars" Height="720 " Width="1200"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         Background="Transparent"
         xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
         AllowsTransparency="True">
     <Window.Resources>
+
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibility"/>
 
         <utils:BindingProxy x:Key="Proxy" Data="{Binding}"/>
         
@@ -44,6 +46,10 @@
             <userControl:FacturacionUserControl/>
         </DataTemplate>
 
+        <DataTemplate DataType="{x:Type viewModel:FacturasHistorialViewModel}">
+            <userControl:FacturasHistorialUserControl/>
+        </DataTemplate>
+
         <DataTemplate DataType="{x:Type viewModel:ReportesViewModel}">
             <userControl:ReportesUserControl/>
         </DataTemplate>
@@ -68,9 +74,9 @@
 
         <Border.BorderBrush>
             <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                <GradientStop Color="{StaticResource winBorderColor1}" Offset="0"/>
-                <GradientStop Color="{StaticResource winBorderColor2}" Offset="0.75"/>
-                <GradientStop Color="{StaticResource winBorderColor3}" Offset="1"/>
+                <GradientStop Color="{StaticResource Color.WinBorder1}" Offset="0"/>
+                <GradientStop Color="{StaticResource Color.WinBorder2}" Offset="0.75"/>
+                <GradientStop Color="{StaticResource Color.WinBorder3}" Offset="1"/>
             </LinearGradientBrush>
         </Border.BorderBrush>
 
@@ -88,8 +94,8 @@
                     Grid.Column="0">
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,0.7">
-                        <GradientStop Color="{StaticResource secundaryBackColor1}" Offset="0"/>
-                        <GradientStop Color="{StaticResource secundaryBackColor2}" Offset="1"/>
+                        <GradientStop Color="{StaticResource Color.SecundaryBack1}" Offset="0"/>
+                        <GradientStop Color="{StaticResource Color.SecundaryBack2}" Offset="1"/>
                     </LinearGradientBrush>
                 </Border.Background>
 
@@ -169,22 +175,30 @@
                                  Margin="0,0,0,5">
                                 <StackPanel Orientation="Horizontal">
                                     <fa:IconImage Icon="ShoppingCart" Style="{StaticResource menuButtonIcon}"/>
-                                    <TextBlock Text="Compras" Style="{StaticResource menuButtonText}"/>
+                                    <TextBlock Text="Pedidos" Style="{StaticResource menuButtonText}"/>
                                 </StackPanel>
                             </RadioButton>
 
                             <RadioButton Style="{StaticResource menuButton1}"
-                                 Tag="{StaticResource color7}"
-                                 Command="{Binding ShowFacturacionViewCommand}"
-                                 Margin="0,0,0,5">
+                                         Tag="{StaticResource color7}"
+                                         Command="{Binding ShowPuntoDeVentaCommand}">   
                                 <StackPanel Orientation="Horizontal">
-                                    <fa:IconImage Icon="FileInvoiceDollar" Style="{StaticResource menuButtonIcon}"/>
+                                    <fa:IconImage Icon="CashRegister" Style="{StaticResource menuButtonIcon}"/>
                                     <TextBlock Text="Facturación" Style="{StaticResource menuButtonText}"/>
                                 </StackPanel>
                             </RadioButton>
 
                             <RadioButton Style="{StaticResource menuButton1}"
-                                 Tag="{StaticResource color8}"
+                                         Tag="{StaticResource color8}"
+                                         Command="{Binding ShowHistorialVentasCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <fa:IconImage Icon="History" Style="{StaticResource menuButtonIcon}"/>
+                                    <TextBlock Text="Historial de Ventas" Style="{StaticResource menuButtonText}"/>
+                                </StackPanel>
+                            </RadioButton>
+
+                            <RadioButton Style="{StaticResource menuButton1}"
+                                 Tag="{StaticResource color9}"
                                  Command="{Binding ShowReportesViewCommand}"
                                  Margin="0,0,0,10">
                                 <StackPanel Orientation="Horizontal">
@@ -195,11 +209,11 @@
 
 
                             <RadioButton Style="{StaticResource menuButton1}"
-                                         Tag="{StaticResource secundaryBackColor2}"
+                                         Tag="{StaticResource color13}"
                                          Command="{Binding ShowRolViewCommand}"
                                          Margin="0,0,0,5">
                                 <StackPanel Orientation="Horizontal">
-                                    <fa:IconImage Icon="CriticalRole" Style="{StaticResource menuButtonIcon}"/>
+                                    <fa:IconImage Icon="UserShield" Style="{StaticResource menuButtonIcon}"/>
                                     <TextBlock Text="Roles" Style="{StaticResource menuButtonText}"/>
                                 </StackPanel>
                             </RadioButton>
@@ -215,9 +229,10 @@
                             </RadioButton>
 
                             <RadioButton Style="{StaticResource menuButton1}"
-                                         Tag="{StaticResource color9}"
+                                         Tag="{StaticResource color12}"
                                          Command="{Binding ShowConfiguracionViewCommand}"
-                                         Margin="0,0,0,5">
+                                         Visibility="{Binding IsAdmin, 
+                                                            Converter={StaticResource BooleanToVisibility}}">
                                 <StackPanel Orientation="Horizontal">
                                     <fa:IconImage Icon="Tools" Style="{StaticResource menuButtonIcon}"/>
                                     <TextBlock Text="Configuración" Style="{StaticResource menuButtonText}"/>
@@ -234,8 +249,8 @@
 
                 <Border.Background>
                     <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
-                        <GradientStop Color="{StaticResource primaryBackColor1}" Offset="0"/>
-                        <GradientStop Color="{StaticResource primaryBackColor2}" Offset="1"/>
+                        <GradientStop Color="{StaticResource Color.PrimaryBack1}" Offset="0"/>
+                        <GradientStop Color="{StaticResource Color.PrimaryBack2}" Offset="1"/>
                     </LinearGradientBrush>
                 </Border.Background>
 
@@ -328,7 +343,7 @@
                                     <ContextMenu Placement="Bottom" VerticalOffset="2"
                                                  DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
                                         <MenuItem Header="Cerrar sesión"
-                                          Command="{Binding Data.LogoutCommand, Source={StaticResource Proxy}}"
+                                          Command="{Binding LogoutCommand}"
                                           Style="{StaticResource menuItemBotton}">  
 
                                         </MenuItem>

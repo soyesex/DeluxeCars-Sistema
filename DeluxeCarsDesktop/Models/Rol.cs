@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DeluxeCarsDesktop.Models
 {
-    public class Roles
+    public class Rol
     {
         [Key]
         public int Id { get; set; }

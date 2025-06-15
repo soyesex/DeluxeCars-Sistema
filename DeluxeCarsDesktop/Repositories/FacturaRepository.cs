@@ -15,7 +15,15 @@ namespace DeluxeCarsDesktop.Repositories
         public FacturaRepository(AppDbContext context) : base(context)
         {
         }
-
+        public async Task<IEnumerable<Factura>> GetAllWithClienteYMetodoPagoAsync()
+        {
+            return await _context.Facturas
+                                 .Include(f => f.Cliente)
+                                 .Include(f => f.MetodoPago)
+                                 .AsNoTracking()
+                                 .OrderByDescending(f => f.FechaEmision)
+                                 .ToListAsync();
+        }
         public async Task<Factura> GetFacturaWithDetailsAsync(int facturaId)
         {
             return await _dbSet

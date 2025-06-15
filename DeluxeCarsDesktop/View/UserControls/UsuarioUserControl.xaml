@@ -5,59 +5,45 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800"
-             xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp">
-
+             d:DesignHeight="550" d:DesignWidth="900">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="Usuarios"
-                   Foreground="White"
-                   FontSize="25"
-                   FontWeight="Normal"
-                   VerticalAlignment="Center"
-                   HorizontalAlignment="Left"
-                   Grid.Row="0"
-                   Margin="20,20,20,10" />
+        <Grid Grid.Row="0" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
+            <TextBox Grid.Column="0" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" 
+                     Style="{StaticResource SearchBoxStyle}" Width="300" VerticalAlignment="Center"
+                     Tag="Buscar por nombre o email..."/>
 
-        <TextBox Grid.Row="1" Margin="20,0,20,15" Style="{StaticResource SearchBoxStyle}" 
-                         Tag="Buscar producto..." />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Nuevo Usuario" Command="{Binding NuevoUsuarioCommand}" Style="{StaticResource DarkActionButtonStyle}" Margin="10,0,0,0" Width="Auto" Padding="15,0"/>
+                <Button Content="Editar Usuario" Command="{Binding EditarUsuarioCommand}" Style="{StaticResource DarkActionButtonStyle}" Margin="10,0,0,0" Width="Auto" Padding="15,0"/>
+                <Button Content="Cambiar Contraseña" Command="{Binding CambiarPasswordCommand}" Style="{StaticResource DarkActionButtonStyle}" Margin="10,0,0,0" Width="Auto" Padding="15,0"/>
+                <Button Content="Activar/Desactivar" Command="{Binding ToggleEstadoCommand}" Style="{StaticResource DarkActionButtonStyle}" Margin="10,0,0,0" Width="Auto" Padding="15,0"/>
+            </StackPanel>
+        </Grid>
 
-        <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right" Margin="20,0,20,15">
-            <Button Content="Nuevo Usuario" 
-                    Command="{Binding ShowUsuarioFormCommand}"
-                    Style="{StaticResource DarkActionButtonStyle}"  Margin="0,0,10,0"/>
-
-            <Button Content="Cambiar contraseña"
-                    Command="{Binding ShowCambiarPasswordFormCommand}"
-                    Style="{StaticResource DarkActionButtonStyle}"  Width="150"/>
-        </StackPanel>
-
-        <Border Grid.Row="3" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" 
+        <Border Grid.Row="1" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" 
                 BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
-            <DataGrid x:Name="ProductsDataGrid"
-                      Style="{StaticResource ElegantDataGridStyle}"
-                      ItemsSource="{Binding Productos}">
-                <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="Imagen" Width="Auto">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Border CornerRadius="5" Width="40" Height="40" Margin="5">
-                                    <Border.Background>
-                                        <ImageBrush ImageSource="{Binding ImageUrl}" Stretch="UniformToFill"/>
-                                    </Border.Background>
-                                </Border>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
 
-                    <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="2*"/>
+            <DataGrid ItemsSource="{Binding Usuarios}"
+                      SelectedItem="{Binding UsuarioSeleccionado}"
+                      Style="{StaticResource ElegantDataGridStyle}"
+                      CanUserAddRows="False" AutoGenerateColumns="False" IsReadOnly="True">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
+                    <DataGridTextColumn Header="Nombre Completo" Binding="{Binding Nombre}" Width="2*"/>
+                    <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="2*"/>
+                    <DataGridTextColumn Header="Teléfono" Binding="{Binding Telefono}" Width="*"/>
+                    <DataGridTextColumn Header="Rol" Binding="{Binding Rol.Nombre}" Width="*"/>
+                    <DataGridCheckBoxColumn Header="Activo" Binding="{Binding Activo}" Width="Auto"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>

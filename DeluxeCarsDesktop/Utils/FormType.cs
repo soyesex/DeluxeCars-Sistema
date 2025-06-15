@@ -12,15 +12,17 @@ namespace DeluxeCarsDesktop.Utils
         Categoria,
         Cliente,
         Proveedor,
-        Departamentos,
+        Departamento,
         Municipio,
         Pedido,
         Factura,
         Servicio,
+        TipoServicio,
         MetodoPago,
         DetallesFactura,
         Rol,
         Usuario,
-        CambiarPassword
+        CambiarPassword,
+        GestionarProductosProveedor
     }
 }

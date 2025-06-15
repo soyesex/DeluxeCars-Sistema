@@ -9,6 +9,6 @@ namespace DeluxeCarsDesktop.Services
 {
     public interface INavigationService
     {
-       void OpenFormWindow(FormType formType);
+       Task OpenFormWindow(FormType formType, int entityId);
     }
 }

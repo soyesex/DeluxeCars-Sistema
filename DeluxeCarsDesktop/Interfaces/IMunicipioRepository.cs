@@ -9,5 +9,6 @@ namespace DeluxeCarsDesktop.Interfaces
 {
     public interface IMunicipioRepository : IGenericRepository<Municipio>
     {
+        Task<IEnumerable<Municipio>> GetAllWithDepartamentosAsync();
     }
 }

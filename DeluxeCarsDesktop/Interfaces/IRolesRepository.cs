@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DeluxeCarsDesktop.Interfaces
 {
-    public interface IRolesRepository : IGenericRepository<Roles>
+    public interface IRolesRepository : IGenericRepository<Rol>
     {
     }
 }

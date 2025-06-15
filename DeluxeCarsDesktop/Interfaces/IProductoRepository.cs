@@ -7,9 +7,13 @@ using System.Threading.Tasks;
 
 namespace DeluxeCarsDesktop.Interfaces
 {
-    public interface IProductoRepository : IGenericRepository<Producto> 
+    public interface IProductoRepository : IGenericRepository<Producto>
     {
-        /// Obtiene una lista de productos cuyo stock está por debajo de un umbral específico.
+        // Solo definimos los métodos que son únicos para este repositorio
+        Task<IEnumerable<Producto>> GetAllWithCategoriaAsync();
         Task<IEnumerable<Producto>> GetLowStockProductsAsync(int stockThreshold);
+        Task<IEnumerable<Producto>> SearchProductsBySupplierAsync(int proveedorId, string searchTerm);
+        Task<IEnumerable<Producto>> GetAssociatedProductsAsync(int proveedorId);
+        Task<IEnumerable<Producto>> GetUnassociatedProductsAsync(int proveedorId);
     }
 }

@@ -14,5 +14,14 @@ namespace DeluxeCarsDesktop.ViewModel
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+
+        // (Opcional pero recomendado) Helper en ViewModelBase para no repetir OnPropertyChanged
+        protected void SetProperty<T>(ref T field, T value, [System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value)) return;
+            field = value;
+            OnPropertyChanged(propertyName);
+        }
     }
 }

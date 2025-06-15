@@ -18,14 +18,14 @@ namespace DeluxeCarsDesktop.Models
         public int Stock { get; set; }
         public string Descripcion { get; set; }
         public bool Estado { get; set; }
-        public decimal? UltimoPrecioCompra { get; set; } // Nullable
-        public DateTime? FechaIngreso { get; set; } // Nullable
-        public string Lote { get; set; }
-        public string ImagenUrl { get; set; }
+        public decimal? UltimoPrecioCompra { get; set; }
+        public DateTime? FechaIngreso { get; set; }
+        public string? Lote { get; set; }
+        public string? ImagenUrl { get; set; }
 
-        // Navigation Properties
+        // Propiedades de navegación
         public virtual Categoria Categoria { get; set; }
-        public virtual ICollection<DetallePedido> DetallesPedidos { get; set; }
-        public virtual ICollection<ProductoProveedor> ProductoProveedores { get; set; }
+        public virtual ICollection<DetallePedido> DetallesPedidos { get; set; } = new HashSet<DetallePedido>();
+        public virtual ICollection<ProductoProveedor> ProductoProveedores { get; set; } = new HashSet<ProductoProveedor>();
     }
 }

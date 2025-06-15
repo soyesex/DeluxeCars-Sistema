@@ -5,149 +5,62 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
              mc:Ignorable="d" 
-             xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
-             Background="Transparent"
-             FontFamily="Montserrat"
-             Foreground="#E0E6F1">
-
-    <UserControl.Resources>
-        <SolidColorBrush x:Key="PlaceholderBrush" Color="#b0b9c6" />
-
-        <Style x:Key="DarkInputControlStyle" TargetType="Control">
-            <Setter Property="Background" Value="#1F2A44" />
-            <Setter Property="Foreground" Value="#E0E6F1" />
-            <Setter Property="BorderBrush" Value="#4D5B7C" />
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="Padding" Value="10,0"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Control">
-                        <Border x:Name="border"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="15">
-                            <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="#28AEED"/>
-                            </Trigger>
-                            <Trigger Property="IsKeyboardFocused" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="#28AEED"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="DarkComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource DarkInputControlStyle}"/>
-        <Style x:Key="DarkDatePickerStyle" TargetType="DatePicker" BasedOn="{StaticResource DarkInputControlStyle}"/>
-
-        <Style x:Key="DarkActionButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="#1F2A44"/>
-            <Setter Property="Foreground" Value="#E0E6F1"/>
-            <Setter Property="BorderBrush" Value="#4D5B7C"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="Width" Value="180"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border" CornerRadius="15" 
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}">
-                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#2C3A5A"/>
-                                <Setter TargetName="border" Property="BorderBrush" Value="#28AEED"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-    </UserControl.Resources>
-
-    <Grid Margin="20">
+             d:DesignHeight="550" d:DesignWidth="900">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0"
-                   Text="Compras"
-                   FontSize="24"
-                   FontWeight="Bold"
-                   HorizontalAlignment="Center"
-                   Margin="0,0,0,25"/>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+            <Label Content="Desde:" VerticalAlignment="Center" Style="{StaticResource DarkLableForm}"/>
+            <DatePicker SelectedDate="{Binding FechaInicio}" Width="120" Margin="5,0,0,0" VerticalAlignment="Center"/>
+ 
+            <Label Content="Hasta:" VerticalAlignment="Center" Margin="10,0,0,0" Style="{StaticResource DarkLableForm}"/>
+            <DatePicker SelectedDate="{Binding FechaFin}" Width="120" Margin="5,0,0,0" VerticalAlignment="Center"/>
 
-        <Grid Grid.Row="1" Margin="0,0,0,20">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+            <Label Content="Proveedor:" VerticalAlignment="Center" Margin="10,0,0,0" Style="{StaticResource DarkLableForm}"/>
+            <ComboBox ItemsSource="{Binding Proveedores}"
+                      SelectedItem="{Binding ProveedorFiltro}"
+                      DisplayMemberPath="RazonSocial"
+                      Style="{StaticResource DarkComboBoxStyle}"
+                      Width="200" Margin="5,0,0,0" VerticalAlignment="Center"/>
 
-            <StackPanel Grid.Column="0" Orientation="Vertical" Margin="0,0,20,0">
-                <TextBox Style="{StaticResource SearchBoxStyle}" 
-                         Tag="Buscar compras..." />
-                <Button Content="Nuevo pedido" 
-                        Command="{Binding ShowPedidoFormCommand}"
-                        Style="{StaticResource DarkActionButtonStyle}" 
-                        HorizontalAlignment="Center"
-                        Margin="0,15,0,0"/>
-            </StackPanel>
+            <Button Content="Filtrar" Command="{Binding FiltrarCommand}"          
+                    Style="{StaticResource DarkActionButtonStyle}"
+                    Margin="10,0,0,0" VerticalAlignment="Center"/>
 
-            <StackPanel Grid.Column="1" Orientation="Vertical">
-                <ComboBox x:Name="cbxProveedor"
-                          MinWidth="250"
-                          SelectedIndex="0">
-                    <ComboBoxItem Content="Proveedor"/>
-                </ComboBox>
+            <Button Content="Nuevo Pedido" Command="{Binding NuevoPedidoCommand}" 
+                    Style="{StaticResource DarkActionButtonStyle}"
+                    Margin="20,0,0,0" VerticalAlignment="Center"/>
+        </StackPanel>
 
-                <DatePicker x:Name="datePickerMes"
-                            Style="{StaticResource DarkDatePickerStyle}"
-                            MinWidth="250"
-                            Margin="0,15,0,0"/>
-            </StackPanel>
-        </Grid>
+        <Border Grid.Row="1" Margin="0 0 10 0" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" 
+                BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
 
-        <Border Grid.Row="2" CornerRadius="10" Background="#1F2A44" BorderBrush="#4D5B7C" BorderThickness="1">
-            <DataGrid x:Name="ProductsDataGrid"
+            <DataGrid ItemsSource="{Binding Pedidos}"
+                      SelectedItem="{Binding PedidoSeleccionado}"
                       Style="{StaticResource ElegantDataGridStyle}"
-                      ItemsSource="{Binding Productos}">
+                      CanUserAddRows="False" 
+                      AutoGenerateColumns="False" 
+                      IsReadOnly="True">
                 <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="Imagen" Width="Auto">
+                    <DataGridTextColumn Header="N° Pedido" Binding="{Binding NumeroPedido}" Width="*"/>
+                    <DataGridTextColumn Header="Fecha Emisión" Binding="{Binding FechaEmision, StringFormat=d}" Width="Auto"/>
+                    <DataGridTextColumn Header="Proveedor" Binding="{Binding Proveedor.RazonSocial}" Width="2*"/>
+                    <DataGridTextColumn Header="Plazo Entrega" Binding="{Binding PlazoEntrega, StringFormat=d}" Width="Auto"/>
+                    <DataGridTextColumn Header="Usuario" Binding="{Binding Usuario.Nombre}" Width="*"/>
+                    <DataGridTemplateColumn Header="Acciones">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Border CornerRadius="5" Width="40" Height="40" Margin="5">
-                                    <Border.Background>
-                                        <ImageBrush ImageSource="{Binding ImageUrl}" Stretch="UniformToFill"/>
-                                    </Border.Background>
-                                </Border>
+                                <Button Content="Ver Detalles" 
+                                        Style="{StaticResource DarkActionButtonStyle}"
+                                        Command="{Binding DataContext.VerDetallesCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-
-                    <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="2*"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>
-
-        <TextBlock Grid.Row="3"
-                   Text="Total compras: $"
-                   FontSize="14"
-                   HorizontalAlignment="Left"
-                   Margin="10,15,0,0"/>
     </Grid>
 </UserControl>

@@ -13,6 +13,7 @@ namespace DeluxeCarsDesktop.Interfaces
         Task<Pedido> GetPedidoWithDetailsAsync(int pedidoId);
 
         // Obtiene todos los pedidos realizados a un proveedor específico.
-        Task<IEnumerable<Pedido>> GetPedidosByProveedorAsync(int proveedorId);
+        Task<IEnumerable<Pedido>> GetPedidosByProveedorAsync(int proveedorId); 
+        Task<IEnumerable<Pedido>> GetPedidosByCriteriaAsync(DateTime startDate, DateTime endDate, int? proveedorId);
     }
 }

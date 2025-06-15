@@ -5,121 +5,44 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="1000"
-             Background="Transparent"
-             FontFamily="Montserrat"
-             Foreground="#E0E6F1">
-
-    <UserControl.Resources>
-        <Style x:Key="DarkInputControlStyle" TargetType="TextBox">
-            <Setter Property="Background" Value="#1F2A44" />
-            <Setter Property="Foreground" Value="#E0E6F1" />
-            <Setter Property="BorderBrush" Value="#4D5B7C" />
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="Padding" Value="10,0"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="TextBox">
-                        <Border x:Name="border"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="15">
-                            <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="#28AEED"/>
-                            </Trigger>
-                            <Trigger Property="IsKeyboardFocused" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="#28AEED"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="DarkActionButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="#1F2A44"/>
-            <Setter Property="Foreground" Value="#E0E6F1"/>
-            <Setter Property="BorderBrush" Value="#4D5B7C"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="MinWidth" Value="180"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border" CornerRadius="15" 
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}">
-                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#2C3A5A"/>
-                                <Setter TargetName="border" Property="BorderBrush" Value="#28AEED"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-    </UserControl.Resources>
-
-    <Grid Margin="20">
+             d:DesignHeight="550" d:DesignWidth="900">
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0"
-                   Text="Roles"
-                   FontSize="28"
-                   FontWeight="Bold"
-                   HorizontalAlignment="Center"
-                   Margin="0,0,0,25"/>
-
-        <Grid Grid.Row="1" Margin="0,0,0,20">
+        <Grid Grid.Row="0" Margin="0,0,0,10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <TextBox Style="{StaticResource SearchBoxStyle}" 
-                    Tag="Buscar producto..." />
+            <TextBox Grid.Column="0" 
+                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource SearchBoxStyle}" 
+                     Width="300" 
+                     HorizontalAlignment="Left"
+                     Tag="Buscar por nombre..."/>
 
-            <Button Grid.Column="1"
-                    Command="{Binding ShowRolFormCommand}"
-                    Content="Nuevo Rol" 
-                    Style="{StaticResource DarkActionButtonStyle}"/>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Nuevo Rol" Command="{Binding NuevoRolCommand}" Style="{StaticResource DarkActionButtonStyle}" Margin="10,0,0,0"/>
+                <Button Content="Editar Rol" Command="{Binding EditarRolCommand}" Style="{StaticResource DarkActionButtonStyle}" Margin="10,0,0,0"/>
+                <Button Content="Eliminar Rol" Command="{Binding EliminarRolCommand}" Style="{StaticResource DarkActionButtonStyle}" Margin="10,0,0,0"/>
+            </StackPanel>
         </Grid>
 
-        <Border Grid.Row="2" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" 
+        <Border Grid.Row="1" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" 
                 BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
-            <DataGrid x:Name="ProductsDataGrid"
-                      Style="{StaticResource ElegantDataGridStyle}"
-                      ItemsSource="{Binding Productos}">
-                <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="Imagen" Width="Auto">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Border CornerRadius="5" Width="40" Height="40" Margin="5">
-                                    <Border.Background>
-                                        <ImageBrush ImageSource="{Binding ImageUrl}" Stretch="UniformToFill"/>
-                                    </Border.Background>
-                                </Border>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
 
-                    <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="2*"/>
+            <DataGrid ItemsSource="{Binding Roles}"
+                      SelectedItem="{Binding RolSeleccionado}"
+                      Style="{StaticResource ElegantDataGridStyle}"
+                      CanUserAddRows="False" AutoGenerateColumns="False" IsReadOnly="True">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="80"/>
+                    <DataGridTextColumn Header="Nombre del Rol" Binding="{Binding Nombre}" Width="*"/>
+                    <DataGridTextColumn Header="Descripción" Binding="{Binding Descripcion}" Width="2*"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>

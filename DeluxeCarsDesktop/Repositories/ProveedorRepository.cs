@@ -1,6 +1,7 @@
 ﻿using DeluxeCarsDesktop.Data;
 using DeluxeCarsDesktop.Interfaces;
 using DeluxeCarsDesktop.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,6 @@ namespace DeluxeCarsDesktop.Repositories
 {
     public class ProveedorRepository : GenericRepository<Proveedor>, IProveedorRepository
     {
-        private readonly AppDbContext _context;
         public ProveedorRepository(AppDbContext context) : base(context)
         { }
 
@@ -19,7 +19,25 @@ namespace DeluxeCarsDesktop.Repositories
         {
             throw new NotImplementedException();
         }
-    }
-    {
+
+        public async Task<IEnumerable<Proveedor>> GetAllWithLocationAsync()
+        {
+            // Ahora, '_context' se refiere al campo 'protected' de la clase base,
+            // que SÍ fue inicializado. Ya no será null.
+            return await _context.Proveedores
+                                 .Include(p => p.Municipio)
+                                    .ThenInclude(m => m.Departamento)
+                                 .AsNoTracking()
+                                 .ToListAsync();
+        }
+
+        public async Task<Proveedor> GetByIdWithLocationAsync(int id)
+        {
+            return await _context.Proveedores
+                                 .Include(p => p.Municipio)
+                                    .ThenInclude(m => m.Departamento)
+                                 .FirstOrDefaultAsync(p => p.Id == id);
+        }
     }
 }
+

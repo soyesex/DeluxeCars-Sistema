@@ -15,7 +15,13 @@ namespace DeluxeCarsDesktop.Interfaces
         IPedidoRepository Pedidos { get; }
         IProveedorRepository Proveedores { get; }
         IUsuarioRepository Usuarios { get; }
-        IRolesRepository Rol { get; }
+        IRolesRepository Roles { get; }
+        IDepartamentoRepository Departamentos { get; }
+        IServicioRepository Servicios { get; }
+        IMetodoPagoRepository MetodosPago { get; }
+        IMunicipioRepository Municipios { get; }
+        ITipoServicioRepository TiposServicios { get; }
+        IProductoProveedorRepository ProductoProveedores { get; }
         // ...Añadir aquí todas las demás interfaces de repositorio
 
         /// <summary>

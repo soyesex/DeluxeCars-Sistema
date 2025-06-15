@@ -1,5 +1,6 @@
 ﻿using DeluxeCarsDesktop.Data;
 using DeluxeCarsDesktop.Interfaces;
+using DeluxeCarsDesktop.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,15 +21,27 @@ namespace DeluxeCarsDesktop.Repositories
         public IProveedorRepository Proveedores { get; private set; }
         public IUsuarioRepository Usuarios { get; private set; }
         public IRolesRepository Roles { get; private set; }
+        public IDepartamentoRepository Departamentos { get; private set; }
+        public IServicioRepository Servicios { get; private set; }
+        public IMunicipioRepository Municipios { get; private set; }
+        public IMetodoPagoRepository MetodosPago { get; private set; }
+        public ITipoServicioRepository TiposServicios { get; private set; }
+        public IProductoProveedorRepository ProductoProveedores { get; private set; }
         // ...Y las demás propiedades
 
         public UnitOfWork(AppDbContext context)
         {
             _context = context;
+            TiposServicios = new TipoServicioRepository(_context);
             Productos = new ProductoRepository(_context);
             Categorias = new CategoriaRepository(_context);
             Clientes = new ClienteRepository(_context);
             Facturas = new FacturaRepository(_context);
+            Departamentos = new DepartamentoRepository(_context);
+            Servicios = new ServicioRepository(_context);
+            Municipios = new MunicipioRepository(_context);
+            MetodosPago = new MetodoPagoRepository(_context);
+            ProductoProveedores = new ProductoProveedorRepository(_context);
             // ...Inicializar aquí todos los demás repositorios
             // Ejemplo para los que faltan:
             Pedidos = new PedidoRepository(_context);

@@ -9,5 +9,6 @@ namespace DeluxeCarsDesktop.Interfaces
 {
     public interface IServicioRepository : IGenericRepository<Servicio>
     {
+        Task<IEnumerable<Servicio>> GetAllWithTipoServicioAsync();
     }
 }
