@@ -64,7 +64,7 @@ namespace DeluxeCarsDesktop.ViewModel
             _currentUserService = currentUserService;
 
             // --- Inicialización de Comandos ---
-            ShowHomeViewCommand = new ViewModelCommand(ExecuteShowHomeViewCommand);
+            ShowHomeViewCommand = new ViewModelCommand(async (p) => await ExecuteShowHomeViewCommand(p));
             ShowCatalogoViewCommand = new ViewModelCommand(ExecuteShowCatalogViewCommand);
             ShowClienteViewCommand = new ViewModelCommand(ExecuteShowCustomerViewCommand);
             ShowProveedorViewCommand = new ViewModelCommand(ExecuteShowSupplierViewCommand);
@@ -101,24 +101,39 @@ namespace DeluxeCarsDesktop.ViewModel
             // Es más limpio que reiniciar la aplicación.
             LogoutSuccess?.Invoke();
         }
-        private void ExecuteShowPuntoDeVentaCommand(object obj)
+        // En MainViewModel.cs
+
+        // Este método se encarga de mostrar la pantalla del POS y llamar a su inicialización
+        private async void ExecuteShowPuntoDeVentaCommand(object obj)
         {
-            // Carga el ViewModel del Punto de Venta
-            CurrentChildView = _serviceProvider.GetService<FacturacionViewModel>();
+            var vm = _serviceProvider.GetService<FacturacionViewModel>();
+            await vm.OnNavigatedTo();
+            CurrentChildView = vm;
             Caption = "Punto de Venta (POS)";
             Icon = IconChar.CashRegister;
         }
 
+        // Este método ahora se suscribe al evento del historial
         private void ExecuteShowHistorialVentasCommand(object obj)
         {
-            // Carga el ViewModel del Historial
-            CurrentChildView = _serviceProvider.GetService<FacturasHistorialViewModel>();
+            var vm = _serviceProvider.GetService<FacturasHistorialViewModel>();
+
+            // SUSCRIPCIÓN AL EVENTO:
+            // Cuando el historial pida una nueva factura, ejecuta el comando que muestra el POS.
+            vm.OnRequestNuevaFactura += () => ExecuteShowPuntoDeVentaCommand(null);
+
+            CurrentChildView = vm;
             Caption = "Historial de Ventas";
             Icon = IconChar.History;
-        }
-        private void ExecuteShowHomeViewCommand(object obj)
+        }   
+        private async Task ExecuteShowHomeViewCommand(object obj)
         {
+            // 1. Se crea una nueva instancia del DashboardViewModel
             CurrentChildView = _serviceProvider.GetService<DashboardViewModel>();
+
+            // 2. Se asigna inmediatamente a la vista actual.
+            // NUNCA se llama a su método LoadAsync().
+
             Caption = "Panel Principal";
             Icon = IconChar.Home;
         }

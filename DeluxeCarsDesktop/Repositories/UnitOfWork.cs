@@ -12,6 +12,7 @@ namespace DeluxeCarsDesktop.Repositories
     public class UnitOfWork : IUnitOfWork
     {
         private readonly AppDbContext _context;
+        public AppDbContext Context => _context;
 
         public IProductoRepository Productos { get; private set; }
         public ICategoriaRepository Categorias { get; private set; }

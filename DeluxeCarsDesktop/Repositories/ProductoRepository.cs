@@ -43,14 +43,12 @@ namespace DeluxeCarsDesktop.Repositories
         // ÚNICA RESPONSABILIDAD: Implementar los métodos especializados.
         public async Task<IEnumerable<Producto>> SearchProductsBySupplierAsync(int proveedorId, string searchTerm)
         {
-            // Esta consulta busca en la tabla de unión ProductoProveedor,
-            // obtiene los Ids de los productos para ese proveedor,
-            // y luego busca en la tabla de Productos.
             var query = from pp in _context.ProductoProveedores
                         join p in _context.Productos on pp.IdProducto equals p.Id
                         where pp.IdProveedor == proveedorId && p.Nombre.Contains(searchTerm)
                         select p;
 
+            // Añadimos AsNoTracking() para que EF solo lea los datos sin "vigilarlos"
             return await query.AsNoTracking().ToListAsync();
         }
 

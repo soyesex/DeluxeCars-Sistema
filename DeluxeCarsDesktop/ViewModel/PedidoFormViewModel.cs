@@ -1,5 +1,6 @@
 ﻿using DeluxeCarsDesktop.Interfaces;
 using DeluxeCarsDesktop.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -16,8 +17,41 @@ namespace DeluxeCarsDesktop.ViewModel
         private readonly IUnitOfWork _unitOfWork;
         private Pedido _pedidoActual;
         private bool _esModoEdicion;
+        private bool _isBuscandoProductos = false;
+        private Producto _productoSeleccionado;
+        private bool _isProductPopupOpen;
+        private bool _isUpdatingFromSelection = false;
 
         // --- Propiedades para Binding (Estandarizadas con SetProperty) ---
+        public Producto ProductoSeleccionado
+        {
+            get => _productoSeleccionado;
+            set
+            {
+                SetProperty(ref _productoSeleccionado, value);
+                (AgregarProductoCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+
+                if (value != null)
+                {
+                    // 1. Levantamos la bandera para indicar que estamos actualizando desde una selección.
+                    _isUpdatingFromSelection = true;
+
+                    // 2. Actualizamos el texto del buscador.
+                    TextoBusquedaProducto = value.Nombre;
+
+                    // 3. Bajamos la bandera inmediatamente después.
+                    _isUpdatingFromSelection = false;
+
+                    IsProductPopupOpen = false;
+                }
+            }
+        }
+
+        public bool IsProductPopupOpen
+        {
+            get => _isProductPopupOpen;
+            set => SetProperty(ref _isProductPopupOpen, value);
+        }
         public ObservableCollection<Proveedor> Proveedores { get; private set; }
         public ObservableCollection<MetodoPago> MetodosDePago { get; private set; }
 
@@ -36,17 +70,53 @@ namespace DeluxeCarsDesktop.ViewModel
         private string _observaciones;
         public string Observaciones { get => _observaciones; set => SetProperty(ref _observaciones, value); }
 
+
         public ObservableCollection<DetallePedido> LineasDePedido { get; private set; }
         public ObservableCollection<Producto> ResultadosBusquedaProducto { get; private set; }
 
         private string _textoBusquedaProducto;
-        public string TextoBusquedaProducto { get => _textoBusquedaProducto; set { SetProperty(ref _textoBusquedaProducto, value); BuscarProductos(); } }
+        public string TextoBusquedaProducto
+        {
+            get => _textoBusquedaProducto;
+            set
+            {
+                SetProperty(ref _textoBusquedaProducto, value);
+
+                // ¡LA CLAVE! Solo buscamos si el cambio NO vino de seleccionar un producto.
+                if (!_isUpdatingFromSelection)
+                {
+                    BuscarProductos();
+                }
+            }
+        }
 
         private int _cantidadItem = 1;
-        public int CantidadItem { get => _cantidadItem; set => SetProperty(ref _cantidadItem, value); }
+        public int CantidadItem
+        {
+            get => _cantidadItem;
+            set
+            {
+                // 1. Llama a SetProperty para actualizar el valor.
+                SetProperty(ref _cantidadItem, value);
+
+                // 2. Notifica al comando que debe re-evaluar su estado.
+                (AgregarProductoCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+            }
+        }
 
         private decimal _precioCompraItem;
-        public decimal PrecioCompraItem { get => _precioCompraItem; set => SetProperty(ref _precioCompraItem, value); }
+        public decimal PrecioCompraItem
+        {
+            get => _precioCompraItem;
+            set
+            {
+                // 1. Llama a SetProperty para actualizar el valor.
+                SetProperty(ref _precioCompraItem, value);
+
+                // 2. Notifica al comando que debe re-evaluar su estado.
+                (AgregarProductoCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+            }
+        }
 
         private decimal _totalPedido;
         public decimal TotalPedido { get => _totalPedido; private set => SetProperty(ref _totalPedido, value); }
@@ -67,7 +137,7 @@ namespace DeluxeCarsDesktop.ViewModel
             Proveedores = new ObservableCollection<Proveedor>();
             MetodosDePago = new ObservableCollection<MetodoPago>();
 
-            AgregarProductoCommand = new ViewModelCommand(ExecuteAgregarProductoCommand);
+            AgregarProductoCommand = new ViewModelCommand(ExecuteAgregarProductoCommand, CanExecuteAgregarProductoCommand);
             EliminarProductoCommand = new ViewModelCommand(ExecuteEliminarProductoCommand);
             GuardarPedidoCommand = new ViewModelCommand(ExecuteGuardarPedidoCommand);
             CancelarPedidoCommand = new ViewModelCommand(ExecuteCancelarPedidoCommand);
@@ -127,21 +197,27 @@ namespace DeluxeCarsDesktop.ViewModel
 
         private async void BuscarProductos()
         {
-            // Validación: No buscar si no hay proveedor o el texto es muy corto.
-            if (ProveedorSeleccionado == null || ProveedorSeleccionado.Id == 0)
-            {
-                ResultadosBusquedaProducto.Clear();
-                return;
-            }
-            if (string.IsNullOrWhiteSpace(TextoBusquedaProducto) || TextoBusquedaProducto.Length < 3)
-            {
-                ResultadosBusquedaProducto.Clear();
-                return;
-            }
+            if (_isBuscandoProductos) return;
 
             try
             {
-                // ¡Ahora llamamos a nuestro nuevo método del repositorio!
+                _isBuscandoProductos = true;
+
+                if (ProveedorSeleccionado == null || ProveedorSeleccionado.Id == 0)
+                {
+                    ResultadosBusquedaProducto.Clear();
+                    IsProductPopupOpen = false;
+                    return;
+                }
+                if (string.IsNullOrWhiteSpace(TextoBusquedaProducto) || TextoBusquedaProducto.Length < 2)
+                {
+                    ResultadosBusquedaProducto.Clear();
+                    IsProductPopupOpen = false;
+                    return;
+                }
+
+                // El bloque problemático ha sido eliminado.
+
                 var productos = await _unitOfWork.Productos.SearchProductsBySupplierAsync(ProveedorSeleccionado.Id, TextoBusquedaProducto);
 
                 ResultadosBusquedaProducto.Clear();
@@ -149,11 +225,24 @@ namespace DeluxeCarsDesktop.ViewModel
                 {
                     ResultadosBusquedaProducto.Add(p);
                 }
+
+                IsProductPopupOpen = ResultadosBusquedaProducto.Any();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error buscando productos por proveedor: {ex.Message}");
+                IsProductPopupOpen = false;
             }
+            finally
+            {
+                _isBuscandoProductos = false;
+            }
+        }
+        private bool CanExecuteAgregarProductoCommand(object obj)
+        {
+            // El botón solo estará activo si hay un producto seleccionado,
+            // la cantidad es válida y el precio es válido.
+            return ProductoSeleccionado != null && CantidadItem > 0 && PrecioCompraItem >= 0;
         }
 
         private void ExecuteAgregarProductoCommand(object item)
@@ -193,15 +282,20 @@ namespace DeluxeCarsDesktop.ViewModel
             OnPropertyChanged(nameof(TotalPedido));
         }
 
+        // EN: PedidoFormViewModel.cs
+
         private async void ExecuteGuardarPedidoCommand(object obj)
         {
+            // 1. La validación inicial se queda como está.
             if (ProveedorSeleccionado == null || MetodoPagoSeleccionado == null || !LineasDePedido.Any())
             {
                 MessageBox.Show("Debe seleccionar un proveedor, un método de pago y añadir al menos un producto.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            // Actualizamos el objeto que estamos rastreando
+            // --- INICIO DE LA CORRECCIÓN ---
+
+            // 2. Poblamos el objeto Pedido con todos los datos de la UI ANTES de intentar guardarlo.
             _pedidoActual.IdProveedor = ProveedorSeleccionado.Id;
             _pedidoActual.IdMetodoPago = MetodoPagoSeleccionado.Id;
             _pedidoActual.FechaEmision = FechaEmision;
@@ -209,31 +303,49 @@ namespace DeluxeCarsDesktop.ViewModel
             _pedidoActual.Observaciones = Observaciones;
             _pedidoActual.DetallesPedidos = LineasDePedido;
 
+            // 3. Asignamos el NumeroPedido y otros valores por defecto FUERA del try, si es un pedido nuevo.
+            //    Esto garantiza que el objeto esté completo antes de la transacción.
+            if (!_esModoEdicion && string.IsNullOrEmpty(_pedidoActual.NumeroPedido))
+            {
+                _pedidoActual.NumeroPedido = $"PED-{DateTime.Now:yyyyMMddHHmmss}";
+                // TODO: Reemplazar con el ID del usuario logueado
+                _pedidoActual.IdUsuario = 1;
+            }
+
             try
             {
-                // CORRECCIÓN: La lógica de Añadir/Actualizar va DENTRO del try
                 if (!_esModoEdicion)
                 {
-                    _pedidoActual.NumeroPedido = $"PED-{DateTime.Now:yyyyMMddHHmmss}";
-                    // TODO: Reemplazar con el ID del usuario logueado
-                    _pedidoActual.IdUsuario = 1;
-                    await _unitOfWork.Pedidos.AddAsync(_pedidoActual);
+                    // 4. Aplicamos el control de estado manual para evitar el error de tracking.
+                    _unitOfWork.Context.Pedidos.Add(_pedidoActual);
+                    foreach (var detalle in _pedidoActual.DetallesPedidos)
+                    {
+                        _unitOfWork.Context.Entry(detalle.Producto).State = EntityState.Unchanged;
+                    }
                 }
                 else
                 {
-                    // Al ser modo edición, la entidad _pedidoActual ya está siendo rastreada por el DbContext.
-                    // No es estrictamente necesario llamar a Update, pero hacerlo es una buena práctica explícita.
-                    await _unitOfWork.Pedidos.UpdateAsync(_pedidoActual);
+                    // La lógica de edición
+                    _unitOfWork.Context.Pedidos.Update(_pedidoActual);
                 }
 
-                await _unitOfWork.CompleteAsync(); // Guardamos todos los cambios
+                // 5. Guardamos todo en una sola transacción atómica.
+                await _unitOfWork.CompleteAsync();
+
                 MessageBox.Show("Pedido guardado exitosamente.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
                 CloseAction?.Invoke();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ocurrió un error al guardar el pedido: {ex.Message}", "Error de Guardado", MessageBoxButton.OK, MessageBoxImage.Error);
+                // Usamos el MessageBox detallado para cualquier error.
+                string errorMessage = $"Error principal: {ex.Message}";
+                if (ex.InnerException != null)
+                {
+                    errorMessage += $"\n\n--- DETALLES ---\n{ex.InnerException.Message}";
+                }
+                MessageBox.Show(errorMessage, "Error de Guardado Detallado", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+            // --- FIN DE LA CORRECCIÓN ---
         }
 
         private void ExecuteCancelarPedidoCommand(object obj)

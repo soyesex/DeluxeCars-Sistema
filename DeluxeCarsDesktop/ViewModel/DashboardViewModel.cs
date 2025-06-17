@@ -27,28 +27,26 @@ namespace DeluxeCarsDesktop.ViewModel
         public DashboardViewModel(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            LoadDashboardData();
         }
 
-        private async void LoadDashboardData()
+        // Nuevo método público para cargar los datos
+        public async Task LoadAsync()
         {
             try
             {
-                // Las operaciones ahora se ejecutan en SECUENCIA.
-                // Esperamos a que una termine antes de empezar la siguiente.
                 var clientes = await _unitOfWork.Clientes.GetAllAsync();
                 var productos = (await _unitOfWork.Productos.GetAllAsync()).ToList();
                 var facturasHoy = await _unitOfWork.Facturas.GetFacturasByDateRangeAsync(DateTime.Today, DateTime.Today.AddDays(1).AddTicks(-1));
 
-                // Ahora que tenemos todos los datos, actualizamos las propiedades.
                 NumeroDeClientes = clientes.Count();
                 ProductosEnInventario = productos.Count();
-                ProductosBajoStock = productos.Count(p => p.Stock < 10); // Umbral de ejemplo: 10 unidades
-                VentasDeHoy = facturasHoy.Sum(f => f.Total);
+                ProductosBajoStock = productos.Count(p => p.Stock < 10);
+
+                // Corrección aquí: Sumar sobre una colección de decimales nulables
+                VentasDeHoy = facturasHoy.Sum(f => f.Total ?? 0m);
             }
             catch (Exception ex)
             {
-                // Es una buena práctica mostrar el error también en el debug para más detalles.
                 System.Diagnostics.Debug.WriteLine($"Error cargando datos del dashboard: {ex.Message}");
             }
         }

@@ -31,7 +31,7 @@ namespace DeluxeCarsDesktop.ViewModel
             {
                 SetProperty(ref _selectedReport, value);
                 // --- APLICAMOS LA CORRECIÓN AQUÍ ---
-                (GenerateReportCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+                (GenerarReporteCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
             }
         }
 
@@ -41,7 +41,8 @@ namespace DeluxeCarsDesktop.ViewModel
         private IEnumerable<object> _reportResults;
         public IEnumerable<object> ReportResults { get => _reportResults; set => SetProperty(ref _reportResults, value); }
 
-        public ICommand GenerateReportCommand { get; }
+        public ICommand GenerarReporteCommand { get; }
+
 
         public ReportesViewModel(IUnitOfWork unitOfWork)
         {
@@ -58,14 +59,15 @@ namespace DeluxeCarsDesktop.ViewModel
 
             SelectedReport = AvailableReports.FirstOrDefault();
 
-            GenerateReportCommand = new ViewModelCommand(async p => await ExecuteGenerateReport(), p => CanExecuteGenerateReport());
+            GenerarReporteCommand = new ViewModelCommand(async p => await ExecuteGenerarReporte(), p => CanExecuteGenerateReport());
         }
         // Añadimos un método CanExecute explícito para mayor claridad
         private bool CanExecuteGenerateReport()
         {
             return SelectedReport != null;
         }
-        private async Task ExecuteGenerateReport()
+
+        private async Task ExecuteGenerarReporte()
         {
             if (SelectedReport == null) return;
 

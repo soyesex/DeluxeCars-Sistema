@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="900">
+             d:DesignHeight="700" d:DesignWidth="1000">
     <Grid Margin="15">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -20,23 +20,114 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="220"/>
+                    <ColumnDefinition Width="250"/>
                 </Grid.ColumnDefinitions>
-                <Label Content="Buscar Cliente:" VerticalAlignment="Center" Style="{StaticResource DarkLableForm}"/>
-                <ComboBox Grid.Column="1" x:Name="ClientSearchComboBox" Style="{StaticResource DarkComboBoxStyle}"
-                          ItemsSource="{Binding ResultadosBusquedaCliente}"
-                          DisplayMemberPath="Nombre"
-                          IsEditable="True"
-                          Text="{Binding TextoBusquedaCliente, UpdateSourceTrigger=PropertyChanged}"/>
+                <Label Content="Cliente:" Style="{StaticResource DarkLableForm}"/>
+                
+                <Grid Grid.Column="1">
+                    <TextBox x:Name="ClientSearchTextBox" 
+             Text="{Binding TextoBusquedaCliente, UpdateSourceTrigger=PropertyChanged}"
+             Style="{StaticResource DarkInputControlStyle}" />
 
-                <Label Grid.Column="2" Content="Método de Pago:" VerticalAlignment="Center" Style="{StaticResource DarkLableForm}" Margin="10,0,0,0"/>
+                    <Popup IsOpen="{Binding IsClientPopupOpen, Mode=TwoWay}" 
+           PlacementTarget="{Binding ElementName=ClientSearchTextBox}"
+           StaysOpen="False">
+                        <Border Background="#2D3748" BorderBrush="#4A5568" BorderThickness="1" CornerRadius="5">
+                            <ListBox ItemsSource="{Binding ResultadosBusquedaCliente}"
+                     SelectedItem="{Binding ClienteSeleccionado, Mode=TwoWay}"
+                     DisplayMemberPath="Nombre"
+                     MaxHeight="200"
+                     BorderThickness="0">
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="Padding" Value="5"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ListBoxItem">
+                                                    <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter />
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsSelected" Value="True">
+                                                            <Setter Property="Background" Value="#4A5568"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="#4A5568"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                            </ListBox>
+                        </Border>
+                    </Popup>
+                </Grid>
+                <Label Grid.Column="2" Content="Método de Pago:" Style="{StaticResource DarkLableForm}" Margin="10,0,0,0"/>
                 <ComboBox Grid.Column="3" ItemsSource="{Binding MetodosDePago}"
                           SelectedItem="{Binding MetodoPagoSeleccionado}"
                           DisplayMemberPath="Descripcion" Style="{StaticResource DarkComboBoxStyle}"/>
             </Grid>
         </Border>
 
-        <Grid Grid.Row="1" Margin="5">
+        <Grid Grid.Row="1" Margin="5,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="80"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0" Content="Buscar Producto/Servicio:" Style="{StaticResource DarkLableForm}"/>
+            <Grid Grid.Column="1">
+                <TextBox x:Name="ProductSearchTextBox" 
+             Text="{Binding TextoBusquedaItem, UpdateSourceTrigger=PropertyChanged}"
+             Style="{StaticResource DarkInputControlStyle}" />
+
+                <Popup IsOpen="{Binding IsProductPopupOpen, Mode=TwoWay}" 
+           PlacementTarget="{Binding ElementName=ProductSearchTextBox}"
+           StaysOpen="False">
+                    <Border Background="#2D3748" BorderBrush="#4A5568" BorderThickness="1" CornerRadius="5">
+                        <ListBox ItemsSource="{Binding ResultadosBusquedaItem}"
+                     SelectedItem="{Binding ItemSeleccionado, Mode=TwoWay}"
+                     DisplayMemberPath="Nombre"
+                     MaxHeight="200"
+                     BorderThickness="0">
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="Padding" Value="5"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ListBoxItem">
+                                                <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter />
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter Property="Background" Value="#4A5568"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#4A5568"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                        </ListBox>
+                    </Border>
+                </Popup>
+            </Grid>
+            <Label Grid.Column="2" Content="Cantidad:" Style="{StaticResource DarkLableForm}" Margin="10,0,0,0"/>
+            <TextBox Grid.Column="3" Text="{Binding CantidadItem}" Style="{StaticResource DarkInputControlStyle}" TextAlignment="Center"/>
+            <Button Grid.Column="4" Content="Añadir" Style="{StaticResource DarkActionButtonStyle}" 
+                    Command="{Binding AgregarItemCommand}" 
+                    CommandParameter="{Binding ItemSeleccionado}" 
+                    Margin="10,0,0,0"/>
         </Grid>
 
         <Border Grid.Row="2" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
@@ -46,7 +137,7 @@
                     <DataGridTextColumn Header="Cantidad" Binding="{Binding Cantidad}" Width="Auto"/>
                     <DataGridTextColumn Header="Precio Unit." Binding="{Binding PrecioUnitario, StringFormat=C}" Width="Auto"/>
                     <DataGridTextColumn Header="Subtotal" Binding="{Binding SubTotalLinea, StringFormat=C}" Width="Auto"/>
-                    <DataGridTemplateColumn>
+                    <DataGridTemplateColumn Width="Auto">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Button Content="Quitar" Command="{Binding DataContext.EliminarItemCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}"/>
@@ -58,18 +149,9 @@
         </Border>
 
         <Grid Grid.Row="3" Margin="10">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                <TextBlock Text="Subtotal: " Foreground="White" FontSize="16" VerticalAlignment="Center"/>
-                <TextBlock Text="{Binding SubTotal, StringFormat=C}" Foreground="White" FontSize="16" VerticalAlignment="Center" FontWeight="SemiBold"/>
-                <TextBlock Text="IVA: " Foreground="White" FontSize="16" VerticalAlignment="Center" Margin="20,0,0,0"/>
-                <TextBlock Text="{Binding TotalIVA, StringFormat=C}" Foreground="White" FontSize="16" VerticalAlignment="Center" FontWeight="SemiBold"/>
-                <TextBlock Text="TOTAL: " Foreground="White" FontSize="22" VerticalAlignment="Center" Margin="20,0,0,0"/>
-                <TextBlock Text="{Binding Total, StringFormat=C}" Foreground="LawnGreen" FontSize="22" VerticalAlignment="Center" FontWeight="Bold"/>
-            </StackPanel>
-
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Content="FINALIZAR VENTA" Command="{Binding FinalizarVentaCommand}" Style="{StaticResource DarkActionButtonStyle}" Width="150" Background="ForestGreen"/>
-                <Button Content="Cancelar" Command="{Binding CancelarVentaCommand}" Style="{StaticResource DarkActionButtonStyle}" Margin="10,0,0,0"/>
+                <Button Content="Cancelar Venta" Command="{Binding CancelarVentaCommand}" Style="{StaticResource DarkActionButtonStyle}" Margin="10,0,0,0"/>
             </StackPanel>
         </Grid>
     </Grid>

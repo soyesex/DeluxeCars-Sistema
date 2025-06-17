@@ -1,6 +1,7 @@
 ﻿using DeluxeCarsDesktop.Data;
 using DeluxeCarsDesktop.Interfaces;
 using DeluxeCarsDesktop.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,15 @@ namespace DeluxeCarsDesktop.Repositories
     public class ProductoProveedorRepository : GenericRepository<ProductoProveedor>, IProductoProveedorRepository
     {
         public ProductoProveedorRepository(AppDbContext context) : base(context)
+        {}
+
+        public async Task<IEnumerable<ProductoProveedor>> GetByProveedorWithProductoAsync(int proveedorId)
         {
+            return await _dbSet
+                .Where(pp => pp.IdProveedor == proveedorId)
+                .Include(pp => pp.Producto) // Incluimos el producto asociado
+                .AsNoTracking()
+                .ToListAsync();
         }
     }
 }

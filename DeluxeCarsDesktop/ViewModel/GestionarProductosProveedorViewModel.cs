@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace DeluxeCarsDesktop.ViewModel
@@ -16,12 +17,19 @@ namespace DeluxeCarsDesktop.ViewModel
         private int _proveedorId;
 
         public Proveedor ProveedorActual { get; private set; }
-        public ObservableCollection<Producto> ProductosAsociados { get; private set; }
+        public ObservableCollection<ProductoProveedor> ProductosAsociados { get; private set; }
         public ObservableCollection<Producto> ProductosNoAsociados { get; private set; }
 
-        public Producto ProductoAsociadoSeleccionado { get; set; }
+        public ProductoProveedor ProductoAsociadoSeleccionado { get; set; }
         public Producto ProductoNoAsociadoSeleccionado { get; set; }
         public decimal NuevoPrecioCompra { get; set; }
+
+        private string _textoBusquedaInventario;
+        public string TextoBusquedaInventario
+        {
+            get => _textoBusquedaInventario;
+            set { SetProperty(ref _textoBusquedaInventario, value); RefreshLists(); } // Llama a RefreshLists para filtrar
+        }
 
         public ICommand AsociarCommand { get; }
         public ICommand DesasociarCommand { get; }
@@ -30,7 +38,7 @@ namespace DeluxeCarsDesktop.ViewModel
         public GestionarProductosProveedorViewModel(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            ProductosAsociados = new ObservableCollection<Producto>();
+            ProductosAsociados = new ObservableCollection<ProductoProveedor>();
             ProductosNoAsociados = new ObservableCollection<Producto>();
             AsociarCommand = new ViewModelCommand(ExecuteAsociar, p => ProductoNoAsociadoSeleccionado != null && NuevoPrecioCompra > 0);
             DesasociarCommand = new ViewModelCommand(ExecuteDesasociar, p => ProductoAsociadoSeleccionado != null);
@@ -44,12 +52,21 @@ namespace DeluxeCarsDesktop.ViewModel
             await RefreshLists();
         }
 
+        // --- MÉTODO REFRESHLISTS ACTUALIZADO ---
         private async Task RefreshLists()
         {
-            var asociados = await _unitOfWork.Productos.GetAssociatedProductsAsync(_proveedorId);
+            var asociados = await _unitOfWork.ProductoProveedores.GetByProveedorWithProductoAsync(_proveedorId);
             var noAsociados = await _unitOfWork.Productos.GetUnassociatedProductsAsync(_proveedorId);
-            ProductosAsociados = new ObservableCollection<Producto>(asociados.OrderBy(p => p.Nombre));
+
+            // Aplicamos el filtro de búsqueda si existe
+            if (!string.IsNullOrWhiteSpace(TextoBusquedaInventario))
+            {
+                noAsociados = noAsociados.Where(p => p.Nombre.Contains(TextoBusquedaInventario, StringComparison.OrdinalIgnoreCase));
+            }
+
+            ProductosAsociados = new ObservableCollection<ProductoProveedor>(asociados.OrderBy(p => p.Producto.Nombre));
             ProductosNoAsociados = new ObservableCollection<Producto>(noAsociados.OrderBy(p => p.Nombre));
+
             OnPropertyChanged(nameof(ProductosAsociados));
             OnPropertyChanged(nameof(ProductosNoAsociados));
         }
@@ -69,14 +86,17 @@ namespace DeluxeCarsDesktop.ViewModel
 
         private async void ExecuteDesasociar(object obj)
         {
-            var associationToRemove = await _unitOfWork.ProductoProveedores
-                .GetByConditionAsync(pp => pp.IdProveedor == _proveedorId && pp.IdProducto == ProductoAsociadoSeleccionado.Id);
-
-            if (associationToRemove.Any())
+            if (ProductoAsociadoSeleccionado == null) return;
+            try
             {
-                await _unitOfWork.ProductoProveedores.RemoveAsync(associationToRemove.First());
+                // La lógica ahora es más simple porque el objeto seleccionado es del tipo correcto.
+                await _unitOfWork.ProductoProveedores.RemoveAsync(ProductoAsociadoSeleccionado);
                 await _unitOfWork.CompleteAsync();
                 await RefreshLists();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al desasociar el producto: {ex.Message}", "Error");
             }
         }
     }

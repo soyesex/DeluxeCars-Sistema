@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DeluxeCarsDesktop.ViewModel;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +24,15 @@ namespace DeluxeCarsDesktop.View.UserControls
         public DashboardUserControl()
         {
             InitializeComponent();
+        }
+        private async void DashboardUserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Verificamos que el DataContext sea nuestro ViewModel
+            if (this.DataContext is DashboardViewModel viewModel)
+            {
+                // ¡Llamamos aquí al método de carga!
+                await viewModel.LoadAsync();
+            }
         }
     }
 }

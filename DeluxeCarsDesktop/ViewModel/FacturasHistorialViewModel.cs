@@ -48,6 +48,9 @@ namespace DeluxeCarsDesktop.ViewModel
             }
         }
 
+
+        public event Action OnRequestNuevaFactura;
+        public ICommand NuevaFacturaCommand { get; }
         public ICommand VerDetallesCommand { get; }
         public ICommand AnularFacturaCommand { get; }
         public ICommand RefrescarCommand { get; }
@@ -64,6 +67,7 @@ namespace DeluxeCarsDesktop.ViewModel
             AnularFacturaCommand = new ViewModelCommand(ExecuteAnularFacturaCommand, CanExecuteActions);
             RefrescarCommand = new ViewModelCommand(p => LoadFacturasAsync());
 
+            NuevaFacturaCommand = new ViewModelCommand(p => OnRequestNuevaFactura?.Invoke());
             LoadFacturasAsync();
         }
 

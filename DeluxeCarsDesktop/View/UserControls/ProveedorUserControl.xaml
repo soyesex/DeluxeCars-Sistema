@@ -51,7 +51,7 @@
             </StackPanel>
         </Grid>
 
-        <Border Grid.Row="2" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" 
+        <Border Grid.Row="2" Margin="0 20 0 0" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" 
                 BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
 
             <DataGrid ItemsSource="{Binding Proveedores}"

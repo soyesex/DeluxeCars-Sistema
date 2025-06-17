@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DeluxeCarsDesktop.Data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,7 @@ namespace DeluxeCarsDesktop.Interfaces
 {
     public interface IUnitOfWork : IDisposable
     {
+        AppDbContext Context { get; }
         IProductoRepository Productos { get; }
         ICategoriaRepository Categorias { get; }
         IClienteRepository Clientes { get; }

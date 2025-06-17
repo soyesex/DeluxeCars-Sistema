@@ -1,6 +1,7 @@
 ﻿using DeluxeCarsDesktop.Interfaces;
 using DeluxeCarsDesktop.Models;
 using DeluxeCarsDesktop.Services;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,22 +16,71 @@ namespace DeluxeCarsDesktop.ViewModel
     public class FacturacionViewModel : ViewModelBase
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICurrentUserService _currentUserService;
         private Factura _facturaEnProgreso;
+        private bool _isInitialized = false;
+        private bool _isBuscandoItems = false;
 
-        // --- Propiedades para la Cabecera de la Factura ---
+        // --- Propiedades para Binding (Estandarizadas con SetProperty) ---
         public ObservableCollection<Cliente> ResultadosBusquedaCliente { get; private set; }
         public ObservableCollection<MetodoPago> MetodosDePago { get; private set; }
 
-        private string _textoBusquedaCliente;
-        public string TextoBusquedaCliente { get => _textoBusquedaCliente; set { SetProperty(ref _textoBusquedaCliente, value); BuscarClientes(); } }
-
         private Cliente _clienteSeleccionado;
-        public Cliente ClienteSeleccionado { get => _clienteSeleccionado; set => SetProperty(ref _clienteSeleccionado, value); }
+        public Cliente ClienteSeleccionado
+        {
+            get => _clienteSeleccionado;
+            set
+            {
+                SetProperty(ref _clienteSeleccionado, value);
+                if (value != null)
+                {
+                    // Actualiza el texto de búsqueda para que el usuario vea su selección
+                    _textoBusquedaCliente = value.Nombre;
+                    OnPropertyChanged(nameof(TextoBusquedaCliente));
+
+                    // Cierra el popup de resultados
+                    IsClientPopupOpen = false;
+                }
+            }
+        }
+
+        // Coloca estas propiedades junto a las otras en tu ViewModel
+
+        private bool _isProductPopupOpen;
+        public bool IsProductPopupOpen
+        {
+            get => _isProductPopupOpen;
+            set => SetProperty(ref _isProductPopupOpen, value);
+        }
+
+        private object _itemSeleccionado;
+        public object ItemSeleccionado
+        {
+            get => _itemSeleccionado;
+            set
+            {
+                SetProperty(ref _itemSeleccionado, value);
+                if (value != null)
+                {
+                    // Para obtener el nombre, necesitamos saber si es Producto o Servicio
+                    string nombre = string.Empty;
+                    if (value is Producto p) nombre = p.Nombre;
+                    else if (value is Servicio s) nombre = s.Nombre;
+
+                    _textoBusquedaItem = nombre;
+                    OnPropertyChanged(nameof(TextoBusquedaItem));
+
+                    IsProductPopupOpen = false;
+                }
+            }
+        }
 
         private MetodoPago _metodoPagoSeleccionado;
         public MetodoPago MetodoPagoSeleccionado { get => _metodoPagoSeleccionado; set => SetProperty(ref _metodoPagoSeleccionado, value); }
 
-        // --- Propiedades para las Líneas de Detalle ---
+        private string _textoBusquedaCliente;
+        public string TextoBusquedaCliente { get => _textoBusquedaCliente; set { SetProperty(ref _textoBusquedaCliente, value); BuscarClientes(); } }
+
         public ObservableCollection<DetalleFactura> LineasDeFactura { get; private set; }
         public ObservableCollection<object> ResultadosBusquedaItem { get; private set; }
 
@@ -40,7 +90,6 @@ namespace DeluxeCarsDesktop.ViewModel
         private int _cantidadItem = 1;
         public int CantidadItem { get => _cantidadItem; set => SetProperty(ref _cantidadItem, value); }
 
-        // --- Propiedades para los Totales ---
         private decimal _subTotal;
         public decimal SubTotal { get => _subTotal; private set => SetProperty(ref _subTotal, value); }
 
@@ -50,70 +99,148 @@ namespace DeluxeCarsDesktop.ViewModel
         private decimal _total;
         public decimal Total { get => _total; private set => SetProperty(ref _total, value); }
 
+        private bool _isClientPopupOpen;
+        public bool IsClientPopupOpen
+        {
+            get => _isClientPopupOpen;
+            set => SetProperty(ref _isClientPopupOpen, value);
+        }
+
         // --- Comandos ---
         public ICommand AgregarItemCommand { get; }
         public ICommand EliminarItemCommand { get; }
         public ICommand FinalizarVentaCommand { get; }
         public ICommand CancelarVentaCommand { get; }
 
-        public FacturacionViewModel(IUnitOfWork unitOfWork)
+        public FacturacionViewModel(IUnitOfWork unitOfWork, ICurrentUserService currentUserService)
         {
             _unitOfWork = unitOfWork;
-            InicializarNuevaVenta();
-
-            AgregarItemCommand = new ViewModelCommand(ExecuteAgregarItem);
-            EliminarItemCommand = new ViewModelCommand(ExecuteEliminarItem);
-            FinalizarVentaCommand = new ViewModelCommand(ExecuteFinalizarVenta);
-            CancelarVentaCommand = new ViewModelCommand(p => InicializarNuevaVenta());
-        }
-
-        private async void InicializarNuevaVenta()
-        {
-            _facturaEnProgreso = new Factura();
+            _currentUserService = currentUserService;
             LineasDeFactura = new ObservableCollection<DetalleFactura>();
             ResultadosBusquedaCliente = new ObservableCollection<Cliente>();
             ResultadosBusquedaItem = new ObservableCollection<object>();
+            MetodosDePago = new ObservableCollection<MetodoPago>();
+            AgregarItemCommand = new ViewModelCommand(ExecuteAgregarItem, p => p != null && CantidadItem > 0);
+            EliminarItemCommand = new ViewModelCommand(ExecuteEliminarItem);
+            FinalizarVentaCommand = new ViewModelCommand(async p => await ExecuteFinalizarVenta(), p => LineasDeFactura.Any() && ClienteSeleccionado != null);
+            CancelarVentaCommand = new ViewModelCommand(async p => await InicializarNuevaVenta());
+        }
+        public async Task OnNavigatedTo()
+        {
+            if (_isInitialized)
+            {
+                // Si ya está inicializado, solo reinicia la venta si es necesario
+                if (LineasDeFactura.Any() || ClienteSeleccionado != null)
+                {
+                    await InicializarNuevaVenta();
+                }
+                return;
+            }
+            await InicializarNuevaVenta();
+            _isInitialized = true;
+        }
+        private async Task InicializarNuevaVenta()
+        {
+            _facturaEnProgreso = new Factura();
+            try
+            {
+                var metodos = await _unitOfWork.MetodosPago.GetAllAsync();
+                MetodosDePago = new ObservableCollection<MetodoPago>(metodos.Where(m => m.Disponible));
+                OnPropertyChanged(nameof(MetodosDePago));
+                MetodoPagoSeleccionado = MetodosDePago.FirstOrDefault();
+            }
+            catch (Exception ex) { MessageBox.Show($"Error cargando métodos de pago: {ex.Message}", "Error"); }
 
-            // Cargar datos iniciales
-            MetodosDePago = new ObservableCollection<MetodoPago>(await _unitOfWork.MetodosPago.GetAllAsync());
-            MetodoPagoSeleccionado = MetodosDePago.FirstOrDefault();
+            LineasDeFactura.Clear();
+            ResultadosBusquedaCliente?.Clear(); // Usamos el '?' por si acaso
+            ResultadosBusquedaItem?.Clear();
+            ClienteSeleccionado = null; // Esto ya lo tenías, pero es clave
 
-            ClienteSeleccionado = null;
-            TextoBusquedaCliente = string.Empty;
-            TextoBusquedaItem = string.Empty;
+            TextoBusquedaCliente = string.Empty; OnPropertyChanged(nameof(TextoBusquedaCliente));
+            TextoBusquedaItem = string.Empty; OnPropertyChanged(nameof(TextoBusquedaItem));
             CantidadItem = 1;
             RecalcularTotales();
-            OnPropertyChanged(nameof(LineasDeFactura)); // Notificar a la UI
         }
 
-        private async void BuscarClientes()
+        // --- MÉTODOS DE BÚSQUEDA CORREGIDOS ---
+        // Reemplaza tu método BuscarClientes actual por este
+        private async Task BuscarClientes()
         {
-            if (string.IsNullOrWhiteSpace(TextoBusquedaCliente) || TextoBusquedaCliente.Length < 3)
+            if (string.IsNullOrWhiteSpace(TextoBusquedaCliente) || TextoBusquedaCliente.Length < 2)
             {
-                ResultadosBusquedaCliente.Clear();
+                ResultadosBusquedaCliente?.Clear();
+                IsClientPopupOpen = false;
                 return;
             }
-            var clientes = await _unitOfWork.Clientes.GetAllAsync(); // Se puede optimizar con un método de búsqueda
-            ResultadosBusquedaCliente.Clear();
-            foreach (var c in clientes.Where(c => c.Nombre.Contains(TextoBusquedaCliente, StringComparison.OrdinalIgnoreCase)))
+
+            if (ClienteSeleccionado != null && TextoBusquedaCliente == ClienteSeleccionado.Nombre)
             {
-                ResultadosBusquedaCliente.Add(c);
+                return;
             }
+
+            ClienteSeleccionado = null;
+
+            // --- INICIO DE LA CORRECCIÓN ---
+            var textoBusquedaUpper = TextoBusquedaCliente.ToUpper();
+            var clientes = await _unitOfWork.Clientes.GetByConditionAsync(c =>
+                c.Nombre.ToUpper().Contains(textoBusquedaUpper) ||
+                c.Email.ToUpper().Contains(textoBusquedaUpper)
+            );
+            // --- FIN DE LA CORRECCIÓN ---
+
+            ResultadosBusquedaCliente = new ObservableCollection<Cliente>(clientes);
+            OnPropertyChanged(nameof(ResultadosBusquedaCliente));
+            IsClientPopupOpen = ResultadosBusquedaCliente.Any();
         }
 
-        private async void BuscarItems()
+        // Reemplaza tu método BuscarItems actual por este
+        private async Task BuscarItems()
         {
-            if (string.IsNullOrWhiteSpace(TextoBusquedaItem) || TextoBusquedaItem.Length < 3)
+            // 1. Chequeo de la bandera de "ocupado" al inicio.
+            if (_isBuscandoItems)
+                return;
+
+            try
             {
+                // 2. Se levanta la bandera para indicar que la búsqueda comienza.
+                _isBuscandoItems = true;
+
+                // =============================================================
+                // AHORA VIENE TODA LA LÓGICA QUE YA TENÍAS, PERO LIMPIA
+                // =============================================================
+
+                if (string.IsNullOrWhiteSpace(TextoBusquedaItem) || TextoBusquedaItem.Length < 2)
+                {
+                    ResultadosBusquedaItem?.Clear();
+                    IsProductPopupOpen = false;
+                    return;
+                }
+
+                if (ItemSeleccionado != null)
+                {
+                    string nombreSeleccionado = (ItemSeleccionado as Producto)?.Nombre ?? (ItemSeleccionado as Servicio)?.Nombre;
+                    if (TextoBusquedaItem == nombreSeleccionado) return;
+                }
+
+                ItemSeleccionado = null;
                 ResultadosBusquedaItem.Clear();
-                return;
-            }
-            var productos = await _unitOfWork.Productos.GetAllAsync();
-            var servicios = await _unitOfWork.Servicios.GetAllAsync();
 
-            ResultadosBusquedaItem.Clear();
-            foreach (var p in productos.Where(p => p.Nombre.Contains(TextoBusquedaItem, StringComparison.OrdinalIgnoreCase))) { ResultadosBusquedaItem.Add(p); }
-            foreach (var s in servicios.Where(s => s.Nombre.Contains(TextoBusquedaItem, StringComparison.OrdinalIgnoreCase))) { ResultadosBusquedaItem.Add(s); }
+                // Ya no usamos .ToUpper() porque la base de datos ahora ignora mayúsculas/minúsculas
+                var productos = await _unitOfWork.Productos.GetByConditionAsync(p => p.Nombre.Contains(TextoBusquedaItem));
+                foreach (var p in productos) { ResultadosBusquedaItem.Add(p); }
+
+                var servicios = await _unitOfWork.Servicios.GetByConditionAsync(s => s.Nombre.Contains(TextoBusquedaItem));
+                foreach (var s in servicios) { ResultadosBusquedaItem.Add(s); }
+
+                OnPropertyChanged(nameof(ResultadosBusquedaItem));
+                IsProductPopupOpen = ResultadosBusquedaItem.Any();
+            }
+            finally
+            {
+                // 3. En el 'finally', nos aseguramos de que la bandera SIEMPRE se baje,
+                // permitiendo que la próxima búsqueda pueda ejecutarse.
+                _isBuscandoItems = false;
+            }
         }
 
         private void ExecuteAgregarItem(object item)
@@ -125,22 +252,34 @@ namespace DeluxeCarsDesktop.ViewModel
             if (item is Producto p)
             {
                 if (p.Stock < CantidadItem) { MessageBox.Show($"Stock insuficiente para '{p.Nombre}'. Disponible: {p.Stock}", "Stock Insuficiente", MessageBoxButton.OK, MessageBoxImage.Warning); return; }
+
+
                 detalle.TipoDetalle = "Producto";
+
                 detalle.IdItem = p.Id;
+
                 detalle.Descripcion = p.Nombre;
+
                 detalle.PrecioUnitario = p.Precio;
+
                 detalle.IVA = 19; // Asumir 19% o tomarlo de configuración
             }
+
             else if (item is Servicio s)
             {
                 detalle.TipoDetalle = "Servicio";
+
                 detalle.IdItem = s.Id;
+
                 detalle.Descripcion = s.Nombre;
+
                 detalle.PrecioUnitario = s.Precio;
+
                 detalle.IVA = 19;
             }
 
             LineasDeFactura.Add(detalle);
+
             RecalcularTotales();
         }
 
@@ -149,28 +288,34 @@ namespace DeluxeCarsDesktop.ViewModel
             if (item is DetalleFactura detalle)
             {
                 LineasDeFactura.Remove(detalle);
+
                 RecalcularTotales();
+
             }
         }
-
         private void RecalcularTotales()
         {
-            SubTotal = LineasDeFactura.Sum(d => d.SubTotalLinea);
-            TotalIVA = LineasDeFactura.Sum(d => d.SubTotalLinea * (d.IVA ?? 0) / 100);
+            SubTotal = LineasDeFactura.Sum(d => d.Cantidad * d.PrecioUnitario);
+            TotalIVA = LineasDeFactura.Sum(d => d.Cantidad * d.PrecioUnitario * (d.IVA ?? 19) / 100); // Asumimos 19% si es nulo
             Total = SubTotal + TotalIVA;
+            OnPropertyChanged(nameof(SubTotal));
+            OnPropertyChanged(nameof(TotalIVA));
+            OnPropertyChanged(nameof(Total));
         }
-
-        private async void ExecuteFinalizarVenta(object obj)
+        private async Task ExecuteFinalizarVenta()
         {
-            if (ClienteSeleccionado == null) { MessageBox.Show("Debe seleccionar un cliente.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning); return; }
-            if (!LineasDeFactura.Any()) { MessageBox.Show("La factura no tiene productos o servicios.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning); return; }
-            if (MetodoPagoSeleccionado == null) { MessageBox.Show("Debe seleccionar un método de pago.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning); return; }
+            if (ClienteSeleccionado == null || !LineasDeFactura.Any() || MetodoPagoSeleccionado == null)
+            {
+                MessageBox.Show("Debe seleccionar un cliente, un método de pago y añadir al menos un ítem.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
-            // Llenar la cabecera de la factura
+            // Llenar la cabecera
             _facturaEnProgreso.IdCliente = ClienteSeleccionado.Id;
             _facturaEnProgreso.IdMetodoPago = MetodoPagoSeleccionado.Id;
             _facturaEnProgreso.FechaEmision = DateTime.Now;
-            _facturaEnProgreso.NumeroFactura = $"F-{DateTime.Now:yyyyMMddHHmmss}"; // Lógica de numeración
+            _facturaEnProgreso.NumeroFactura = $"F-{DateTime.Now:yyyyMMddHHmmss}";
+            _facturaEnProgreso.IdUsuario = _currentUserService.CurrentUser?.Id;
             _facturaEnProgreso.SubTotal = SubTotal;
             _facturaEnProgreso.TotalIVA = TotalIVA;
             _facturaEnProgreso.Total = Total;
@@ -178,28 +323,52 @@ namespace DeluxeCarsDesktop.ViewModel
 
             try
             {
-                // Inicia la transacción
                 await _unitOfWork.Facturas.AddAsync(_facturaEnProgreso);
 
-                // Descontar stock
-                foreach (var detalle in _facturaEnProgreso.DetallesFactura.Where(d => d.TipoDetalle == "Producto"))
+                // Lógica de Stock Optimizada
+                var idsProductos = LineasDeFactura.Where(d => d.TipoDetalle == "Producto").Select(d => d.IdItem).ToList();
+                var productosAfectados = await _unitOfWork.Productos.GetByConditionAsync(p => idsProductos.Contains(p.Id));
+
+                foreach (var producto in productosAfectados)
                 {
-                    var producto = await _unitOfWork.Productos.GetByIdAsync(detalle.IdItem);
-                    if (producto != null)
+                    var cantidadVendida = LineasDeFactura.First(d => d.IdItem == producto.Id).Cantidad;
+                    if (producto.Stock >= cantidadVendida)
                     {
-                        producto.Stock -= detalle.Cantidad;
-                        await _unitOfWork.Productos.UpdateAsync(producto);
+                        producto.Stock -= cantidadVendida;
+                        // Ya no hay llamada a UpdateAsync. EF lo guardará al final.
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"Stock insuficiente para el producto '{producto.Nombre}'.");
                     }
                 }
 
-                await _unitOfWork.CompleteAsync(); // Confirma la transacción
+                await _unitOfWork.CompleteAsync(); // Confirma la transacción (guarda factura y actualiza stock)
                 MessageBox.Show($"Venta #{_facturaEnProgreso.NumeroFactura} finalizada exitosamente.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
-                InicializarNuevaVenta(); // Limpia el formulario para la siguiente venta
+                await InicializarNuevaVenta(); // Limpia el formulario para la siguiente venta
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ocurrió un error crítico al finalizar la venta: {ex.Message}", "Error de Guardado", MessageBoxButton.OK, MessageBoxImage.Error);
+                // Construimos un mensaje de error detallado para mostrarlo
+                string errorMessage = $"Error principal: {ex.Message}";
+
+                // Verificamos si hay una excepción interna (el error real de la BD)
+                if (ex.InnerException != null)
+                {
+                    errorMessage += $"\n\n--- DETALLES (InnerException) ---\n{ex.InnerException.Message}";
+
+                    // A veces, la excepción interna tiene OTRA excepción interna.
+                    // La buscamos también para tener toda la información.
+                    if (ex.InnerException.InnerException != null)
+                    {
+                        errorMessage += $"\n\n--- MÁS DETALLES ---\n{ex.InnerException.InnerException.Message}";
+                    }
+                }
+
+                MessageBox.Show(errorMessage, "Error de Guardado Detallado", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-    }
+
+    }    
 }
+
