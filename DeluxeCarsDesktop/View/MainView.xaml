@@ -8,6 +8,7 @@
         xmlns:viewModel="clr-namespace:DeluxeCarsDesktop.ViewModel"
         xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
         mc:Ignorable="d" 
+        xmlns:converters="clr-namespace:DeluxeCarsDesktop.Converters"
         xmlns:utils="clr-namespace:DeluxeCarsDesktop.Utils"
         x:Name="MainViewWindow"
         Title="Deluxe Cars" Height="720 " Width="1200"
@@ -16,56 +17,57 @@
         Background="Transparent"
         xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
         AllowsTransparency="True">
+
     <Window.Resources>
+        <ResourceDictionary>
 
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibility"/>
+            <utils:BindingProxy x:Key="Proxy" Data="{Binding}"/>
 
-        <utils:BindingProxy x:Key="Proxy" Data="{Binding}"/>
-        
-        <DataTemplate DataType="{x:Type viewModel:DashboardViewModel}">
-            <userControl:DashboardUserControl/>
-        </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:DashboardViewModel}">
+                <userControl:DashboardUserControl/>
+            </DataTemplate>
 
-        <DataTemplate DataType="{x:Type viewModel:CatalogoViewModel}">
-            <userControl:CatalogoUserControl/>
-        </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:CatalogoViewModel}">
+                <userControl:CatalogoUserControl/>
+            </DataTemplate>
 
-        <DataTemplate DataType="{x:Type viewModel:ClientesViewModel}">
-            <userControl:ClienteUserControl/>
-        </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:ClientesViewModel}">
+                <userControl:ClienteUserControl/>
+            </DataTemplate>
 
-        <DataTemplate DataType="{x:Type viewModel:ProveedorViewModel}">
-            <userControl:ProveedorUserControl/>
-        </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:ProveedorViewModel}">
+                <userControl:ProveedorUserControl/>
+            </DataTemplate>
 
-        <DataTemplate DataType="{x:Type viewModel:PedidoViewModel}">
-            <userControl:PedidoUserControl/>
-        </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:PedidoViewModel}">
+                <userControl:PedidoUserControl/>
+            </DataTemplate>
 
-        <DataTemplate DataType="{x:Type viewModel:FacturacionViewModel}">
-            <userControl:FacturacionUserControl/>
-        </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:FacturacionViewModel}">
+                <userControl:FacturacionUserControl/>
+            </DataTemplate>
 
-        <DataTemplate DataType="{x:Type viewModel:FacturasHistorialViewModel}">
-            <userControl:FacturasHistorialUserControl/>
-        </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:FacturasHistorialViewModel}">
+                <userControl:FacturasHistorialUserControl/>
+            </DataTemplate>
 
-        <DataTemplate DataType="{x:Type viewModel:ReportesViewModel}">
-            <userControl:ReportesUserControl/>
-        </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:ReportesViewModel}">
+                <userControl:ReportesUserControl/>
+            </DataTemplate>
 
-        <DataTemplate DataType="{x:Type viewModel:ConfiguracionViewModel}">
-            <userControl:ConfiguracionUserControl/>
-        </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:ConfiguracionViewModel}">
+                <userControl:ConfiguracionUserControl/>
+            </DataTemplate>
 
-        <DataTemplate DataType="{x:Type viewModel:UsuarioViewModel}">
-            <userControl:UsuarioUserControl/>
-        </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:UsuarioViewModel}">
+                <userControl:UsuarioUserControl/>
+            </DataTemplate>
 
-        <DataTemplate DataType="{x:Type viewModel:RolViewModel}">
-            <userControl:RolUserControl/>
-        </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:RolViewModel}">
+                <userControl:RolUserControl/>
+            </DataTemplate>
 
+        </ResourceDictionary>
     </Window.Resources>
 
 
@@ -142,7 +144,11 @@
                             <RadioButton Style="{StaticResource menuButton1}"
                                 Tag="{StaticResource color3}"
                                 Command="{Binding ShowCatalogoViewCommand}"
+                                         IsChecked="{Binding CurrentChildView, Mode=OneWay, 
+                                           Converter={StaticResource ViewModelToBoolConverter}, 
+                                               ConverterParameter='CatalogoViewModel'}"
                                  Margin="0,0,0,5">
+                                
                                 <StackPanel Orientation="Horizontal">
                                     <fa:IconImage Icon="List" Style="{StaticResource menuButtonIcon}"/>
                                     <TextBlock Text="Inventario" Style="{StaticResource menuButtonText}"/>
@@ -152,7 +158,11 @@
                             <RadioButton Style="{StaticResource menuButton1}"
                                  Tag="{StaticResource color4}"
                                  Command="{Binding ShowClienteViewCommand}"
-                                 Margin="0,0,0,5">
+                                 Margin="0,0,0,5"
+                                 IsChecked="{Binding CurrentChildView, Mode=OneWay,
+                                  Converter={StaticResource ViewModelToBoolConverter}, 
+                                      ConverterParameter='ClientesViewModel'}">
+
                                 <StackPanel Orientation="Horizontal">
                                     <fa:IconImage Icon="Users" Style="{StaticResource menuButtonIcon}"/>
                                     <TextBlock Text="Clientes" Style="{StaticResource menuButtonText}"/>
@@ -162,9 +172,14 @@
                             <RadioButton Style="{StaticResource menuButton1}"
                                  Tag="{StaticResource color5}"
                                  Command="{Binding ShowProveedorViewCommand}"
-                                 Margin="0,0,0,5">
+                                 Margin="0,0,0,5"
+                                 IsChecked="{Binding CurrentChildView, Mode=OneWay,
+                                  Converter={StaticResource ViewModelToBoolConverter}, 
+                                      ConverterParameter='ProveedorViewModel'}"
+                                 Visibility="{Binding IsAdmin, Converter={StaticResource BooleanToVisibilityConverter}}">
+
                                 <StackPanel Orientation="Horizontal">
-                                    <fa:IconImage Icon="Wallet" Style="{StaticResource menuButtonIcon}"/>
+                                    <fa:IconImage Icon="Truck" Style="{StaticResource menuButtonIcon}"/>
                                     <TextBlock Text="Proveedores" Style="{StaticResource menuButtonText}"/>
                                 </StackPanel>
                             </RadioButton>
@@ -172,7 +187,12 @@
                             <RadioButton Style="{StaticResource menuButton1}"
                                  Tag="{StaticResource color6}"
                                  Command="{Binding ShowComprasViewCommand}"
-                                 Margin="0,0,0,5">
+                                 Margin="0,0,0,5"
+                                 IsChecked="{Binding CurrentChildView, Mode=OneWay,
+                                  Converter={StaticResource ViewModelToBoolConverter}, 
+                                      ConverterParameter='PedidoViewModel'}"
+                                         Visibility="{Binding IsAdmin, Converter={StaticResource BooleanToVisibilityConverter}}">     
+
                                 <StackPanel Orientation="Horizontal">
                                     <fa:IconImage Icon="ShoppingCart" Style="{StaticResource menuButtonIcon}"/>
                                     <TextBlock Text="Pedidos" Style="{StaticResource menuButtonText}"/>
@@ -181,7 +201,12 @@
 
                             <RadioButton Style="{StaticResource menuButton1}"
                                          Tag="{StaticResource color7}"
-                                         Command="{Binding ShowPuntoDeVentaCommand}">   
+                                         Command="{Binding ShowPuntoDeVentaCommand}"
+                                          Margin="0,0,0,5"
+                                         IsChecked="{Binding CurrentChildView, Mode=OneWay,
+                                          Converter={StaticResource ViewModelToBoolConverter}, 
+                                              ConverterParameter='FacturacionViewModel'}">
+
                                 <StackPanel Orientation="Horizontal">
                                     <fa:IconImage Icon="CashRegister" Style="{StaticResource menuButtonIcon}"/>
                                     <TextBlock Text="Facturación" Style="{StaticResource menuButtonText}"/>
@@ -190,7 +215,12 @@
 
                             <RadioButton Style="{StaticResource menuButton1}"
                                          Tag="{StaticResource color8}"
-                                         Command="{Binding ShowHistorialVentasCommand}">
+                                         Command="{Binding ShowHistorialVentasCommand}"
+                                          Margin="0,0,0,5"
+                                         IsChecked="{Binding CurrentChildView, Mode=OneWay,
+                                          Converter={StaticResource ViewModelToBoolConverter}, 
+                                              ConverterParameter='FacturasHistorialViewModel'}">
+
                                 <StackPanel Orientation="Horizontal">
                                     <fa:IconImage Icon="History" Style="{StaticResource menuButtonIcon}"/>
                                     <TextBlock Text="Historial de Ventas" Style="{StaticResource menuButtonText}"/>
@@ -200,9 +230,14 @@
                             <RadioButton Style="{StaticResource menuButton1}"
                                  Tag="{StaticResource color9}"
                                  Command="{Binding ShowReportesViewCommand}"
-                                 Margin="0,0,0,10">
+                                 Margin="0,0,0,10"
+                                 IsChecked="{Binding CurrentChildView, Mode=OneWay,
+                                     Converter={StaticResource ViewModelToBoolConverter}, 
+                                         ConverterParameter='ReportesViewModel'}"
+                                         Visibility="{Binding IsAdmin, Converter={StaticResource BooleanToVisibilityConverter}}">
+
                                 <StackPanel Orientation="Horizontal">
-                                    <fa:IconImage Icon="FileAlt" Style="{StaticResource menuButtonIcon}"/>
+                                    <fa:IconImage Icon="ChartColumn" Style="{StaticResource menuButtonIcon}"/>
                                     <TextBlock Text="Reportes" Style="{StaticResource menuButtonText}"/>
                                 </StackPanel>
                             </RadioButton>
@@ -211,7 +246,12 @@
                             <RadioButton Style="{StaticResource menuButton1}"
                                          Tag="{StaticResource color13}"
                                          Command="{Binding ShowRolViewCommand}"
-                                         Margin="0,0,0,5">
+                                         Margin="0,0,0,5"
+                                         IsChecked="{Binding CurrentChildView, Mode=OneWay,
+                                             Converter={StaticResource ViewModelToBoolConverter}, 
+                                                 ConverterParameter='RolViewModel'}"
+                                         Visibility="{Binding IsAdmin, Converter={StaticResource BooleanToVisibilityConverter}}">
+
                                 <StackPanel Orientation="Horizontal">
                                     <fa:IconImage Icon="UserShield" Style="{StaticResource menuButtonIcon}"/>
                                     <TextBlock Text="Roles" Style="{StaticResource menuButtonText}"/>
@@ -221,9 +261,14 @@
                             <RadioButton Style="{StaticResource menuButton1}"
                                          Tag="{StaticResource color10}"
                                          Command="{Binding ShowUsuarioViewCommand}"
-                                         Margin="0,0,0,5">
+                                         Margin="0,0,0,5"
+                                         IsChecked="{Binding CurrentChildView, Mode=OneWay,
+                                             Converter={StaticResource ViewModelToBoolConverter}, 
+                                                 ConverterParameter='UsuarioViewModel'}"
+                                         Visibility="{Binding IsAdmin, Converter={StaticResource BooleanToVisibilityConverter}}">
+
                                 <StackPanel Orientation="Horizontal">
-                                    <fa:IconImage Icon="UserFriends" Style="{StaticResource menuButtonIcon}"/>
+                                    <fa:IconImage Icon="UserGear" Style="{StaticResource menuButtonIcon}"/>
                                     <TextBlock Text="Usuarios" Style="{StaticResource menuButtonText}"/>
                                 </StackPanel>
                             </RadioButton>
@@ -231,8 +276,12 @@
                             <RadioButton Style="{StaticResource menuButton1}"
                                          Tag="{StaticResource color12}"
                                          Command="{Binding ShowConfiguracionViewCommand}"
-                                         Visibility="{Binding IsAdmin, 
-                                                            Converter={StaticResource BooleanToVisibility}}">
+                                          Margin="0,0,0,5"
+                                         IsChecked="{Binding CurrentChildView, Mode=OneWay,
+                                             Converter={StaticResource ViewModelToBoolConverter}, 
+                                                 ConverterParameter='ConfiguracionViewModel'}"
+                                         Visibility="{Binding IsAdmin, Converter={StaticResource BooleanToVisibilityConverter}}">
+
                                 <StackPanel Orientation="Horizontal">
                                     <fa:IconImage Icon="Tools" Style="{StaticResource menuButtonIcon}"/>
                                     <TextBlock Text="Configuración" Style="{StaticResource menuButtonText}"/>
@@ -309,7 +358,18 @@
                         <!--Caption-->
                         <StackPanel Grid.Column="0"
                                     Orientation="Horizontal"
-                                    VerticalAlignment="Center">
+                                    VerticalAlignment="Center"
+                                    Margin="20,0,0,0">
+                            <Button Command="{Binding GoBackCommand}"
+                                    Style="{StaticResource iconButton}"
+                                    ToolTip="Volver"
+                                    Visibility="{Binding CanGoBack, 
+                                Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <fa:IconImage Icon="ArrowLeft" 
+                                              Width="16" Height="16"
+                                              Style="{StaticResource iconButtonIcon}"/> 
+                            </Button>
+                            
                             <fa:IconImage Icon="{Binding Icon}"
                                           Height="20"
                                           Width="20"
@@ -358,14 +418,28 @@
                                        FontSize="12"
                                        VerticalAlignment="Center"/>
 
-                            <Ellipse Height="25" Width="25"
-                                     Stroke="{StaticResource color2}"
-                                     StrokeThickness="2"
-                                     Margin="10,0,10,0" Cursor="Hand">
-                                <Ellipse.Fill>
-                                    <ImageBrush ImageSource="/Images/user.png"/>
-                                </Ellipse.Fill>
-                            </Ellipse>
+                            <Border Width="30" Height="30" CornerRadius="15" Margin="10,0,10,0">
+                                <Border.Background>
+                                    <Binding Path="CurrentUserAccount.DisplayName" Converter="{StaticResource NameToBrushConverter}"/>
+                                </Border.Background>
+
+                                <Grid>
+                                    <TextBlock Text="{Binding CurrentUserAccount.Initial}"
+                                               FontWeight="Bold" FontSize="14" Foreground="White"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+                                    <Ellipse>
+                                        <Ellipse.Fill>
+                                            <ImageBrush Stretch="UniformToFill">
+                                                <ImageBrush.ImageSource>
+                                                    <Binding Path="CurrentUserAccount.ProfilePicture" 
+                                                        Converter="{StaticResource ByteArrayToImageConverter}"/>
+                                                </ImageBrush.ImageSource>
+                                            </ImageBrush>
+                                        </Ellipse.Fill>
+                                    </Ellipse>
+                                </Grid>
+                            </Border>
 
                             <Button Style="{StaticResource iconButton}"
                                     Tag="{StaticResource color3}">

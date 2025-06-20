@@ -10,6 +10,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Fonts\Poppins-Bold.ttf" />
+    <None Remove="Fonts\Poppins-Light.ttf" />
+    <None Remove="Fonts\Poppins-Regular.ttf" />
+    <None Remove="Fonts\SourceSans3-Light.ttf" />
+    <None Remove="Fonts\SourceSans3-Regular.ttf" />
+    <None Remove="Fonts\SourceSans3-SemiBold.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="icono3.ico" />
   </ItemGroup>
 
@@ -28,6 +37,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Fonts\Poppins-Bold.ttf" />
+    <Resource Include="Fonts\Poppins-Light.ttf" />
+    <Resource Include="Fonts\Poppins-Regular.ttf" />
+    <Resource Include="Fonts\SourceSans3-Light.ttf" />
+    <Resource Include="Fonts\SourceSans3-Regular.ttf" />
+    <Resource Include="Fonts\SourceSans3-SemiBold.ttf" />
     <Resource Include="Images\background-car-image.jpg" />
     <Resource Include="Images\key-icon-png-11.jpg" />
     <Resource Include="Images\logo.lux.png" />

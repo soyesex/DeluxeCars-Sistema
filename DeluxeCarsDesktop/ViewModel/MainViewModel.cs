@@ -19,14 +19,14 @@ namespace DeluxeCarsDesktop.ViewModel
 {
     public class MainViewModel : ViewModelBase
     {
-        // --- Dependencias y Estado ---
+        //// --- Dependencias y Estado ---
         private readonly IUnitOfWork _unitOfWork; // <-- CAMBIO: Ahora usamos UnitOfWork
-        private readonly IServiceProvider _serviceProvider;
+        //private readonly IServiceProvider _serviceProvider;
+
         private readonly INavigationService _navigationService;
         private readonly ICurrentUserService _currentUserService;
 
-        // Nueva propiedad para el binding en XAML
-        public bool IsAdmin => _currentUserService.IsAdmin;
+        public bool CanGoBack => _navigationService.CanGoBack;
 
         private UserAccountModel _currentUserAccount;
         private ViewModelBase _currentChildView;
@@ -38,10 +38,16 @@ namespace DeluxeCarsDesktop.ViewModel
         // --- Propiedades Públicas para Binding ---
         public UserAccountModel CurrentUserAccount { get => _currentUserAccount; set => SetProperty(ref _currentUserAccount, value); }
         public ViewModelBase CurrentChildView { get => _currentChildView; set => SetProperty(ref _currentChildView, value); }
+        
         public string Caption { get => _caption; set => SetProperty(ref _caption, value); }
         public IconChar Icon { get => _icon; set => SetProperty(ref _icon, value); }
+        public bool IsAdmin => _currentUserService.IsAdmin;
+
+        
+
 
         // --- Comandos ---
+        public ICommand GoBackCommand { get; }
         public ICommand ShowHomeViewCommand { get; }
         public ICommand ShowCatalogoViewCommand { get; }
         public ICommand ShowClienteViewCommand { get; }
@@ -55,38 +61,69 @@ namespace DeluxeCarsDesktop.ViewModel
         public ICommand ShowConfiguracionViewCommand { get; }
         public ICommand LogoutCommand { get; }
 
-        public MainViewModel(ICurrentUserService currentUserService, IUnitOfWork unitOfWork, IServiceProvider serviceProvider, INavigationService navigationService)
+        public MainViewModel(ICurrentUserService currentUserService,
+            INavigationService navigationService, IUnitOfWork unitOfWork)
         {
-            // --- Inyección de Dependencias (CAMBIO) ---
-            _unitOfWork = unitOfWork;
-            _serviceProvider = serviceProvider;
+
             _navigationService = navigationService;
+            _unitOfWork = unitOfWork; // <-- Se asigna aquí
             _currentUserService = currentUserService;
 
-            // --- Inicialización de Comandos ---
-            ShowHomeViewCommand = new ViewModelCommand(async (p) => await ExecuteShowHomeViewCommand(p));
-            ShowCatalogoViewCommand = new ViewModelCommand(ExecuteShowCatalogViewCommand);
-            ShowClienteViewCommand = new ViewModelCommand(ExecuteShowCustomerViewCommand);
-            ShowProveedorViewCommand = new ViewModelCommand(ExecuteShowSupplierViewCommand);
-            ShowComprasViewCommand = new ViewModelCommand(ExecuteShowShoppingViewCommand);
-            ShowPuntoDeVentaCommand = new ViewModelCommand(ExecuteShowPuntoDeVentaCommand);
-            ShowHistorialVentasCommand = new ViewModelCommand(ExecuteShowHistorialVentasCommand);
-            ShowReportesViewCommand = new ViewModelCommand(ExecuteShowReportViewCommand);
-            ShowUsuarioViewCommand = new ViewModelCommand(ExecuteShowUsuarioViewCommand);
-            ShowRolViewCommand = new ViewModelCommand(ExecuteShowRollViewCommand);
-            ShowConfiguracionViewCommand = new ViewModelCommand(ExecuteShowConfigurationViewCommand);
-            LogoutCommand = new ViewModelCommand(ExecuteLogout);
+            // Nos suscribimos al evento del servicio para reaccionar a los cambios de navegación
+            _navigationService.CurrentMainViewChanged += OnCurrentMainViewChanged;
 
-            // --- Carga Inicial ---
-            ExecuteShowHomeViewCommand(null); // Vista por defecto
+            // --- Comandos de Navegación SIMPLIFICADOS ---
+            ShowHomeViewCommand = new ViewModelCommand(async p => await _navigationService.NavigateTo<DashboardViewModel>());
+            ShowCatalogoViewCommand = new ViewModelCommand(async p => await _navigationService.NavigateTo<CatalogoViewModel>());
+            ShowClienteViewCommand = new ViewModelCommand(async p => await _navigationService.NavigateTo<ClientesViewModel>());
+            ShowProveedorViewCommand = new ViewModelCommand(async p => await _navigationService.NavigateTo<ProveedorViewModel>());
+            ShowComprasViewCommand = new ViewModelCommand(async p => await _navigationService.NavigateTo<PedidoViewModel>());
+            ShowPuntoDeVentaCommand = new ViewModelCommand(async p => await _navigationService.NavigateTo<FacturacionViewModel>());
+            ShowHistorialVentasCommand = new ViewModelCommand(async p => await _navigationService.NavigateTo<FacturasHistorialViewModel>());
+            ShowReportesViewCommand = new ViewModelCommand(async p => await _navigationService.NavigateTo<ReportesViewModel>());
+            ShowUsuarioViewCommand = new ViewModelCommand(async p => await _navigationService.NavigateTo<UsuarioViewModel>());
+            ShowRolViewCommand = new ViewModelCommand(async p => await _navigationService.NavigateTo<RolViewModel>());
+            ShowConfiguracionViewCommand = new ViewModelCommand(async p => await _navigationService.NavigateTo<ConfiguracionViewModel>());
+
+            // --- Comando para Volver ---
+            GoBackCommand = new ViewModelCommand(p => _navigationService.GoBack(), p => _navigationService.CanGoBack);
+            LogoutCommand = new ViewModelCommand(ExecuteLogout);
         }
 
-        // --- Métodos de Ejecución de Comandos ---
-        // --- NUEVO MÉTODO DE INICIALIZACIÓN ASÍNCRONA ---
+        // Este método se ejecuta cada vez que el NavigationService cambia la vista.
+        // Tu implementación actual ya es PERFECTA. No necesita cambios.
+        private void OnCurrentMainViewChanged()
+        {
+            CurrentChildView = _navigationService.CurrentMainView;
+            OnPropertyChanged(nameof(CurrentChildView)); // Notificamos a la UI para que actualice el ContentControl
+            UpdateCaptionAndIcon(CurrentChildView); // Llamamos al método que pone el título/ícono
+            (GoBackCommand as ViewModelCommand)?.RaiseCanExecuteChanged(); // Notificamos al botón "Volver"
+            OnPropertyChanged(nameof(CanGoBack)); // <-- AÑADE ESTA LÍNEA
+        }
+
+        // Este método se ejecuta una sola vez al iniciar la aplicación.
+        // Tu implementación actual también es PERFECTA. No necesita cambios.
         public async Task InitializeAsync()
         {
-            await LoadCurrentUserData();
-            ExecuteShowHomeViewCommand(null); // Carga la vista por defecto
+            await LoadCurrentUserData(); // Carga los datos del usuario logueado
+            await _navigationService.NavigateTo<DashboardViewModel>();// Carga la vista por defecto (el dashboard)
+        }
+
+        // Centraliza toda la lógica para actualizar el título y el ícono de la ventana.
+        private void UpdateCaptionAndIcon(ViewModelBase viewModel)
+        {
+            if (viewModel is DashboardViewModel) { Caption = "Panel Principal"; Icon = IconChar.Home; }
+            else if (viewModel is CatalogoViewModel) { Caption = "Inventario"; Icon = IconChar.List; }
+            else if (viewModel is ClientesViewModel) { Caption = "Clientes"; Icon = IconChar.Users; }
+            else if (viewModel is ProveedorViewModel) { Caption = "Proveedores"; Icon = IconChar.Truck; }
+            else if (viewModel is PedidoViewModel) { Caption = "Pedidos"; Icon = IconChar.ShoppingCart; }
+            else if (viewModel is FacturacionViewModel) { Caption = "Punto de Venta (POS)"; Icon = IconChar.CashRegister; }
+            else if (viewModel is FacturasHistorialViewModel) { Caption = "Historial de Ventas"; Icon = IconChar.History; }
+            else if (viewModel is ReportesViewModel) { Caption = "Reportes"; Icon = IconChar.ChartColumn; }
+            else if (viewModel is UsuarioViewModel) { Caption = "Usuarios"; Icon = IconChar.UserGear; }
+            else if (viewModel is RolViewModel) { Caption = "Roles de Usuario"; Icon = IconChar.UserShield; }
+            else if (viewModel is ConfiguracionViewModel) { Caption = "Configuración"; Icon = IconChar.Tools; }
+            else { Caption = "Deluxe Cars"; Icon = IconChar.Car; } // Un valor por defecto
         }
         private void ExecuteLogout(object obj)
         {
@@ -101,113 +138,15 @@ namespace DeluxeCarsDesktop.ViewModel
             // Es más limpio que reiniciar la aplicación.
             LogoutSuccess?.Invoke();
         }
-        // En MainViewModel.cs
-
-        // Este método se encarga de mostrar la pantalla del POS y llamar a su inicialización
-        private async void ExecuteShowPuntoDeVentaCommand(object obj)
-        {
-            var vm = _serviceProvider.GetService<FacturacionViewModel>();
-            await vm.OnNavigatedTo();
-            CurrentChildView = vm;
-            Caption = "Punto de Venta (POS)";
-            Icon = IconChar.CashRegister;
-        }
-
-        // Este método ahora se suscribe al evento del historial
-        private void ExecuteShowHistorialVentasCommand(object obj)
-        {
-            var vm = _serviceProvider.GetService<FacturasHistorialViewModel>();
-
-            // SUSCRIPCIÓN AL EVENTO:
-            // Cuando el historial pida una nueva factura, ejecuta el comando que muestra el POS.
-            vm.OnRequestNuevaFactura += () => ExecuteShowPuntoDeVentaCommand(null);
-
-            CurrentChildView = vm;
-            Caption = "Historial de Ventas";
-            Icon = IconChar.History;
-        }   
-        private async Task ExecuteShowHomeViewCommand(object obj)
-        {
-            // 1. Se crea una nueva instancia del DashboardViewModel
-            CurrentChildView = _serviceProvider.GetService<DashboardViewModel>();
-
-            // 2. Se asigna inmediatamente a la vista actual.
-            // NUNCA se llama a su método LoadAsync().
-
-            Caption = "Panel Principal";
-            Icon = IconChar.Home;
-        }
-
-        private void ExecuteShowCatalogViewCommand(object obj)
-        {
-            CurrentChildView = _serviceProvider.GetService<CatalogoViewModel>();
-            Caption = "Inventario";
-            Icon = IconChar.List;
-        }
-
-        private void ExecuteShowCustomerViewCommand(object obj)
-        {
-            CurrentChildView = _serviceProvider.GetService<ClientesViewModel>();
-            Caption = "Clientes";
-            Icon = IconChar.Users;
-        }
-
-        private void ExecuteShowSupplierViewCommand(object obj)
-        {
-            CurrentChildView = _serviceProvider.GetService<ProveedorViewModel>();
-            Caption = "Proveedores";
-            Icon = IconChar.Truck;
-        }
-
-        private void ExecuteShowShoppingViewCommand(object obj)
-        {
-            CurrentChildView = _serviceProvider.GetService<PedidoViewModel>();
-            Caption = "Pedidos";
-            Icon = IconChar.ShoppingCart;
-        }
-
-        private void ExecuteShowBillingViewCommand(object obj)
-        {
-            CurrentChildView = _serviceProvider.GetService<FacturacionViewModel>();
-            Caption = "Facturación (Punto de Venta)";
-            Icon = IconChar.FileInvoiceDollar;
-        }
-
-        private void ExecuteShowReportViewCommand(object obj)
-        {
-            CurrentChildView = _serviceProvider.GetService<ReportesViewModel>();
-            Caption = "Reportes";
-            Icon = IconChar.ChartColumn;
-        }
-
-        private void ExecuteShowUsuarioViewCommand(object obj)
-        {
-            CurrentChildView = _serviceProvider.GetService<UsuarioViewModel>();
-            Caption = "Usuarios";
-            Icon = IconChar.UserGear;
-        }
-
-        private void ExecuteShowRollViewCommand(object obj)
-        {
-            CurrentChildView = _serviceProvider.GetService<RolViewModel>();
-            Caption = "Roles de Usuario";
-            Icon = IconChar.UserShield;
-        }
-
-        private void ExecuteShowConfigurationViewCommand(object obj)
-        {
-            CurrentChildView = _serviceProvider.GetService<ConfiguracionViewModel>();
-            Caption = "Configuración";
-            Icon = IconChar.Tools;
-        }
-
+        
         private async Task LoadCurrentUserData()
         {
             var identityName = Thread.CurrentPrincipal?.Identity?.Name;
             if (string.IsNullOrWhiteSpace(identityName))
             {
                 _currentUserService.ClearCurrentUser();
-                CurrentUserAccount = new UserAccountModel { DisplayName = "Usuario no autenticado" };
+                // CORRECCIÓN: Asignamos un FirstName para que el DisplayName se genere solo.
+                CurrentUserAccount = new UserAccountModel { FirstName = "Invitado" };
             }
             else
             {
@@ -223,20 +162,23 @@ namespace DeluxeCarsDesktop.ViewModel
                         // Actualizamos la UI con los datos de la cuenta
                         CurrentUserAccount = new UserAccountModel
                         {
-                            Username = user.Email,
-                            DisplayName = $"Bienvenido, {user.Nombre}",
+                            Username = user.Email, // <-- Esta línea ya no es necesaria
+                            FirstName = user.Nombre, // <-- AÑADE ESTA LÍNEA
+                            ProfilePicture = user.ProfilePicture
                         };
                     }
                     else
                     {
                         _currentUserService.ClearCurrentUser();
-                        CurrentUserAccount = new UserAccountModel { DisplayName = "Usuario no encontrado o inactivo" };
+                        CurrentUserAccount = new UserAccountModel { FirstName = "Desconocido" };
                     }
                 }
                 catch (Exception ex)
                 {
+                    // --- Caso 4: Ocurrió un error ---
                     _currentUserService.ClearCurrentUser();
-                    CurrentUserAccount = new UserAccountModel { DisplayName = "Error al cargar" };
+                    // CORRECCIÓN: Asignamos un FirstName para el estado de error.
+                    CurrentUserAccount = new UserAccountModel { FirstName = "Error" };
                     System.Diagnostics.Debug.WriteLine($"Error cargando datos de usuario: {ex.Message}");
                 }
             }

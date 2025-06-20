@@ -1,22 +1,53 @@
 ﻿<Application x:Class="DeluxeCarsDesktop.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:DeluxeCarsDesktop">
-    <!--StartupUri="MainWindow.xaml"-->
-    
+             xmlns:local="clr-namespace:DeluxeCarsDesktop"
+             xmlns:converters="clr-namespace:DeluxeCarsDesktop.Converters">
     <Application.Resources>
-
         <ResourceDictionary>
+
             <ResourceDictionary.MergedDictionaries>
-                
                 <ResourceDictionary Source="/Styles/UIColors.xaml"/>
                 <ResourceDictionary Source="/Styles/ButtonStyle.xaml"/>
-
-                <!--<ResourceDictionary Source="/Styles/DataGrid.xaml"/>
-                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />-->
             </ResourceDictionary.MergedDictionaries>
+
+            <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            <converters:ByteArrayToImageSourceConverter x:Key="ByteArrayToImageConverter"/>
+            <converters:ViewModelTypeToBooleanConverter x:Key="ViewModelToBoolConverter"/>
+            <converters:NameToBrushConverter x:Key="NameToBrushConverter"/>
+
+            <BitmapImage x:Key="DefaultUserImage" UriSource="/Images/user.png" />
+            <FontFamily x:Key="Font.Poppins">/DeluxeCarsDesktop;component/Fonts/#Poppins</FontFamily>
+
+            <Style x:Key="H1TextStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource Font.Poppins}" />
+                <Setter Property="FontWeight" Value="UltraBlack" />
+                <Setter Property="FontSize" Value="35" />
+                <Setter Property="Foreground" Value="#F1F1F1" />
+            </Style>
+
+            <Style x:Key="H2TextStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource Font.Poppins}" />
+                <Setter Property="FontWeight" Value="Medium" />
+                <Setter Property="FontSize" Value="20" />
+                <Setter Property="Foreground" Value="#F1F1F1" />
+            </Style>
+
+            <FontFamily x:Key="Font.SourceSans3">/DeluxeCarsDesktop;component/Fonts/#Source Sans 3</FontFamily>
+
+            <Style x:Key="BodyTextStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource Font.SourceSans3}" />
+                <Setter Property="FontWeight" Value="Regular" />
+                <Setter Property="FontSize" Value="15" />
+                <Setter Property="Foreground" Value="#D8D8D8" />
+            </Style>
+
+            <Style x:Key="SecondaryTextStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource Font.SourceSans3}" />
+                <Setter Property="FontWeight" Value="Regular" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="Foreground" Value="#8892B0" />
+            </Style>
 
         </ResourceDictionary>
     </Application.Resources>

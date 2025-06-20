@@ -1,6 +1,23 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
+    <Color x:Key="Color.Aggressive.DeepBlue">#0D2149</Color>
+    <Color x:Key="Color.Aggressive.RacingRed">#D72638</Color>
+    <Color x:Key="Color.Aggressive.DarkerBlue">#061229</Color>
 
+    <SolidColorBrush x:Key="Brush.Aggressive.DeepBlue" Color="{StaticResource Color.Aggressive.DeepBlue}"/>
+    <SolidColorBrush x:Key="Brush.Aggressive.RacingRed" Color="{StaticResource Color.Aggressive.RacingRed}"/>
+    <SolidColorBrush x:Key="Brush.Aggressive.DarkerBlue" Color="{StaticResource Color.Aggressive.DarkerBlue}"/>
+
+    <Color x:Key="Color.Tech.Charcoal">#0A192F</Color>
+    <Color x:Key="Color.Tech.ElectricBlue">#00BFFF</Color>
+    <Color x:Key="Color.Tech.DarkCharcoal">#020c1b</Color>
+
+    <SolidColorBrush x:Key="Brush.Tech.Charcoal" Color="{StaticResource Color.Tech.Charcoal}"/>
+    <SolidColorBrush x:Key="Brush.Tech.ElectricBlue" Color="{StaticResource Color.Tech.ElectricBlue}"/>
+    <SolidColorBrush x:Key="Brush.Tech.DarkCharcoal" Color="{StaticResource Color.Tech.DarkCharcoal}"/>
+
+    
 
     <Color x:Key="Color.PrimaryBack1">#0A0E21</Color>
     <Color x:Key="Color.PrimaryBack2">#151933</Color>
@@ -40,14 +57,23 @@
     <SolidColorBrush x:Key="color4" Color="#CCCCFF"/>
     <SolidColorBrush x:Key="color5" Color="#FFCC66"/>
     <SolidColorBrush x:Key="color6" Color="#FF9966"/>
-    <SolidColorBrush x:Key="color7" Color="#CC6699"/>
-    <SolidColorBrush x:Key="color8" Color="#9966CC"/>
+    <SolidColorBrush x:Key="color8" Color="#2A9D8F"/>
+    <SolidColorBrush x:Key="color10" Color="#9966CC"/>
     <SolidColorBrush x:Key="color9" Color="#66CCCC"/>
-    <SolidColorBrush x:Key="color10" Color="#669966"/>
-    <SolidColorBrush x:Key="color12" Color="#CCCC66"/>
-    <SolidColorBrush x:Key="color13" Color="#336633"/>
+    <SolidColorBrush x:Key="color15" Color="#A8201A"/>
+    
+    <SolidColorBrush x:Key="color13" Color="#CC6699"/>
     
     
+    
+    <SolidColorBrush x:Key="color7" Color="#669966"/>
+    <SolidColorBrush x:Key="color11" Color="#336633"/>
+
+    
+    <SolidColorBrush x:Key="color12" Color="#6A1B9A"/>
+
+    <SolidColorBrush x:Key="color14" Color="#264653"/>
+
     <SolidColorBrush x:Key="plainTextColor2" Color="#606060"/>
     <SolidColorBrush x:Key="plainTextColor3" Color="#404040"/>
 

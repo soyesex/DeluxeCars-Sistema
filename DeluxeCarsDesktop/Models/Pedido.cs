@@ -14,7 +14,7 @@ namespace DeluxeCarsDesktop.Models
         public DateTime PlazoEntrega { get; set; }
         public int IdProveedor { get; set; }
         public int IdMetodoPago { get; set; }
-        public string Observaciones { get; set; }
+        public string? Observaciones { get; set; }
         public int IdUsuario { get; set; }
 
         // Navigation Properties

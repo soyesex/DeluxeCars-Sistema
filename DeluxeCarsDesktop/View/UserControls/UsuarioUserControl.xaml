@@ -23,8 +23,12 @@
                      Tag="Buscar por nombre o email..."/>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="Nuevo Usuario" Command="{Binding NuevoUsuarioCommand}" Style="{StaticResource DarkActionButtonStyle}" Margin="10,0,0,0" Width="Auto" Padding="15,0"/>
-                <Button Content="Editar Usuario" Command="{Binding EditarUsuarioCommand}" Style="{StaticResource DarkActionButtonStyle}" Margin="10,0,0,0" Width="Auto" Padding="15,0"/>
+                <Button Content="Nuevo Usuario" 
+                        Visibility="{Binding IsAdmin, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        Command="{Binding NuevoUsuarioCommand}" Style="{StaticResource DarkActionButtonStyle}" Margin="10,0,0,0" Width="Auto" Padding="15,0"/>
+                <Button Content="Editar Usuario" 
+                        Visibility="{Binding IsAdmin, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        Command="{Binding EditarUsuarioCommand}" Style="{StaticResource DarkActionButtonStyle}" Margin="10,0,0,0" Width="Auto" Padding="15,0"/>
                 <Button Content="Cambiar Contraseña" Command="{Binding CambiarPasswordCommand}" Style="{StaticResource DarkActionButtonStyle}" Margin="10,0,0,0" Width="Auto" Padding="15,0"/>
                 <Button Content="Activar/Desactivar" Command="{Binding ToggleEstadoCommand}" Style="{StaticResource DarkActionButtonStyle}" Margin="10,0,0,0" Width="Auto" Padding="15,0"/>
             </StackPanel>

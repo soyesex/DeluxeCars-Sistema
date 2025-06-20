@@ -29,19 +29,91 @@ namespace DeluxeCarsDesktop.Repositories
                                  .ToListAsync();
         }
 
-        public bool RecoverPassword(string usernameOrEmail)
+        // MÉTODO 1 ACTUALIZADO: Para generar el token
+        public async Task<PasswordReset> GeneratePasswordResetTokenAsync(string email)
         {
-            throw new NotImplementedException();
+            var user = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == email);
+            if (user == null)
+            {
+                return null; // No revelamos si el email existe
+            }
+
+            var passwordReset = new PasswordReset
+            {
+                UsuarioId = user.Id,
+                // El Token y FechaCreacion se generan por defecto en la BD.
+                // Establecemos una expiración, por ejemplo, de 1 hora.
+                FechaExpiracion = DateTime.UtcNow.AddHours(1),
+                Usado = false
+            };
+
+            await _context.PasswordResets.AddAsync(passwordReset);
+            // El UnitOfWork.CompleteAsync() guardará este registro.
+
+            // Devolvemos el token en formato string para que sea fácil de manejar.
+            return passwordReset;
         }
 
-        public void Remove(int id)
+
+        // MÉTODO 2 ACTUALIZADO: Para validar el token y cambiar la contraseña
+        public async Task<bool> ResetPasswordAsync(string email, string token, string newPassword)
         {
-            throw new NotImplementedException();
+            // Intentamos convertir el string del token a Guid
+            if (!Guid.TryParse(token, out Guid tokenGuid))
+            {
+                return false; // El token no tiene el formato correcto.
+            }
+
+            // Buscamos al usuario para obtener su ID
+            var user = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == email);
+            if (user == null) return false;
+
+            // Buscamos un token válido para ese usuario
+            var passwordResetRequest = await _context.PasswordResets
+                .FirstOrDefaultAsync(pr => pr.UsuarioId == user.Id
+                                       && pr.Token == tokenGuid
+                                       && pr.FechaExpiracion > DateTime.UtcNow
+                                       && !pr.Usado);
+
+            if (passwordResetRequest == null)
+            {
+                return false; // No se encontró un token válido.
+            }
+
+            // Creamos el nuevo hash y salt
+            PasswordHelper.CreatePasswordHash(newPassword, out byte[] passwordHash, out byte[] passwordSalt);
+
+            // Actualizamos el usuario
+            user.PasswordHash = passwordHash;
+            user.PasswordSalt = passwordSalt;
+
+            // Marcamos el token como usado para que no se pueda volver a utilizar.
+            passwordResetRequest.Usado = true;
+
+            // El UnitOfWork.CompleteAsync() guardará ambos cambios (usuario y token).
+            return true;
         }
 
-        public bool ValidateTokenAndResetPassword(string correo, string token, string nuevaPassword)
+        public async Task UpdateUserPassword(int userId, string newPassword)
         {
-            throw new NotImplementedException();
+            // 1. Buscamos al usuario en la base de datos por su ID.
+            var user = await _context.Usuarios.FindAsync(userId);
+
+            if (user != null)
+            {
+                // 2. Si el usuario existe, usamos tu PasswordHelper para crear el nuevo hash y salt.
+                PasswordHelper.CreatePasswordHash(newPassword, out byte[] passwordHash, out byte[] passwordSalt);
+
+                // 3. Actualizamos las propiedades del objeto 'user' que ya está siendo
+                //    rastreado por el DbContext.
+                user.PasswordHash = passwordHash;
+                user.PasswordSalt = passwordSalt;
+
+                // No es necesario llamar a _context.Update(user) aquí.
+                // Con solo modificar el objeto, Entity Framework ya sabe que ha cambiado.
+                // El UnitOfWork.CompleteAsync() se encargará de guardar este cambio.
+            }
+            // Si el usuario no se encuentra, el método simplemente no hace nada.
         }
 
         public async Task<Usuario> RegisterUser(Usuario newUser, string password)

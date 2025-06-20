@@ -13,27 +13,50 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
-            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" 
-                      Style="{StaticResource SearchBoxStyle}" 
-                     Width="200" VerticalAlignment="Center"
-                     Tag="Buscar por nombre u OEM..."/>
+        <Grid Grid.Row="0" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
 
-            <ComboBox ItemsSource="{Binding CategoriasDisponibles}"
+            <Border Background="Transparent">
+                <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
+
+                    <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" 
+                     Style="{StaticResource SearchBoxStyle}" 
+                     Width="200" Tag="Buscar texto universal..."/>
+
+                    <ComboBox ItemsSource="{Binding CategoriasDisponibles}"
                       SelectedItem="{Binding CategoriaFiltroSeleccionada}"
                       Style="{StaticResource DarkComboBoxStyle}"
                       DisplayMemberPath="Nombre"
-                      Width="200" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                      Width="180" Margin="10,5,5,5"/>
 
-            <Button Content="Nuevo Producto" Style="{StaticResource DarkActionButtonStyle}" 
-                    Command="{Binding NuevoProductoCommand}" Margin="20,0,0,0" VerticalAlignment="Center"/>
+                    <ComboBox ItemsSource="{Binding StockStatusOptions}" 
+                      SelectedItem="{Binding StockStatusFiltroSeleccionado}" 
+                      Style="{StaticResource DarkComboBoxStyle}"
+                      Width="120" Margin="5"/>
+                    
 
-            <Button Content="Editar" Style="{StaticResource DarkActionButtonStyle}" 
-                    Command="{Binding EditarProductoCommand}" Margin="10,0,0,0" VerticalAlignment="Center"/>
-            
-            <Button Content="Eliminar" Style="{StaticResource DarkActionButtonStyle}" 
-                    Command="{Binding EliminarProductoCommand}" Margin="10,0,0,0" VerticalAlignment="Center"/>
-        </StackPanel>
+                    <Button Content="Limpiar" 
+                    Command="{Binding LimpiarFiltrosCommand}" 
+                    Style="{StaticResource DarkActionButtonStyle}"
+                    Margin="10,5,5,5"/>
+
+                    <Button Content="Ajuste Manual" Style="{StaticResource DarkActionButtonStyle}" Command="{Binding AjusteManualCommand}"/>
+                </WrapPanel>
+            </Border>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button Content="Nuevo Producto" Style="{StaticResource DarkActionButtonStyle}" 
+                Command="{Binding NuevoProductoCommand}"/>
+                <Button Content="Editar" Style="{StaticResource DarkActionButtonStyle}" 
+                Command="{Binding EditarProductoCommand}" Margin="10,0,0,0"/>
+                <Button Content="Eliminar" Style="{StaticResource DarkActionButtonStyle}" 
+                Command="{Binding EliminarProductoCommand}" Margin="10,0,0,0"/>
+            </StackPanel>
+
+        </Grid>
 
         <Border Grid.Row="1" CornerRadius="10" 
                 Background="{StaticResource PrimaryBackgroundColor}" 
@@ -47,11 +70,11 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
                     <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="*"/>
-                    <DataGridTextColumn Header="OEM" Binding="{Binding OriginalEquipamentManufacture}" Width="120"/>
-                    <DataGridTextColumn Header="ID Categoría" Binding="{Binding IdCategoria}" Width="150"/>
+                    <DataGridTextColumn Header="OEM" Binding="{Binding OEM}" Width="120"/>
+                    <DataGridTextColumn Header="Categoría" Binding="{Binding CategoriaNombre}" Width="150"/>
                     <DataGridTextColumn Header="Precio" Binding="{Binding Precio, StringFormat=C, ConverterCulture=es-CO}" Width="100"/>
-                    <DataGridTextColumn Header="Stock" Binding="{Binding Stock}" Width="70"/>
-                    <DataGridCheckBoxColumn Header="Activo" Binding="{Binding Estado}" Width="70"/>
+                    <DataGridTextColumn Header="Stock" Binding="{Binding StockCalculado}" Width="70"/>
+                    <DataGridCheckBoxColumn Header="Activo" Binding="{Binding Estado, Mode=OneWay}" Width="70"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>

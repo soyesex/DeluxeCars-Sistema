@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="600">
+             d:DesignHeight="600" d:DesignWidth="600">
     <StackPanel Margin="20">
 
         <Grid>
@@ -16,6 +16,8 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/> 
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -41,18 +43,29 @@
                       SelectedItem="{Binding CategoriaSeleccionada}"
                       DisplayMemberPath="Nombre" Margin="5"/>
 
-            <Label Grid.Row="3" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="Precio" VerticalAlignment="Center"/>
+            <Label Grid.Row="3" Style="{StaticResource DarkLableForm}" 
+                   Grid.Column="0" Content="Precio" VerticalAlignment="Center"/>
+            
             <TextBox Grid.Row="3" Grid.Column="1" Style="{StaticResource DarkInputControlStyle}" Text="{Binding Precio, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
 
-            <Label Grid.Row="4" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="Stock" VerticalAlignment="Center"/>
-            <TextBox Grid.Row="4" Style="{StaticResource DarkInputControlStyle}" Grid.Column="1" Text="{Binding Stock, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+            <Label Grid.Row="4" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="Stock Actual" VerticalAlignment="Center"/>
+            <TextBox Grid.Row="4" Grid.Column="1" 
+                     Text="{Binding Stock, Mode=OneWay}" IsReadOnly="True" 
+                     ToolTip="El stock se modifica desde los Pedidos y Facturas."
+                     Style="{StaticResource DarkInputControlStyle}" Margin="5"/>
 
-            <Label Grid.Row="5" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="Descripción" VerticalAlignment="Center"/>
-            <TextBox Grid.Row="5" Grid.Column="1" Style="{StaticResource DarkInputControlStyle}"
+            <Label Grid.Row="5" Grid.Column="0" Content="Stock Mínimo:" VerticalAlignment="Center" Style="{StaticResource DarkLableForm}"/>
+            <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding StockMinimo}" Style="{StaticResource DarkInputControlStyle}" Margin="5"/>
+
+            <Label Grid.Row="6" Grid.Column="0" Content="Stock Máximo:" VerticalAlignment="Center" Style="{StaticResource DarkLableForm}"/>
+            <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding StockMaximo}" Style="{StaticResource DarkInputControlStyle}" Margin="5"/>
+
+            <Label Grid.Row="7" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="Descripción" VerticalAlignment="Center"/>
+            <TextBox Grid.Row="7" Grid.Column="1" Style="{StaticResource DarkInputControlStyle}"
                      Text="{Binding Descripcion, UpdateSourceTrigger=PropertyChanged}" Margin="5" Height="80" TextWrapping="Wrap" AcceptsReturn="True"/>
 
-            <Label Grid.Row="6" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="Activo" VerticalAlignment="Center"/>
-            <CheckBox Grid.Row="6" Grid.Column="1" IsChecked="{Binding Estado}" VerticalAlignment="Center" Margin="5"/>
+            <Label Grid.Row="8" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="Activo" VerticalAlignment="Center"/>
+            <CheckBox Grid.Row="8" Grid.Column="1" IsChecked="{Binding Estado}" VerticalAlignment="Center" Margin="5"/>
         </Grid>
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">

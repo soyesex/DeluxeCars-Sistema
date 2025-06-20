@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         xmlns:viewModel="clr-namespace:DeluxeCarsDesktop.ViewModel"
         xmlns:customcontrols="clr-namespace:DeluxeCarsDesktop.CustomControls"
-        Title="LoginView"  Height="500" Width="800"
+        Title="Registrate!"  Height="550" Width="800"
         WindowStyle="None"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
@@ -29,21 +29,20 @@
         </Border.Background>
 
         <Border CornerRadius="12"
-        BorderThickness="3"
-        Opacity="0.75">
+    BorderThickness="3">
 
             <Border.BorderBrush>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="{StaticResource Color.WinBorder1}" Offset="0"/>
-                    <GradientStop Color="{StaticResource Color.WinBorder2}" Offset="0.75"/>
-                    <GradientStop Color="{StaticResource Color.WinBorder3}" Offset="1"/>
+                    <GradientStop Color="{StaticResource Color.Aggressive.RacingRed}" Offset="0"/>
+                    <GradientStop Color="{StaticResource Color.Aggressive.DeepBlue}" Offset="0.5"/>
+                    <GradientStop Color="{StaticResource Color.Aggressive.DeepBlue}" Offset="1"/>
                 </LinearGradientBrush>
             </Border.BorderBrush>
 
             <Border.Background>
-                <LinearGradientBrush StartPoint="0,1" EndPoint="1,0">
+                <LinearGradientBrush StartPoint="0,1" EndPoint="1,0" Opacity="0.75">
                     <GradientStop Color="{StaticResource Color.PrimaryBack1}" Offset="0"/>
-                    <GradientStop Color="{StaticResource Color.PrimaryBack2}" Offset="0.75"/>
+                    <GradientStop Color="{StaticResource Color.PrimaryBack2}" Offset="0.65"/>
                 </LinearGradientBrush>
             </Border.Background>
 
@@ -56,15 +55,15 @@
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
-                        <ColumnDefinition Width="25"/>
-                        <ColumnDefinition Width="25"/>
+                        <ColumnDefinition Width="30"/>
+                        <ColumnDefinition Width="30"/>
                         <ColumnDefinition Width="5"/>
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Text="Registro"
                                Foreground="DarkGray"
-                               FontSize="10"
-                               FontFamily="Montserrat"
+                               FontSize="12"
+                               FontFamily="{StaticResource Font.SourceSans3}"
                                Grid.Column="0"
                                VerticalAlignment="Center"
                                Margin="10,0,0,0"/>
@@ -81,10 +80,10 @@
 
                         <Button.Style>
                             <Style TargetType="Button">
-                                <Setter Property="Background" Value="#28AEED"/>
+                                <Setter Property="Background" Value="{StaticResource Brush.Aggressive.DeepBlue}"/>
                                 <Style.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#278BEF"/>
+                                        <Setter Property="Background" Value="{StaticResource Brush.Aggressive.DarkerBlue}"/>
                                     </Trigger>
                                 </Style.Triggers>
                             </Style>
@@ -114,7 +113,7 @@
                             Click="btnClose_Click">
                         <Button.Style>
                             <Style TargetType="Button">
-                                <Setter Property="Background" Value="#DA34AE"/>
+                                <Setter Property="Background" Value="{StaticResource Brush.Aggressive.RacingRed}"/>
                                 <Style.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
                                         <Setter Property="Background" Value="#C62DAE"/>
@@ -144,22 +143,23 @@
                     <TextBlock Text=" DELUXE CARS"
                                Foreground="White"
                                FontSize="25"
-                               FontWeight="Medium"
-                               FontFamily="Montserrat"
+                               Margin="10 30 10 20"
+                               FontWeight="Bold"
+                               Style="{StaticResource H1TextStyle}" 
                                HorizontalAlignment="Center"/> 
 
                     <TextBlock Text="Nombre completo"
                                Foreground="DarkGray"
-                               FontSize="12"
+                               FontSize="13"
                                FontWeight="Medium"
-                               FontFamily="Montserrat"
+                               FontFamily="{StaticResource Font.SourceSans3}"
                                Margin="0,10,0,0"/>
 
                     <TextBox x:Name="txtNombre"
                              Text="{Binding NombreUsuario, UpdateSourceTrigger=PropertyChanged}"
                              FontSize="13"
                              FontWeight="Medium"
-                             FontFamily="Montserrat"
+                             FontFamily="{StaticResource Font.SourceSans3}"
                              Background="Transparent"
                              Foreground="White"
                              CaretBrush="LightGray"
@@ -167,20 +167,20 @@
                              BorderThickness="0,0,0,1"
                              Height="28"
                              VerticalContentAlignment="Center"
-                             Margin="0,3,0,0"/>
+                             Margin="0,0,0,0"/>
 
                     <TextBlock Text="Telefono"
                                Foreground="DarkGray"
-                               FontSize="12"
+                               FontSize="13"
                                FontWeight="Medium"
-                               FontFamily="Montserrat"
-                               Margin="0,10,0,0"/>
+                               FontFamily="{StaticResource Font.SourceSans3}"
+                               Margin="0,5,0,0"/>
 
                     <TextBox x:Name="txtTelefono"
                              Text="{Binding TelefonoUsuario, UpdateSourceTrigger=PropertyChanged}"
                              FontSize="13"
                              FontWeight="Medium"
-                             FontFamily="Montserrat"
+                             FontFamily="{StaticResource Font.SourceSans3}"
                              Background="Transparent"
                              Foreground="White"
                              CaretBrush="LightGray"
@@ -188,20 +188,20 @@
                              BorderThickness="0,0,0,1"
                              Height="28"
                              VerticalContentAlignment="Center"
-                             Margin="0,3,0,0"/>
+                             Margin="0,0,0,0"/>
                     
-                    <TextBlock Text="Email"
+                    <TextBlock Text="Correo electronico"
                                Foreground="DarkGray"
-                               FontSize="12"
+                               FontSize="13"
                                FontWeight="Medium"
-                               FontFamily="Montserrat"
-                               Margin="0,10,0,0"/>
+                               FontFamily="{StaticResource Font.SourceSans3}"
+                               Margin="0,5,0,0"/>
 
                     <TextBox x:Name="txtEmail"
                              Text="{Binding EmailUsuario, UpdateSourceTrigger=PropertyChanged}"
                              FontSize="13"
                              FontWeight="Medium"
-                             FontFamily="Montserrat"
+                             FontFamily="{StaticResource Font.SourceSans3}"
                              Background="Transparent"
                              Foreground="White"
                              CaretBrush="LightGray"
@@ -209,14 +209,14 @@
                              BorderThickness="0,0,0,1"
                              Height="28"
                              VerticalContentAlignment="Center"
-                             Margin="0,3,0,0"/>
+                             Margin="0,0,0,0"/>
 
                     <TextBlock Text="Contraseña"
                                Foreground="DarkGray"
-                               FontSize="12"
+                               FontSize="13"
                                FontWeight="Medium"
-                               FontFamily="Montserrat"
-                               Margin="0,10,0,0"/>
+                               FontFamily="{StaticResource Font.SourceSans3}"
+                               Margin="0,5,0,0"/>
 
                     <customcontrols:BindablePasswordBox Password="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     Height="28"
@@ -226,10 +226,10 @@
 
                     <TextBlock Text="Confirmar Contraseña"
                                Foreground="DarkGray"
-                               FontSize="12"
+                               FontSize="13"
                                FontWeight="Medium"
-                               FontFamily="Montserrat"
-                               Margin="0,10,0,0"/>
+                               FontFamily="{StaticResource Font.SourceSans3}"
+                               Margin="0,5,0,0"/>
 
                     <customcontrols:BindablePasswordBox Password="{Binding ConfirmPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     Height="28"
@@ -238,15 +238,16 @@
 
                     <TextBlock Text="Rol"
                                Foreground="DarkGray"
-                               FontSize="12"
+                               FontSize="13"
                                FontWeight="Medium"
-                               FontFamily="Montserrat"
-                               Margin="0,10,0,0"/>
+                               FontFamily="{StaticResource Font.SourceSans3}"
+                               Margin="0,5,0,0"/>
 
                     <ComboBox ItemsSource="{Binding RolesDisponibles}"
                               Style="{StaticResource DarkComboBoxStyle}"
                               SelectedItem="{Binding RolSeleccionado}"
                               DisplayMemberPath="Nombre"
+                              FontFamily="{StaticResource Font.SourceSans3}"
                               Height="28"
                               Margin="0,3,0,0"/>
 
@@ -256,24 +257,25 @@
                                Foreground="#D7596D"
                                FontSize="12"
                                FontWeight="Medium"
-                               FontFamily="Montserrat"
-                               Margin="0,10,0,0"
+                               FontFamily="{StaticResource Font.SourceSans3}"
+                               Margin="0,7,0,0"
                                TextWrapping="Wrap"/>
 
                     <Button x:Name="btnRegistrar"
                             Command="{Binding RegistrarCommand}"
                             BorderThickness="0"
                             Content="Registrarme"
+                            FontWeight="SemiBold"
                             Foreground="White"
-                            FontSize="12"
-                            FontFamily="Montserrat"
+                            FontSize="15"
+                            FontFamily="{StaticResource Font.SourceSans3}"
                             Cursor="Hand"
                             Grid.Column="2"
                             Margin="0,10,0,0">
 
                         <Button.Style>
                             <Style TargetType="Button">
-                                <Setter Property="Background" Value="#422AD8"/>
+                                <Setter Property="Background" Value="{StaticResource Brush.Aggressive.RacingRed}"/>
                                 <Style.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
                                         <Setter Property="Background" Value="#28AEED"/>
@@ -284,7 +286,7 @@
 
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
-                                <Border Width="150" Height="20"
+                                <Border Width="150" Height="25"
                                         CornerRadius="10"
                                         Background="{TemplateBinding Background}">
                                     <ContentPresenter VerticalAlignment="Center"
@@ -298,8 +300,9 @@
                             Command="{Binding NavigateBackToLoginCommand}"
                             Content="Regresar loggin"
                             Foreground="White"
-                            FontSize="12"
-                            FontFamily="Montserrat"
+                            FontSize="15"
+                            FontWeight="SemiBold"
+                            FontFamily="{StaticResource Font.SourceSans3}"
                             Cursor="Hand"
                             Grid.Column="2"
                             Margin="0,10,10,0">
@@ -309,7 +312,7 @@
                                 <Setter Property="Background" Value="Transparent"/>
                                 <Style.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#28AEED"/>
+                                        <Setter Property="Background" Value="{StaticResource Brush.Aggressive.DarkerBlue}"/>
                                     </Trigger>
                                 </Style.Triggers>
                             </Style>

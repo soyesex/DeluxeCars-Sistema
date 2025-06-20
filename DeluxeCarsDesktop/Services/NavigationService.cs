@@ -2,6 +2,7 @@
 using DeluxeCarsDesktop.Utils;
 using DeluxeCarsDesktop.View;
 using DeluxeCarsDesktop.ViewModel;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,14 +11,55 @@ using System.Threading.Tasks;
 
 namespace DeluxeCarsDesktop.Services
 {
-    public class NavigationService  : INavigationService
+    public class NavigationService : ViewModelBase, INavigationService
     {
-
         private readonly IServiceProvider _serviceProvider;
+        private readonly Stack<ViewModelBase> _history = new Stack<ViewModelBase>();
+        private ViewModelBase _currentMainView;
+
+        public ViewModelBase CurrentMainView
+        {
+            get => _currentMainView;
+            private set
+            {
+                SetProperty(ref _currentMainView, value);
+                OnPropertyChanged(nameof(CanGoBack));
+            }
+        }
+
+        public bool CanGoBack => _history.Count > 0;
+        public event Action CurrentMainViewChanged;
 
         public NavigationService(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
+        }
+
+        public async Task NavigateTo<TViewModel>() where TViewModel : ViewModelBase
+        {
+            if (CurrentMainView != null)
+            {
+                _history.Push(CurrentMainView);
+            }
+
+            var newViewModel = _serviceProvider.GetRequiredService<TViewModel>();
+
+            if (newViewModel is IAsyncLoadable vmWithLoad)
+            {
+                await vmWithLoad.LoadAsync();
+            }
+
+            CurrentMainView = newViewModel;
+            CurrentMainViewChanged?.Invoke();
+        }
+
+        public void GoBack()
+        {
+            if (_history.Count > 0)
+            {
+                CurrentMainView = _history.Pop();
+                CurrentMainViewChanged?.Invoke();
+            }
         }
 
         public async Task OpenFormWindow(FormType formType, int entityId = 0)
@@ -45,6 +87,5 @@ namespace DeluxeCarsDesktop.Services
             formWindow.DataContext = formViewModel;
             formWindow.ShowDialog();
         }
-
     }
 }

@@ -25,16 +25,30 @@ namespace DeluxeCarsDesktop.ViewModel
         public string TituloVentana { get => _tituloVentana; set => SetProperty(ref _tituloVentana, value); }
 
         private string _nombre;
-        public string Nombre { get => _nombre; set => SetProperty(ref _nombre, value); }
+        public string Nombre
+        {
+            get => _nombre;
+            set { SetProperty(ref _nombre, value); (GuardarCommand as ViewModelCommand)?.RaiseCanExecuteChanged(); }
+        }
 
         private string _oem;
         public string OEM { get => _oem; set => SetProperty(ref _oem, value); }
 
         private decimal _precio;
-        public decimal Precio { get => _precio; set => SetProperty(ref _precio, value); }
+        public decimal Precio
+        {
+            get => _precio;
+            set { SetProperty(ref _precio, value); (GuardarCommand as ViewModelCommand)?.RaiseCanExecuteChanged(); }
+        }
 
         private int _stock;
-        public int Stock { get => _stock; set => SetProperty(ref _stock, value); }
+        public int Stock { get => _stock; private set => SetProperty(ref _stock, value); }
+        private int? _stockMinimo;
+        public int? StockMinimo { get => _stockMinimo; set => SetProperty(ref _stockMinimo, value); }
+
+        private int? _stockMaximo;
+        public int? StockMaximo { get => _stockMaximo; set => SetProperty(ref _stockMaximo, value); }
+
 
         private string _descripcion;
         public string Descripcion { get => _descripcion; set => SetProperty(ref _descripcion, value); }
@@ -44,7 +58,11 @@ namespace DeluxeCarsDesktop.ViewModel
 
         public ObservableCollection<Categoria> Categorias { get; private set; }
         private Categoria _categoriaSeleccionada;
-        public Categoria CategoriaSeleccionada { get => _categoriaSeleccionada; set => SetProperty(ref _categoriaSeleccionada, value); }
+        public Categoria CategoriaSeleccionada
+        {
+            get => _categoriaSeleccionada;
+            set { SetProperty(ref _categoriaSeleccionada, value); (GuardarCommand as ViewModelCommand)?.RaiseCanExecuteChanged(); }
+        }
 
         // --- Comandos ---
         public ICommand GuardarCommand { get; }
@@ -55,7 +73,7 @@ namespace DeluxeCarsDesktop.ViewModel
         {
             _unitOfWork = unitOfWork;
             Categorias = new ObservableCollection<Categoria>();
-            GuardarCommand = new ViewModelCommand(ExecuteGuardarCommand);
+            GuardarCommand = new ViewModelCommand(ExecuteGuardarCommand, CanExecuteGuardarCommand);
             CancelarCommand = new ViewModelCommand(p => CloseAction?.Invoke());
         }
 
@@ -73,15 +91,17 @@ namespace DeluxeCarsDesktop.ViewModel
             else // Modo Edición
             {
                 _esModoEdicion = true;
-                _productoActual = await _unitOfWork.Productos.GetByIdAsync(productoId);
+                _productoActual = await _unitOfWork.Productos.GetByIdWithCategoriaAsync(productoId);
                 if (_productoActual != null)
                 {
-                    TituloVentana = "Editar Producto";
+                    TituloVentana = $"Editar Producto: {_productoActual.Nombre}";
                     Nombre = _productoActual.Nombre;
                     OEM = _productoActual.OriginalEquipamentManufacture;
                     Precio = _productoActual.Precio;
                     Stock = _productoActual.Stock;
                     Descripcion = _productoActual.Descripcion;
+                    StockMinimo = _productoActual.StockMinimo;
+                    StockMaximo = _productoActual.StockMaximo;
                     Estado = _productoActual.Estado;
                     CategoriaSeleccionada = Categorias.FirstOrDefault(c => c.Id == _productoActual.IdCategoria);
                 }
@@ -91,7 +111,17 @@ namespace DeluxeCarsDesktop.ViewModel
         private async Task LoadCategoriasAsync()
         {
             var cats = await _unitOfWork.Categorias.GetAllAsync();
-            Categorias = new ObservableCollection<Categoria>(cats.OrderBy(c => c.Id));
+            Categorias.Clear(); // Limpiamos la colección existente
+            foreach (var cat in cats.OrderBy(c => c.Nombre))
+            {
+                Categorias.Add(cat); // Añadimos a la colección existente
+            }
+        }
+
+        private bool CanExecuteGuardarCommand(object obj)
+        {
+            // Validación simple para habilitar el botón
+            return !string.IsNullOrWhiteSpace(Nombre) && Precio > 0 && CategoriaSeleccionada != null;
         }
 
         private async void ExecuteGuardarCommand(object obj)
@@ -105,6 +135,8 @@ namespace DeluxeCarsDesktop.ViewModel
             _productoActual.Nombre = Nombre;
             _productoActual.OriginalEquipamentManufacture = OEM;
             _productoActual.Precio = Precio;
+            _productoActual.StockMinimo = StockMinimo;
+            _productoActual.StockMaximo = StockMaximo;
             _productoActual.Stock = Stock;
             _productoActual.Descripcion = Descripcion;
             _productoActual.Estado = Estado;

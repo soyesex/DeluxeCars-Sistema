@@ -40,6 +40,7 @@ namespace DeluxeCarsDesktop.Data
         public DbSet<DetalleFactura> DetallesFactura { get; set; }
         public DbSet<ProductoProveedor> ProductoProveedores { get; set; }
         public DbSet<FacturaElectronica> FacturasElectronicas { get; set; }
+        public DbSet<MovimientoInventario> MovimientosInventario { get; set; }
 
         /// <summary>
         /// Configura el modelo de la base de datos usando Fluent API.
@@ -116,11 +117,21 @@ namespace DeluxeCarsDesktop.Data
 
             // ON DELETE CASCADE: Si se borra una entidad principal, sus detalles asociados también se borran.
             // Ejemplo: Al eliminar un Pedido, se eliminan todas sus líneas de DetallePedido.
-            modelBuilder.Entity<DetallePedido>()
-                .HasOne(dp => dp.Pedido)
-                .WithMany(p => p.DetallesPedidos)
-                .HasForeignKey(dp => dp.IdPedido)
-                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<DetallePedido>(entity =>
+            {
+                // La relación con Pedido se queda igual, está perfecta.
+                entity.HasOne(dp => dp.Pedido)
+                      .WithMany(p => p.DetallesPedidos)
+                      .HasForeignKey(dp => dp.IdPedido)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                // --- CORRECCIÓN FINAL ---
+                // Ahora especificamos la colección correcta en WithMany.
+                entity.HasOne(dp => dp.Producto)
+                      .WithMany(p => p.DetallesPedidos) // <-- ASÍ SE CORRIGE
+                      .HasForeignKey(dp => dp.IdProducto)
+                      .OnDelete(DeleteBehavior.NoAction);
+            });
 
             modelBuilder.Entity<DetalleFactura>()
                 .HasOne(df => df.Factura)
@@ -183,6 +194,13 @@ namespace DeluxeCarsDesktop.Data
                      .OnDelete(DeleteBehavior.NoAction);
             });
 
+            modelBuilder.Entity<PasswordReset>(entity =>
+            {
+                // Le decimos a EF que la columna Token tiene un valor por defecto generado por SQL.
+                // Esto le indica que debe leer el valor de vuelta después de un INSERT.
+                entity.Property(e => e.Token).HasDefaultValueSql("NEWID()");
+            });
+
             // --- SECCIÓN 3: Configuraciones de Precisión para Campos Decimales ---
             // Define el tipo de dato SQL exacto para todos los campos monetarios y decimales.
             // Esto es crucial para evitar problemas de redondeo y asegurar la consistencia con la DB.
@@ -227,11 +245,6 @@ namespace DeluxeCarsDesktop.Data
             modelBuilder.Entity<DetalleFactura>()
                 .Property(df => df.Total)
                 .HasComputedColumnSql("((Cantidad * PrecioUnitario - ISNULL(Descuento, 0)) * (1 + ISNULL(IVA, 0)/100))", stored: true);
-            // --- AÑADE ESTAS DOS LÍNEAS AL FINAL ---
-            modelBuilder.Entity<Producto>().Ignore(p => p.FechaIngreso);
-            modelBuilder.Entity<Producto>().Ignore(p => p.UltimoPrecioCompra);
-
-
         }
 
     }

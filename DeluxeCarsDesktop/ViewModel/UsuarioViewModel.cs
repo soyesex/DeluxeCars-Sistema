@@ -16,7 +16,9 @@ namespace DeluxeCarsDesktop.ViewModel
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly INavigationService _navigationService;
+        private readonly ICurrentUserService _currentUserService;
         private List<Usuario> _todosLosUsuarios;
+        public bool IsAdmin => _currentUserService.IsAdmin;
 
         // --- Propiedades para Binding ---
         public bool IsViewVisible { get; set; } = true; // No necesita OnPropertyChanged si no cambia dinámicamente
@@ -46,10 +48,11 @@ namespace DeluxeCarsDesktop.ViewModel
         public ICommand CambiarPasswordCommand { get; }
         public ICommand ToggleEstadoCommand { get; }
 
-        public UsuarioViewModel(IUnitOfWork unitOfWork, INavigationService navigationService)
+        public UsuarioViewModel(IUnitOfWork unitOfWork, INavigationService navigationService, ICurrentUserService currentUserService)
         {
             _unitOfWork = unitOfWork;
             _navigationService = navigationService;
+            _currentUserService = currentUserService;
 
             _todosLosUsuarios = new List<Usuario>();
             Usuarios = new ObservableCollection<Usuario>();
@@ -113,6 +116,8 @@ namespace DeluxeCarsDesktop.ViewModel
         private async Task ExecuteToggleEstadoCommand()
         {
             var usuario = UsuarioSeleccionado;
+            if (usuario == null) return;
+
             string accion = usuario.Activo ? "desactivar" : "activar";
 
             var result = MessageBox.Show($"¿Estás seguro de que deseas {accion} al usuario '{usuario.Nombre}'?", "Confirmar Cambio", MessageBoxButton.YesNo, MessageBoxImage.Question);
@@ -120,14 +125,26 @@ namespace DeluxeCarsDesktop.ViewModel
 
             try
             {
+                // 1. Cambiamos el estado en el objeto que tenemos en memoria.
                 usuario.Activo = !usuario.Activo;
+
+                // 2. --- CORRECCIÓN ---
+                // Como la lista se cargó con 'AsNoTracking', el objeto 'usuario' no está
+                // siendo rastreado. Con 'UpdateAsync' le decimos a EF que empiece a 
+                // rastrearlo y que lo marque como 'Modificado'.
                 await _unitOfWork.Usuarios.UpdateAsync(usuario);
+
+                // 3. Ahora 'CompleteAsync' sabrá que hay un cambio que guardar.
                 await _unitOfWork.CompleteAsync();
-                FiltrarUsuarios(); // Refrescar UI
+
+                // 4. Actualiza la UI. Una forma simple es forzar la notificación en el objeto.
+                //    Esto hará que el CheckBox en el DataGrid se actualice visualmente.
+                OnPropertyChanged(nameof(UsuarioSeleccionado.Activo));
             }
             catch (Exception ex)
             {
-                usuario.Activo = !usuario.Activo; // Revertir
+                // Revertimos el cambio en la UI si el guardado falla
+                usuario.Activo = !usuario.Activo;
                 MessageBox.Show($"Error al cambiar estado: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }

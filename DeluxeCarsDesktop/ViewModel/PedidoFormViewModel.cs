@@ -230,7 +230,7 @@ namespace DeluxeCarsDesktop.ViewModel
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error buscando productos por proveedor: {ex.Message}");
+                MessageBox.Show($"La búsqueda falló: {ex.Message}", "Error en Búsqueda", MessageBoxButton.OK, MessageBoxImage.Error);
                 IsProductPopupOpen = false;
             }
             finally
@@ -282,8 +282,6 @@ namespace DeluxeCarsDesktop.ViewModel
             OnPropertyChanged(nameof(TotalPedido));
         }
 
-        // EN: PedidoFormViewModel.cs
-
         private async void ExecuteGuardarPedidoCommand(object obj)
         {
             // 1. La validación inicial se queda como está.
@@ -292,8 +290,6 @@ namespace DeluxeCarsDesktop.ViewModel
                 MessageBox.Show("Debe seleccionar un proveedor, un método de pago y añadir al menos un producto.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-
-            // --- INICIO DE LA CORRECCIÓN ---
 
             // 2. Poblamos el objeto Pedido con todos los datos de la UI ANTES de intentar guardarlo.
             _pedidoActual.IdProveedor = ProveedorSeleccionado.Id;
@@ -327,10 +323,35 @@ namespace DeluxeCarsDesktop.ViewModel
                 {
                     // La lógica de edición
                     _unitOfWork.Context.Pedidos.Update(_pedidoActual);
+                    // NOTA: La lógica de edición de un pedido existente es más compleja
+                    // (habría que comparar líneas viejas y nuevas). Nos centramos en la creación por ahora.
                 }
 
                 // 5. Guardamos todo en una sola transacción atómica.
                 await _unitOfWork.CompleteAsync();
+
+                // 6. AHORA, creamos los registros de Movimiento de Inventario.
+                // Esto ocurre después de que el pedido se ha guardado exitosamente.
+                if (!_esModoEdicion) // Solo creamos movimientos para pedidos nuevos
+                {
+                    foreach (var detalle in _pedidoActual.DetallesPedidos)
+                    {
+                        var movimiento = new MovimientoInventario
+                        {
+                            IdProducto = detalle.IdProducto,
+                            Fecha = DateTime.UtcNow, // Siempre usar UTC para fechas de registro
+                            TipoMovimiento = "Compra", // Es una entrada por compra
+                            Cantidad = detalle.Cantidad, // La cantidad es POSITIVA
+                            CostoUnitario = detalle.PrecioUnitario, // El costo de este lote
+                            IdReferencia = _pedidoActual.Id // El ID del Pedido que originó el movimiento
+                        };
+                        // Añadimos el nuevo movimiento al contexto
+                        await _unitOfWork.Context.MovimientosInventario.AddAsync(movimiento);
+                    }
+
+                    // 7. Guardamos los nuevos registros de MovimientoInventario.
+                    await _unitOfWork.CompleteAsync();
+                }
 
                 MessageBox.Show("Pedido guardado exitosamente.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
                 CloseAction?.Invoke();

@@ -10,6 +10,8 @@ namespace DeluxeCarsDesktop.Interfaces
 {
     public interface IUsuarioRepository
     {
+        Task<PasswordReset> GeneratePasswordResetTokenAsync(string email);
+        Task<bool> ResetPasswordAsync(string email, string token, string newPassword);
         Task<Usuario> RegisterUser(Usuario newUser, string password);
         Task<Usuario> AuthenticateUser(string email, string password);
         Task<Usuario> GetUserByEmail(string email); 
@@ -21,5 +23,6 @@ namespace DeluxeCarsDesktop.Interfaces
         Task<IEnumerable<Usuario>> GetAllAsync();
         Task UpdateAsync(Usuario user);
         Task DeactivateAsync(int id);
+        Task UpdateUserPassword(int userId, string newPassword);
     }
 }

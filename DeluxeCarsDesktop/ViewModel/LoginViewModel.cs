@@ -48,8 +48,8 @@ namespace DeluxeCarsDesktop.ViewModel
             _serviceProvider = serviceProvider;
 
             LoginCommand = new ViewModelCommand(ExecuteLoginCommand, CanExecuteLoginCommand);
-            RecoverPasswordCommand = new ViewModelCommand(ExecuteRecoverPassCommand);
             ShowRegisterViewCommand = new ViewModelCommand(ExecuteShowRegisterView);
+            RecoverPasswordCommand = new ViewModelCommand(ExecuteRecoverPasswordCommand);
         }
 
         private bool CanExecuteLoginCommand(object obj)
@@ -59,6 +59,12 @@ namespace DeluxeCarsDesktop.ViewModel
 
         private async void ExecuteLoginCommand(object obj)
         {
+            if (!Utils.ValidationHelper.IsValidEmail(Username))
+            {
+                ErrorMessage = "❌ Por favor, introduce un formato de correo válido.";
+                return; // Detenemos la ejecución si el formato no es válido.
+            }
+
             ErrorMessage = ""; // Limpiar error
             try
             {
@@ -92,10 +98,15 @@ namespace DeluxeCarsDesktop.ViewModel
             }
         }
 
-        private void ExecuteRecoverPassCommand(object obj)
+        private void ExecuteRecoverPasswordCommand(object obj)
         {
-            // La lógica para la recuperación de contraseña iría aquí.
-            ErrorMessage = "Funcionalidad de recuperar contraseña no implementada.";
+            // Usamos el ServiceProvider para crear la vista y el viewmodel
+            var recoveryView = _serviceProvider.GetRequiredService<PasswordRecoveryView>();
+            var recoveryViewModel = _serviceProvider.GetRequiredService<PasswordRecoveryViewModel>();
+
+            // Conectamos la vista con su lógica y la mostramos
+            recoveryView.DataContext = recoveryViewModel;
+            recoveryView.ShowDialog();
         }
 
         private void ExecuteShowRegisterView(object obj)

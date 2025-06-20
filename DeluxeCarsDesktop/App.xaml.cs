@@ -41,14 +41,16 @@ public partial class App : Application
         {
             string connectionString = ConfigurationManager.ConnectionStrings["AppDbContext"].ConnectionString;
             options.UseSqlServer(connectionString);
-        });
+        }, ServiceLifetime.Transient);  
 
         // AHORA (El nuevo modo, registrando todo de una vez con Unit of Work)
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddTransient<IUnitOfWork, UnitOfWork>();
 
         services.AddScoped<INavigationService, NavigationService>();
 
         services.AddSingleton<ICurrentUserService, CurrentUserService>();
+
+        services.AddTransient<IEmailService, EmailService>();
 
         // Registrar tus ViewModels. Transient significa que se creará una nueva instancia cada vez que se pida.
         services.AddTransient<LoginViewModel>();
@@ -66,6 +68,7 @@ public partial class App : Application
         services.AddTransient<ReportesViewModel>();
         services.AddTransient<ConfiguracionViewModel>();
         services.AddTransient<GestionarProductosProveedorViewModel>();
+        services.AddTransient<PasswordRecoveryViewModel>();
 
         // User Controls Hijos
         services.AddTransient<ProductoFormViewModel>();
@@ -88,6 +91,7 @@ public partial class App : Application
         services.AddTransient<MainView>();
         services.AddTransient<RegistroView>();
         services.AddTransient<FormularioView>();
+        services.AddTransient<PasswordRecoveryView>();
     }
 
     protected override async void OnStartup(StartupEventArgs e)

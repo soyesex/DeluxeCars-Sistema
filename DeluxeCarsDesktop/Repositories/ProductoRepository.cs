@@ -1,6 +1,7 @@
 ﻿using DeluxeCarsDesktop.Data;
 using DeluxeCarsDesktop.Interfaces;
 using DeluxeCarsDesktop.Models;
+using DeluxeCarsDesktop.Models.Search;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,85 @@ namespace DeluxeCarsDesktop.Repositories
         public ProductoRepository(AppDbContext context) : base(context)
         {
         }
+        public async Task<Dictionary<int, int>> GetCurrentStocksAsync(IEnumerable<int> productIds)
+        {
+            // Esta consulta va a la tabla de movimientos una sola vez
+            return await _context.MovimientosInventario
+                // Filtra solo por los IDs de los productos que nos interesan
+                .Where(m => productIds.Contains(m.IdProducto))
+                // Agrupa por IdProducto
+                .GroupBy(m => m.IdProducto)
+                // Para cada grupo, crea un par clave-valor: (IdProducto, Suma de Cantidades)
+                .Select(g => new { ProductId = g.Key, Stock = g.Sum(m => m.Cantidad) })
+                // Convierte el resultado final a un diccionario para un acceso súper rápido.
+                .ToDictionaryAsync(r => r.ProductId, r => r.Stock);
+        }
+        public async Task<int> GetCurrentStockAsync(int productoId)
+        {
+            // Suma todas las cantidades (positivas y negativas) para un producto.
+            // Si no hay movimientos, devuelve 0.
+            return await _context.MovimientosInventario
+                                 .Where(m => m.IdProducto == productoId)
+                                 .SumAsync(m => (int?)m.Cantidad) ?? 0;
+        }
+        public async Task<Producto> GetByIdWithCategoriaAsync(int productoId)
+        {
+            return await _context.Productos
+                                 .Include(p => p.Categoria)
+                                 .FirstOrDefaultAsync(p => p.Id == productoId);
+        }
+
+        public async Task<IEnumerable<Producto>> SearchAsync(ProductSearchCriteria criteria)
+        {
+            // 1. Empezamos con una consulta base que trae todos los productos
+            //    Usamos AsQueryable() para poder añadirle filtros dinámicamente.
+            var query = _context.Productos
+                                .Include(p => p.Categoria) // Incluimos la categoría para mostrar su nombre
+                                .AsQueryable();
+
+            // 2. Aplicamos cada filtro solo si tiene un valor
+
+            // --- Filtro por Categoría ---
+            if (criteria.CategoryId.HasValue && criteria.CategoryId.Value != 0)
+            {
+                query = query.Where(p => p.IdCategoria == criteria.CategoryId.Value);
+            }
+
+            // --- Filtro por Estado de Stock ---
+            if (!string.IsNullOrWhiteSpace(criteria.StockStatus))
+            {
+                switch (criteria.StockStatus)
+                {
+                    case "En Stock":
+                        query = query.Where(p => p.Stock > 0);
+                        break;
+                    case "Agotado":
+                        query = query.Where(p => p.Stock == 0);
+                        break;
+                    case "Bajo Stock":
+                        query = query.Where(p => p.Stock > 0 && p.Stock <= 10); // Asumiendo 10 como umbral
+                        break;
+                }
+            }
+
+            // --- Filtro de Texto Universal ---
+            if (!string.IsNullOrWhiteSpace(criteria.UniversalSearchText))
+            {
+                string searchText = criteria.UniversalSearchText;
+
+                // NOTA: No usamos .ToLower() aquí porque ya configuramos la base de datos
+                // para que sea case-insensitive (CI). La BD lo hará más rápido.
+                query = query.Where(p =>
+                    p.Nombre.Contains(searchText) ||
+                    p.OriginalEquipamentManufacture.Contains(searchText) ||
+                    p.Descripcion.Contains(searchText)
+                );
+            }
+
+            // 3. Finalmente, ejecutamos la consulta en la base de datos
+            return await query.AsNoTracking().ToListAsync();
+        }
+
         public async Task<IEnumerable<Producto>> GetAssociatedProductsAsync(int proveedorId)
         {
             return await _context.ProductoProveedores

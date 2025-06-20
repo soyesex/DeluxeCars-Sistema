@@ -13,13 +13,14 @@ using System.Windows.Input;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
-    public class FacturacionViewModel : ViewModelBase
+    public class FacturacionViewModel : ViewModelBase, IAsyncLoadable
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUserService;
         private Factura _facturaEnProgreso;
         private bool _isInitialized = false;
         private bool _isBuscandoItems = false;
+        private bool _isBuscandoClientes = false;
 
         // --- Propiedades para Binding (Estandarizadas con SetProperty) ---
         public ObservableCollection<Cliente> ResultadosBusquedaCliente { get; private set; }
@@ -120,12 +121,12 @@ namespace DeluxeCarsDesktop.ViewModel
             ResultadosBusquedaCliente = new ObservableCollection<Cliente>();
             ResultadosBusquedaItem = new ObservableCollection<object>();
             MetodosDePago = new ObservableCollection<MetodoPago>();
-            AgregarItemCommand = new ViewModelCommand(ExecuteAgregarItem, p => p != null && CantidadItem > 0);
+            AgregarItemCommand = new ViewModelCommand( async p => await ExecuteAgregarItem(p), p => p != null && CantidadItem > 0);
             EliminarItemCommand = new ViewModelCommand(ExecuteEliminarItem);
             FinalizarVentaCommand = new ViewModelCommand(async p => await ExecuteFinalizarVenta(), p => LineasDeFactura.Any() && ClienteSeleccionado != null);
             CancelarVentaCommand = new ViewModelCommand(async p => await InicializarNuevaVenta());
         }
-        public async Task OnNavigatedTo()
+        public async Task LoadAsync()
         {
             if (_isInitialized)
             {
@@ -145,8 +146,22 @@ namespace DeluxeCarsDesktop.ViewModel
             try
             {
                 var metodos = await _unitOfWork.MetodosPago.GetAllAsync();
-                MetodosDePago = new ObservableCollection<MetodoPago>(metodos.Where(m => m.Disponible));
-                OnPropertyChanged(nameof(MetodosDePago));
+
+                // --- INICIO DE LA CORRECCIÓN ---
+
+                // 1. Limpiamos la colección existente.
+                MetodosDePago.Clear();
+
+                // 2. Añadimos los nuevos métodos a la colección que la UI ya conoce.
+                foreach (var metodo in metodos.Where(m => m.Disponible))
+                {
+                    MetodosDePago.Add(metodo);
+                }
+
+                // Ya no necesitas la línea OnPropertyChanged(nameof(MetodosDePago));
+
+                // --- FIN DE LA CORRECCIÓN ---
+
                 MetodoPagoSeleccionado = MetodosDePago.FirstOrDefault();
             }
             catch (Exception ex) { MessageBox.Show($"Error cargando métodos de pago: {ex.Message}", "Error"); }
@@ -166,31 +181,51 @@ namespace DeluxeCarsDesktop.ViewModel
         // Reemplaza tu método BuscarClientes actual por este
         private async Task BuscarClientes()
         {
-            if (string.IsNullOrWhiteSpace(TextoBusquedaCliente) || TextoBusquedaCliente.Length < 2)
+            // 1. Añadimos la protección de concurrencia
+            if (_isBuscandoClientes) return;
+
+            try
             {
-                ResultadosBusquedaCliente?.Clear();
-                IsClientPopupOpen = false;
-                return;
-            }
+                _isBuscandoClientes = true;
 
-            if (ClienteSeleccionado != null && TextoBusquedaCliente == ClienteSeleccionado.Nombre)
+                if (string.IsNullOrWhiteSpace(TextoBusquedaCliente) || TextoBusquedaCliente.Length < 2)
+                {
+                    ResultadosBusquedaCliente?.Clear();
+                    IsClientPopupOpen = false;
+                    return;
+                }
+
+                if (ClienteSeleccionado != null && TextoBusquedaCliente == ClienteSeleccionado.Nombre)
+                {
+                    // Si el texto no ha cambiado desde la selección, cerramos el popup y no buscamos
+                    IsClientPopupOpen = false;
+                    return;
+                }
+
+                // Si el usuario sigue escribiendo, limpiamos la selección anterior
+                ClienteSeleccionado = null;
+
+                // La búsqueda ya es case-insensitive gracias a la configuración de la BD
+                var clientes = await _unitOfWork.Clientes.GetByConditionAsync(c =>
+                    c.Nombre.Contains(TextoBusquedaCliente) ||
+                    c.Email.Contains(TextoBusquedaCliente)
+                );
+
+                // --- CORRECCIÓN CLAVE ---
+                // Limpiamos y añadimos a la colección existente en lugar de crear una nueva
+                ResultadosBusquedaCliente.Clear();
+                foreach (var cliente in clientes)
+                {
+                    ResultadosBusquedaCliente.Add(cliente);
+                }
+
+                IsClientPopupOpen = ResultadosBusquedaCliente.Any();
+            }
+            finally
             {
-                return;
+                // Liberamos la bandera para la siguiente búsqueda
+                _isBuscandoClientes = false;
             }
-
-            ClienteSeleccionado = null;
-
-            // --- INICIO DE LA CORRECCIÓN ---
-            var textoBusquedaUpper = TextoBusquedaCliente.ToUpper();
-            var clientes = await _unitOfWork.Clientes.GetByConditionAsync(c =>
-                c.Nombre.ToUpper().Contains(textoBusquedaUpper) ||
-                c.Email.ToUpper().Contains(textoBusquedaUpper)
-            );
-            // --- FIN DE LA CORRECCIÓN ---
-
-            ResultadosBusquedaCliente = new ObservableCollection<Cliente>(clientes);
-            OnPropertyChanged(nameof(ResultadosBusquedaCliente));
-            IsClientPopupOpen = ResultadosBusquedaCliente.Any();
         }
 
         // Reemplaza tu método BuscarItems actual por este
@@ -243,43 +278,70 @@ namespace DeluxeCarsDesktop.ViewModel
             }
         }
 
-        private void ExecuteAgregarItem(object item)
+        // La firma del método ahora devuelve un Task
+        private async Task ExecuteAgregarItem(object item)
         {
+            // Validación inicial (se queda igual)
             if (item == null || CantidadItem <= 0) return;
 
-            var detalle = new DetalleFactura { Cantidad = CantidadItem };
-
+            // --- Lógica para PRODUCTOS ---
             if (item is Producto p)
             {
-                if (p.Stock < CantidadItem) { MessageBox.Show($"Stock insuficiente para '{p.Nombre}'. Disponible: {p.Stock}", "Stock Insuficiente", MessageBoxButton.OK, MessageBoxImage.Warning); return; }
+                // =======================================================
+                // VALIDACIÓN 1: ¿HAY STOCK SUFICIENTE?
+                // =======================================================
+                int stockReal = await _unitOfWork.Productos.GetCurrentStockAsync(p.Id);
+                if (stockReal < CantidadItem)
+                {
+                    MessageBox.Show($"Stock insuficiente para '{p.Nombre}'. Disponible: {stockReal}", "Stock Insuficiente", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return; // Detenemos la operación.
+                }
 
+                // =======================================================
+                // VALIDACIÓN 2: ¿SE ESTÁ VENDIENDO POR DEBAJO DEL COSTO?
+                // =======================================================
+                // Usamos UltimoPrecioCompra como el costo. Si es nulo, asumimos costo 0.
+                decimal costoDelProducto = p.UltimoPrecioCompra ?? 0m;
 
-                detalle.TipoDetalle = "Producto";
+                // La propiedad 'p.Precio' es el precio de venta que está en el catálogo.
+                if (p.Precio < costoDelProducto)
+                {
+                    // Si el precio de venta es menor que el costo, verificamos el rol.
+                    if (!_currentUserService.IsAdmin)
+                    {
+                        MessageBox.Show($"No tienes permiso para vender '{p.Nombre}' por debajo de su costo de ${costoDelProducto:N2}.", "Venta no Permitida", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return; // Detenemos la operación.
+                    }
+                }
 
-                detalle.IdItem = p.Id;
-
-                detalle.Descripcion = p.Nombre;
-
-                detalle.PrecioUnitario = p.Precio;
-
-                detalle.IVA = 19; // Asumir 19% o tomarlo de configuración
+                // --- Si todas las validaciones pasan, procedemos ---
+                var detalle = new DetalleFactura
+                {
+                    Cantidad = CantidadItem,
+                    TipoDetalle = "Producto",
+                    IdItem = p.Id,
+                    Descripcion = p.Nombre,
+                    PrecioUnitario = p.Precio,
+                    IVA = 19 // O tomarlo de una configuración
+                };
+                LineasDeFactura.Add(detalle);
             }
-
+            // --- Lógica para SERVICIOS (no cambia) ---
             else if (item is Servicio s)
             {
-                detalle.TipoDetalle = "Servicio";
-
-                detalle.IdItem = s.Id;
-
-                detalle.Descripcion = s.Nombre;
-
-                detalle.PrecioUnitario = s.Precio;
-
-                detalle.IVA = 19;
+                var detalle = new DetalleFactura
+                {
+                    Cantidad = CantidadItem,
+                    TipoDetalle = "Servicio",
+                    IdItem = s.Id,
+                    Descripcion = s.Nombre,
+                    PrecioUnitario = s.Precio,
+                    IVA = 19
+                };
+                LineasDeFactura.Add(detalle);
             }
 
-            LineasDeFactura.Add(detalle);
-
+            // Finalmente, recalculamos los totales de la factura.
             RecalcularTotales();
         }
 
@@ -304,13 +366,14 @@ namespace DeluxeCarsDesktop.ViewModel
         }
         private async Task ExecuteFinalizarVenta()
         {
+            // 1. La validación inicial se queda como está. Es perfecta.
             if (ClienteSeleccionado == null || !LineasDeFactura.Any() || MetodoPagoSeleccionado == null)
             {
                 MessageBox.Show("Debe seleccionar un cliente, un método de pago y añadir al menos un ítem.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            // Llenar la cabecera
+            // 2. Llenar la cabecera de la factura también se queda igual.
             _facturaEnProgreso.IdCliente = ClienteSeleccionado.Id;
             _facturaEnProgreso.IdMetodoPago = MetodoPagoSeleccionado.Id;
             _facturaEnProgreso.FechaEmision = DateTime.Now;
@@ -323,48 +386,50 @@ namespace DeluxeCarsDesktop.ViewModel
 
             try
             {
+                // 3. Añadimos la Factura y sus Detalles al contexto.
                 await _unitOfWork.Facturas.AddAsync(_facturaEnProgreso);
 
-                // Lógica de Stock Optimizada
-                var idsProductos = LineasDeFactura.Where(d => d.TipoDetalle == "Producto").Select(d => d.IdItem).ToList();
-                var productosAfectados = await _unitOfWork.Productos.GetByConditionAsync(p => idsProductos.Contains(p.Id));
+                // 4. Guardamos la factura PRIMERO. Esto es crucial para obtener el ID de la factura
+                //    que usaremos como referencia en los movimientos de inventario.
+                await _unitOfWork.CompleteAsync();
 
-                foreach (var producto in productosAfectados)
+                // 5. AHORA, creamos los registros de Movimiento de Inventario para cada producto vendido.
+                //    Hemos eliminado por completo el bloque de "Lógica de Stock Optimizada".
+                foreach (var detalle in _facturaEnProgreso.DetallesFactura)
                 {
-                    var cantidadVendida = LineasDeFactura.First(d => d.IdItem == producto.Id).Cantidad;
-                    if (producto.Stock >= cantidadVendida)
+                    // Solo creamos movimientos para los detalles que son de tipo 'Producto'.
+                    if (detalle.TipoDetalle == "Producto")
                     {
-                        producto.Stock -= cantidadVendida;
-                        // Ya no hay llamada a UpdateAsync. EF lo guardará al final.
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException($"Stock insuficiente para el producto '{producto.Nombre}'.");
+                        var movimiento = new MovimientoInventario
+                        {
+                            IdProducto = detalle.IdItem,
+                            Fecha = DateTime.UtcNow,
+                            TipoMovimiento = "Venta", // Es una salida por venta.
+                            Cantidad = -detalle.Cantidad, // ¡LA CANTIDAD ES NEGATIVA!
+                            IdReferencia = _facturaEnProgreso.Id // El ID de la Factura que originó el movimiento.
+                        };
+                        await _unitOfWork.Context.MovimientosInventario.AddAsync(movimiento);
                     }
                 }
 
-                await _unitOfWork.CompleteAsync(); // Confirma la transacción (guarda factura y actualiza stock)
+                // 6. Guardamos los nuevos registros de MovimientoInventario.
+                await _unitOfWork.CompleteAsync();
+
                 MessageBox.Show($"Venta #{_facturaEnProgreso.NumeroFactura} finalizada exitosamente.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
-                await InicializarNuevaVenta(); // Limpia el formulario para la siguiente venta
+                await InicializarNuevaVenta(); // Limpia el formulario.
             }
             catch (Exception ex)
             {
-                // Construimos un mensaje de error detallado para mostrarlo
+                // Tu excelente manejador de errores detallado se queda igual.
                 string errorMessage = $"Error principal: {ex.Message}";
-
-                // Verificamos si hay una excepción interna (el error real de la BD)
                 if (ex.InnerException != null)
                 {
                     errorMessage += $"\n\n--- DETALLES (InnerException) ---\n{ex.InnerException.Message}";
-
-                    // A veces, la excepción interna tiene OTRA excepción interna.
-                    // La buscamos también para tener toda la información.
                     if (ex.InnerException.InnerException != null)
                     {
                         errorMessage += $"\n\n--- MÁS DETALLES ---\n{ex.InnerException.InnerException.Message}";
                     }
                 }
-
                 MessageBox.Show(errorMessage, "Error de Guardado Detallado", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }

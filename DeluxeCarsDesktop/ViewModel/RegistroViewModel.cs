@@ -37,12 +37,65 @@ namespace DeluxeCarsDesktop.ViewModel
         public Action CloseAction { get => RegistrationCancelled; set => RegistrationCancelled = value; }
 
         // --- Propiedades Públicas (Se respetan los nombres de tu XAML) ---
-        public string NombreUsuario { get => _nombreUsuario; set => SetProperty(ref _nombreUsuario, value); }
+        public string NombreUsuario
+        {
+            get => _nombreUsuario;
+            set
+            {
+                SetProperty(ref _nombreUsuario, value);
+                // Le avisamos al comando que revise las reglas de nuevo
+                (RegistrarCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+            }
+        }
+
+        // La propiedad Telefono no está en las validaciones, así que se puede quedar como está.
         public string TelefonoUsuario { get => _telefonoUsuario; set => SetProperty(ref _telefonoUsuario, value); }
-        public string EmailUsuario { get => _emailUsuario; set => SetProperty(ref _emailUsuario, value); }
-        public SecureString Password { get => _password; set => SetProperty(ref _password, value); }
-        public SecureString ConfirmPassword { get => _confirmPassword; set => SetProperty(ref _confirmPassword, value); }
-        public Rol RolSeleccionado { get => _rolSeleccionado; set => SetProperty(ref _rolSeleccionado, value); }
+        public string EmailUsuario
+        {
+            get => _emailUsuario;
+            set
+            {
+                SetProperty(ref _emailUsuario, value);
+                // Le avisamos al comando que revise las reglas de nuevo
+                (RegistrarCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+            }
+        }
+
+        public SecureString Password
+        {
+            get => _password;
+            set
+            {
+                SetProperty(ref _password, value);
+                // Le avisamos al comando que revise las reglas de nuevo
+                (RegistrarCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+            }
+        }
+
+
+        public SecureString ConfirmPassword
+        {
+            get => _confirmPassword;
+            set
+            {
+                SetProperty(ref _confirmPassword, value);
+                // Le avisamos al comando que revise las reglas de nuevo
+                (RegistrarCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+            }
+        }
+
+        public Rol RolSeleccionado
+        {
+            get => _rolSeleccionado;
+            set
+            {
+                SetProperty(ref _rolSeleccionado, value);
+                // Le avisamos al comando que revise las reglas de nuevo
+                (RegistrarCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+            }
+        }
+
+        // Las propiedades de solo lectura o las que no afectan la validación no necesitan cambios.
         public string ErrorMessage { get => _errorMessage; set => SetProperty(ref _errorMessage, value); }
         public bool IsViewVisible { get => _isViewVisible; set => SetProperty(ref _isViewVisible, value); }
 
@@ -89,12 +142,19 @@ namespace DeluxeCarsDesktop.ViewModel
 
         private bool CanExecuteRegistrarCommand(object obj)
         {
+            // Usamos tu código como base y añadimos dos nuevas validaciones
             return !string.IsNullOrWhiteSpace(NombreUsuario) &&
+
                    !string.IsNullOrWhiteSpace(EmailUsuario) &&
+                   Utils.ValidationHelper.IsValidEmail(EmailUsuario) && // <-- VALIDACIÓN DE FORMATO DE EMAIL
+
                    Password != null && Password.Length > 0 &&
                    ConfirmPassword != null && ConfirmPassword.Length > 0 &&
-                   RolSeleccionado != null; // Se añade validación de rol
+                   Password.Unsecure() == ConfirmPassword.Unsecure() && // <-- VALIDACIÓN DE CONTRASEÑAS IGUALES
+
+                   RolSeleccionado != null;
         }
+
 
         private async void ExecuteRegistrarCommand(object obj)
         {

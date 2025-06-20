@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,6 +19,7 @@ namespace DeluxeCarsDesktop.Models
         public decimal PrecioUnitario { get; set; }
         public decimal? Descuento { get; set; } // Nullable
         public decimal? IVA { get; set; } // Nullable
+        [NotMapped]
         public decimal SubTotalLinea { get; set; } // Columna calculada
         public decimal Total { get; set; } // Columna calculada
 

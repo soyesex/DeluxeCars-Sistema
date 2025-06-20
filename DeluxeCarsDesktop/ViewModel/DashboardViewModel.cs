@@ -1,4 +1,5 @@
 ﻿using DeluxeCarsDesktop.Interfaces;
+using DeluxeCarsDesktop.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
-    public class DashboardViewModel : ViewModelBase
+    public class DashboardViewModel : ViewModelBase, IAsyncLoadable
     {
         private readonly IUnitOfWork _unitOfWork;
 
