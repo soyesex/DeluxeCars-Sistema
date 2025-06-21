@@ -80,7 +80,7 @@ namespace DeluxeCarsDesktop.ViewModel
                     ReportResults = await _unitOfWork.Facturas.GetFacturasByDateRangeAsync(FechaInicio, FechaFin);
                     break;
                 case "Inventario Crítico":
-                    ReportResults = await _unitOfWork.Productos.GetLowStockProductsAsync(10); // Umbral de 10
+                    ReportResults = await _unitOfWork.Productos.GetLowStockProductsAsync(); 
                     break;
                 // ... Aquí irían las llamadas a los otros métodos de reporte cuando los implementes
                 default:

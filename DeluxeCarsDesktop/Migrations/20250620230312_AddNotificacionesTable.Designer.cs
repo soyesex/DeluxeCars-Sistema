@@ -4,6 +4,7 @@ using DeluxeCarsDesktop.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DeluxeCarsDesktop.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250620230312_AddNotificacionesTable")]
+    partial class AddNotificacionesTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -460,9 +463,12 @@ namespace DeluxeCarsDesktop.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("IdUsuario");
+                    b.HasIndex("UsuarioId");
 
                     b.ToTable("Notificaciones");
                 });
@@ -575,6 +581,9 @@ namespace DeluxeCarsDesktop.Migrations
 
                     b.Property<decimal>("Precio")
                         .HasColumnType("decimal(18, 2)");
+
+                    b.Property<int>("Stock")
+                        .HasColumnType("int");
 
                     b.Property<int?>("StockMaximo")
                         .HasColumnType("int");
@@ -933,7 +942,7 @@ namespace DeluxeCarsDesktop.Migrations
                 {
                     b.HasOne("DeluxeCarsDesktop.Models.Usuario", "Usuario")
                         .WithMany()
-                        .HasForeignKey("IdUsuario")
+                        .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

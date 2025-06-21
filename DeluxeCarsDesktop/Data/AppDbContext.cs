@@ -24,6 +24,7 @@ namespace DeluxeCarsDesktop.Data
         public DbSet<TipoServicio> TiposServicios { get; set; }
         public DbSet<EstadoFacturaElectronica> EstadosFacturaElectronica { get; set; }
         public DbSet<TipoDocumentoElectronico> TiposDocumentoElectronico { get; set; }
+        public DbSet<Notificacion> Notificaciones { get; set; }
 
         // Grupo 2: Entidades Principales (Core)
         public DbSet<Producto> Productos { get; set; }

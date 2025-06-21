@@ -28,6 +28,7 @@ namespace DeluxeCarsDesktop.Repositories
         public IMetodoPagoRepository MetodosPago { get; private set; }
         public ITipoServicioRepository TiposServicios { get; private set; }
         public IProductoProveedorRepository ProductoProveedores { get; private set; }
+        public INotificacionRepository Notificaciones { get; private set; }
         // ...Y las demás propiedades
 
         public UnitOfWork(AppDbContext context)
@@ -43,6 +44,7 @@ namespace DeluxeCarsDesktop.Repositories
             Municipios = new MunicipioRepository(_context);
             MetodosPago = new MetodoPagoRepository(_context);
             ProductoProveedores = new ProductoProveedorRepository(_context);
+            Notificaciones = new NotificacionRepository(_context);
             // ...Inicializar aquí todos los demás repositorios
             // Ejemplo para los que faltan:
             Pedidos = new PedidoRepository(_context);

@@ -24,6 +24,7 @@ namespace DeluxeCarsDesktop.Interfaces
         IMunicipioRepository Municipios { get; }
         ITipoServicioRepository TiposServicios { get; }
         IProductoProveedorRepository ProductoProveedores { get; }
+        INotificacionRepository Notificaciones { get; }
         // ...Añadir aquí todas las demás interfaces de repositorio
 
         /// <summary>

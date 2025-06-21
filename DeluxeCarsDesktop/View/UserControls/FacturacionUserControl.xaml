@@ -136,7 +136,7 @@
                     <DataGridTextColumn Header="Descripción" Binding="{Binding Descripcion}" Width="*"/>
                     <DataGridTextColumn Header="Cantidad" Binding="{Binding Cantidad}" Width="Auto"/>
                     <DataGridTextColumn Header="Precio Unit." Binding="{Binding PrecioUnitario, StringFormat=C}" Width="Auto"/>
-                    <DataGridTextColumn Header="Subtotal" Binding="{Binding SubTotalCalculado, StringFormat=C}" Width="Auto"/>
+                    <DataGridTextColumn Header="Subtotal" Binding="{Binding SubtotalCalculado, StringFormat=C}" Width="Auto"/>
                     <DataGridTemplateColumn Width="Auto">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>

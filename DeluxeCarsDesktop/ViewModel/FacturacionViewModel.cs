@@ -17,6 +17,7 @@ namespace DeluxeCarsDesktop.ViewModel
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IStockAlertService _stockAlertService;
         private Factura _facturaEnProgreso;
         private bool _isInitialized = false;
         private bool _isBuscandoItems = false;
@@ -113,10 +114,12 @@ namespace DeluxeCarsDesktop.ViewModel
         public ICommand FinalizarVentaCommand { get; }
         public ICommand CancelarVentaCommand { get; }
 
-        public FacturacionViewModel(IUnitOfWork unitOfWork, ICurrentUserService currentUserService)
+        public FacturacionViewModel(IUnitOfWork unitOfWork, ICurrentUserService currentUserService, IStockAlertService stockAlertService)
         {
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
+            _stockAlertService = stockAlertService;
+
             LineasDeFactura = new ObservableCollection<DetalleFactura>();
             ResultadosBusquedaCliente = new ObservableCollection<Cliente>();
             ResultadosBusquedaItem = new ObservableCollection<object>();
@@ -414,6 +417,22 @@ namespace DeluxeCarsDesktop.ViewModel
 
                 // 6. Guardamos los nuevos registros de MovimientoInventario.
                 await _unitOfWork.CompleteAsync();
+
+                try
+                {
+                    // Ahora que la venta y los movimientos están confirmados,
+                    // verificamos el stock de cada producto vendido.
+                    foreach (var detalle in _facturaEnProgreso.DetallesFactura.Where(d => d.TipoDetalle == "Producto"))
+                    {
+                        await _stockAlertService.CheckAndCreateStockAlertAsync(detalle.IdItem, _unitOfWork);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Si la generación de la alerta falla, no debe detener el flujo principal de la venta.
+                    // Solo lo registramos para futura depuración.
+                    System.Diagnostics.Debug.WriteLine($"Error al verificar alertas de stock post-venta: {ex.Message}");
+                }
 
                 MessageBox.Show($"Venta #{_facturaEnProgreso.NumeroFactura} finalizada exitosamente.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
                 await InicializarNuevaVenta(); // Limpia el formulario.

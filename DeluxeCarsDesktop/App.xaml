@@ -7,10 +7,16 @@
         <ResourceDictionary>
 
             <ResourceDictionary.MergedDictionaries>
+
+
                 <ResourceDictionary Source="/Styles/UIColors.xaml"/>
                 <ResourceDictionary Source="/Styles/ButtonStyle.xaml"/>
+
+                <ResourceDictionary Source="/Styles/NotificationStyles.xaml"/>
+
             </ResourceDictionary.MergedDictionaries>
 
+            <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
             <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
             <converters:ByteArrayToImageSourceConverter x:Key="ByteArrayToImageConverter"/>
             <converters:ViewModelTypeToBooleanConverter x:Key="ViewModelToBoolConverter"/>

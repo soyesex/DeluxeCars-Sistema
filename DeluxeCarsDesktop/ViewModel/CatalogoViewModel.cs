@@ -24,6 +24,7 @@ namespace DeluxeCarsDesktop.ViewModel
         // --- Dependencias ---
         private readonly IUnitOfWork _unitOfWork;
         private readonly INavigationService _navigationService;
+        private readonly IStockAlertService _stockAlertService;
         private bool _isSearching = false;
 
         // --- Propiedades Públicas para Binding ---
@@ -77,12 +78,13 @@ namespace DeluxeCarsDesktop.ViewModel
         public ICommand AjusteManualCommand { get; }
 
         // --- Constructor ---
-        public CatalogoViewModel(IUnitOfWork unitOfWork, INavigationService navigationService)
-        {
+        public CatalogoViewModel(IUnitOfWork unitOfWork, INavigationService navigationService, IStockAlertService stockAlertService)
+    {
             _unitOfWork = unitOfWork;
             _navigationService = navigationService;
+        _stockAlertService = stockAlertService;
 
-            Productos = new ObservableCollection<ProductoDisplayViewModel>();
+        Productos = new ObservableCollection<ProductoDisplayViewModel>();
             CategoriasDisponibles = new ObservableCollection<Categoria>();
 
             // Opciones para el filtro de Stock
@@ -187,10 +189,10 @@ namespace DeluxeCarsDesktop.ViewModel
 
         private void ExecuteAjusteManual(object obj)
         {
-            // Este código es conceptual. Necesitarás una forma de crear y mostrar la ventana.
-            // Podrías expandir tu NavigationService para que maneje diálogos como este.
-            var vm = new AjusteInventarioViewModel(_unitOfWork);
-            var view = new AjusteInventarioView { DataContext = vm };
+        // Este código es conceptual. Necesitarás una forma de crear y mostrar la ventana.
+        // Podrías expandir tu NavigationService para que maneje diálogos como este.
+        var vm = new AjusteInventarioViewModel(_unitOfWork, _stockAlertService);
+        var view = new AjusteInventarioView { DataContext = vm };
             vm.CloseAction = view.Close;
             view.ShowDialog();
 

@@ -41,7 +41,7 @@ namespace DeluxeCarsDesktop.ViewModel
 
                 NumeroDeClientes = clientes.Count();
                 ProductosEnInventario = productos.Count();
-                ProductosBajoStock = productos.Count(p => p.Stock < 10);
+                ProductosBajoStock = await _unitOfWork.Productos.CountLowStockProductsAsync();
 
                 // Corrección aquí: Sumar sobre una colección de decimales nulables
                 VentasDeHoy = facturasHoy.Sum(f => f.Total ?? 0m);

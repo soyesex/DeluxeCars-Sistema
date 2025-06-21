@@ -41,8 +41,8 @@ namespace DeluxeCarsDesktop.ViewModel
             set { SetProperty(ref _precio, value); (GuardarCommand as ViewModelCommand)?.RaiseCanExecuteChanged(); }
         }
 
-        private int _stock;
-        public int Stock { get => _stock; private set => SetProperty(ref _stock, value); }
+        private int _stockCalculado;
+        public int StockCalculado { get => _stockCalculado; private set => SetProperty(ref _stockCalculado, value); }
         private int? _stockMinimo;
         public int? StockMinimo { get => _stockMinimo; set => SetProperty(ref _stockMinimo, value); }
 
@@ -98,7 +98,7 @@ namespace DeluxeCarsDesktop.ViewModel
                     Nombre = _productoActual.Nombre;
                     OEM = _productoActual.OriginalEquipamentManufacture;
                     Precio = _productoActual.Precio;
-                    Stock = _productoActual.Stock;
+                    StockCalculado = await _unitOfWork.Productos.GetCurrentStockAsync(productoId);
                     Descripcion = _productoActual.Descripcion;
                     StockMinimo = _productoActual.StockMinimo;
                     StockMaximo = _productoActual.StockMaximo;
@@ -126,9 +126,17 @@ namespace DeluxeCarsDesktop.ViewModel
 
         private async void ExecuteGuardarCommand(object obj)
         {
-            if (string.IsNullOrWhiteSpace(Nombre) || CategoriaSeleccionada == null || Precio < 0 || Stock < 0)
+            // Validación 1: Campos obligatorios y valores negativos
+            if (string.IsNullOrWhiteSpace(Nombre) || CategoriaSeleccionada == null || Precio < 0 || (StockMinimo.HasValue && StockMinimo < 0) || (StockMaximo.HasValue && StockMaximo < 0))
             {
-                MessageBox.Show("Nombre, Categoría, Precio y Stock son obligatorios. Precio y Stock no pueden ser negativos.", "Validación Fallida", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Los campos Nombre, Categoría y Precio son obligatorios. Los valores de Stock no pueden ser negativos.", "Validación Fallida", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Validación 2: Coherencia entre Stock Mínimo y Máximo
+            if (StockMinimo.HasValue && StockMaximo.HasValue && StockMinimo >= StockMaximo)
+            {
+                MessageBox.Show("El Stock Mínimo no puede ser mayor o igual al Stock Máximo.", "Error de Lógica", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -137,7 +145,6 @@ namespace DeluxeCarsDesktop.ViewModel
             _productoActual.Precio = Precio;
             _productoActual.StockMinimo = StockMinimo;
             _productoActual.StockMaximo = StockMaximo;
-            _productoActual.Stock = Stock;
             _productoActual.Descripcion = Descripcion;
             _productoActual.Estado = Estado;
             _productoActual.IdCategoria = CategoriaSeleccionada.Id;

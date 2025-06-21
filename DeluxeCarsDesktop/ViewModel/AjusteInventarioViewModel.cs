@@ -1,5 +1,6 @@
 ﻿using DeluxeCarsDesktop.Interfaces;
 using DeluxeCarsDesktop.Models;
+using DeluxeCarsDesktop.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,6 +14,7 @@ namespace DeluxeCarsDesktop.ViewModel
     public class AjusteInventarioViewModel : ViewModelBase, ICloseable
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IStockAlertService _stockAlertService; 
 
         // --- Propiedades para el Binding ---
         public ObservableCollection<Producto> ProductosDisponibles { get; private set; }
@@ -40,9 +42,11 @@ namespace DeluxeCarsDesktop.ViewModel
         public ICommand GuardarAjusteCommand { get; }
         public Action CloseAction { get; set; }
 
-        public AjusteInventarioViewModel(IUnitOfWork unitOfWork)
+        public AjusteInventarioViewModel(IUnitOfWork unitOfWork, IStockAlertService stockAlertService)
         {
             _unitOfWork = unitOfWork;
+            _stockAlertService = stockAlertService;
+
             ProductosDisponibles = new ObservableCollection<Producto>();
             GuardarAjusteCommand = new ViewModelCommand(async p => await ExecuteGuardarAjuste(), p => CanExecuteGuardar());
             LoadProductosAsync();
@@ -77,12 +81,33 @@ namespace DeluxeCarsDesktop.ViewModel
                 Cantidad = cantidadAjuste,
                 MotivoAjuste = this.Motivo
             };
+            try
+            {
+                await _unitOfWork.Context.MovimientosInventario.AddAsync(movimiento);
+                await _unitOfWork.CompleteAsync();
 
-            await _unitOfWork.Context.MovimientosInventario.AddAsync(movimiento);
-            await _unitOfWork.CompleteAsync();
+                if (cantidadAjuste < 0)
+                {
+                    try
+                    {
+                        // Llamamos a nuestro servicio para que haga su magia.
+                        await _stockAlertService.CheckAndCreateStockAlertAsync(ProductoSeleccionado.Id, _unitOfWork);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Si la alerta falla, no detenemos el flujo, solo lo registramos.
+                        System.Diagnostics.Debug.WriteLine($"Error al verificar alertas de stock post-ajuste: {ex.Message}");
+                    }
+                }
 
-            System.Windows.MessageBox.Show("Ajuste de inventario guardado exitosamente.", "Éxito");
-            CloseAction?.Invoke();
+                System.Windows.MessageBox.Show("Ajuste de inventario guardado exitosamente.", "Éxito");
+                CloseAction?.Invoke();
+            }
+
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Ocurrió un error al guardar el ajuste: {ex.Message}", "Error de Guardado");
+            }
         }
     }
 }

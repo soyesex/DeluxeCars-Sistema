@@ -16,7 +16,8 @@ namespace DeluxeCarsDesktop.Interfaces
         Task<Producto> GetByIdWithCategoriaAsync(int productoId);
         Task<IEnumerable<Producto>> SearchAsync(ProductSearchCriteria criteria);
         Task<IEnumerable<Producto>> GetAllWithCategoriaAsync();
-        Task<IEnumerable<Producto>> GetLowStockProductsAsync(int stockThreshold);
+        Task<IEnumerable<Producto>> GetLowStockProductsAsync();
+        Task<int> CountLowStockProductsAsync();
         Task<IEnumerable<Producto>> SearchProductsBySupplierAsync(int proveedorId, string searchTerm);
         Task<IEnumerable<Producto>> GetAssociatedProductsAsync(int proveedorId);
         Task<IEnumerable<Producto>> GetUnassociatedProductsAsync(int proveedorId);

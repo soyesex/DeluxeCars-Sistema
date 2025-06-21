@@ -1,5 +1,6 @@
 ﻿using DeluxeCarsDesktop.Interfaces;
 using DeluxeCarsDesktop.Models;
+using DeluxeCarsDesktop.Services;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,7 @@ namespace DeluxeCarsDesktop.ViewModel
     public class PedidoFormViewModel : ViewModelBase, IFormViewModel, ICloseable
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly INotificationService _notificationService;
         private Pedido _pedidoActual;
         private bool _esModoEdicion;
         private bool _isBuscandoProductos = false;
@@ -128,9 +130,10 @@ namespace DeluxeCarsDesktop.ViewModel
         public ICommand CancelarPedidoCommand { get; }
         public Action CloseAction { get; set; }
 
-        public PedidoFormViewModel(IUnitOfWork unitOfWork)
+        public PedidoFormViewModel(IUnitOfWork unitOfWork, INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
+            _notificationService = notificationService; 
 
             LineasDePedido = new ObservableCollection<DetallePedido>();
             ResultadosBusquedaProducto = new ObservableCollection<Producto>();
@@ -353,7 +356,7 @@ namespace DeluxeCarsDesktop.ViewModel
                     await _unitOfWork.CompleteAsync();
                 }
 
-                MessageBox.Show("Pedido guardado exitosamente.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
+                 _notificationService.ShowSuccess("Pedido guardado exitosamente.");
                 CloseAction?.Invoke();
             }
             catch (Exception ex)
@@ -364,7 +367,7 @@ namespace DeluxeCarsDesktop.ViewModel
                 {
                     errorMessage += $"\n\n--- DETALLES ---\n{ex.InnerException.Message}";
                 }
-                MessageBox.Show(errorMessage, "Error de Guardado Detallado", MessageBoxButton.OK, MessageBoxImage.Error);
+                _notificationService.ShowError($"Error al guardar el pedido: {ex.Message}");
             }
             // --- FIN DE LA CORRECCIÓN ---
         }

@@ -47,10 +47,13 @@ public partial class App : Application
         services.AddTransient<IUnitOfWork, UnitOfWork>();
 
         services.AddScoped<INavigationService, NavigationService>();
+        services.AddScoped<IStockAlertService, StockAlertService>();
 
         services.AddSingleton<ICurrentUserService, CurrentUserService>();
 
         services.AddTransient<IEmailService, EmailService>();
+
+        services.AddSingleton<INotificationService, NotificationService>();
 
         // Registrar tus ViewModels. Transient significa que se creará una nueva instancia cada vez que se pida.
         services.AddTransient<LoginViewModel>();

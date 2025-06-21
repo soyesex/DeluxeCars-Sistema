@@ -29,9 +29,6 @@ namespace DeluxeCarsDesktop.Models
         private decimal _precio;
         public decimal Precio { get => _precio; set => SetProperty(ref _precio, value); }
 
-        private int _stock;
-        public int Stock { get => _stock; set => SetProperty(ref _stock, value); }
-
         private string _descripcion;
         public string Descripcion { get => _descripcion; set => SetProperty(ref _descripcion, value); }
 

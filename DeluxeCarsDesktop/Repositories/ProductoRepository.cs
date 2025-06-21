@@ -16,6 +16,18 @@ namespace DeluxeCarsDesktop.Repositories
         public ProductoRepository(AppDbContext context) : base(context)
         {
         }
+        // En ProductoRepository.cs
+        public async Task<int> CountLowStockProductsAsync()
+        {
+            // Es la misma lógica que GetLowStockProductsAsync, pero en lugar de
+            // devolver la lista completa, usamos CountAsync() para que EF
+            // genere un "SELECT COUNT(*)" en SQL. Mucho más rápido.
+            return await _context.Productos
+                .CountAsync(p => p.StockMinimo.HasValue && p.StockMinimo > 0 &&
+                            (_context.MovimientosInventario
+                                   .Where(m => m.IdProducto == p.Id)
+                                   .Sum(m => (int?)m.Cantidad) ?? 0) < p.StockMinimo);
+        }
         public async Task<Dictionary<int, int>> GetCurrentStocksAsync(IEnumerable<int> productIds)
         {
             // Esta consulta va a la tabla de movimientos una sola vez
@@ -63,16 +75,27 @@ namespace DeluxeCarsDesktop.Repositories
             // --- Filtro por Estado de Stock ---
             if (!string.IsNullOrWhiteSpace(criteria.StockStatus))
             {
+
                 switch (criteria.StockStatus)
                 {
                     case "En Stock":
-                        query = query.Where(p => p.Stock > 0);
+                        // Un producto está "En Stock" si la suma de sus movimientos es > 0
+                        query = query.Where(p => _context.MovimientosInventario
+                                                       .Where(m => m.IdProducto == p.Id)
+                                                       .Sum(m => (int?)m.Cantidad) > 0);
                         break;
                     case "Agotado":
-                        query = query.Where(p => p.Stock == 0);
+                        // Un producto está "Agotado" si la suma es 0 o no tiene movimientos
+                        query = query.Where(p => (_context.MovimientosInventario
+                                                      .Where(m => m.IdProducto == p.Id)
+                                                      .Sum(m => (int?)m.Cantidad) ?? 0) == 0);
                         break;
                     case "Bajo Stock":
-                        query = query.Where(p => p.Stock > 0 && p.Stock <= 10); // Asumiendo 10 como umbral
+                        // "Bajo Stock" si la suma es > 0 Y es menor que su StockMinimo configurado
+                        query = query.Where(p => p.StockMinimo.HasValue && p.StockMinimo > 0 &&
+                                                 (_context.MovimientosInventario
+                                                        .Where(m => m.IdProducto == p.Id)
+                                                        .Sum(m => (int?)m.Cantidad) ?? 0) < p.StockMinimo);
                         break;
                 }
             }
@@ -141,10 +164,15 @@ namespace DeluxeCarsDesktop.Repositories
                                  .ToListAsync();
         }
 
-        public async Task<IEnumerable<Producto>> GetLowStockProductsAsync(int stockThreshold)
+        public async Task<IEnumerable<Producto>> GetLowStockProductsAsync()
         {
-            return await _dbSet
-                .Where(p => p.Stock < stockThreshold)
+            // Este método busca todos los productos cuyo stock calculado
+            // sea menor que su StockMinimo configurado.
+            return await _context.Productos
+                .Where(p => p.StockMinimo.HasValue && p.StockMinimo > 0 &&
+                            (_context.MovimientosInventario
+                                   .Where(m => m.IdProducto == p.Id)
+                                   .Sum(m => (int?)m.Cantidad) ?? 0) < p.StockMinimo)
                 .AsNoTracking()
                 .ToListAsync();
         }
