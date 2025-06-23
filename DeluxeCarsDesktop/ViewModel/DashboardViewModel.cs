@@ -1,4 +1,5 @@
 ﻿using DeluxeCarsDesktop.Interfaces;
+using DeluxeCarsDesktop.Models;
 using DeluxeCarsDesktop.Services;
 using System;
 using System.Collections.Generic;
@@ -25,26 +26,28 @@ namespace DeluxeCarsDesktop.ViewModel
         private decimal _ventasDeHoy;
         public decimal VentasDeHoy { get => _ventasDeHoy; set => SetProperty(ref _ventasDeHoy, value); }
 
+        // --- NUEVA PROPIEDAD ---
+        private int _pedidosPendientes;
+        public int PedidosPendientes { get => _pedidosPendientes; set => SetProperty(ref _pedidosPendientes, value); }
+
+
         public DashboardViewModel(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
 
-        // Nuevo método público para cargar los datos
         public async Task LoadAsync()
         {
             try
             {
-                var clientes = await _unitOfWork.Clientes.GetAllAsync();
-                var productos = (await _unitOfWork.Productos.GetAllAsync()).ToList();
-                var facturasHoy = await _unitOfWork.Facturas.GetFacturasByDateRangeAsync(DateTime.Today, DateTime.Today.AddDays(1).AddTicks(-1));
-
-                NumeroDeClientes = clientes.Count();
-                ProductosEnInventario = productos.Count();
+                NumeroDeClientes = await _unitOfWork.Clientes.CountAsync();
+                ProductosEnInventario = await _unitOfWork.Productos.CountAsync();
                 ProductosBajoStock = await _unitOfWork.Productos.CountLowStockProductsAsync();
 
-                // Corrección aquí: Sumar sobre una colección de decimales nulables
+                var facturasHoy = await _unitOfWork.Facturas.GetFacturasByDateRangeAsync(DateTime.Today, DateTime.Today.AddDays(1).AddTicks(-1));
                 VentasDeHoy = facturasHoy.Sum(f => f.Total ?? 0m);
+
+                PedidosPendientes = await _unitOfWork.Pedidos.CountAsync(p => p.Estado == EstadoPedido.Aprobado);
             }
             catch (Exception ex)
             {

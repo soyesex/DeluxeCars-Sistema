@@ -15,5 +15,7 @@ namespace DeluxeCarsDesktop.Interfaces
         Task UpdateAsync(T entity);
         Task RemoveAsync(T entity); // Es preferible pasar la entidad para el tracking de EF
         Task<IEnumerable<T>> GetByConditionAsync(Expression<Func<T, bool>> condition);
+        Task<int> CountAsync();
+        Task<int> CountAsync(Expression<Func<T, bool>> condition);
     }
 }

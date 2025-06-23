@@ -3,11 +3,6 @@ using DeluxeCarsDesktop.Utils;
 using DeluxeCarsDesktop.View;
 using DeluxeCarsDesktop.ViewModel;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DeluxeCarsDesktop.Services
 {
@@ -34,7 +29,23 @@ namespace DeluxeCarsDesktop.Services
         {
             _serviceProvider = serviceProvider;
         }
+        public async Task OpenSugerenciasDialogAsync()
+        {
+            // Usamos el DI container para crear una instancia del ViewModel con todas sus dependencias.
+            var vm = _serviceProvider.GetRequiredService<SugerenciasCompraViewModel>();
 
+            // Creamos la vista del diálogo.
+            var view = new SugerenciasCompraView { DataContext = vm };
+
+            // Le pasamos la acción de cierre al ViewModel.
+            // vm.CloseAction = view.Close; // Si tuvieras un CloseAction en SugerenciasCompraViewModel
+
+            // Cargamos sus datos antes de mostrarla.
+            await vm.LoadAsync();
+
+            // Mostramos la ventana como un diálogo modal (bloquea la ventana principal).
+            view.ShowDialog();
+        }
         public async Task NavigateTo<TViewModel>() where TViewModel : ViewModelBase
         {
             if (CurrentMainView != null)

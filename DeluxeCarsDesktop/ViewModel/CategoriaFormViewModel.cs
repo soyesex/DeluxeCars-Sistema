@@ -10,99 +10,119 @@ namespace DeluxeCarsDesktop.ViewModel
 {
     public class CategoriaFormViewModel : ViewModelBase, IFormViewModel, ICloseable
     {
-        // --- Dependencias ---
+        // --- Dependencias (Sin cambios) ---
         private readonly IUnitOfWork _unitOfWork;
 
-        // --- Propiedades de Estado ---
+        // --- Estado Interno (Sin cambios) ---
         private Categoria _categoriaActual;
         private bool _esModoEdicion;
 
         // --- Propiedades para Binding a la UI ---
 
-        private string _tituloVentana;
-        public string TituloVentana
-        {
-            get => _tituloVentana;
-            set => SetProperty(ref _tituloVentana, value); // SetProperty es un helper de ViewModelBase
-        }
+        public string TituloVentana { get; private set; } = "Gestión de Categorías"; // Título fijo
 
+        // --- Propiedades para el Formulario de Entrada ---
         private string _nombre;
         public string Nombre
         {
             get => _nombre;
-            set => SetProperty(ref _nombre, value);
+            set { SetProperty(ref _nombre, value); (GuardarCommand as ViewModelCommand)?.RaiseCanExecuteChanged(); }
         }
 
         private string _descripcion;
-        public string Descripcion
+        public string Descripcion { get => _descripcion; set => SetProperty(ref _descripcion, value); }
+
+        // --- NUEVAS PROPIEDADES PARA EL DATAGRID ---
+        public ObservableCollection<Categoria> ListaCategorias { get; private set; }
+        private Categoria _categoriaSeleccionada;
+        public Categoria CategoriaSeleccionada
         {
-            get => _descripcion;
-            set => SetProperty(ref _descripcion, value);
+            get => _categoriaSeleccionada;
+            set { SetProperty(ref _categoriaSeleccionada, value); (EditarCommand as ViewModelCommand)?.RaiseCanExecuteChanged(); }
         }
 
         // --- Comandos ---
         public ICommand GuardarCommand { get; }
         public ICommand CancelarCommand { get; }
+        public ICommand EditarCommand { get; } // NUEVO
+        public ICommand NuevoCommand { get; }   // NUEVO
 
-        // --- Acción para cerrar la ventana ---
+        // --- Acción para cerrar la ventana (Sin cambios) ---
         public Action CloseAction { get; set; }
 
         // --- Constructor ---
         public CategoriaFormViewModel(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            GuardarCommand = new ViewModelCommand(ExecuteGuardarCommand);
-            CancelarCommand = new ViewModelCommand(ExecuteCancelarCommand);
+            ListaCategorias = new ObservableCollection<Categoria>();
+
+            // Inicialización de comandos
+            GuardarCommand = new ViewModelCommand(async (p) => await ExecuteGuardarCommand(), (p) => CanExecuteGuardarCommand());
+            CancelarCommand = new ViewModelCommand((p) => CloseAction?.Invoke());
+            EditarCommand = new ViewModelCommand(ExecuteEditarCommand, (p) => CategoriaSeleccionada != null);
+            NuevoCommand = new ViewModelCommand(ExecuteNuevoCommand);
+
+            // Inicializamos en modo "Nuevo"
+            ExecuteNuevoCommand(null);
         }
 
-        /// <summary>
-        /// Método de inicialización para cargar una categoría existente o preparar una nueva.
-        /// </summary>
-        /// <param name="categoriaId">El ID de la categoría a editar, o 0 para crear una nueva.</param>
-        public async Task LoadAsync(int categoriaId)
+        // --- Lógica de Carga de Datos ---
+        // Este método se llama cuando el formulario anfitrión lo inicializa.
+        public async Task LoadAsync(int ignoredId)
         {
-            if (categoriaId == 0) // Modo Creación
+            await CargarCategoriasAsync();
+        }
+
+        private async Task CargarCategoriasAsync()
+        {
+            var categorias = await _unitOfWork.Categorias.GetAllAsync();
+            ListaCategorias.Clear();
+            foreach (var cat in categorias.OrderBy(c => c.Nombre))
             {
-                _esModoEdicion = false;
-                _categoriaActual = new Categoria();
-                TituloVentana = "Nueva Categoría";
-            }
-            else // Modo Edición
-            {
-                _esModoEdicion = true;
-                _categoriaActual = await _unitOfWork.Categorias.GetByIdAsync(categoriaId);
-                if (_categoriaActual != null)
-                {
-                    TituloVentana = "Editar Categoría";
-                    Nombre = _categoriaActual.Nombre;
-                    Descripcion = _categoriaActual.Descripcion;
-                }
-                else
-                {
-                    MessageBox.Show("No se encontró la categoría solicitada.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    CloseAction?.Invoke();
-                }
+                ListaCategorias.Add(cat);
             }
         }
 
         // --- Lógica de los Comandos ---
 
-        private async void ExecuteGuardarCommand(object obj)
+        private void ExecuteNuevoCommand(object obj)
         {
-            // --- Validación ---
-            if (string.IsNullOrWhiteSpace(Nombre))
-            {
-                MessageBox.Show("El nombre de la categoría no puede estar vacío.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
+            _esModoEdicion = false;
+            _categoriaActual = new Categoria();
 
-            // --- Actualización del modelo ---
+            // Limpiamos los campos del formulario
+            Nombre = string.Empty;
+            Descripcion = string.Empty;
+            CategoriaSeleccionada = null; // Deseleccionamos la grid
+        }
+
+        private void ExecuteEditarCommand(object obj)
+        {
+            if (CategoriaSeleccionada == null) return;
+
+            _esModoEdicion = true;
+            _categoriaActual = CategoriaSeleccionada; // Apuntamos a la entidad seleccionada
+
+            // Cargamos sus datos en el formulario
+            Nombre = _categoriaActual.Nombre;
+            Descripcion = _categoriaActual.Descripcion;
+        }
+
+        private bool CanExecuteGuardarCommand()
+        {
+            return !string.IsNullOrWhiteSpace(Nombre);
+        }
+
+        private async Task ExecuteGuardarCommand()
+        {
+            if (!CanExecuteGuardarCommand()) return;
+
+            // Actualizamos la entidad en memoria con los datos del formulario
             _categoriaActual.Nombre = Nombre;
             _categoriaActual.Descripcion = Descripcion;
 
             try
             {
-                // --- Lógica de persistencia ---
                 if (_esModoEdicion)
                 {
                     await _unitOfWork.Categorias.UpdateAsync(_categoriaActual);
@@ -112,22 +132,18 @@ namespace DeluxeCarsDesktop.ViewModel
                     await _unitOfWork.Categorias.AddAsync(_categoriaActual);
                 }
 
-                // --- Confirmación de la transacción ---
                 await _unitOfWork.CompleteAsync();
 
                 MessageBox.Show("Categoría guardada exitosamente.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
-                CloseAction?.Invoke(); // Cierra la ventana del formulario
+
+                // Refrescamos la lista en la UI y reiniciamos el formulario
+                await CargarCategoriasAsync();
+                ExecuteNuevoCommand(null);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ocurrió un error al guardar la categoría: {ex.Message}", "Error de Guardado", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Ocurrió un error al guardar: {ex.Message}", "Error de Guardado", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-        }
-
-        private void ExecuteCancelarCommand(object obj)
-        {
-            // Simplemente cierra la ventana sin guardar.
-            CloseAction?.Invoke();
         }
     }
 }

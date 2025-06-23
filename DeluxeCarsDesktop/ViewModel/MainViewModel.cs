@@ -25,19 +25,17 @@ namespace DeluxeCarsDesktop.ViewModel
     {
         //// --- Dependencias y Estado ---
         private readonly IUnitOfWork _unitOfWork; // <-- CAMBIO: Ahora usamos UnitOfWork
-        private readonly INotificationService _notificationService;
-
+        private readonly IServiceProvider _serviceProvider;
         private readonly INavigationService _navigationService;
+        private readonly INotificationService _notificationService;
         private readonly ICurrentUserService _currentUserService;
-
+        public event Action LogoutSuccess;
         public bool CanGoBack => _navigationService.CanGoBack;
 
         private UserAccountModel _currentUserAccount;
         private ViewModelBase _currentChildView;
         private string _caption;
         private IconChar _icon;
-
-        public event Action LogoutSuccess;
 
         // --- Propiedades Públicas para Binding ---
         public UserAccountModel CurrentUserAccount { get => _currentUserAccount; set => SetProperty(ref _currentUserAccount, value); }
@@ -47,25 +45,12 @@ namespace DeluxeCarsDesktop.ViewModel
         public IconChar Icon { get => _icon; set => SetProperty(ref _icon, value); }
         public bool IsAdmin => _currentUserService.IsAdmin;
 
-        // --> AÑADIDO: Estado para el centro de notificaciones
-        private int _notificationCount;
+        // --- Sistema de Notificaciones ---
+        public ObservableCollection<AppNotification> AlertasNuevas { get; }
+        public ObservableCollection<AppNotification> HistorialYEstados { get; }
+        public int NotificationCount => AlertasNuevas.Count;
         private bool _isNotificationsPanelVisible;
-
-        // --> AÑADIDO: Propiedades para bindeo del centro de notificaciones
-        public int NotificationCount
-        {
-            get => _notificationCount;
-            set => SetProperty(ref _notificationCount, value);
-        }
-
-        public bool IsNotificationsPanelVisible
-        {
-            get => _isNotificationsPanelVisible;
-            set => SetProperty(ref _isNotificationsPanelVisible, value);
-        }
-
-        // Esta propiedad expone la colección del servicio directamente a la UI.
-        public ReadOnlyObservableCollection<AppNotification> Notifications => _notificationService.AllNotifications;
+        public bool IsNotificationsPanelVisible { get => _isNotificationsPanelVisible; set => SetProperty(ref _isNotificationsPanelVisible, value); }
 
 
         // --- Comandos ---
@@ -83,19 +68,24 @@ namespace DeluxeCarsDesktop.ViewModel
         public ICommand ShowConfiguracionViewCommand { get; }
         public ICommand LogoutCommand { get; }
         public ICommand ToggleNotificationsPanelCommand { get; }
+        public ICommand ShowSugerenciasCompraViewCommand { get; }
 
-        public MainViewModel(ICurrentUserService currentUserService,
-            INavigationService navigationService, IUnitOfWork unitOfWork,
-                             INotificationService notificationService)
+        public MainViewModel(ICurrentUserService currentUserService, INavigationService navigationService, IUnitOfWork unitOfWork, IServiceProvider serviceProvider, INotificationService notificationService)
         {
 
             _navigationService = navigationService;
+            _notificationService = notificationService;
             _unitOfWork = unitOfWork; // <-- Se asigna aquí
             _currentUserService = currentUserService;
-            _notificationService = notificationService;
+            _serviceProvider = serviceProvider;
 
-            // Nos suscribimos al evento del servicio para reaccionar a los cambios de navegación
+            AlertasNuevas = new ObservableCollection<AppNotification>();
+            HistorialYEstados = new ObservableCollection<AppNotification>();
+            AlertasNuevas.CollectionChanged += (s, e) => OnPropertyChanged(nameof(NotificationCount));
             _navigationService.CurrentMainViewChanged += OnCurrentMainViewChanged;
+
+            AppEvents.OnNotificationsChanged += async () => await CargarEstadoDeNotificacionesAsync();
+            
 
             // --- Comandos de Navegación SIMPLIFICADOS ---
             ShowHomeViewCommand = new ViewModelCommand(async p => await _navigationService.NavigateTo<DashboardViewModel>());
@@ -109,57 +99,21 @@ namespace DeluxeCarsDesktop.ViewModel
             ShowUsuarioViewCommand = new ViewModelCommand(async p => await _navigationService.NavigateTo<UsuarioViewModel>());
             ShowRolViewCommand = new ViewModelCommand(async p => await _navigationService.NavigateTo<RolViewModel>());
             ShowConfiguracionViewCommand = new ViewModelCommand(async p => await _navigationService.NavigateTo<ConfiguracionViewModel>());
-
+            ShowSugerenciasCompraViewCommand = new ViewModelCommand(async p => await _navigationService.NavigateTo<SugerenciasCompraViewModel>());
             ToggleNotificationsPanelCommand = new ViewModelCommand(ExecuteToggleNotificationsPanel);
-
-            // 2. Nos suscribimos al evento del servicio.
-            //    Cada vez que se postee una notificación, se llamará a este delegado.
-            _notificationService.OnNotificationPosted += (notificationContent) =>
-            {
-                // El hilo de la UI es necesario para actualizar propiedades bindeables desde otros hilos.
-                App.Current.Dispatcher.Invoke(() =>
-                {
-                    NotificationCount++;
-                });
-            };
+                        
             // --- Comando para Volver ---
             GoBackCommand = new ViewModelCommand(p => _navigationService.GoBack(), p => _navigationService.CanGoBack);
             LogoutCommand = new ViewModelCommand(ExecuteLogout);
         }
-        //  Método que ejecuta el comando del botón de la campana
-        private async void ExecuteToggleNotificationsPanel(object obj)
+
+        public async Task InitializeAsync()
         {
-            IsNotificationsPanelVisible = !IsNotificationsPanelVisible;
-
-            // Solo actuamos si el panel se acaba de ABRIR y hay notificaciones.
-            if (IsNotificationsPanelVisible && NotificationCount > 0)
-            {
-                // Reseteamos el contador visual INMEDIATAMENTE para una mejor UX.
-                int countToClear = NotificationCount;
-                NotificationCount = 0;
-
-                // Ahora, actualizamos la base de datos en segundo plano.
-                try
-                {
-                    // Extraemos los IDs de las notificaciones que estaban como no leídas.
-                    var idsParaMarcar = _notificationService.AllNotifications
-                                                            .Take(countToClear) // Tomamos solo las que contaban como no leídas
-                                                            .Select(n => n.Id)
-                                                            .ToList();
-
-                    if (idsParaMarcar.Any())
-                    {
-                        await _unitOfWork.Notificaciones.MarcarComoLeidasAsync(idsParaMarcar);
-                        await _unitOfWork.CompleteAsync();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"Error al marcar notificaciones como leídas: {ex.Message}");
-                    // No bloqueamos al usuario, pero registramos el error.
-                }
-            }
+            await LoadCurrentUserData(); // Carga los datos del usuario logueado
+            await CargarEstadoDeNotificacionesAsync();
+            await _navigationService.NavigateTo<DashboardViewModel>();// Carga la vista por defecto (el dashboard)
         }
+                
         // Este método se ejecuta cada vez que el NavigationService cambia la vista.
         private void OnCurrentMainViewChanged()
         {
@@ -170,45 +124,148 @@ namespace DeluxeCarsDesktop.ViewModel
             OnPropertyChanged(nameof(CanGoBack)); // <-- AÑADE ESTA LÍNEA
         }
 
-        // Este método se ejecuta una sola vez al iniciar la aplicación.
-        // Tu implementación actual también es PERFECTA. No necesita cambios.
-        public async Task InitializeAsync()
-        {
-            await LoadCurrentUserData(); // Carga los datos del usuario logueado
-            await LoadUnreadNotificationsAsync();
-            await _navigationService.NavigateTo<DashboardViewModel>();// Carga la vista por defecto (el dashboard)
-        }
-        // ---> AÑADIDO: El nuevo método para cargar y traducir las notificaciones <---
-        private async Task LoadUnreadNotificationsAsync()
+
+
+        private async Task CargarEstadoDeNotificacionesAsync()
         {
             if (_currentUserService.CurrentUser == null) return;
+
+            // Limpiamos las listas para evitar duplicados en cada recarga.
+            AlertasNuevas.Clear();
+            HistorialYEstados.Clear();
 
             try
             {
                 var userId = _currentUserService.CurrentUser.Id;
-                var notificacionesDesdeDb = await _unitOfWork.Notificaciones.GetNotificacionesNoLeidasAsync(userId);
 
-                // "Traducimos" del modelo de BD (Notificacion) al modelo de UI (AppNotification)
-                var notificacionesParaUi = notificacionesDesdeDb.Select(n => new AppNotification
+                // 1. Manejar el Panel de Estado del Inventario (siempre lo buscamos y mostramos)
+                var stockSummaryDB = await _unitOfWork.Notificaciones.GetUnreadSummaryAlertAsync("LowStockSummary", userId);
+                var lowStockCount = stockSummaryDB?.DataCount ?? await _unitOfWork.Productos.CountLowStockProductsAsync();
+                var haSidoLeido = stockSummaryDB?.Leida ?? true;
+
+                var panelDeEstado = CrearPanelDeEstado(lowStockCount, haSidoLeido);
+                HistorialYEstados.Add(panelDeEstado);
+
+                // DESPUÉS (usando el nuevo método especializado y correcto):
+                var otrasAlertasDB = await _unitOfWork.Notificaciones.GetActiveNotificationsWithDetailsAsync(userId);
+
+                foreach (var notificacionDB in otrasAlertasDB.OrderByDescending(n => n.FechaCreacion))
                 {
-                    Id = n.Id,
-                    Title = n.Titulo,
-                    Message = n.Mensaje,
-                    Timestamp = n.FechaCreacion,
-                    // Convertimos el string de la BD de nuevo a un Enum para la UI
-                    Type = Enum.TryParse<NotificationType>(n.Tipo, true, out var type) ? type : NotificationType.Information
-                }).ToList();
+                    // --- INICIO DE LA NUEVA LÓGICA ---
+                    ICommand? actionCommand = null;
+                    string? actionText = null;
 
-                // Usamos el nuevo método del servicio para cargar la lista en la UI
-                _notificationService.LoadInitialNotifications(notificacionesParaUi);
+                    // Verificamos el tipo de notificación para asignarle una acción específica.
+                    if (notificacionDB.Tipo == "PedidoPendiente" && notificacionDB.PedidoId.HasValue)
+                    {
+                        actionText = "Recepcionar Pedido";
+
+                        // Creamos el comando específico para esta notificación.
+                        actionCommand = new ViewModelCommand(async p =>
+                        {
+                            // Primero, marcamos esta notificación específica como leída.
+                            await _unitOfWork.Notificaciones.MarcarComoLeidasAsync(new[] { notificacionDB.Id });
+                            await _unitOfWork.CompleteAsync();
+
+                            // Cerramos el panel de notificaciones para que el usuario vea la acción.
+                            IsNotificationsPanelVisible = false;
+
+                            // Navegamos a la ventana de recepción, pasándole el ID del pedido.
+                            await _navigationService.OpenFormWindow(Utils.FormType.RecepcionPedido, notificacionDB.PedidoId.Value);
+
+                            // Al volver, recargamos todo para asegurar que la UI está 100% actualizada.
+                            await InitializeAsync();
+                        });
+                    }
+                    // Aquí podrías añadir otros 'else if' para futuros tipos de notificaciones.
+
+                    // --- FIN DE LA NUEVA LÓGICA ---
+
+                    var notificacionUI = new AppNotification
+                    {
+                        Id = notificacionDB.Id,
+                        Title = notificacionDB.Titulo,
+                        Message = notificacionDB.Mensaje,
+                        Timestamp = notificacionDB.FechaCreacion,
+                        Type = Enum.TryParse<NotificationType>(notificacionDB.Tipo, true, out var typeEnum) ? typeEnum : NotificationType.Information,
+
+                        // Asignamos el comando y el texto que acabamos de crear.
+                        // Si no se creó ninguno, serán 'null' y el botón no aparecerá gracias a tu Converter.
+                        ActionCommand = actionCommand,
+                        ActionText = actionText
+                    };
+                    AlertasNuevas.Add(notificacionUI);
+                }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Error al cargar las notificaciones no leídas: {ex.Message}");
-                // Opcional: Mostrar un error al usuario
-                // _notificationService.ShowError("No se pudieron cargar las notificaciones pendientes.");
+                Debug.WriteLine($"Error al cargar notificaciones: {ex.Message}");
             }
         }
+
+        private AppNotification CrearPanelDeEstado(int lowStockCount, bool haSidoLeido)
+        {
+            string title = (lowStockCount > 0) ? "Inventario Crítico" : "Estado del Inventario";
+            string message = (lowStockCount > 0)
+                ? $"Hay {lowStockCount} producto(s) con bajo stock que requieren atención."
+                : "¡Todo en orden! No hay productos con bajo stock.";
+
+            ICommand? command = null;
+            string? commandText = null;
+            var type = NotificationType.Success; // Por defecto, es un estado positivo
+
+            // Solo creamos un comando si hay productos con bajo stock
+            if (lowStockCount > 0)
+            {
+                type = NotificationType.Warning;
+                commandText = "Revisar Sugerencias";
+
+                // Creamos el comando que ejecuta la navegación al diálogo de sugerencias
+                command = new ViewModelCommand(p =>
+                {
+                    // Usamos el ServiceProvider para obtener una instancia FRESCA del NavigationService
+                    // y llamar a su método. Esto asegura que las dependencias son correctas.
+                    var navService = _serviceProvider.GetRequiredService<INavigationService>();
+                    navService.OpenSugerenciasDialogAsync();
+                });
+            }
+
+            return new AppNotification
+            {
+                IsStatusPanel = true,
+                NotificationKey = "LowStockSummary",
+                Title = title,
+                Message = message,
+                Type = type,
+                Timestamp = DateTime.Now,
+                ActionCommand = command, // <-- Aquí se asigna el comando creado
+                ActionText = commandText
+            };
+        }
+
+        private async void ExecuteToggleNotificationsPanel(object obj)
+        {
+            IsNotificationsPanelVisible = !IsNotificationsPanelVisible;
+
+            if (IsNotificationsPanelVisible && AlertasNuevas.Any())
+            {
+                var alertasParaMarcar = AlertasNuevas.ToList();
+                AlertasNuevas.Clear();
+
+                foreach (var alerta in alertasParaMarcar.OrderByDescending(a => a.Timestamp))
+                {
+                    HistorialYEstados.Insert(0, alerta);
+                }
+
+                var ids = alertasParaMarcar.Select(a => a.Id).ToList();
+                if (ids.Any())
+                {
+                    await _unitOfWork.Notificaciones.MarcarComoLeidasAsync(ids);
+                    await _unitOfWork.CompleteAsync();
+                }
+            }
+        }
+
         // Centraliza toda la lógica para actualizar el título y el ícono de la ventana.
         private void UpdateCaptionAndIcon(ViewModelBase viewModel)
         {

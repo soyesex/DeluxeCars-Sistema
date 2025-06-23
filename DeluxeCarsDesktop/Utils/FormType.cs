@@ -23,6 +23,7 @@ namespace DeluxeCarsDesktop.Utils
         Rol,
         Usuario,
         CambiarPassword,
-        GestionarProductosProveedor
+        GestionarProductosProveedor,
+        RecepcionPedido
     }
 }

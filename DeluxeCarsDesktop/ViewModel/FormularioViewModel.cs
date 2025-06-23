@@ -176,6 +176,10 @@ namespace DeluxeCarsDesktop.ViewModel
                     Icon = IconChar.Tasks; // Un ícono de ejemplo
                     break;
 
+                case FormType.RecepcionPedido:
+                    CurrentChildView = serviceProvider.GetRequiredService<RecepcionPedidoViewModel>();
+                    break;
+
                 default:
                     Caption = "Formulario Desconocido";
                     Icon = IconChar.QuestionCircle;

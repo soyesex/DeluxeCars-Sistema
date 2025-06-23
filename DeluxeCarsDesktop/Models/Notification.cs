@@ -18,6 +18,16 @@ namespace DeluxeCarsDesktop.Models
         public DateTime FechaCreacion { get; set; }
         public bool Leida { get; set; }
 
+        /*Un campo genérico para guardar un dato numérico asociado a la notificación.
+         Para las alertas de stock, guardaremos aquí el recuento de productos.*/
+        public int? DataCount { get; set; }
+
+        // --- NUEVA PROPIEDAD ---
+        // Clave foránea opcional al pedido relacionado.
+        // Es 'nullable' (int?) porque no todas las notificaciones
+        // estarán relacionadas con un pedido (ej: las de bajo stock).
+        public int? PedidoId { get; set; }
+
         // Esta es la propiedad que contendrá el valor de la clave foránea.
         public int IdUsuario { get; set; }
 
@@ -26,7 +36,9 @@ namespace DeluxeCarsDesktop.Models
         // debe usar la columna especificada en 'IdUsuario' como su clave foránea.
         // Ya no creará una columna extra 'UsuarioId'.
         [ForeignKey("IdUsuario")]
-        // --- FIN DE LA CORRECCIÓN ---
         public virtual Usuario Usuario { get; set; }
+
+        [ForeignKey("PedidoId")]
+        public virtual Pedido Pedido { get; set; }
     }
 }

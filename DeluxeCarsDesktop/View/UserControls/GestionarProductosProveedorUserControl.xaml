@@ -73,7 +73,7 @@
                 <DataGrid ItemsSource="{Binding ProductosNoAsociados}" SelectedItem="{Binding ProductoNoAsociadoSeleccionado}" Style="{StaticResource ElegantDataGridStyle}">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Nombre Producto" Binding="{Binding Nombre}" Width="*"/>
-                        <DataGridTextColumn Header="Categoría" Binding="{Binding Categoria.Nombre}" Width="*"/>
+                        <DataGridTextColumn Header="Precio Venta" Binding="{Binding Precio, StringFormat=C, ConverterCulture=es-CO}" Width="*"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </DockPanel>

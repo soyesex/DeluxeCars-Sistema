@@ -1,5 +1,4 @@
-﻿using DeluxeCarsDesktop.ViewModel;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,11 +16,11 @@ using System.Windows.Shapes;
 namespace DeluxeCarsDesktop.View.UserControls
 {
     /// <summary>
-    /// Lógica de interacción para DashboardUserControl.xaml
+    /// Lógica de interacción para RecepcionPedidoUserControl.xaml
     /// </summary>
-    public partial class DashboardUserControl : UserControl
+    public partial class RecepcionPedidoUserControl : UserControl
     {
-        public DashboardUserControl()
+        public RecepcionPedidoUserControl()
         {
             InitializeComponent();
         }

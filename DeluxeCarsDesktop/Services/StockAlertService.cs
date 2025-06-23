@@ -1,4 +1,7 @@
 ﻿using DeluxeCarsDesktop.Interfaces;
+using DeluxeCarsDesktop.Models;
+using DeluxeCarsDesktop.Models.Notifications;
+using DeluxeCarsDesktop.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,47 +13,69 @@ namespace DeluxeCarsDesktop.Services
 {
     public class StockAlertService : IStockAlertService
     {
-        private readonly INotificationService _notificationService;
-
-        public StockAlertService(INotificationService notificationService)
+        private readonly ICurrentUserService _currentUserService;
+        // Ya no necesita INotificationService ni INavigationService
+        
+        public StockAlertService(ICurrentUserService currentUserService)
         {
-            _notificationService = notificationService;
+            _currentUserService = currentUserService;
         }
 
         public async Task CheckAndCreateStockAlertAsync(int productoId, IUnitOfWork unitOfWork)
         {
+            // Este método ahora solo se preocupa por la persistencia de datos.
             try
             {
                 var producto = await unitOfWork.Productos.GetByIdAsync(productoId);
+                if (producto == null || !producto.StockMinimo.HasValue || producto.StockMinimo.Value <= 0) return;
 
-                // Si no hay producto o no tiene un mínimo configurado, no hacemos nada.
-                if (producto == null || !producto.StockMinimo.HasValue || producto.StockMinimo.Value <= 0)
-                {
-                    return;
-                }
-
-                // Usamos el método que ya calcula el stock real
                 var currentStock = await unitOfWork.Productos.GetCurrentStockAsync(productoId);
+                // Si el stock está bien, no hacemos nada.
+                if (currentStock >= producto.StockMinimo.Value) return;
 
-                // La lógica de negocio principal
-                if (currentStock < producto.StockMinimo.Value)
+                if (_currentUserService.CurrentUser == null) return;
+                int userId = _currentUserService.CurrentUser.Id;
+                string tipoAlerta = "LowStockSummary";
+
+                int totalProductosBajoStock = await unitOfWork.Productos.CountLowStockProductsAsync();
+                var notificacionExistenteDB = await unitOfWork.Notificaciones.GetUnreadSummaryAlertAsync(tipoAlerta, userId);
+                int ultimoConteo = notificacionExistenteDB?.DataCount ?? -1;
+
+                // La regla de negocio clave: ¿empeoró la situación?
+                bool esAlertaNueva = totalProductosBajoStock > ultimoConteo;
+
+                if (notificacionExistenteDB != null)
                 {
-                    // ¡El stock está por debajo del mínimo! Creamos una notificación.
-                    string title = "Alerta de Stock Bajo";
-                    string message = $"El producto '{producto.Nombre}' (ID: {productoId}) tiene solo {currentStock} unidades, por debajo del mínimo de {producto.StockMinimo.Value}.";
-
-                    // Usamos nuestro sistema de notificaciones para crear una alerta de tipo "Advertencia".
-                    // NOTA: Para que esto funcione, necesitamos un pequeño ajuste en INotificationService.
-                    _notificationService.ShowWarning(message); // Por ahora solo el mensaje
+                    notificacionExistenteDB.Mensaje = $"Hay {totalProductosBajoStock} producto(s) con bajo stock...";
+                    notificacionExistenteDB.FechaCreacion = DateTime.Now;
+                    notificacionExistenteDB.DataCount = totalProductosBajoStock;
+                    if (esAlertaNueva)
+                    {
+                        notificacionExistenteDB.Leida = false; // ¡Despertamos la alerta!
+                    }
                 }
+                else if (totalProductosBajoStock > 0)
+                {
+                    var nuevaNotificacion = new Notificacion
+                    {
+                        Titulo = "Inventario Crítico",
+                        Mensaje = $"Hay {totalProductosBajoStock} producto(s) con bajo stock...",
+                        Tipo = tipoAlerta,
+                        FechaCreacion = DateTime.Now,
+                        Leida = false,
+                        IdUsuario = userId,
+                        DataCount = totalProductosBajoStock
+                    };
+                    await unitOfWork.Notificaciones.AddAsync(nuevaNotificacion);
+                }
+
+                await unitOfWork.CompleteAsync();
+                AppEvents.RaiseNotificationsChanged();
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                // Si algo falla aquí, no debe detener la transacción principal (venta, ajuste).
-                // Solo lo registramos para futura depuración.
-                Debug.WriteLine($"ERROR al verificar alerta de stock para producto ID {productoId}: {ex.Message}");
+                Debug.WriteLine($"ERROR en el sistema de alertas de stock: {ex.Message}");
             }
         }
-
     }
 }

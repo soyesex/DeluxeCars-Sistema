@@ -16,6 +16,8 @@
 
             </ResourceDictionary.MergedDictionaries>
 
+            <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+            <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
             <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
             <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
             <converters:ByteArrayToImageSourceConverter x:Key="ByteArrayToImageConverter"/>

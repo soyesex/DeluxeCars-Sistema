@@ -21,6 +21,8 @@ namespace DeluxeCarsDesktop.Models
         public decimal? IVA { get; set; } // Nullable
         [NotMapped]
         public decimal SubTotalLinea { get; set; } // Columna calculada
+        [NotMapped] // <-- Le dice a EF que no la guarde en la base de datos
+        public decimal SubtotalCalculado => Cantidad * PrecioUnitario;
         public decimal Total { get; set; } // Columna calculada
 
         // Navigation Property

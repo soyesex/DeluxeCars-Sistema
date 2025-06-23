@@ -8,6 +8,7 @@ using DeluxeCarsDesktop.View;
 using DeluxeCarsDesktop.ViewModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using QuestPDF.Infrastructure;
 using System.Configuration;
 using System.Security.Principal;
 using System.Windows;
@@ -25,6 +26,8 @@ public partial class App : Application
     //Contructor de la clase App
     public App()
     {
+        QuestPDF.Settings.License = LicenseType.Community;
+
         var services = new ServiceCollection();
 
         // Debemos llamar a ConfigureServices y construir el provider DENTRO del constructor.
@@ -87,6 +90,8 @@ public partial class App : Application
         services.AddTransient<RolFormViewModel>();
         services.AddTransient<ServicioFormViewModel>();
         services.AddTransient<UsuarioFormViewModel>();
+        services.AddTransient<SugerenciasCompraViewModel>();
+        services.AddTransient<RecepcionPedidoViewModel>();
 
         // Registra tus Vistas (las ventanas). Singleton o Transient son opciones comunes.
         // Usaremos Transient para asegurar que siempre se abran limpias.

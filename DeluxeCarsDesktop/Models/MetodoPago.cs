@@ -7,6 +7,13 @@ using System.Threading.Tasks;
 
 namespace DeluxeCarsDesktop.Models
 {
+    public enum TipoMetodoPago
+    {
+        Efectivo,
+        Electronico, // Transferencias, PSE, Nequi, etc.
+        Credito,     // Tarjetas de Crédito/Débito
+        Otro
+    }
     public class MetodoPago
     {
         [Key]
@@ -22,7 +29,16 @@ namespace DeluxeCarsDesktop.Models
 
         [Required]
         public bool Disponible { get; set; }
-        // --- AÑADE ESTAS DOS LÍNEAS ---
+
+        // --- NUEVAS PROPIEDADES ---
+        [Required]
+        public TipoMetodoPago Tipo { get; set; }
+        public decimal? ComisionPorcentaje { get; set; }
+        public bool RequiereReferencia { get; set; }
+        public bool AplicaParaVentas { get; set; }
+        public bool AplicaParaCompras { get; set; }
+
+        // --- Propiedades de Navegación ---
         public virtual ICollection<Factura> Facturas { get; set; }
         public virtual ICollection<Pedido> Pedidos { get; set; }
     }

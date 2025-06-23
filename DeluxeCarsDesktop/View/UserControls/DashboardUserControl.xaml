@@ -5,12 +5,29 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
              mc:Ignorable="d" 
-             Loaded="DashboardUserControl_Loaded"
              d:DesignHeight="600" d:DesignWidth="1000"
              xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp">
-    
+
     <Grid Margin="10">
         <UniformGrid Rows="2" Columns="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+
+            <Button Style="{StaticResource CardButtonStyle}" Margin="10"
+            Command="{Binding DataContext.ShowHistorialVentasCommand, RelativeSource={RelativeSource AncestorType=Window}}">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Style="{StaticResource CardTitleStyle}" Text="Ventas de Hoy"/>
+                    <TextBlock Text="{Binding VentasDeHoy, StringFormat=C, ConverterCulture=es-CO}" FontSize="36" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    <fa:IconImage Icon="CashRegister" Opacity="0.8" Height="50" Width="50" Margin="0,15,0,0"/>
+                </StackPanel>
+            </Button>
+
+            <Button Style="{StaticResource CardButtonStyle}" Margin="10"
+            Command="{Binding DataContext.ShowComprasViewCommand, RelativeSource={RelativeSource AncestorType=Window}}">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Style="{StaticResource CardTitleStyle}" Text="Pedidos Pendientes de Recepción"/>
+                    <TextBlock Text="{Binding PedidosPendientes}" FontSize="36" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{StaticResource color6}"/>
+                    <fa:IconImage Icon="TruckFast" Opacity="0.8" Height="50" Width="50" Margin="0,15,0,0"/>
+                </StackPanel>
+            </Button>
 
             <Button Style="{StaticResource CardButtonStyle}" Margin="10"
                     Command="{Binding DataContext.ShowHistorialVentasCommand, RelativeSource={RelativeSource AncestorType=Window}}">

@@ -11,5 +11,7 @@ namespace DeluxeCarsDesktop.Interfaces
     {
         Task<IEnumerable<Notificacion>> GetNotificacionesNoLeidasAsync(int idUsuario);
         Task MarcarComoLeidasAsync(IEnumerable<int> idsNotificaciones);
+        Task<Notificacion> GetUnreadSummaryAlertAsync(string tipo, int idUsuario);
+        Task<IEnumerable<Notificacion>> GetActiveNotificationsWithDetailsAsync(int userId);
     }
 }

@@ -349,10 +349,19 @@ namespace DeluxeCarsDesktop.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("AplicaParaCompras")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("AplicaParaVentas")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Codigo")
                         .IsRequired()
                         .HasMaxLength(5)
                         .HasColumnType("nvarchar(5)");
+
+                    b.Property<decimal?>("ComisionPorcentaje")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Descripcion")
                         .IsRequired()
@@ -362,9 +371,39 @@ namespace DeluxeCarsDesktop.Migrations
                     b.Property<bool>("Disponible")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("RequiereReferencia")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Tipo")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.ToTable("MetodosPago");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AplicaParaCompras = true,
+                            AplicaParaVentas = true,
+                            Codigo = "EFE",
+                            Descripcion = "Efectivo",
+                            Disponible = true,
+                            RequiereReferencia = false,
+                            Tipo = 0
+                        },
+                        new
+                        {
+                            Id = 2,
+                            AplicaParaCompras = false,
+                            AplicaParaVentas = true,
+                            Codigo = "TDC",
+                            Descripcion = "Tarjeta de Crédito",
+                            Disponible = true,
+                            RequiereReferencia = false,
+                            Tipo = 2
+                        });
                 });
 
             modelBuilder.Entity("DeluxeCarsDesktop.Models.MovimientoInventario", b =>
@@ -439,6 +478,9 @@ namespace DeluxeCarsDesktop.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("DataCount")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("FechaCreacion")
                         .HasColumnType("datetime2");
 
@@ -452,6 +494,9 @@ namespace DeluxeCarsDesktop.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("PedidoId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Tipo")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -463,6 +508,8 @@ namespace DeluxeCarsDesktop.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("IdUsuario");
+
+                    b.HasIndex("PedidoId");
 
                     b.ToTable("Notificaciones");
                 });
@@ -507,7 +554,17 @@ namespace DeluxeCarsDesktop.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("Estado")
+                        .HasMaxLength(50)
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("FechaEmision")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaEstimadaEntrega")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("FechaRecepcionReal")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("IdMetodoPago")
@@ -525,9 +582,6 @@ namespace DeluxeCarsDesktop.Migrations
 
                     b.Property<string>("Observaciones")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("PlazoEntrega")
-                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -686,6 +740,20 @@ namespace DeluxeCarsDesktop.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Descripcion = "Acceso total al sistema.",
+                            Nombre = "Administrador"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Descripcion = "Acceso limitado a ventas y operaciones diarias.",
+                            Nombre = "Empleado"
+                        });
                 });
 
             modelBuilder.Entity("DeluxeCarsDesktop.Models.Servicio", b =>
@@ -936,6 +1004,12 @@ namespace DeluxeCarsDesktop.Migrations
                         .HasForeignKey("IdUsuario")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("DeluxeCarsDesktop.Models.Pedido", "Pedido")
+                        .WithMany()
+                        .HasForeignKey("PedidoId");
+
+                    b.Navigation("Pedido");
 
                     b.Navigation("Usuario");
                 });

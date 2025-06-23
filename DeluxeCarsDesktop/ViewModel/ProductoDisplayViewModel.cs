@@ -16,12 +16,24 @@ namespace DeluxeCarsDesktop.ViewModel
         public decimal Precio => Producto.Precio;
         public bool Estado => Producto.Estado;
         public string CategoriaNombre => Producto.Categoria?.Nombre ?? "N/A";
-
+        public string EstadoStock
+        {
+            get
+            {
+                if (StockCalculado <= 0) return "Agotado";
+                if (Producto.StockMinimo.HasValue && StockCalculado < Producto.StockMinimo.Value) return "Bajo Stock";
+                return "En Stock";
+            }
+        }
         private int _stockCalculado;
         public int StockCalculado
         {
             get => _stockCalculado;
-            set => SetProperty(ref _stockCalculado, value);
+            set
+            {
+                SetProperty(ref _stockCalculado, value);
+                OnPropertyChanged(nameof(EstadoStock)); // <-- AVISA QUE EL ESTADO TAMBIÉN CAMBIÓ
+            }
         }
 
         public ProductoDisplayViewModel(Producto producto)

@@ -27,7 +27,7 @@
             <DataTemplate DataType="{x:Type viewModel:DashboardViewModel}">
                 <userControl:DashboardUserControl/>
             </DataTemplate>
-
+            
             <DataTemplate DataType="{x:Type viewModel:CatalogoViewModel}">
                 <userControl:CatalogoUserControl/>
             </DataTemplate>
@@ -77,8 +77,8 @@
 
         <Border.BorderBrush>
             <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                <GradientStop Color="{StaticResource Color.WinBorder1}" Offset="0"/>
-                <GradientStop Color="{StaticResource Color.WinBorder2}" Offset="0.75"/>
+                <GradientStop Color="{StaticResource Color.Aggressive.DeepBlue}" Offset="0"/>
+                <GradientStop Color="{StaticResource Color.Aggressive.RacingRed}" Offset="0.75"/>
                 <GradientStop Color="{StaticResource Color.WinBorder3}" Offset="1"/>
             </LinearGradientBrush>
         </Border.BorderBrush>
@@ -116,9 +116,9 @@
                         <Image Source="/Images/deluxeCarsLogo.jpg " Height="30"/>
                         <TextBlock Text="Deluxe Cars"
                                    Foreground="{StaticResource titleColor2}"
-                                   FontSize="20"
-                                   FontFamily="Montserrat"
-                                   FontWeight="Medium"
+                                   FontSize="21"
+                                   FontWeight="SemiBold"
+                                   FontFamily="{StaticResource Font.Poppins}" 
                                    VerticalAlignment="Center"
                                    Margin="10,0,0,0"/>
 
@@ -242,8 +242,7 @@
                                     <TextBlock Text="Reportes" Style="{StaticResource menuButtonText}"/>
                                 </StackPanel>
                             </RadioButton>
-
-
+                            
                             <RadioButton Style="{StaticResource menuButton1}"
                                          Tag="{StaticResource color13}"
                                          Command="{Binding ShowRolViewCommand}"
@@ -380,7 +379,7 @@
                             <TextBlock Text="{Binding Caption}"
                                        Foreground="{StaticResource titleColor2}"
                                        FontSize="16"
-                                       FontFamily="Montserrat"
+                                       FontFamily="{StaticResource Font.SourceSans3}"
                                        FontWeight="Medium"
                                        VerticalAlignment="Center"/>
                         </StackPanel>
@@ -417,6 +416,7 @@
                                        Foreground="{StaticResource titleColor2}"
                                        FontFamily="Montserrat"
                                        FontSize="12"
+                                       FontWeight="Normal"
                                        VerticalAlignment="Center"/>
 
                             <Border Width="30" Height="30" CornerRadius="15" Margin="10,0,10,0">
@@ -459,20 +459,15 @@
                                         Command="{Binding ToggleNotificationsPanelCommand}">
                                     <fa:IconImage Icon="Bell" Style="{StaticResource iconButtonIcon}"/>
                                 </Button>
-
-                                <Border CornerRadius="8" 
-                                        Background="Red"
-                                        Width="10" Height="10"
+         
+                                <Border CornerRadius="4" 
+                                        Background="{StaticResource color1}"
+                                        Width="8" Height="8"
                                         HorizontalAlignment="Right" VerticalAlignment="Top"
-                                        Margin="0,1,1,0"
+                                        Margin="0,8.4,9,0"
                                         Visibility="{Binding NotificationCount, 
                                     Converter={StaticResource IntToVisibilityConverter}}">
 
-                                    <TextBlock Text="{Binding NotificationCount}"
-                                               Foreground="White"
-                                               FontSize="10"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center"/>
                                 </Border>
 
                             </Grid>
@@ -500,11 +495,11 @@
                    Margin="0,10,15,0">
 
                 <Border Background="{StaticResource Brush.Aggressive.DarkerBlue}"
-            BorderBrush="{StaticResource color4}"
-            BorderThickness="1"
-            CornerRadius="10"
-            Width="350"
-            MaxHeight="400">
+                        BorderBrush="{StaticResource color4}"
+                        BorderThickness="1"
+                        CornerRadius="10"
+                        Width="350"
+                        MaxHeight="400">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -514,25 +509,51 @@
                         <TextBlock Text="Centro de Notificaciones" 
                        Grid.Row="0"
                        Foreground="{StaticResource Brush.Tech.ElectricBlue}"
-                       FontFamily="Montserrat"
+                       FontFamily="{StaticResource Font.Poppins}"
                        FontWeight="Bold"
                        FontSize="16"
                        Margin="15"/>
 
                         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Style="{StaticResource CustomScrollViewer}">
-                            <ItemsControl ItemsSource="{Binding Notifications}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border BorderThickness="0,0,0,1" BorderBrush="{StaticResource color3}" Padding="15,10">
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding Title}" FontWeight="Bold" Foreground="{StaticResource titleColor2}"/>
-                                                <TextBlock Text="{Binding Message}" TextWrapping="Wrap" Foreground="{StaticResource color9}"/>
-                                                <TextBlock Text="{Binding Timestamp, StringFormat='dd/MM/yyyy HH:mm'}" FontSize="10" Foreground="Gray" HorizontalAlignment="Right" Margin="0,5,0,0"/>
-                                            </StackPanel>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
+                            <StackPanel>
+
+                                <ItemsControl ItemsSource="{Binding AlertasNuevas}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border BorderThickness="0,0,0,1" BorderBrush="{StaticResource color3}" Padding="15,10">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Title}" FontFamily="{StaticResource Font.Poppins}" FontWeight="Bold" Foreground="{StaticResource titleColor2}"/>
+                                                    <TextBlock Text="{Binding Message}" FontFamily="{StaticResource Font.Poppins}" TextWrapping="Wrap" Foreground="{StaticResource ButtonSecondaryHover}"/>
+                                                    <Grid Margin="0,8,0,0">
+                                                        <TextBlock Grid.Column="0" FontFamily="{StaticResource Font.Poppins}" Text="{Binding Timestamp, StringFormat='dd/MM/yyyy HH:mm'}" FontSize="10" Foreground="Gray" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+                                                        <Button Grid.Column="1" FontFamily="{StaticResource Font.Poppins}" Content="{Binding ActionText}" Command="{Binding ActionCommand}" Visibility="{Binding ActionCommand, Converter={StaticResource NullToVisibilityConverter}}" Style="{StaticResource DarkActionButtonStyle}" Padding="8,4" FontSize="10" HorizontalAlignment="Right" />
+                                                    </Grid>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <Separator Margin="10,5" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
+
+                                <ItemsControl ItemsSource="{Binding HistorialYEstados}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border BorderThickness="0,0,0,1" BorderBrush="{StaticResource color3}" Padding="15,10">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Title}" FontFamily="{StaticResource Font.Poppins}" FontWeight="Bold" Foreground="{StaticResource titleColor2}"/>
+                                                    <TextBlock Text="{Binding Message}" FontFamily="{StaticResource Font.Poppins}" TextWrapping="Wrap" Foreground="{StaticResource ButtonSecondaryHover}"/>
+                                                    <Grid Margin="0,8,0,0">
+                                                        <TextBlock Grid.Column="0" FontFamily="{StaticResource Font.Poppins}" Text="{Binding Timestamp, StringFormat='dd/MM/yyyy HH:mm'}" FontSize="10" Foreground="Gray" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+                                                        <Button Grid.Column="1" FontFamily="{StaticResource Font.Poppins}" Content="{Binding ActionText}" Command="{Binding ActionCommand}" Visibility="{Binding ActionCommand, Converter={StaticResource NullToVisibilityConverter}}" Style="{StaticResource DarkActionButtonStyle}" Padding="8,4" FontSize="10" HorizontalAlignment="Right" />
+                                                    </Grid>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                            </StackPanel>
                         </ScrollViewer>
                     </Grid>
                 </Border>

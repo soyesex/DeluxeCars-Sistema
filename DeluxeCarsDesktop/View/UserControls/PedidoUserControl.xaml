@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
              mc:Ignorable="d" 
+             xmlns:models="clr-namespace:DeluxeCarsDesktop.Models"
              d:DesignHeight="550" d:DesignWidth="900">
     <Grid Margin="15">
         <Grid.RowDefinitions>
@@ -36,6 +37,18 @@
             <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
                 <Button Content="Filtrar" Command="{Binding FiltrarCommand}" Style="{StaticResource DarkActionButtonStyle}"/>
                 <Button Content="Nuevo Pedido" Command="{Binding NuevoPedidoCommand}" Style="{StaticResource DarkActionButtonStyle}" Margin="10,0,0,0"/>
+                
+                <Label Content="Estado:" VerticalAlignment="Center" Margin="15,0,0,0" Style="{StaticResource DarkLableForm}"/>
+                <ComboBox ItemsSource="{Binding EstadosFiltro}"
+                          SelectedItem="{Binding EstadoFiltroSeleccionado}"
+                          Style="{StaticResource DarkComboBoxStyle}"
+                          Width="150" Margin="5,0,0,0">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
             </StackPanel>
         </Grid>
 
@@ -47,15 +60,66 @@
                       CanUserAddRows="False" AutoGenerateColumns="False" IsReadOnly="True">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="N° Pedido" Binding="{Binding NumeroPedido}" Width="*"/>
+
+                    <DataGridTemplateColumn Header="Estado" Width="Auto">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border CornerRadius="4" Padding="8,3" Margin="2">
+                                    <TextBlock Text="{Binding Estado}" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Estado}" Value="{x:Static models:EstadoPedido.Borrador}">
+                                                    <Setter Property="Background" Value="#6B7280"/>
+                                                    <Setter Property="ToolTip" Value="Este pedido es un borrador y aún puede ser editado."/>
+                                                </DataTrigger>
+
+                                                <DataTrigger Binding="{Binding Estado}" Value="{x:Static models:EstadoPedido.Aprobado}">
+                                                    <Setter Property="Background" Value="#10B981"/>
+                                                    <Setter Property="ToolTip" Value="El pedido ha sido aprobado. Pendiente de recepción."/>
+                                                </DataTrigger>
+
+                                                <DataTrigger Binding="{Binding Estado}" Value="{x:Static models:EstadoPedido.Recibido}">
+                                                    <Setter Property="Background" Value="#059669"/>
+                                                    <Setter Property="ToolTip" Value="El pedido ha sido completado y la mercancía recibida."/>
+                                                </DataTrigger>
+
+                                                <DataTrigger Binding="{Binding Estado}" Value="{x:Static models:EstadoPedido.Cancelado}">
+                                                    <Setter Property="Background" Value="#374151"/>
+                                                    <Setter Property="ToolTip" Value="Este pedido ha sido cancelado."/>
+                                                </DataTrigger>
+
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
                     <DataGridTextColumn Header="Fecha Emisión" Binding="{Binding FechaEmision, StringFormat=d}" Width="Auto"/>
-                    <DataGridTextColumn Header="Proveedor" Binding="{Binding Proveedor.RazonSocial}" Width="2*"/>
-                    <DataGridTextColumn Header="Plazo Entrega" Binding="{Binding PlazoEntrega, StringFormat=d}" Width="Auto"/>
+                    <DataGridTextColumn Header="Proveedor" Binding="{Binding Proveedor.RazonSocial}" Width="Auto"/>
+                    <DataGridTextColumn Header="Entrega Estimada" Binding="{Binding FechaEstimadaEntrega, StringFormat='d'}" />
                     <DataGridTextColumn Header="Usuario" Binding="{Binding Usuario.Nombre}" Width="*"/>
                     <DataGridTemplateColumn Header="Acciones">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Button Content="Ver Detalles" Style="{StaticResource DarkActionButtonStyle}"
-                                        Command="{Binding DataContext.VerDetallesCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+
+                                    <Button Content="Ver Detalles" Style="{StaticResource DarkActionButtonStyle}"
+                                            Command="{Binding DataContext.VerDetallesCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"/>
+
+                                    <Button Content="Recepcionar" Style="{StaticResource DarkActionButtonStyle}" Margin="5,0,0,0"
+                                            Command="{Binding DataContext.RecepcionarPedidoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"/>
+
+                                    <Button Content="PDF" Style="{StaticResource DarkActionButtonStyle}" Margin="5,0,0,0"
+                                            Command="{Binding DataContext.GenerarPdfCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"/>
+
+                                </StackPanel>
+
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

@@ -37,22 +37,23 @@
                      Grid.Column="1" Text="{Binding OEM, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
 
             <Label Grid.Row="2" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="Categoría" VerticalAlignment="Center"/>
-            <ComboBox Grid.Row="2" Grid.Column="1" 
-                      Style="{StaticResource DarkComboBoxStyle}"
-                      ItemsSource="{Binding Categorias}"
-                      SelectedItem="{Binding CategoriaSeleccionada}"
-                      DisplayMemberPath="Nombre" Margin="5"/>
+            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
+                <ComboBox ItemsSource="{Binding Categorias}"
+                          SelectedItem="{Binding CategoriaSeleccionada}"
+                          DisplayMemberPath="Nombre"
+                          Style="{StaticResource DarkComboBoxStyle}"
+                          Width="180"/>
+                <Button Content="+" 
+                        Command="{Binding NuevaCategoriaCommand}"
+                        Style="{StaticResource DarkActionButtonStyle}"
+                        Width="10" Height="40" Margin="5,0,0,0"
+                        ToolTip="Crear Nueva Categoría"/>
+            </StackPanel>
 
             <Label Grid.Row="3" Style="{StaticResource DarkLableForm}" 
-                   Grid.Column="0" Content="Precio" VerticalAlignment="Center"/>
-            
-            <TextBox Grid.Row="3" Grid.Column="1" Style="{StaticResource DarkInputControlStyle}" Text="{Binding Precio, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+                   Grid.Column="0" Content="Precio Venta" VerticalAlignment="Center"/>
 
-            <Label Grid.Row="4" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="Stock Actual" VerticalAlignment="Center"/>
-            <TextBox Grid.Row="4" Grid.Column="1" 
-                     Text="{Binding Stock, Mode=OneWay}" IsReadOnly="True" 
-                     ToolTip="El stock se modifica desde los Pedidos y Facturas."
-                     Style="{StaticResource DarkInputControlStyle}" Margin="5"/>
+            <TextBox Grid.Row="3" Grid.Column="1" Style="{StaticResource DarkInputControlStyle}" Text="{Binding Precio, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
 
             <Label Grid.Row="5" Grid.Column="0" Content="Stock Mínimo:" VerticalAlignment="Center" Style="{StaticResource DarkLableForm}"/>
             <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding StockMinimo}" Style="{StaticResource DarkInputControlStyle}" Margin="5"/>

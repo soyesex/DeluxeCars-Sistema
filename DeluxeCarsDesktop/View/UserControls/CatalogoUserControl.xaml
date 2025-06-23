@@ -67,6 +67,47 @@
                       CanUserAddRows="False"
                       AutoGenerateColumns="False"
                       IsReadOnly="True">
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="ToolTip">
+                                    <Setter.Value>
+                                        <ToolTip Background="#2D3748" BorderThickness="0">
+                                            <StackPanel Orientation="Horizontal" Margin="10">
+                                                <Image Source="{Binding Producto.ImagenUrl}" Width="100" Height="100" Margin="0,0,15,0" />
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Nombre}" FontWeight="SemiBold" FontFamily="{StaticResource Font.Poppins}" FontSize="14" Foreground="White"/>
+                                                    <TextBlock Text="{Binding OEM}" FontFamily="{StaticResource Font.SourceSans3}" Foreground="LightGray"/>
+                                                    <TextBlock Text="{Binding Producto.Descripcion}" TextWrapping="Wrap" FontFamily="Montserrat" MaxWidth="250" Margin="0,10,0,0" Foreground="White"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </ToolTip>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+
+                            <!-- En Stock: verde menta pastel -->
+                            <DataTrigger Binding="{Binding EstadoStock}" Value="En Stock">
+                                <Setter Property="Background" Value="#A8E6CF"/>
+                                <Setter Property="Foreground" Value="#2F4F4F"/>
+                            </DataTrigger>
+
+                            <!-- Bajo Stock: durazno pastel -->
+                            <DataTrigger Binding="{Binding EstadoStock}" Value="Bajo Stock">
+                                <Setter Property="Background" Value="#FFD3B6"/>
+                                <Setter Property="Foreground" Value="#3E3E3E"/>
+                            </DataTrigger>
+
+                            <!-- Agotado: rosa pastel -->
+                            <DataTrigger Binding="{Binding EstadoStock}" Value="Agotado">
+                                <Setter Property="Background" Value="#FFAAA5"/>
+                                <Setter Property="Foreground" Value="#4A2F2F"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
+
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
                     <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="*"/>

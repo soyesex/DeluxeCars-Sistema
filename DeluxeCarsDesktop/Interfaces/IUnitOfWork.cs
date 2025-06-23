@@ -25,6 +25,7 @@ namespace DeluxeCarsDesktop.Interfaces
         ITipoServicioRepository TiposServicios { get; }
         IProductoProveedorRepository ProductoProveedores { get; }
         INotificacionRepository Notificaciones { get; }
+        IMovimientoInventarioRepository MovimientosInventario { get; }
         // ...Añadir aquí todas las demás interfaces de repositorio
 
         /// <summary>

@@ -10,5 +10,6 @@ namespace DeluxeCarsDesktop.Interfaces
     public interface IProductoProveedorRepository : IGenericRepository<ProductoProveedor>
     {
         Task<IEnumerable<ProductoProveedor>> GetByProveedorWithProductoAsync(int proveedorId);
+        Task<ProductoProveedor> GetByProductAndSupplierAsync(int productoId, int proveedorId);
     }
 }

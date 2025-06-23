@@ -56,6 +56,37 @@ namespace DeluxeCarsDesktop.Data
             // Llama a la implementación base para que aplique sus propias convenciones antes de nuestras configuraciones.
             base.OnModelCreating(modelBuilder);
 
+            // Aquí empieza la magia del "Data Seeding"
+
+            modelBuilder.Entity<Rol>().HasData(
+                new Rol
+                {
+                    // ¡MUY IMPORTANTE! Debemos especificar el Id manualmente para que EF pueda rastrearlo.
+                    Id = 1,
+                    Nombre = "Administrador",
+                    Descripcion = "Acceso total al sistema."
+                },
+                new Rol
+                {
+                    Id = 2,
+                    Nombre = "Empleado",
+                    Descripcion = "Acceso limitado a ventas y operaciones diarias."
+                }
+            // Puedes añadir más roles aquí si lo necesitas
+            );
+
+            modelBuilder.Entity<MetodoPago>().HasData(
+                 new MetodoPago { Id = 1, Codigo = "EFE", 
+                     Descripcion = "Efectivo", Disponible = true,
+                     Tipo = TipoMetodoPago.Efectivo, AplicaParaVentas = true,
+                     AplicaParaCompras = true },
+
+                 new MetodoPago { Id = 2, Codigo = "TDC",
+                     Descripcion = "Tarjeta de Crédito", Disponible = true,
+                     Tipo = TipoMetodoPago.Credito, AplicaParaVentas = true, 
+                     AplicaParaCompras = false }
+             );
+
             // --- SECCIÓN 1: Configuraciones de Llaves Únicas (UNIQUE CONSTRAINTS) ---
             // Asegura que ciertos campos no puedan tener valores duplicados en la base de datos.
 

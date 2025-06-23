@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 
 namespace DeluxeCarsDesktop.Services
 {
@@ -34,7 +35,29 @@ namespace DeluxeCarsDesktop.Services
             AllNotifications = new ReadOnlyObservableCollection<AppNotification>(_notifications);
         }
 
-        // --> MODIFICADO: El método Show ahora también guarda en la base de datos
+        public void PostOrUpdateByKey(AppNotification notification)
+        {
+            // Buscamos en la lista EN MEMORIA si ya existe una notificación con la misma clave.
+            var existingNotification = _notifications.FirstOrDefault(n => n.NotificationKey == notification.NotificationKey);
+
+            if (existingNotification != null)
+            {
+                // SI EXISTE: No creamos una nueva. Actualizamos las propiedades de la existente.
+                // Gracias a que AppNotification hereda de ViewModelBase, la UI se actualizará automáticamente.
+                existingNotification.Title = notification.Title;
+                existingNotification.Message = notification.Message;
+                existingNotification.Type = notification.Type;
+                existingNotification.Timestamp = DateTime.Now; // Actualizamos la fecha para que aparezca como nueva
+
+                // Movemos la notificación actualizada al principio de la lista.
+                _notifications.Move(_notifications.IndexOf(existingNotification), 0);
+            }
+            else
+            {
+                // SI NO EXISTE: La añadimos como una notificación normal.
+                Show(notification);
+            }
+        }
         private async void Show(AppNotification content)
         {
             // 1. Lógica en memoria (para la UI en tiempo real, como antes)
@@ -93,10 +116,20 @@ namespace DeluxeCarsDesktop.Services
             }
         }
 
-        // Estos métodos no necesitan ningún cambio. Su lógica interna se actualiza a través del método Show.
-        public void ShowSuccess(string message) => Show(new AppNotification { Title = "Éxito", Message = message, Type = NotificationType.Success, Timestamp = DateTime.Now });
-        public void ShowInfo(string message) => Show(new AppNotification { Title = "Información", Message = message, Type = NotificationType.Information, Timestamp = DateTime.Now });
-        public void ShowWarning(string message) => Show(new AppNotification { Title = "Advertencia", Message = message, Type = NotificationType.Warning, Timestamp = DateTime.Now });
-        public void ShowError(string message) => Show(new AppNotification { Title = "Error", Message = message, Type = NotificationType.Error, Timestamp = DateTime.Now });
+        public void ShowSuccess(string message, string title = "Éxito", ICommand actionCommand = null, string actionText = null)
+        {
+            // Esta versión ya no llama al método Show() que guarda en la base de datos.
+            // Solo muestra el "toast" efímero.
+            var content = new NotificationContent { Title = title, Message = message, Type = NotificationType.Success };
+            _notificationManager.ShowAsync(content, areaName: "WindowArea", expirationTime: TimeSpan.FromSeconds(4));
+        }
+        public void ShowInfo(string message, string title = "Información", ICommand actionCommand = null, string actionText = null) =>
+            Show(new AppNotification { Title = title, Message = message, Type = NotificationType.Information, Timestamp = DateTime.Now, ActionCommand = actionCommand, ActionText = actionText });
+
+        public void ShowWarning(string message, string title = "Advertencia", ICommand actionCommand = null, string actionText = null) =>
+            Show(new AppNotification { Title = title, Message = message, Type = NotificationType.Warning, Timestamp = DateTime.Now, ActionCommand = actionCommand, ActionText = actionText });
+
+        public void ShowError(string message, string title = "Error", ICommand actionCommand = null, string actionText = null) =>
+            Show(new AppNotification { Title = title, Message = message, Type = NotificationType.Error, Timestamp = DateTime.Now, ActionCommand = actionCommand, ActionText = actionText });
     }
 }

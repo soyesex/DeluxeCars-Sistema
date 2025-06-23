@@ -16,7 +16,22 @@ namespace DeluxeCarsDesktop.Repositories
         public NotificacionRepository(AppDbContext context) : base(context)
         {
         }
-
+        // --- IMPLEMENTACIÓN DEL NUEVO MÉTODO ---
+        public async Task<IEnumerable<Notificacion>> GetActiveNotificationsWithDetailsAsync(int userId)
+        {
+            return await _context.Notificaciones
+                .Where(n => n.IdUsuario == userId && !n.Leida && n.Tipo != "LowStockSummary")
+                .Include(n => n.Pedido) // Incluye la entidad Pedido relacionada
+                    .ThenInclude(p => p.Proveedor) // Y DENTRO de Pedido, incluye al Proveedor
+                .OrderByDescending(n => n.FechaCreacion)
+                .AsNoTracking() // Buena práctica para consultas de solo lectura
+                .ToListAsync();
+        }
+        public async Task<Notificacion> GetUnreadSummaryAlertAsync(string tipo, int idUsuario)
+        {
+            return await _context.Notificaciones
+                .FirstOrDefaultAsync(n => n.IdUsuario == idUsuario && n.Tipo == tipo && !n.Leida);
+        }
         public async Task<IEnumerable<Notificacion>> GetNotificacionesNoLeidasAsync(int idUsuario)
         {
             return await _context.Notificaciones

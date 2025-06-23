@@ -169,12 +169,18 @@ namespace DeluxeCarsDesktop.Repositories
             // Este método busca todos los productos cuyo stock calculado
             // sea menor que su StockMinimo configurado.
             return await _context.Productos
-                .Where(p => p.StockMinimo.HasValue && p.StockMinimo > 0 &&
-                            (_context.MovimientosInventario
-                                   .Where(m => m.IdProducto == p.Id)
-                                   .Sum(m => (int?)m.Cantidad) ?? 0) < p.StockMinimo)
-                .AsNoTracking()
-                .ToListAsync();
+                                // --- INICIO DE LA CORRECCIÓN ---
+                                // Le decimos a EF que incluya en la consulta la tabla de unión...
+                                .Include(p => p.ProductoProveedores)
+                                // ...y DENTRO de esa tabla de unión, que incluya los datos del Proveedor.
+                                .ThenInclude(pp => pp.Proveedor)
+                                // --- FIN DE LA CORRECCIÓN ---
+                                .Where(p => p.StockMinimo.HasValue && p.StockMinimo > 0 &&
+                                            (_context.MovimientosInventario
+                                                .Where(m => m.IdProducto == p.Id)
+                                                .Sum(m => (int?)m.Cantidad) ?? 0) < p.StockMinimo)
+                                .AsNoTracking()
+                                .ToListAsync();
         }
     }
 }

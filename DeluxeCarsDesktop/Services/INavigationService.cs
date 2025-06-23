@@ -27,5 +27,6 @@ namespace DeluxeCarsDesktop.Services
 
         // Tu método original para abrir ventanas de formulario
         Task OpenFormWindow(FormType formType, int entityId = 0);
+        Task OpenSugerenciasDialogAsync();
     }
 }

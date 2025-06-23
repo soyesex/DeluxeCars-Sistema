@@ -156,26 +156,40 @@ namespace DeluxeCarsDesktop.ViewModel
             await _navigationService.OpenFormWindow(FormType.GestionarProductosProveedor, ProveedorSeleccionado.Id);
         }
 
+        // En ProveedorViewModel.cs
         private void FiltrarProveedores()
         {
+            // Empezamos con la lista completa de proveedores que tenemos en caché.
             IEnumerable<Proveedor> itemsFiltrados = _todosLosProveedores;
 
+            // Aplicamos el filtro de Departamento
             if (DepartamentoFiltro != null && DepartamentoFiltro.Id != 0)
             {
+                // Usamos el '?' (operador de anulación de referencia) para evitar errores si un proveedor no tiene municipio.
                 itemsFiltrados = itemsFiltrados.Where(p => p.Municipio?.IdDepartamento == DepartamentoFiltro.Id);
             }
 
+            // Aplicamos el filtro de Municipio
             if (MunicipioFiltro != null && MunicipioFiltro.Id != 0)
             {
                 itemsFiltrados = itemsFiltrados.Where(p => p.IdMunicipio == MunicipioFiltro.Id);
             }
 
+            // Aplicamos el filtro de texto
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
                 itemsFiltrados = itemsFiltrados.Where(p => p.RazonSocial.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
             }
 
-            Proveedores = new ObservableCollection<Proveedor>(itemsFiltrados.OrderBy(p => p.RazonSocial));
+            // --- LA CORRECCIÓN CLAVE ESTÁ AQUÍ ---
+            // 1. Limpiamos la colección que la UI está observando.
+            Proveedores.Clear();
+
+            // 2. Llenamos ESA MISMA colección con los resultados filtrados y ordenados.
+            foreach (var proveedor in itemsFiltrados.OrderBy(p => p.RazonSocial))
+            {
+                Proveedores.Add(proveedor);
+            }
         }
 
         private bool CanExecuteActions() => ProveedorSeleccionado != null;

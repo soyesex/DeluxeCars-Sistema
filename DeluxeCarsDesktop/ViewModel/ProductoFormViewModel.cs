@@ -1,5 +1,7 @@
 ﻿using DeluxeCarsDesktop.Interfaces;
 using DeluxeCarsDesktop.Models;
+using DeluxeCarsDesktop.Services;
+using DeluxeCarsDesktop.Utils;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -8,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Navigation;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
@@ -15,6 +18,9 @@ namespace DeluxeCarsDesktop.ViewModel
     {
         // --- Dependencias ---
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IStockAlertService _stockAlertService;
+        private readonly INavigationService _navigationService;
+        private readonly INotificationService _notificationService;
 
         // --- Estado Interno ---
         private Producto _productoActual;
@@ -67,13 +73,20 @@ namespace DeluxeCarsDesktop.ViewModel
         // --- Comandos ---
         public ICommand GuardarCommand { get; }
         public ICommand CancelarCommand { get; }
+        public ICommand NuevaCategoriaCommand { get; }
         public Action CloseAction { get; set; }
 
-        public ProductoFormViewModel(IUnitOfWork unitOfWork)
+        public ProductoFormViewModel(IUnitOfWork unitOfWork, IStockAlertService stockAlertService,
+                                  INotificationService notificationService, INavigationService navigationService)
         {
             _unitOfWork = unitOfWork;
+            _stockAlertService = stockAlertService;
+            _notificationService = notificationService;
+            _navigationService = navigationService;
+
             Categorias = new ObservableCollection<Categoria>();
             GuardarCommand = new ViewModelCommand(ExecuteGuardarCommand, CanExecuteGuardarCommand);
+            NuevaCategoriaCommand = new ViewModelCommand(ExecuteShowCategoriaCommand);
             CancelarCommand = new ViewModelCommand(p => CloseAction?.Invoke());
         }
 
@@ -161,13 +174,27 @@ namespace DeluxeCarsDesktop.ViewModel
                 }
                 await _unitOfWork.CompleteAsync();
 
-                MessageBox.Show("Producto guardado exitosamente.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
+                // Después de guardar, llamamos al servicio de alertas para este producto.
+                // Si el nuevo StockMinimo que acabamos de guardar lo pone en estado
+                // crítico, se generará la alerta correspondiente.
+                await _stockAlertService.CheckAndCreateStockAlertAsync(_productoActual.Id, _unitOfWork);
+                // --- FIN DE LA NUEVA LÓGICA ---
+
+                _notificationService.ShowSuccess("Producto guardado exitosamente.");
                 CloseAction?.Invoke();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Ocurrió un error al guardar el producto: {ex.Message}", "Error de Guardado", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private void ExecuteShowCategoriaCommand(object obj)
+        {
+            // Abrimos el formulario de Categoría en modo creación.
+            _navigationService.OpenFormWindow(Utils.FormType.Categoria, 0);
+            // No necesitamos esperar a que se cierre, ya que las categorías se recargarán al abrir el formulario de Producto.
+
         }
     }
 }

@@ -21,7 +21,15 @@ namespace DeluxeCarsDesktop.Repositories
             _dbSet = context.Set<T>();
         }
 
-        // --- AÑADE LA IMPLEMENTACIÓN DE ESTE MÉTODO ---
+        public async Task<int> CountAsync()
+        {
+            return await _dbSet.CountAsync();
+        }
+
+        public async Task<int> CountAsync(Expression<Func<T, bool>> condition)
+        {
+            return await _dbSet.Where(condition).CountAsync();
+        }
         public async Task<IEnumerable<T>> GetByConditionAsync(Expression<Func<T, bool>> condition)
         {
             // Ejecuta la consulta con la condición 'WHERE' que le pasemos
