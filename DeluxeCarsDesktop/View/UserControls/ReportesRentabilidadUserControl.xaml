@@ -1,0 +1,39 @@
+﻿<UserControl x:Class="DeluxeCarsDesktop.View.UserControls.ReportesRentabilidadUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid Margin="15">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+                <Label Content="Desde:" Style="{StaticResource DarkLableForm}"/>
+                <DatePicker SelectedDate="{Binding FechaInicio}" Style="{StaticResource DarkDatePickerStyle}" Width="140"/>
+                <Label Content="Hasta:" Style="{StaticResource DarkLableForm}" Margin="15,0,0,0"/>
+                <DatePicker SelectedDate="{Binding FechaFin}" Style="{StaticResource DarkDatePickerStyle}" Width="140"/>
+                <Button Content="Generar Reporte" Command="{Binding CargarReporteCommand}" Style="{StaticResource DarkActionButtonStyle}" Margin="15,0,0,0"/>
+            </StackPanel>
+
+            <Border Grid.Row="1" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
+                <DataGrid ItemsSource="{Binding Resultados}" Style="{StaticResource ElegantDataGridStyle}" CanUserAddRows="False" AutoGenerateColumns="False" IsReadOnly="True">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="N° Factura" Binding="{Binding NumeroFactura}" Width="*"/>
+                        <DataGridTextColumn Header="Fecha" Binding="{Binding Fecha, StringFormat=d}" Width="Auto"/>
+                        <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente}" Width="2*"/>
+                        <DataGridTextColumn Header="Total Venta" Binding="{Binding TotalVenta, StringFormat=C}" Width="Auto"/>
+                        <DataGridTextColumn Header="Total Costo" Binding="{Binding TotalCosto, StringFormat=C}" Width="Auto"/>
+                        <DataGridTextColumn Header="Ganancia Bruta" Binding="{Binding GananciaBruta, StringFormat=C}" Width="Auto" FontWeight="Bold"/>
+                        <DataGridTextColumn Header="Margen" Binding="{Binding MargenPorcentual, StringFormat=P2}" Width="Auto"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

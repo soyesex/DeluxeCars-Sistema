@@ -4,6 +4,7 @@ using DeluxeCarsDesktop.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DeluxeCarsDesktop.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250623210504_AddFinancialAndUnitFields")]
+    partial class AddFinancialAndUnitFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -420,7 +423,7 @@ namespace DeluxeCarsDesktop.Migrations
                     b.Property<int>("Cantidad")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("CostoUnitario")
+                    b.Property<decimal?>("CostoUnitario")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("Fecha")
@@ -517,61 +520,6 @@ namespace DeluxeCarsDesktop.Migrations
                     b.ToTable("Notificaciones");
                 });
 
-            modelBuilder.Entity("DeluxeCarsDesktop.Models.PagoProveedor", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("FechaPago")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("IdMetodoPago")
-                        .HasColumnType("int");
-
-                    b.Property<int>("IdProveedor")
-                        .HasColumnType("int");
-
-                    b.Property<int>("IdUsuario")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("MontoPagado")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<string>("Notas")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Referencia")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IdMetodoPago");
-
-                    b.HasIndex("IdProveedor");
-
-                    b.HasIndex("IdUsuario");
-
-                    b.ToTable("PagosProveedores");
-                });
-
-            modelBuilder.Entity("DeluxeCarsDesktop.Models.PagoProveedorPedido", b =>
-                {
-                    b.Property<int>("IdPagoProveedor")
-                        .HasColumnType("int");
-
-                    b.Property<int>("IdPedido")
-                        .HasColumnType("int");
-
-                    b.HasKey("IdPagoProveedor", "IdPedido");
-
-                    b.HasIndex("IdPedido");
-
-                    b.ToTable("PagoProveedorPedidos");
-                });
-
             modelBuilder.Entity("DeluxeCarsDesktop.Models.PasswordReset", b =>
                 {
                     b.Property<int>("Id")
@@ -613,6 +561,7 @@ namespace DeluxeCarsDesktop.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("Estado")
+                        .HasMaxLength(50)
                         .HasColumnType("int");
 
                     b.Property<DateTime>("FechaEmision")
@@ -697,6 +646,7 @@ namespace DeluxeCarsDesktop.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("UnidadMedida")
+                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
@@ -1075,52 +1025,6 @@ namespace DeluxeCarsDesktop.Migrations
                     b.Navigation("Usuario");
                 });
 
-            modelBuilder.Entity("DeluxeCarsDesktop.Models.PagoProveedor", b =>
-                {
-                    b.HasOne("DeluxeCarsDesktop.Models.MetodoPago", "MetodoPago")
-                        .WithMany()
-                        .HasForeignKey("IdMetodoPago")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("DeluxeCarsDesktop.Models.Proveedor", "Proveedor")
-                        .WithMany()
-                        .HasForeignKey("IdProveedor")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("DeluxeCarsDesktop.Models.Usuario", "Usuario")
-                        .WithMany()
-                        .HasForeignKey("IdUsuario")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("MetodoPago");
-
-                    b.Navigation("Proveedor");
-
-                    b.Navigation("Usuario");
-                });
-
-            modelBuilder.Entity("DeluxeCarsDesktop.Models.PagoProveedorPedido", b =>
-                {
-                    b.HasOne("DeluxeCarsDesktop.Models.PagoProveedor", "PagoProveedor")
-                        .WithMany("PedidosCubiertos")
-                        .HasForeignKey("IdPagoProveedor")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DeluxeCarsDesktop.Models.Pedido", "Pedido")
-                        .WithMany("PagosAplicados")
-                        .HasForeignKey("IdPedido")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("PagoProveedor");
-
-                    b.Navigation("Pedido");
-                });
-
             modelBuilder.Entity("DeluxeCarsDesktop.Models.PasswordReset", b =>
                 {
                     b.HasOne("DeluxeCarsDesktop.Models.Usuario", "Usuario")
@@ -1261,16 +1165,9 @@ namespace DeluxeCarsDesktop.Migrations
                     b.Navigation("Proveedores");
                 });
 
-            modelBuilder.Entity("DeluxeCarsDesktop.Models.PagoProveedor", b =>
-                {
-                    b.Navigation("PedidosCubiertos");
-                });
-
             modelBuilder.Entity("DeluxeCarsDesktop.Models.Pedido", b =>
                 {
                     b.Navigation("DetallesPedidos");
-
-                    b.Navigation("PagosAplicados");
                 });
 
             modelBuilder.Entity("DeluxeCarsDesktop.Models.Producto", b =>

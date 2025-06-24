@@ -47,6 +47,8 @@ namespace DeluxeCarsDesktop.ViewModel
             set { SetProperty(ref _precio, value); (GuardarCommand as ViewModelCommand)?.RaiseCanExecuteChanged(); }
         }
 
+        private string _unidadMedida;
+        public string UnidadMedida { get => _unidadMedida; set => SetProperty(ref _unidadMedida, value); }
         private int _stockCalculado;
         public int StockCalculado { get => _stockCalculado; private set => SetProperty(ref _stockCalculado, value); }
         private int? _stockMinimo;
@@ -100,6 +102,7 @@ namespace DeluxeCarsDesktop.ViewModel
                 _productoActual = new Producto();
                 TituloVentana = "Nuevo Producto";
                 Estado = true; // Por defecto
+                UnidadMedida = "Unidad";
             }
             else // Modo Edición
             {
@@ -111,6 +114,7 @@ namespace DeluxeCarsDesktop.ViewModel
                     Nombre = _productoActual.Nombre;
                     OEM = _productoActual.OriginalEquipamentManufacture;
                     Precio = _productoActual.Precio;
+                    UnidadMedida = _productoActual.UnidadMedida; // Carga la unidad de medida existente
                     StockCalculado = await _unitOfWork.Productos.GetCurrentStockAsync(productoId);
                     Descripcion = _productoActual.Descripcion;
                     StockMinimo = _productoActual.StockMinimo;
@@ -156,6 +160,7 @@ namespace DeluxeCarsDesktop.ViewModel
             _productoActual.Nombre = Nombre;
             _productoActual.OriginalEquipamentManufacture = OEM;
             _productoActual.Precio = Precio;
+            _productoActual.UnidadMedida = UnidadMedida;
             _productoActual.StockMinimo = StockMinimo;
             _productoActual.StockMaximo = StockMaximo;
             _productoActual.Descripcion = Descripcion;

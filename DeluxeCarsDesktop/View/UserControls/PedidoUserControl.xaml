@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
              mc:Ignorable="d" 
+             xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
              xmlns:models="clr-namespace:DeluxeCarsDesktop.Models"
              d:DesignHeight="550" d:DesignWidth="900">
     <Grid Margin="15">
@@ -57,11 +58,12 @@
             <DataGrid ItemsSource="{Binding Pedidos}"
                       SelectedItem="{Binding PedidoSeleccionado}"
                       Style="{StaticResource ElegantDataGridStyle}"
-                      CanUserAddRows="False" AutoGenerateColumns="False" IsReadOnly="True">
+                      CanUserAddRows="False" AutoGenerateColumns="False" IsReadOnly="True"
+                      ScrollViewer.HorizontalScrollBarVisibility="Auto">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="N° Pedido" Binding="{Binding NumeroPedido}" Width="*"/>
+                    <DataGridTextColumn Header="N° Pedido" Binding="{Binding NumeroPedido}" Width="140"/>
 
-                    <DataGridTemplateColumn Header="Estado" Width="Auto">
+                    <DataGridTemplateColumn Header="Estado" Width="Auto" MinWidth="100">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Border CornerRadius="4" Padding="8,3" Margin="2">
@@ -73,22 +75,18 @@
                                                     <Setter Property="Background" Value="#6B7280"/>
                                                     <Setter Property="ToolTip" Value="Este pedido es un borrador y aún puede ser editado."/>
                                                 </DataTrigger>
-
                                                 <DataTrigger Binding="{Binding Estado}" Value="{x:Static models:EstadoPedido.Aprobado}">
                                                     <Setter Property="Background" Value="#10B981"/>
                                                     <Setter Property="ToolTip" Value="El pedido ha sido aprobado. Pendiente de recepción."/>
                                                 </DataTrigger>
-
                                                 <DataTrigger Binding="{Binding Estado}" Value="{x:Static models:EstadoPedido.Recibido}">
                                                     <Setter Property="Background" Value="#059669"/>
                                                     <Setter Property="ToolTip" Value="El pedido ha sido completado y la mercancía recibida."/>
                                                 </DataTrigger>
-
                                                 <DataTrigger Binding="{Binding Estado}" Value="{x:Static models:EstadoPedido.Cancelado}">
                                                     <Setter Property="Background" Value="#374151"/>
                                                     <Setter Property="ToolTip" Value="Este pedido ha sido cancelado."/>
                                                 </DataTrigger>
-
                                             </Style.Triggers>
                                         </Style>
                                     </Border.Style>
@@ -98,31 +96,72 @@
                     </DataGridTemplateColumn>
 
                     <DataGridTextColumn Header="Fecha Emisión" Binding="{Binding FechaEmision, StringFormat=d}" Width="Auto"/>
-                    <DataGridTextColumn Header="Proveedor" Binding="{Binding Proveedor.RazonSocial}" Width="Auto"/>
-                    <DataGridTextColumn Header="Entrega Estimada" Binding="{Binding FechaEstimadaEntrega, StringFormat='d'}" />
-                    <DataGridTextColumn Header="Usuario" Binding="{Binding Usuario.Nombre}" Width="*"/>
-                    <DataGridTemplateColumn Header="Acciones">
+
+                    <DataGridTextColumn Header="Proveedor" Binding="{Binding Proveedor.RazonSocial}" Width="*"/>
+
+                    <DataGridTextColumn Header="Monto Total" Binding="{Binding MontoTotal, StringFormat=C}" Width="Auto" FontWeight="Bold"/>
+                    <DataGridTextColumn Header="Saldo Pendiente" Binding="{Binding SaldoPendiente, StringFormat=C}" Width="Auto"/>
+
+                    <DataGridTemplateColumn Header="Estado Pago" Width="Auto" MinWidth="120">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-
-                                    <Button Content="Ver Detalles" Style="{StaticResource DarkActionButtonStyle}"
-                                            Command="{Binding DataContext.VerDetallesCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                            CommandParameter="{Binding}"/>
-
-                                    <Button Content="Recepcionar" Style="{StaticResource DarkActionButtonStyle}" Margin="5,0,0,0"
-                                            Command="{Binding DataContext.RecepcionarPedidoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                            CommandParameter="{Binding}"/>
-
-                                    <Button Content="PDF" Style="{StaticResource DarkActionButtonStyle}" Margin="5,0,0,0"
-                                            Command="{Binding DataContext.GenerarPdfCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                            CommandParameter="{Binding}"/>
-
-                                </StackPanel>
-
+                                <Border CornerRadius="4" Padding="8,3" Margin="2" MinWidth="70">
+                                    <TextBlock Text="{Binding EstadoPago}" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding EstadoPago}" Value="{x:Static models:EstadoPagoPedido.Pendiente}">
+                                                    <Setter Property="Background" Value="#EF4444"/>
+                                                    <Setter Property="ToolTip" Value="Este pedido está pendiente de pago."/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding EstadoPago}" Value="{x:Static models:EstadoPagoPedido.PagadoParcialmente}">
+                                                    <Setter Property="Background" Value="#F59E0B"/>
+                                                    <Setter Property="ToolTip" Value="Se han realizado abonos a este pedido."/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding EstadoPago}" Value="{x:Static models:EstadoPagoPedido.Pagado}">
+                                                    <Setter Property="Background" Value="#10B981"/>
+                                                    <Setter Property="ToolTip" Value="Este pedido ha sido pagado en su totalidad."/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                </Border>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="Acciones" Width="280">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Button Style="{StaticResource DataGridIconSharpButton_Style}"
+                                            Tag="{x:Static fa:IconChar.Eye}"
+                                            ToolTip="Ver Detalles"
+                                            Command="{Binding DataContext.VerDetallesCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"/>
+
+                                    <Button Style="{StaticResource DataGridIconSharpButton_Style}"
+                                            Tag="{x:Static fa:IconChar.Inbox}"
+                                            ToolTip="Recepcionar Pedido"
+                                            Command="{Binding DataContext.RecepcionarPedidoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"/>
+
+                                    <Button Style="{StaticResource DataGridIconSharpButton_Style}"
+                                            Tag="{x:Static fa:IconChar.MoneyBillWave}"
+                                            ToolTip="Registrar Pago"
+                                            Command="{Binding DataContext.RegistrarPagoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"/>
+
+                                    <Button Style="{StaticResource DataGridIconSharpButton_Style}"
+                                            Tag="{x:Static fa:IconChar.FilePdf}"
+                                            ToolTip="Generar PDF"
+                                            Command="{Binding DataContext.GenerarPdfCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"/>      
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
                 </DataGrid.Columns>
             </DataGrid>
         </Border>

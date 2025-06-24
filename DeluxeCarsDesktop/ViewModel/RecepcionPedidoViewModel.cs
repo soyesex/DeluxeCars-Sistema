@@ -1,4 +1,5 @@
 ﻿using DeluxeCarsDesktop.Interfaces;
+using DeluxeCarsDesktop.Messages;
 using DeluxeCarsDesktop.Models;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ namespace DeluxeCarsDesktop.ViewModel
     public class RecepcionPedidoViewModel : ViewModelBase, IFormViewModel, ICloseable
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMessengerService _messengerService;
         private Pedido _pedidoActual;
 
         public string Titulo => $"Recepcionar Pedido N° {_pedidoActual?.NumeroPedido}";
@@ -22,9 +24,11 @@ namespace DeluxeCarsDesktop.ViewModel
         public ICommand ConfirmarRecepcionCommand { get; }
         public Action CloseAction { get; set; }
 
-        public RecepcionPedidoViewModel(IUnitOfWork unitOfWork)
+        public RecepcionPedidoViewModel(IUnitOfWork unitOfWork, IMessengerService messengerService)
         {
             _unitOfWork = unitOfWork;
+            _messengerService = messengerService;
+
             ItemsARecepcionar = new ObservableCollection<RecepcionPedidoItemViewModel>();
             ConfirmarRecepcionCommand = new ViewModelCommand(async (p) => await ExecuteConfirmarRecepcion());
         }
@@ -62,7 +66,9 @@ namespace DeluxeCarsDesktop.ViewModel
                             Cantidad = item.CantidadRecibida, // La cantidad que el usuario ingresó
                             TipoMovimiento = "Entrada por Compra",
                             Fecha = DateTime.Now,
-                            MotivoAjuste = $"Recepción de Pedido N° {_pedidoActual.NumeroPedido}" // Trazabilidad perfecta
+                            MotivoAjuste = $"Recepción de Pedido N° {_pedidoActual.NumeroPedido}", // Trazabilidad perfecta
+                            CostoUnitario = item.DetalleOriginal.PrecioUnitario,
+                            IdReferencia = _pedidoActual.Id
                         };
                         await _unitOfWork.MovimientosInventario.AddAsync(movimiento);
                     }
@@ -75,6 +81,8 @@ namespace DeluxeCarsDesktop.ViewModel
                 // Guardamos TODOS los cambios (nuevos movimientos + actualización del pedido)
                 // en una única transacción atómica.
                 await _unitOfWork.CompleteAsync();
+
+                _messengerService.Publish(new InventarioCambiadoMessage());
 
                 MessageBox.Show("¡Mercancía recepcionada! El inventario ha sido actualizado.", "Éxito");
                 CloseAction?.Invoke();

@@ -13,11 +13,12 @@ using System.Windows.Input;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
-    public class SugerenciasCompraViewModel : ViewModelBase, IAsyncLoadable
+    public class SugerenciasCompraViewModel : ViewModelBase, IAsyncLoadable, ICloseable
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUserService;
         private readonly INotificationService _notificationService;
+        public Action CloseAction { get; set; }
         // private readonly INavigationService _navigationService; // Lo añadiremos cuando lo necesitemos
 
         private bool _isLoading;
@@ -113,7 +114,7 @@ namespace DeluxeCarsDesktop.ViewModel
 
             // --- REFINAMIENTO 2: Obtener el Método de Pago por defecto ---
             var metodoPagoDefecto = await _unitOfWork.MetodosPago.GetByConditionAsync(m => m.Descripcion.Contains("Crédito"));
-            var idMetodoPagoDefecto = metodoPagoDefecto.FirstOrDefault()?.Id ?? 1; // Si no lo encuentra, usa 1 como fallback.
+            var idMetodoPagoDefecto = metodoPagoDefecto.FirstOrDefault()?.Id ?? 1;
 
 
             IsLoading = true;
@@ -144,7 +145,8 @@ namespace DeluxeCarsDesktop.ViewModel
                             IdProducto = itemWrapper.Sugerencia.Producto.Id,
                             Cantidad = itemWrapper.Sugerencia.CantidadSugerida > 0 ? itemWrapper.Sugerencia.CantidadSugerida : 1,
                             PrecioUnitario = itemWrapper.MejorOpcion.PrecioCompra, // Usamos el precio de la mejor opción encontrada.
-                            Descripcion = itemWrapper.Sugerencia.Nombre
+                            Descripcion = itemWrapper.Sugerencia.Nombre,
+                            UnidadMedida = itemWrapper.Sugerencia.Producto.UnidadMedida ?? "Unidad"
                         });
                     }
 
@@ -157,10 +159,9 @@ namespace DeluxeCarsDesktop.ViewModel
                 {
                     await _unitOfWork.CompleteAsync();
                     _notificationService.ShowSuccess($"{borradoresCreados} borrador(es) de órdenes de compra han sido generados exitosamente.");
-                }
 
-                // 6. Recargamos la lista para que los productos pedidos ya no aparezcan.
-                await LoadAsync();
+                    CloseAction?.Invoke();
+                }
             }
             catch (Exception ex)
             {

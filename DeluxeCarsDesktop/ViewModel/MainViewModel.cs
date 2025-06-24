@@ -1,4 +1,5 @@
 ﻿using DeluxeCarsDesktop.Interfaces;
+using DeluxeCarsDesktop.Messages;
 using DeluxeCarsDesktop.Models;
 using DeluxeCarsDesktop.Models.Notifications;
 using DeluxeCarsDesktop.Properties;
@@ -29,6 +30,7 @@ namespace DeluxeCarsDesktop.ViewModel
         private readonly INavigationService _navigationService;
         private readonly INotificationService _notificationService;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IMessengerService _messengerService;
         public event Action LogoutSuccess;
         public bool CanGoBack => _navigationService.CanGoBack;
 
@@ -70,7 +72,7 @@ namespace DeluxeCarsDesktop.ViewModel
         public ICommand ToggleNotificationsPanelCommand { get; }
         public ICommand ShowSugerenciasCompraViewCommand { get; }
 
-        public MainViewModel(ICurrentUserService currentUserService, INavigationService navigationService, IUnitOfWork unitOfWork, IServiceProvider serviceProvider, INotificationService notificationService)
+        public MainViewModel(ICurrentUserService currentUserService, IMessengerService messengerService, INavigationService navigationService, IUnitOfWork unitOfWork, IServiceProvider serviceProvider, INotificationService notificationService)
         {
 
             _navigationService = navigationService;
@@ -78,6 +80,7 @@ namespace DeluxeCarsDesktop.ViewModel
             _unitOfWork = unitOfWork; // <-- Se asigna aquí
             _currentUserService = currentUserService;
             _serviceProvider = serviceProvider;
+            _messengerService = messengerService;
 
             AlertasNuevas = new ObservableCollection<AppNotification>();
             HistorialYEstados = new ObservableCollection<AppNotification>();
@@ -85,7 +88,8 @@ namespace DeluxeCarsDesktop.ViewModel
             _navigationService.CurrentMainViewChanged += OnCurrentMainViewChanged;
 
             AppEvents.OnNotificationsChanged += async () => await CargarEstadoDeNotificacionesAsync();
-            
+
+            _messengerService.Subscribe<InventarioCambiadoMessage>(async msg => await CargarEstadoDeNotificacionesAsync());
 
             // --- Comandos de Navegación SIMPLIFICADOS ---
             ShowHomeViewCommand = new ViewModelCommand(async p => await _navigationService.NavigateTo<DashboardViewModel>());
@@ -95,7 +99,7 @@ namespace DeluxeCarsDesktop.ViewModel
             ShowComprasViewCommand = new ViewModelCommand(async p => await _navigationService.NavigateTo<PedidoViewModel>());
             ShowPuntoDeVentaCommand = new ViewModelCommand(async p => await _navigationService.NavigateTo<FacturacionViewModel>());
             ShowHistorialVentasCommand = new ViewModelCommand(async p => await _navigationService.NavigateTo<FacturasHistorialViewModel>());
-            ShowReportesViewCommand = new ViewModelCommand(async p => await _navigationService.NavigateTo<ReportesViewModel>());
+            ShowReportesViewCommand = new ViewModelCommand(async p => await _navigationService.NavigateTo<ReportesRentabilidadViewModel>());
             ShowUsuarioViewCommand = new ViewModelCommand(async p => await _navigationService.NavigateTo<UsuarioViewModel>());
             ShowRolViewCommand = new ViewModelCommand(async p => await _navigationService.NavigateTo<RolViewModel>());
             ShowConfiguracionViewCommand = new ViewModelCommand(async p => await _navigationService.NavigateTo<ConfiguracionViewModel>());
@@ -276,7 +280,7 @@ namespace DeluxeCarsDesktop.ViewModel
             else if (viewModel is PedidoViewModel) { Caption = "Pedidos"; Icon = IconChar.ShoppingCart; }
             else if (viewModel is FacturacionViewModel) { Caption = "Punto de Venta (POS)"; Icon = IconChar.CashRegister; }
             else if (viewModel is FacturasHistorialViewModel) { Caption = "Historial de Ventas"; Icon = IconChar.History; }
-            else if (viewModel is ReportesViewModel) { Caption = "Reportes"; Icon = IconChar.ChartColumn; }
+            else if (viewModel is ReportesRentabilidadViewModel) { Caption = "Reportes"; Icon = IconChar.ChartColumn; }
             else if (viewModel is UsuarioViewModel) { Caption = "Usuarios"; Icon = IconChar.UserGear; }
             else if (viewModel is RolViewModel) { Caption = "Roles de Usuario"; Icon = IconChar.UserShield; }
             else if (viewModel is ConfiguracionViewModel) { Caption = "Configuración"; Icon = IconChar.Tools; }

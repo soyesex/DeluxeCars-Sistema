@@ -26,7 +26,7 @@ namespace DeluxeCarsDesktop.Models
 
         public int Cantidad { get; set; }
 
-        public decimal? CostoUnitario { get; set; }
+        public decimal CostoUnitario { get; set; }
 
         public int? IdReferencia { get; set; }
         public string? MotivoAjuste { get; set; }

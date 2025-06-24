@@ -23,6 +23,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <Label Grid.Row="0" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="Nombre" VerticalAlignment="Center"/>
@@ -52,8 +53,10 @@
 
             <Label Grid.Row="3" Style="{StaticResource DarkLableForm}" 
                    Grid.Column="0" Content="Precio Venta" VerticalAlignment="Center"/>
-
             <TextBox Grid.Row="3" Grid.Column="1" Style="{StaticResource DarkInputControlStyle}" Text="{Binding Precio, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+
+            <Label Grid.Row="4" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="Unidad de Medida" VerticalAlignment="Center"/>
+            <TextBox Grid.Row="4" Grid.Column="1" Style="{StaticResource DarkInputControlStyle}" Text="{Binding UnidadMedida, UpdateSourceTrigger=PropertyChanged}" Margin="5" ToolTip="Ej: Unidad, Juego, Caja, Galón"/>
 
             <Label Grid.Row="5" Grid.Column="0" Content="Stock Mínimo:" VerticalAlignment="Center" Style="{StaticResource DarkLableForm}"/>
             <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding StockMinimo}" Style="{StaticResource DarkInputControlStyle}" Margin="5"/>

@@ -34,7 +34,9 @@ namespace DeluxeCarsDesktop.ViewModel
             {
                 SetProperty(ref _pedidoSeleccionado, value);
                 (VerDetallesCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
-                (RecepcionarPedidoCommand as ViewModelCommand)?.RaiseCanExecuteChanged(); // AÑADE ESTO
+                (RecepcionarPedidoCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+                (GenerarPdfCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+                (RegistrarPagoCommand as ViewModelCommand)?.RaiseCanExecuteChanged(); // --- NUEVO --- Notifica al nuevo comando
             }
         }
 
@@ -58,7 +60,7 @@ namespace DeluxeCarsDesktop.ViewModel
         public ICommand FiltrarCommand { get; }
         public ICommand RecepcionarPedidoCommand { get; }
         public ICommand GenerarPdfCommand { get; }
-
+        public ICommand RegistrarPagoCommand { get; }
         public PedidoViewModel(IUnitOfWork unitOfWork, INavigationService navigationService)
         {
             _unitOfWork = unitOfWork;
@@ -76,6 +78,7 @@ namespace DeluxeCarsDesktop.ViewModel
             VerDetallesCommand = new ViewModelCommand(ExecuteVerDetallesCommand, _ => PedidoSeleccionado != null);
             FiltrarCommand = new ViewModelCommand(async p => await AplicarFiltros());
             RecepcionarPedidoCommand = new ViewModelCommand(ExecuteRecepcionarPedido, CanExecuteRecepcionarPedido);
+            RegistrarPagoCommand = new ViewModelCommand(ExecuteRegistrarPago, CanExecuteRegistrarPago);
             GenerarPdfCommand = new ViewModelCommand(ExecuteGenerarPdf, CanExecuteGenerarPdf);
 
             LoadInitialDataAsync();
@@ -160,8 +163,20 @@ namespace DeluxeCarsDesktop.ViewModel
             // Al volver, refrescamos para ver el cambio de estado de "Aprobado" a "Recibido".
             await AplicarFiltros();
         }
+        private bool CanExecuteRegistrarPago(object obj)
+        {
+            // Se puede pagar si el pedido está Aprobado o Recibido, pero no si ya está totalmente pagado.
+            return PedidoSeleccionado != null &&
+                   (PedidoSeleccionado.Estado == EstadoPedido.Aprobado || PedidoSeleccionado.Estado == EstadoPedido.Recibido) &&
+                   PedidoSeleccionado.EstadoPago != EstadoPagoPedido.Pagado;
+        }
 
-        // Implementa los métodos del comando
+        private async void ExecuteRegistrarPago(object obj)
+        {
+            // Asegúrate de añadir 'RegistrarPagoProveedor' a tu enum FormType.
+            await _navigationService.OpenFormWindow(FormType.RegistrarPagoProveedor, PedidoSeleccionado.Id);
+            await AplicarFiltros();
+        }
         private bool CanExecuteGenerarPdf(object obj)
         {
             // Solo se puede generar PDF de un pedido que esté seleccionado Y APROBADO o RECIBIDO.

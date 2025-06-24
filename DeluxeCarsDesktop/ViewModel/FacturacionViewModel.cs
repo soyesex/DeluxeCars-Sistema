@@ -1,4 +1,5 @@
 ﻿using DeluxeCarsDesktop.Interfaces;
+using DeluxeCarsDesktop.Messages;
 using DeluxeCarsDesktop.Models;
 using DeluxeCarsDesktop.Services;
 using Microsoft.Data.SqlClient;
@@ -18,6 +19,8 @@ namespace DeluxeCarsDesktop.ViewModel
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUserService;
         private readonly IStockAlertService _stockAlertService;
+        private readonly IMessengerService _messengerService;
+
         private Factura _facturaEnProgreso;
         private bool _isInitialized = false;
         private bool _isBuscandoItems = false;
@@ -114,9 +117,10 @@ namespace DeluxeCarsDesktop.ViewModel
         public ICommand FinalizarVentaCommand { get; }
         public ICommand CancelarVentaCommand { get; }
 
-        public FacturacionViewModel(IUnitOfWork unitOfWork, ICurrentUserService currentUserService, IStockAlertService stockAlertService)
+        public FacturacionViewModel(IUnitOfWork unitOfWork, ICurrentUserService currentUserService, IStockAlertService stockAlertService, IMessengerService messengerService)
         {
             _unitOfWork = unitOfWork;
+            _messengerService = messengerService;
             _currentUserService = currentUserService;
             _stockAlertService = stockAlertService;
 
@@ -325,6 +329,8 @@ namespace DeluxeCarsDesktop.ViewModel
                     IdItem = p.Id,
                     Descripcion = p.Nombre,
                     PrecioUnitario = p.Precio,
+                    // Usamos el ?? para poner "Unidad" por defecto si un producto antiguo no la tuviera.
+                    UnidadMedida = p.UnidadMedida ?? "Unidad",
                     IVA = 19 // O tomarlo de una configuración
                 };
                 LineasDeFactura.Add(detalle);
@@ -339,6 +345,7 @@ namespace DeluxeCarsDesktop.ViewModel
                     IdItem = s.Id,
                     Descripcion = s.Nombre,
                     PrecioUnitario = s.Precio,
+                    UnidadMedida = "Servicio",
                     IVA = 19
                 };
                 LineasDeFactura.Add(detalle);
@@ -346,6 +353,8 @@ namespace DeluxeCarsDesktop.ViewModel
 
             // Finalmente, recalculamos los totales de la factura.
             RecalcularTotales();
+            TextoBusquedaItem = string.Empty;
+            CantidadItem = 1;
         }
 
         private void ExecuteEliminarItem(object item)
@@ -386,6 +395,8 @@ namespace DeluxeCarsDesktop.ViewModel
             _facturaEnProgreso.TotalIVA = TotalIVA;
             _facturaEnProgreso.Total = Total;
             _facturaEnProgreso.DetallesFactura = LineasDeFactura;
+            // El saldo pendiente inicial es siempre el total de la factura.
+            _facturaEnProgreso.SaldoPendiente = Total;
 
             try
             {
@@ -396,6 +407,19 @@ namespace DeluxeCarsDesktop.ViewModel
                 //    que usaremos como referencia en los movimientos de inventario.
                 await _unitOfWork.CompleteAsync();
 
+                // --- TAREA 3.1: Registrar Costo de Mercancía Vendida (CMV) ---
+                // 1. Obtenemos los IDs de todos los productos que se vendieron.
+                var idsDeProductosVendidos = _facturaEnProgreso.DetallesFactura
+                                               .Where(d => d.TipoDetalle == "Producto")
+                                               .Select(d => d.IdItem)
+                                               .ToList();
+
+                // 2. Hacemos UNA SOLA CONSULTA para traer los datos de esos productos.
+                var productosVendidos = await _unitOfWork.Productos.GetByConditionAsync(p => idsDeProductosVendidos.Contains(p.Id));
+
+                // 3. Los convertimos a un diccionario para una búsqueda instantánea y eficiente.
+                var productosDict = productosVendidos.ToDictionary(p => p.Id);
+
                 // 5. AHORA, creamos los registros de Movimiento de Inventario para cada producto vendido.
                 //    Hemos eliminado por completo el bloque de "Lógica de Stock Optimizada".
                 foreach (var detalle in _facturaEnProgreso.DetallesFactura)
@@ -403,13 +427,19 @@ namespace DeluxeCarsDesktop.ViewModel
                     // Solo creamos movimientos para los detalles que son de tipo 'Producto'.
                     if (detalle.TipoDetalle == "Producto")
                     {
+                        // Buscamos el producto completo en nuestro diccionario.
+                        productosDict.TryGetValue(detalle.IdItem, out var productoVendido);
+
                         var movimiento = new MovimientoInventario
                         {
                             IdProducto = detalle.IdItem,
                             Fecha = DateTime.UtcNow,
-                            TipoMovimiento = "Venta", // Es una salida por venta.
+                            TipoMovimiento = "Salida por Venta", // Es una salida por venta.
                             Cantidad = -detalle.Cantidad, // ¡LA CANTIDAD ES NEGATIVA!
-                            IdReferencia = _facturaEnProgreso.Id // El ID de la Factura que originó el movimiento.
+                            IdReferencia = _facturaEnProgreso.Id, // El ID de la Factura que originó el movimiento.
+                            // Asignamos el último costo de compra conocido. Usamos '?? 0' por si es un
+                            // producto que nunca se ha comprado y su costo es nulo.
+                            CostoUnitario = productoVendido?.UltimoPrecioCompra ?? 0m,
                         };
                         await _unitOfWork.Context.MovimientosInventario.AddAsync(movimiento);
                     }
@@ -417,6 +447,7 @@ namespace DeluxeCarsDesktop.ViewModel
 
                 // 6. Guardamos los nuevos registros de MovimientoInventario.
                 await _unitOfWork.CompleteAsync();
+                _messengerService.Publish(new InventarioCambiadoMessage());
 
                 try
                 {

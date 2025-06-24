@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DeluxeCarsDesktop.ViewModel
+namespace DeluxeCarsDesktop.Messages
 {
-    public class FacturaFormViewModel : ViewModelBase
+    public class InventarioCambiadoMessage
     {
     }
 }

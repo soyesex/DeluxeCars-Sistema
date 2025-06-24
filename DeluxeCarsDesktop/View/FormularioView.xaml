@@ -19,6 +19,10 @@
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibility"/>
 
+        <DataTemplate DataType="{x:Type viewModel:RegistrarPagoProveedorViewModel}">
+            <userControl:RegistrarPagoProveedorUserControl/>
+        </DataTemplate>
+
         <DataTemplate DataType="{x:Type viewModel:RecepcionPedidoViewModel}">
             <userControl:RecepcionPedidoUserControl/>
         </DataTemplate>

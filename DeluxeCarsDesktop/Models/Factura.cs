@@ -14,6 +14,7 @@ namespace DeluxeCarsDesktop.Models
         public int IdCliente { get; set; }
         public int? IdUsuario { get; set; } // Nullable
         public int IdMetodoPago { get; set; }
+        public decimal SaldoPendiente { get; set; }
         public string? Observaciones { get; set; }
         public decimal? SubTotal { get; set; }
         public decimal? TotalIVA { get; set; }

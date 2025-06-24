@@ -52,8 +52,8 @@
                 <userControl:FacturasHistorialUserControl/>
             </DataTemplate>
 
-            <DataTemplate DataType="{x:Type viewModel:ReportesViewModel}">
-                <userControl:ReportesUserControl/>
+            <DataTemplate DataType="{x:Type viewModel:ReportesRentabilidadViewModel}">
+                <userControl:ReportesRentabilidadUserControl/>
             </DataTemplate>
 
             <DataTemplate DataType="{x:Type viewModel:ConfiguracionViewModel}">
@@ -234,7 +234,7 @@
                                  Margin="0,0,0,10"
                                  IsChecked="{Binding CurrentChildView, Mode=OneWay,
                                      Converter={StaticResource ViewModelToBoolConverter}, 
-                                         ConverterParameter='ReportesViewModel'}"
+                                         ConverterParameter='ReportesRentabilidadViewModel'}"
                                          Visibility="{Binding IsAdmin, Converter={StaticResource BooleanToVisibilityConverter}}">
 
                                 <StackPanel Orientation="Horizontal">

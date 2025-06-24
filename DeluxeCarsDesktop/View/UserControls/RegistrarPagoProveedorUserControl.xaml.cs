@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace DeluxeCarsDesktop.View.UserControls
 {
     /// <summary>
-    /// Lógica de interacción para FacturaFormUserControl.xaml
+    /// Lógica de interacción para RegistrarPagoProveedorUserControl.xaml
     /// </summary>
-    public partial class FacturaFormUserControl : UserControl
+    public partial class RegistrarPagoProveedorUserControl : UserControl
     {
-        public FacturaFormUserControl()
+        public RegistrarPagoProveedorUserControl()
         {
             InitializeComponent();
         }

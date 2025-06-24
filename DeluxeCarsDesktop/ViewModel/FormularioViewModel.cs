@@ -176,6 +176,12 @@ namespace DeluxeCarsDesktop.ViewModel
                     Icon = IconChar.Tasks; // Un ícono de ejemplo
                     break;
 
+                case FormType.RegistrarPagoProveedor:
+                    CurrentChildView = serviceProvider.GetService<RegistrarPagoProveedorViewModel>();
+                    Caption = "Registrar Pago a Proveedor";
+                    Icon = IconChar.MoneyBillWave; // O HandHoldingUsd, PiggyBank, etc.
+                    break;
+
                 case FormType.RecepcionPedido:
                     CurrentChildView = serviceProvider.GetRequiredService<RecepcionPedidoViewModel>();
                     break;

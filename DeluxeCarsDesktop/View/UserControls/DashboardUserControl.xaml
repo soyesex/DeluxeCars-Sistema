@@ -30,15 +30,6 @@
             </Button>
 
             <Button Style="{StaticResource CardButtonStyle}" Margin="10"
-                    Command="{Binding DataContext.ShowHistorialVentasCommand, RelativeSource={RelativeSource AncestorType=Window}}">
-                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <TextBlock Style="{StaticResource CardTitleStyle}" Text="Ventas de Hoy"/>
-                    <TextBlock Text="{Binding VentasDeHoy, StringFormat=C, ConverterCulture=es-CO}" FontSize="36" FontWeight="Bold" HorizontalAlignment="Center"/>
-                    <fa:IconImage Icon="CashRegister" Opacity="0.8" Height="50" Width="50" Margin="0,15,0,0"/>
-                </StackPanel>
-            </Button>
-
-            <Button Style="{StaticResource CardButtonStyle}" Margin="10"
                     Command="{Binding DataContext.ShowClienteViewCommand, RelativeSource={RelativeSource AncestorType=Window}}">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                     <TextBlock Style="{StaticResource CardTitleStyle}" Text="Clientes Totales"/>

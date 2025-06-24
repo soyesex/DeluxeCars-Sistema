@@ -1,4 +1,5 @@
-﻿using DeluxeCarsDesktop.Models;
+﻿using DeluxeCarsDesktop.Dtos;
+using DeluxeCarsDesktop.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,5 +19,6 @@ namespace DeluxeCarsDesktop.Interfaces
         // Obtiene el historial de facturas para un cliente específico.
         Task<IEnumerable<Factura>> GetFacturasByClienteAsync(int clienteId);
         Task<IEnumerable<Factura>> GetAllWithClienteYMetodoPagoAsync();
+        Task<IEnumerable<ReporteRentabilidadDto>> GetReporteRentabilidadAsync(DateTime startDate, DateTime endDate);
     }
 }

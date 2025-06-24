@@ -42,6 +42,8 @@ namespace DeluxeCarsDesktop.Data
         public DbSet<ProductoProveedor> ProductoProveedores { get; set; }
         public DbSet<FacturaElectronica> FacturasElectronicas { get; set; }
         public DbSet<MovimientoInventario> MovimientosInventario { get; set; }
+        public DbSet<PagoProveedor> PagosProveedores { get; set; }
+        public DbSet<PagoProveedorPedido> PagoProveedorPedidos { get; set; }
 
         /// <summary>
         /// Configura el modelo de la base de datos usando Fluent API.
@@ -226,6 +228,45 @@ namespace DeluxeCarsDesktop.Data
                      .OnDelete(DeleteBehavior.NoAction);
             });
 
+            // --- Configuración para la nueva entidad PagoProveedor ---
+            modelBuilder.Entity<PagoProveedor>(entity =>
+            {
+                // Relación con Proveedor: Un Proveedor puede tener muchos Pagos.
+                entity.HasOne(p => p.Proveedor)
+                      .WithMany() // No necesitamos una colección de Pagos en la clase Proveedor, así que lo dejamos vacío.
+                      .HasForeignKey(p => p.IdProveedor) // Le decimos explícitamente qué columna usar.
+                      .OnDelete(DeleteBehavior.NoAction); // Evita borrados en cascada si se elimina un proveedor.
+
+                // Relación con MetodoPago: Un MetodoPago se puede usar en muchos Pagos.
+                entity.HasOne(p => p.MetodoPago)
+                      .WithMany() // Tampoco necesitamos una colección en MetodoPago.
+                      .HasForeignKey(p => p.IdMetodoPago)
+                      .OnDelete(DeleteBehavior.NoAction);
+
+                // Relación con Usuario: Un Usuario puede registrar muchos Pagos.
+                entity.HasOne(p => p.Usuario)
+                      .WithMany() // Tampoco necesitamos una colección en Usuario.
+                      .HasForeignKey(p => p.IdUsuario)
+                      .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            // --- Configuración para la tabla de enlace PagoProveedorPedido ---
+            modelBuilder.Entity<PagoProveedorPedido>(entity =>
+            {
+                // Define la llave primaria compuesta
+                entity.HasKey(pp => new { pp.IdPagoProveedor, pp.IdPedido });
+
+                // Define la relación con Pedido
+                entity.HasOne(pp => pp.Pedido)
+                      .WithMany(p => p.PagosAplicados)
+                      .HasForeignKey(pp => pp.IdPedido);
+
+                // Define la relación con PagoProveedor
+                entity.HasOne(pp => pp.PagoProveedor)
+                      .WithMany(p => p.PedidosCubiertos)
+                      .HasForeignKey(pp => pp.IdPagoProveedor);
+            });
+
             modelBuilder.Entity<PasswordReset>(entity =>
             {
                 // Le decimos a EF que la columna Token tiene un valor por defecto generado por SQL.
@@ -261,6 +302,7 @@ namespace DeluxeCarsDesktop.Data
             modelBuilder.Entity<DetalleFactura>().Property(df => df.Descuento).HasColumnType("decimal(18, 2)");
             modelBuilder.Entity<DetalleFactura>().Property(df => df.IVA).HasColumnType("decimal(18, 2)");
 
+            modelBuilder.Entity<PagoProveedor>().Property(p => p.MontoPagado).HasColumnType("decimal(18, 2)");
 
             // --- SECCIÓN 4: Configuración de Columnas Calculadas (COMPUTED COLUMNS) ---
             // Informa a Entity Framework que estas propiedades son calculadas por la base de datos (PERSISTED).

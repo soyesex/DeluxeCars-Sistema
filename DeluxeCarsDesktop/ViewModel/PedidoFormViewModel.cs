@@ -363,15 +363,15 @@ namespace DeluxeCarsDesktop.ViewModel
                 var idsDeProductos = _pedidoActual.DetallesPedidos.Select(d => d.IdProducto).ToList();
 
                 // 2. Hacemos UNA SOLA CONSULTA a la BD para traer todos esos productos a la vez.
+                //    Esto es importante para que Entity Framework los "vigile" (track).
                 var productosDelPedido = await _unitOfWork.Productos.GetByConditionAsync(p => idsDeProductos.Contains(p.Id));
 
-                // 3. Los convertimos a un diccionario para una búsqueda instantánea (en memoria).
+                // 3. Los convertimos a un diccionario para una búsqueda instantánea en memoria.
                 var productosDict = productosDelPedido.ToDictionary(p => p.Id);
 
-                // 4. Ahora, actualizamos el último precio de compra en memoria.
+                // 4. Ahora, actualizamos la propiedad en cada objeto de producto en memoria.
                 foreach (var detalle in _pedidoActual.DetallesPedidos)
                 {
-                    // Buscamos el producto en nuestro diccionario (mucho más rápido que ir a la BD).
                     if (productosDict.TryGetValue(detalle.IdProducto, out var productoAActualizar))
                     {
                         productoAActualizar.UltimoPrecioCompra = detalle.PrecioUnitario;
@@ -384,10 +384,8 @@ namespace DeluxeCarsDesktop.ViewModel
                     // Sugerencia: Usar el repositorio es más consistente con el patrón
                     await _unitOfWork.Pedidos.AddAsync(_pedidoActual);
                 }
-                // NOTA: Para la edición, EF Core ya está rastreando _pedidoActual, 
-                // por lo que no es necesario llamar a UpdateAsync explícitamente si se obtuvo del mismo contexto.
-
-                // Guardamos todo en una sola transacción
+                // Al llamar a CompleteAsync, EF guardará tanto el nuevo Pedido
+                // como las actualizaciones en los Productos modificados.
                 await _unitOfWork.CompleteAsync();
 
                 _notificationService.ShowSuccess("Pedido guardado exitosamente.");
@@ -401,11 +399,10 @@ namespace DeluxeCarsDesktop.ViewModel
                 MessageBox.Show($"Error de base de datos al guardar el pedido:\n\n{innerExceptionMessage}",
                                 "Error de Base de Datos", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            catch (Exception ex) // Un 'catch' general para cualquier otro error
+            catch (Exception ex) 
             {
                 MessageBox.Show($"Ocurrió un error inesperado: {ex.Message}", "Error");
             }
-            // --- FIN DE LA CORRECCIÓN ---
         }
         // --- NUEVO MÉTODO ASÍNCRONO ---
         private async Task CargarPrecioDeCompraAsync(Producto producto)

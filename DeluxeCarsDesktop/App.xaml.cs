@@ -1,5 +1,6 @@
 ﻿using DeluxeCarsDesktop.Data;
 using DeluxeCarsDesktop.Interfaces;
+using DeluxeCarsDesktop.Messages;
 using DeluxeCarsDesktop.Properties;
 using DeluxeCarsDesktop.Repositories;
 using DeluxeCarsDesktop.Services;
@@ -10,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using QuestPDF.Infrastructure;
 using System.Configuration;
+using System.Diagnostics;
 using System.Security.Principal;
 using System.Windows;
 
@@ -58,6 +60,10 @@ public partial class App : Application
 
         services.AddSingleton<INotificationService, NotificationService>();
 
+        services.AddSingleton<IMessengerService, MessengerService>();
+
+        services.AddTransient<IPedidoStatusCheckService, PedidoStatusCheckService>();
+
         // Registrar tus ViewModels. Transient significa que se creará una nueva instancia cada vez que se pida.
         services.AddTransient<LoginViewModel>();
         services.AddTransient<MainViewModel>();
@@ -92,6 +98,8 @@ public partial class App : Application
         services.AddTransient<UsuarioFormViewModel>();
         services.AddTransient<SugerenciasCompraViewModel>();
         services.AddTransient<RecepcionPedidoViewModel>();
+        services.AddTransient<RegistrarPagoProveedorViewModel>();
+        services.AddTransient<ReportesRentabilidadViewModel>();
 
         // Registra tus Vistas (las ventanas). Singleton o Transient son opciones comunes.
         // Usaremos Transient para asegurar que siempre se abran limpias.
@@ -190,6 +198,20 @@ public partial class App : Application
         }
         mainView.Show();
         await mainViewModel.InitializeAsync();
+
+        // --- ESTE ES EL BLOQUE QUE EJECUTA EL SERVICIO ---
+        using (var scope = _serviceProvider.CreateScope())
+        {
+            try
+            {
+                var pedidoCheckService = scope.ServiceProvider.GetRequiredService<IPedidoStatusCheckService>();
+                await pedidoCheckService.CheckPendingPedidosAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error ejecutando servicios de arranque: {ex.Message}");
+            }
+        }
     }
 }
 

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DeluxeCarsDesktop.Interfaces
 {
-    public interface IUsuarioRepository
+    public interface IUsuarioRepository : IGenericRepository<Usuario>
     {
         Task<PasswordReset> GeneratePasswordResetTokenAsync(string email);
         Task<bool> ResetPasswordAsync(string email, string token, string newPassword);
@@ -17,11 +17,7 @@ namespace DeluxeCarsDesktop.Interfaces
         Task<Usuario> GetUserByEmail(string email); 
         Task<bool> ChangePassword(int userId, string oldPassword, string newPassword);
         Task<IEnumerable<Usuario>> GetAllWithRolAsync();
-
-        // Métodos CRUD para la gestión de usuarios
-        Task<Usuario> GetByIdAsync(int id);
-        Task<IEnumerable<Usuario>> GetAllAsync();
-        Task UpdateAsync(Usuario user);
+        Task<Usuario> GetAdminUserAsync();
         Task DeactivateAsync(int id);
         Task UpdateUserPassword(int userId, string newPassword);
     }

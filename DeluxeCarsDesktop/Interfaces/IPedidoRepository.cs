@@ -11,6 +11,7 @@ namespace DeluxeCarsDesktop.Interfaces
     {
         // Obtiene un pedido incluyendo todos sus detalles (productos solicitados).
         Task<Pedido> GetPedidoWithDetailsAsync(int pedidoId);
+        Task<IEnumerable<Pedido>> GetPendingOrdersWithDetailsAsync(DateTime forDate);
 
         // Obtiene todos los pedidos realizados a un proveedor específico.
         Task<IEnumerable<Pedido>> GetPedidosByProveedorAsync(int proveedorId);

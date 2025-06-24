@@ -33,7 +33,7 @@ namespace DeluxeCarsDesktop.Repositories
         public async Task<IEnumerable<T>> GetByConditionAsync(Expression<Func<T, bool>> condition)
         {
             // Ejecuta la consulta con la condición 'WHERE' que le pasemos
-            return await _dbSet.Where(condition).AsNoTracking().ToListAsync();
+            return await _dbSet.Where(condition).ToListAsync();
         }
 
         public async Task AddAsync(T entity)

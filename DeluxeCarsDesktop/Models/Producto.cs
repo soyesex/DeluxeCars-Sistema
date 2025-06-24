@@ -55,6 +55,14 @@ namespace DeluxeCarsDesktop.Models
         private Categoria _categoria;
         public virtual Categoria Categoria { get => _categoria; set => SetProperty(ref _categoria, value); }
 
+        private string _unidadMedida;
+        [StringLength(20)] // Es bueno definir un largo máximo
+        public string? UnidadMedida
+        {
+            get => _unidadMedida;
+            set => SetProperty(ref _unidadMedida, value);
+        }
+
         public virtual ICollection<DetallePedido> DetallesPedidos { get; set; } = new HashSet<DetallePedido>();
         public virtual ICollection<ProductoProveedor> ProductoProveedores { get; set; } = new HashSet<ProductoProveedor>();
     }
