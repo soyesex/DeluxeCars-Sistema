@@ -10,18 +10,21 @@ namespace DeluxeCarsDesktop.Services
 {
     public class CurrentUserService : ICurrentUserService
     {
-        public Usuario CurrentUser { get; private set; }
+        public int? CurrentUserId { get; private set; }
+        private string? _userRole;
 
-        public bool IsAdmin => CurrentUser?.Rol?.Nombre == "Administrador";
+        public bool IsAdmin => _userRole == "Administrador";
 
         public void SetCurrentUser(Usuario user)
         {
-            CurrentUser = user;
+            CurrentUserId = user.Id;
+            _userRole = user.Rol?.Nombre; // Guardamos el nombre del rol
         }
 
         public void ClearCurrentUser()
         {
-            CurrentUser = null;
+            CurrentUserId = null;
+            _userRole = null;
         }
     }
 }

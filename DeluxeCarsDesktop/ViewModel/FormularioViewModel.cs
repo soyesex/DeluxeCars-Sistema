@@ -184,6 +184,20 @@ namespace DeluxeCarsDesktop.ViewModel
 
                 case FormType.RecepcionPedido:
                     CurrentChildView = serviceProvider.GetRequiredService<RecepcionPedidoViewModel>();
+                    Caption = "Recepción de Mercancía";
+                    Icon = IconChar.Boxes;
+                    break;
+
+                case FormType.NotaDeCredito:
+                    CurrentChildView = serviceProvider.GetService<NotaDeCreditoViewModel>();
+                    Caption = "Generar Nota de Crédito / Devolución";
+                    Icon = IconChar.Undo;
+                    break;
+
+                case FormType.RegistrarPagoCliente: // Asegúrate de que este valor exista en tu enum FormType
+                    CurrentChildView = serviceProvider.GetService<RegistrarPagoClienteViewModel>();
+                    Caption = "Registrar Pago de Cliente";
+                    Icon = IconChar.HandHoldingUsd;
                     break;
 
                 default:

@@ -63,6 +63,7 @@ namespace DeluxeCarsDesktop.Models
             set => SetProperty(ref _unidadMedida, value);
         }
 
+        public virtual ICollection<DetalleNotaDeCredito> DetallesNotaDeCredito { get; set; }
         public virtual ICollection<DetallePedido> DetallesPedidos { get; set; } = new HashSet<DetallePedido>();
         public virtual ICollection<ProductoProveedor> ProductoProveedores { get; set; } = new HashSet<ProductoProveedor>();
     }

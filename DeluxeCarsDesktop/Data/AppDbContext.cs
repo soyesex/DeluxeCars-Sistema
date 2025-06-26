@@ -44,6 +44,10 @@ namespace DeluxeCarsDesktop.Data
         public DbSet<MovimientoInventario> MovimientosInventario { get; set; }
         public DbSet<PagoProveedor> PagosProveedores { get; set; }
         public DbSet<PagoProveedorPedido> PagoProveedorPedidos { get; set; }
+        public DbSet<PagoCliente> PagosClientes { get; set; }
+        public DbSet<PagoClienteFactura> PagoClienteFacturas { get; set; }
+        public DbSet<NotaDeCredito> NotasDeCredito { get; set; }
+        public DbSet<DetalleNotaDeCredito> DetallesNotaDeCredito { get; set; }
 
         /// <summary>
         /// Configura el modelo de la base de datos usando Fluent API.
@@ -167,6 +171,53 @@ namespace DeluxeCarsDesktop.Data
                       .OnDelete(DeleteBehavior.NoAction);
             });
 
+            // --- Configuración para la nueva entidad NotaDeCredito ---
+            modelBuilder.Entity<NotaDeCredito>(entity =>
+            {
+                // Llave única para el número de nota
+                entity.HasIndex(n => n.NumeroNota).IsUnique();
+
+                // Precisión para el campo monetario
+                entity.Property(n => n.MontoTotal).HasColumnType("decimal(18, 2)");
+
+                // Relación con la Factura original
+                entity.HasOne(n => n.FacturaOriginal)
+                      .WithMany(f => f.NotasDeCredito)
+                      .HasForeignKey(n => n.IdFacturaOriginal)
+                      .OnDelete(DeleteBehavior.NoAction); // No borrar NC si se borra la factura
+
+                // Relación con Cliente
+                entity.HasOne(n => n.Cliente)
+                      .WithMany() // No necesitamos una colección de NC en Cliente
+                      .HasForeignKey(n => n.IdCliente)
+                      .OnDelete(DeleteBehavior.NoAction);
+
+                // Relación con Usuario
+                entity.HasOne(n => n.Usuario)
+                      .WithMany() // No necesitamos una colección de NC en Usuario
+                      .HasForeignKey(n => n.IdUsuario)
+                      .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            // --- Configuración para la nueva entidad DetalleNotaDeCredito ---
+            modelBuilder.Entity<DetalleNotaDeCredito>(entity =>
+            {
+                // Precisión para los campos monetarios
+                entity.Property(d => d.PrecioUnitario).HasColumnType("decimal(18, 2)");
+                entity.Property(d => d.Total).HasColumnType("decimal(18, 2)");
+
+                // Relación con el encabezado de la Nota de Crédito
+                entity.HasOne(d => d.NotaDeCredito)
+                      .WithMany(n => n.Detalles)
+                      .HasForeignKey(d => d.IdNotaDeCredito); // onDelete es Cascade por defecto, lo cual está bien aquí.
+
+                // Relación con Producto
+                entity.HasOne(d => d.Producto)
+                      .WithMany(p => p.DetallesNotaDeCredito)
+                      .HasForeignKey(d => d.IdProducto)
+                      .OnDelete(DeleteBehavior.NoAction);
+            });
+
             modelBuilder.Entity<DetalleFactura>()
                 .HasOne(df => df.Factura)
                 .WithMany(f => f.DetallesFactura)
@@ -265,6 +316,43 @@ namespace DeluxeCarsDesktop.Data
                 entity.HasOne(pp => pp.PagoProveedor)
                       .WithMany(p => p.PedidosCubiertos)
                       .HasForeignKey(pp => pp.IdPagoProveedor);
+            });
+
+            // En AppDbContext.cs -> OnModelCreating
+
+            // --- Configuración para la nueva entidad PagoCliente ---
+            modelBuilder.Entity<PagoCliente>(entity =>
+            {
+                entity.Property(p => p.MontoRecibido).HasColumnType("decimal(18, 2)");
+
+                entity.HasOne(p => p.Cliente)
+                      .WithMany()
+                      .HasForeignKey(p => p.IdCliente)
+                      .OnDelete(DeleteBehavior.NoAction);
+
+                entity.HasOne(p => p.MetodoPago)
+                      .WithMany()
+                      .HasForeignKey(p => p.IdMetodoPago)
+                      .OnDelete(DeleteBehavior.NoAction);
+
+                entity.HasOne(p => p.Usuario)
+                      .WithMany()
+                      .HasForeignKey(p => p.IdUsuario)
+                      .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            // --- Configuración para la tabla de enlace PagoClienteFactura ---
+            modelBuilder.Entity<PagoClienteFactura>(entity =>
+            {
+                entity.HasKey(pf => new { pf.IdPagoCliente, pf.IdFactura });
+
+                entity.HasOne(pf => pf.Factura)
+                      .WithMany(f => f.PagosRecibidos)
+                      .HasForeignKey(pf => pf.IdFactura);
+
+                entity.HasOne(pf => pf.PagoCliente)
+                      .WithMany(p => p.FacturasCubiertas)
+                      .HasForeignKey(pf => pf.IdPagoCliente);
             });
 
             modelBuilder.Entity<PasswordReset>(entity =>

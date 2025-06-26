@@ -150,8 +150,13 @@ namespace DeluxeCarsDesktop.ViewModel
 
         private bool CanExecuteRecepcionarPedido(object obj)
         {
-            // Solo se puede recepcionar un pedido que esté seleccionado Y APROBADO.
-            return PedidoSeleccionado != null && PedidoSeleccionado.Estado == EstadoPedido.Aprobado;
+            // Primero, nos aseguramos de que haya un pedido seleccionado.
+            if (PedidoSeleccionado == null) return false;
+
+            // CAMBIO: Ahora permitimos recepcionar si el estado es Aprobado O RecibidoParcialmente.
+            // El botón se desactivará para los estados Recibido, Borrador o Cancelado.
+            return PedidoSeleccionado.Estado == EstadoPedido.Aprobado ||
+                   PedidoSeleccionado.Estado == EstadoPedido.RecibidoParcialmente;
         }
 
         private async void ExecuteRecepcionarPedido(object obj)

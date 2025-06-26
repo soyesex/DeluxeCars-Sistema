@@ -1,6 +1,7 @@
 ﻿using DeluxeCarsDesktop.Interfaces;
 using DeluxeCarsDesktop.Messages;
 using DeluxeCarsDesktop.Models;
+using DeluxeCarsDesktop.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -16,6 +17,7 @@ namespace DeluxeCarsDesktop.ViewModel
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMessengerService _messengerService;
+        private readonly INotificationService _notificationService;
         private Pedido _pedidoActual;
 
         public string Titulo => $"Recepcionar Pedido N° {_pedidoActual?.NumeroPedido}";
@@ -24,10 +26,11 @@ namespace DeluxeCarsDesktop.ViewModel
         public ICommand ConfirmarRecepcionCommand { get; }
         public Action CloseAction { get; set; }
 
-        public RecepcionPedidoViewModel(IUnitOfWork unitOfWork, IMessengerService messengerService)
+        public RecepcionPedidoViewModel(IUnitOfWork unitOfWork, IMessengerService messengerService, INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _messengerService = messengerService;
+            _notificationService = notificationService;
 
             ItemsARecepcionar = new ObservableCollection<RecepcionPedidoItemViewModel>();
             ConfirmarRecepcionCommand = new ViewModelCommand(async (p) => await ExecuteConfirmarRecepcion());
@@ -46,50 +49,70 @@ namespace DeluxeCarsDesktop.ViewModel
             OnPropertyChanged(nameof(Titulo));
         }
 
+        // Reemplaza este método completo en tu RecepcionPedidoViewModel.cs
+
         private async Task ExecuteConfirmarRecepcion()
         {
-            // Opcional: Confirmación del usuario
-            var result = MessageBox.Show("¿Está seguro de que desea confirmar la recepción de esta mercancía? Esta acción actualizará el inventario y no se puede deshacer.",
+            var result = MessageBox.Show("¿Está seguro de que desea confirmar la recepción de esta mercancía? Esta acción actualizará el inventario.",
                                          "Confirmar Recepción", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.No) return;
 
             try
             {
-                // Iteramos sobre los items que el usuario vio en pantalla
+                // CAMBIO: Ya no necesitamos las variables locales para los totales.
+                // int cantidadTotalPedida = 0; <--- ELIMINADA
+                // int cantidadTotalRecibida = 0; <--- ELIMINADA
+
                 foreach (var item in ItemsARecepcionar)
                 {
-                    if (item.CantidadRecibida > 0) // Solo creamos movimiento si se recibió algo
+                    // CAMBIO CLAVE 1: Acumulamos la cantidad recibida.
+                    // Sumamos lo que ya se había recibido antes (si es nulo, es 0) con lo que se está recibiendo ahora.
+                    item.DetalleOriginal.CantidadRecibida = (item.DetalleOriginal.CantidadRecibida ?? 0) + item.CantidadRecibida;
+                    item.DetalleOriginal.NotaRecepcion = item.NotaRecepcion; // Esto se mantiene igual, sobreescribe la nota.
+
+                    // Solo creamos movimiento de inventario si se recibió algo en ESTA transacción.
+                    if (item.CantidadRecibida > 0)
                     {
                         var movimiento = new MovimientoInventario
                         {
                             IdProducto = item.DetalleOriginal.IdProducto,
-                            Cantidad = item.CantidadRecibida, // La cantidad que el usuario ingresó
+                            Cantidad = item.CantidadRecibida, // La cantidad de ESTA recepción.
                             TipoMovimiento = "Entrada por Compra",
                             Fecha = DateTime.Now,
-                            MotivoAjuste = $"Recepción de Pedido N° {_pedidoActual.NumeroPedido}", // Trazabilidad perfecta
+                            MotivoAjuste = $"Recepción de Pedido N° {_pedidoActual.NumeroPedido}",
                             CostoUnitario = item.DetalleOriginal.PrecioUnitario,
-                            IdReferencia = _pedidoActual.Id
+                            IdReferencia = item.DetalleOriginal.Id
                         };
                         await _unitOfWork.MovimientosInventario.AddAsync(movimiento);
                     }
                 }
 
-                // Actualizamos el estado y la fecha del pedido principal
-                _pedidoActual.Estado = EstadoPedido.Recibido;
+                // CAMBIO CLAVE 2: Calculamos el estado final usando los datos ACTUALIZADOS del pedido.
+                var totalOrdenado = _pedidoActual.DetallesPedidos.Sum(d => d.Cantidad);
+                var totalRecibidoAcumulado = _pedidoActual.DetallesPedidos.Sum(d => d.CantidadRecibida ?? 0);
+
+                if (totalRecibidoAcumulado >= totalOrdenado)
+                {
+                    _pedidoActual.Estado = EstadoPedido.Recibido; // ¡Ahora sí se marcará como recibido!
+                }
+                else if (totalRecibidoAcumulado > 0)
+                {
+                    _pedidoActual.Estado = EstadoPedido.RecibidoParcialmente;
+                }
+                // Si totalRecibidoAcumulado es 0, no cambiamos el estado (sigue 'Aprobado').
+
                 _pedidoActual.FechaRecepcionReal = DateTime.Now;
 
-                // Guardamos TODOS los cambios (nuevos movimientos + actualización del pedido)
-                // en una única transacción atómica.
+                // Guardamos TODOS los cambios en una única transacción atómica.
                 await _unitOfWork.CompleteAsync();
 
                 _messengerService.Publish(new InventarioCambiadoMessage());
-
-                MessageBox.Show("¡Mercancía recepcionada! El inventario ha sido actualizado.", "Éxito");
+                _notificationService.ShowSuccess("¡Mercancía recepcionada! El inventario ha sido actualizado.");
                 CloseAction?.Invoke();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ocurrió un error crítico al procesar la recepción: {ex.Message}", "Error");
+                _notificationService.ShowError($"Ocurrió un error crítico al procesar la recepción: {ex.Message}");
             }
         }
     }

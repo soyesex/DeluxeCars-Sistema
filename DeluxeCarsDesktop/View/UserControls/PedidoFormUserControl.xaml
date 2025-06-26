@@ -33,11 +33,11 @@
                 <Label Grid.Row="0" Grid.Column="0" Content="Proveedor:" Style="{StaticResource DarkLableForm}"/>
                 <ComboBox Grid.Row="0" Grid.Column="1" ItemsSource="{Binding Proveedores}" SelectedItem="{Binding ProveedorSeleccionado}" DisplayMemberPath="RazonSocial" Style="{StaticResource DarkComboBoxStyle}" Margin="5"/>
 
+                <Label Grid.Row="1" Grid.Column="0" Content="Estado:" Style="{StaticResource DarkLableForm}" Margin="10,0,0,0"/>
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding EstadoActual}" FontWeight="Bold" FontSize="14" VerticalAlignment="Center" Foreground="#FFFFFF"/>
+
                 <Label Grid.Row="0" Grid.Column="2" Content="Método de Pago:" Style="{StaticResource DarkLableForm}" Margin="10,0,0,0"/>
                 <ComboBox Grid.Row="0" Grid.Column="3" ItemsSource="{Binding MetodosDePago}" SelectedItem="{Binding MetodoPagoSeleccionado}" DisplayMemberPath="Descripcion" Style="{StaticResource DarkComboBoxStyle}" Margin="5"/>
-
-                <Label Grid.Row="1" Grid.Column="0" Content="Fecha Emisión:" Style="{StaticResource DarkLableForm}"/>
-                <DatePicker Grid.Row="1" Grid.Column="1" SelectedDate="{Binding FechaEmision}" Style="{StaticResource DarkDatePickerStyle}" Margin="5"/>
 
                 <Label Grid.Row="1" Grid.Column="2" Content="Fecha Estimada:" Style="{StaticResource DarkLableForm}" Margin="10,0,0,0"/>
                 <DatePicker Grid.Row="1" Grid.Column="3" SelectedDate="{Binding FechaEstimadaEntrega}" Style="{StaticResource DarkDatePickerStyle}" Margin="5"/>
@@ -45,9 +45,7 @@
                 <Label Grid.Row="2" Grid.Column="0" Content="Observaciones:" Style="{StaticResource DarkLableForm}"/>
                 <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding Observaciones}" Style="{StaticResource DarkInputControlStyle}" Margin="5"/>
 
-                <Label Grid.Row="3" Grid.Column="0" Content="Estado:" Style="{StaticResource DarkLableForm}" Margin="10,0,0,0"/>
-                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding EstadoActual}" FontWeight="Bold" FontSize="14" VerticalAlignment="Center" Foreground="#FFFFFF"/>
-
+               
             </Grid>
         </Border>
 

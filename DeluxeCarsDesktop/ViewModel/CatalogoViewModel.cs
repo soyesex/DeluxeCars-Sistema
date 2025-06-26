@@ -82,7 +82,7 @@ namespace DeluxeCarsDesktop.ViewModel
     {
             _unitOfWork = unitOfWork;
             _navigationService = navigationService;
-        _stockAlertService = stockAlertService;
+            _stockAlertService = stockAlertService;
 
         Productos = new ObservableCollection<ProductoDisplayViewModel>();
             CategoriasDisponibles = new ObservableCollection<Categoria>();

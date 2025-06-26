@@ -133,7 +133,7 @@ namespace DeluxeCarsDesktop.ViewModel
                         FechaEstimadaEntrega = DateTime.Now.AddDays(15), // Valor por defecto
                         Estado = EstadoPedido.Borrador, // Nace como un borrador
                         IdProveedor = idProveedor,
-                        IdUsuario = _currentUserService.CurrentUser.Id,
+                        IdUsuario = _currentUserService.CurrentUserId.Value,
                         IdMetodoPago = 1, // Asumimos un método por defecto, ej: ID 1 = 'Por Definir'
                         DetallesPedidos = new List<DetallePedido>()
                     };

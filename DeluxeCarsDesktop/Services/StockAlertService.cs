@@ -33,8 +33,8 @@ namespace DeluxeCarsDesktop.Services
                 // Si el stock está bien, no hacemos nada.
                 if (currentStock >= producto.StockMinimo.Value) return;
 
-                if (_currentUserService.CurrentUser == null) return;
-                int userId = _currentUserService.CurrentUser.Id;
+                if (_currentUserService.CurrentUserId.HasValue) return;
+                int userId = _currentUserService.CurrentUserId.Value;
                 string tipoAlerta = "LowStockSummary";
 
                 int totalProductosBajoStock = await unitOfWork.Productos.CountLowStockProductsAsync();

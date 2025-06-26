@@ -19,6 +19,14 @@
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibility"/>
 
+        <DataTemplate DataType="{x:Type viewModel:NotaDeCreditoViewModel}">
+            <userControl:NotaDeCreditoUserControl/>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type viewModel:RegistrarPagoClienteViewModel}">
+            <userControl:RegistrarPagoClienteUserControl/>
+        </DataTemplate>
+
         <DataTemplate DataType="{x:Type viewModel:RegistrarPagoProveedorViewModel}">
             <userControl:RegistrarPagoProveedorUserControl/>
         </DataTemplate>
@@ -57,10 +65,6 @@
 
         <DataTemplate DataType="{x:Type viewModel:PedidoFormViewModel}">
             <userControl:PedidoFormUserControl />
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type viewModel:FacturaFormViewModel}">
-            <userControl:FacturaFormUserControl />
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type viewModel:ServicioFormViewModel}">

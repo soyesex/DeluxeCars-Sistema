@@ -1,6 +1,7 @@
 ﻿using DeluxeCarsDesktop.Interfaces;
 using DeluxeCarsDesktop.Models;
 using DeluxeCarsDesktop.Services;
+using DeluxeCarsDesktop.Utils;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -45,6 +46,7 @@ namespace DeluxeCarsDesktop.ViewModel
                 SetProperty(ref _facturaSeleccionada, value);
                 (VerDetallesCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
                 (AnularFacturaCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+                (RegistrarPagoCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
             }
         }
 
@@ -54,7 +56,7 @@ namespace DeluxeCarsDesktop.ViewModel
         public ICommand VerDetallesCommand { get; }
         public ICommand AnularFacturaCommand { get; }
         public ICommand RefrescarCommand { get; }
-
+        public ICommand RegistrarPagoCommand { get; }
         public FacturasHistorialViewModel(IUnitOfWork unitOfWork, INavigationService navigationService)
         {
             _unitOfWork = unitOfWork;
@@ -66,8 +68,9 @@ namespace DeluxeCarsDesktop.ViewModel
             VerDetallesCommand = new ViewModelCommand(ExecuteVerDetallesCommand, CanExecuteActions);
             AnularFacturaCommand = new ViewModelCommand(ExecuteAnularFacturaCommand, CanExecuteActions);
             RefrescarCommand = new ViewModelCommand(p => LoadFacturasAsync());
-
+            RegistrarPagoCommand = new ViewModelCommand(ExecuteRegistrarPago, CanExecuteRegistrarPago);
             NuevaFacturaCommand = new ViewModelCommand(p => OnRequestNuevaFactura?.Invoke());
+
             LoadFacturasAsync();
         }
 
@@ -102,9 +105,22 @@ namespace DeluxeCarsDesktop.ViewModel
 
             Facturas = new ObservableCollection<Factura>(itemsFiltrados.OrderByDescending(f => f.FechaEmision));
         }
-
         private bool CanExecuteActions(object obj) => FacturaSeleccionada != null;
+        private bool CanExecuteRegistrarPago(object obj)
+        {
+            return FacturaSeleccionada != null && FacturaSeleccionada.EstadoPago != EstadoPagoFactura.Pagada;
+        }
+        private async void ExecuteRegistrarPago(object obj)
+        {
+            // 1. Verificamos que se pueda ejecutar (buena práctica)
+            if (!CanExecuteRegistrarPago(obj)) return;
 
+            // 2. Quitamos el MessageBox y descomentamos la línea de navegación
+            await _navigationService.OpenFormWindow(FormType.RegistrarPagoCliente, FacturaSeleccionada.Id);
+
+            // 3. Refrescamos la lista después de que la ventana se cierre
+            await LoadFacturasAsync();
+        }
         private void ExecuteVerDetallesCommand(object obj)
         {
             // Lógica para abrir una ventana que muestre los detalles de la FacturaSeleccionada
@@ -113,8 +129,16 @@ namespace DeluxeCarsDesktop.ViewModel
 
         private async void ExecuteAnularFacturaCommand(object obj)
         {
-            // La anulación implica crear una Nota de Crédito. Es una lógica compleja.
-            MessageBox.Show("Funcionalidad de anular (Nota de Crédito) pendiente de implementación.", "Información");
+            if (!CanExecuteActions(obj)) return;
+
+            // ANTES: Mostraba un MessageBox
+            // MessageBox.Show("Funcionalidad de anular (Nota de Crédito) pendiente de implementación.", "Información");
+
+            // AHORA: Llama al servicio de navegación para abrir el nuevo formulario
+            await _navigationService.OpenFormWindow(FormType.NotaDeCredito, FacturaSeleccionada.Id);
+
+            // Al volver, refrescamos por si la factura cambió de estado
+            await LoadFacturasAsync();
         }
     }
 }

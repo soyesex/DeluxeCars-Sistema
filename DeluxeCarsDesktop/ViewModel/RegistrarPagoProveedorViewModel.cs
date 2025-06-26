@@ -108,7 +108,7 @@ namespace DeluxeCarsDesktop.ViewModel
                 {
                     IdProveedor = _pedidoEnCuestion.IdProveedor,
                     IdMetodoPago = MetodoPagoSeleccionado.Id,
-                    IdUsuario = _currentUserService.CurrentUser.Id,
+                    IdUsuario = _currentUserService.CurrentUserId.Value,
                     MontoPagado = this.MontoAPagar,
                     FechaPago = this.FechaDelPago,
                     Referencia = this.Referencia,

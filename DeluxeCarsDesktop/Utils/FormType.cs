@@ -25,6 +25,8 @@ namespace DeluxeCarsDesktop.Utils
         CambiarPassword,
         GestionarProductosProveedor,
         RecepcionPedido,
-        RegistrarPagoProveedor
+        RegistrarPagoProveedor,
+        RegistrarPagoCliente,
+        NotaDeCredito,
     }
 }

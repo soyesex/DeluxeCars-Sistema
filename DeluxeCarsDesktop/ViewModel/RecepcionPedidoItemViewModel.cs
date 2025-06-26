@@ -18,13 +18,44 @@ namespace DeluxeCarsDesktop.ViewModel
         public int CantidadRecibida
         {
             get => _cantidadRecibida;
-            set => SetProperty(ref _cantidadRecibida, value);
+            set
+            {
+                // Calculamos la cantidad máxima que se puede recibir para este item
+                int cantidadPendiente = this.CantidadPedida - (this.DetalleOriginal.CantidadRecibida ?? 0);
+
+                // --- INICIO DE LA VALIDACIÓN ---
+
+                if (value < 0)
+                {
+                    // Regla 1: No permitir números negativos.
+                    SetProperty(ref _cantidadRecibida, 0);
+                }
+                else if (value > cantidadPendiente)
+                {
+                    // Regla 2: No permitir recibir más de lo que falta.
+                    // Si el usuario intenta, lo limitamos al máximo permitido.
+                    SetProperty(ref _cantidadRecibida, cantidadPendiente);
+                }
+                else
+                {
+                    // Si el valor es válido, lo aceptamos.
+                    SetProperty(ref _cantidadRecibida, value);
+                }
+            }
+        }
+
+        private string _notaRecepcion;
+        public string NotaRecepcion
+        {
+            get => _notaRecepcion;
+            set => SetProperty(ref _notaRecepcion, value);
         }
 
         public RecepcionPedidoItemViewModel(DetallePedido detalle)
         {
             DetalleOriginal = detalle;
-            CantidadRecibida = detalle.Cantidad; // Por defecto, la cantidad recibida es la pedida.
+            CantidadRecibida = detalle.Cantidad - (detalle.CantidadRecibida ?? 0);
+            NotaRecepcion = detalle.NotaRecepcion;
         }
     }
 }

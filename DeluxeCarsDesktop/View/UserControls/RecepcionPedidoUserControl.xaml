@@ -4,7 +4,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
+             xmlns:behaviors="clr-namespace:DeluxeCarsDesktop.Behaviors"
              mc:Ignorable="d" 
+             MaxWidth="900"
+             MinHeight="450"
              d:DesignHeight="450" d:DesignWidth="800">
     
     <Grid Margin="15">
@@ -18,14 +21,29 @@
 
         <DataGrid Grid.Row="1" ItemsSource="{Binding ItemsARecepcionar}" Style="{StaticResource ElegantDataGridStyle}" AutoGenerateColumns="False">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Producto" Binding="{Binding NombreProducto}" IsReadOnly="True" Width="*"/>
-                <DataGridTextColumn Header="Cantidad Pedida" Binding="{Binding CantidadPedida}" IsReadOnly="True" Width="Auto"/>
 
-                <DataGridTemplateColumn Header="Cantidad Recibida">
+                <DataGridTextColumn Header="Producto" Binding="{Binding NombreProducto}" IsReadOnly="True" Width="*"/>
+
+                <DataGridTextColumn Header="Cant. Pedida" Binding="{Binding CantidadPedida}" IsReadOnly="True" Width="120"/>
+
+                <DataGridTemplateColumn Header="Cant. Recibida" Width="120">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBox Text="{Binding CantidadRecibida, UpdateSourceTrigger=PropertyChanged}" 
-                                 Style="{StaticResource DarkInputControlStyle}" TextAlignment="Center"/>
+                            <TextBox Text="{Binding CantidadRecibida, UpdateSourceTrigger=PropertyChanged}"
+                            behaviors:InputBehaviors.SoloNumeros="True"
+                             Style="{StaticResource DarkInputControlStyle}" TextAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Header="Notas de Recepción" Width="2*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding NotaRecepcion, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource DarkInputControlStyle}"
+                             AcceptsReturn="True"  
+                             TextWrapping="Wrap"
+                             VerticalScrollBarVisibility="Auto"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

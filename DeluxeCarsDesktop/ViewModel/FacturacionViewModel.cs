@@ -390,13 +390,11 @@ namespace DeluxeCarsDesktop.ViewModel
             _facturaEnProgreso.IdMetodoPago = MetodoPagoSeleccionado.Id;
             _facturaEnProgreso.FechaEmision = DateTime.Now;
             _facturaEnProgreso.NumeroFactura = $"F-{DateTime.Now:yyyyMMddHHmmss}";
-            _facturaEnProgreso.IdUsuario = _currentUserService.CurrentUser?.Id;
+            _facturaEnProgreso.IdUsuario = _currentUserService.CurrentUserId;
             _facturaEnProgreso.SubTotal = SubTotal;
             _facturaEnProgreso.TotalIVA = TotalIVA;
             _facturaEnProgreso.Total = Total;
             _facturaEnProgreso.DetallesFactura = LineasDeFactura;
-            // El saldo pendiente inicial es siempre el total de la factura.
-            _facturaEnProgreso.SaldoPendiente = Total;
 
             try
             {

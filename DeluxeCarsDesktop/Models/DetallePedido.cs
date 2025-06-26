@@ -21,6 +21,15 @@ namespace DeluxeCarsDesktop.Models
         public decimal Total { get; set; } // Columna calculada
         [NotMapped]
         public decimal SubtotalPreview => Cantidad * PrecioUnitario;
+        /// <summary>
+        /// La cantidad que realmente se recibió del proveedor.
+        /// </summary>
+        public int? CantidadRecibida { get; set; }
+
+        /// <summary>
+        /// Notas sobre cualquier discrepancia o novedad durante la recepción.
+        /// </summary>
+        public string? NotaRecepcion { get; set; }
 
         // Navigation Properties
         public virtual Pedido Pedido { get; set; }

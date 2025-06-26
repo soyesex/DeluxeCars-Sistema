@@ -6,12 +6,11 @@ using System.Threading.Tasks;
 
 namespace DeluxeCarsDesktop.Models
 {
-    public enum EstadoPedido
+    public enum EstadoPagoFactura
     {
-        Borrador,
-        Aprobado,
-        Recibido,
-        RecibidoParcialmente,
-        Cancelado
+        Pendiente,
+        Abonada,
+        Pagada,
+        Anulada
     }
 }

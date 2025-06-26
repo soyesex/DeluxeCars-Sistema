@@ -132,7 +132,7 @@ namespace DeluxeCarsDesktop.ViewModel
 
         private async Task CargarEstadoDeNotificacionesAsync()
         {
-            if (_currentUserService.CurrentUser == null) return;
+            if (!_currentUserService.CurrentUserId.HasValue) return;
 
             // Limpiamos las listas para evitar duplicados en cada recarga.
             AlertasNuevas.Clear();
@@ -140,7 +140,7 @@ namespace DeluxeCarsDesktop.ViewModel
 
             try
             {
-                var userId = _currentUserService.CurrentUser.Id;
+                var userId = _currentUserService.CurrentUserId.Value;
 
                 // 1. Manejar el Panel de Estado del Inventario (siempre lo buscamos y mostramos)
                 var stockSummaryDB = await _unitOfWork.Notificaciones.GetUnreadSummaryAlertAsync("LowStockSummary", userId);

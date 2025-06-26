@@ -46,10 +46,10 @@ public partial class App : Application
         {
             string connectionString = ConfigurationManager.ConnectionStrings["AppDbContext"].ConnectionString;
             options.UseSqlServer(connectionString);
-        }, ServiceLifetime.Transient);  
+        }, ServiceLifetime.Scoped);  
 
         // AHORA (El nuevo modo, registrando todo de una vez con Unit of Work)
-        services.AddTransient<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         services.AddScoped<INavigationService, NavigationService>();
         services.AddScoped<IStockAlertService, StockAlertService>();
@@ -100,6 +100,8 @@ public partial class App : Application
         services.AddTransient<RecepcionPedidoViewModel>();
         services.AddTransient<RegistrarPagoProveedorViewModel>();
         services.AddTransient<ReportesRentabilidadViewModel>();
+        services.AddTransient<RegistrarPagoClienteViewModel>();
+        services.AddTransient<NotaDeCreditoViewModel>();
 
         // Registra tus Vistas (las ventanas). Singleton o Transient son opciones comunes.
         // Usaremos Transient para asegurar que siempre se abran limpias.

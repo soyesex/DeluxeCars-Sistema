@@ -78,7 +78,7 @@ namespace DeluxeCarsDesktop.ViewModel
         public MetodoPago MetodoPagoSeleccionado { get => _metodoPagoSeleccionado; set => SetProperty(ref _metodoPagoSeleccionado, value); }
 
         private DateTime _fechaEmision;
-        public DateTime FechaEmision { get => _fechaEmision; set => SetProperty(ref _fechaEmision, value); }
+        public DateTime FechaEmision { get => _fechaEmision; private set => SetProperty(ref _fechaEmision, value); }
 
         private DateTime _fechaEstimadaEntrega;
         public DateTime FechaEstimadaEntrega { get => _fechaEstimadaEntrega; set => SetProperty(ref _fechaEstimadaEntrega, value); }
@@ -349,7 +349,7 @@ namespace DeluxeCarsDesktop.ViewModel
             if (!_esModoEdicion)
             {
                 _pedidoActual.NumeroPedido = $"PED-{DateTime.Now:yyyyMMddHHmmss}";
-                _pedidoActual.IdUsuario = _currentUserService.CurrentUser.Id;
+                _pedidoActual.IdUsuario = _currentUserService.CurrentUserId.Value;
                 _pedidoActual.Estado = EstadoPedido.Aprobado; // Se aprueba al crear
             }
             else if (_pedidoActual.Estado == EstadoPedido.Borrador)

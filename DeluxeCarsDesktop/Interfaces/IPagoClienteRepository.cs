@@ -7,11 +7,7 @@ using System.Threading.Tasks;
 
 namespace DeluxeCarsDesktop.Interfaces
 {
-    public interface ICurrentUserService
+    public interface IPagoClienteRepository : IGenericRepository<PagoCliente>
     {
-        int? CurrentUserId { get; }
-        bool IsAdmin { get; }
-        void SetCurrentUser(Usuario user);
-        void ClearCurrentUser();
     }
 }

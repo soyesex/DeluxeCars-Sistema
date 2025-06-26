@@ -68,7 +68,7 @@ namespace DeluxeCarsDesktop.Services
             try
             {
                 // Primero, nos aseguramos de que haya un usuario en sesión.
-                if (_currentUserService.CurrentUser != null)
+                if (_currentUserService.CurrentUserId != null)
                 {
                     var notificacionEntity = new Notificacion
                     {
@@ -78,7 +78,7 @@ namespace DeluxeCarsDesktop.Services
                         FechaCreacion = content.Timestamp,
                         Leida = false,
                         // La línea corregida: Accedemos al Id DENTRO del objeto CurrentUser
-                        IdUsuario = _currentUserService.CurrentUser.Id
+                        IdUsuario = _currentUserService.CurrentUserId.Value
                     };
 
                     await _unitOfWork.Notificaciones.AddAsync(notificacionEntity);

@@ -65,20 +65,29 @@ namespace DeluxeCarsDesktop.Repositories
         public async Task<IEnumerable<Factura>> GetAllWithClienteYMetodoPagoAsync()
         {
             return await _context.Facturas
-                         .Include(f => f.Cliente)
-                         .Include(f => f.MetodoPago)
-                         .IgnoreQueryFilters() // <-- AÑADE ESTA LÍNEA
-                         .AsNoTracking()
-                         .OrderByDescending(f => f.FechaEmision)
-                         .ToListAsync();
+                                  .Include(f => f.Cliente)
+                                  .Include(f => f.MetodoPago)
+                                  // --- AÑADE ESTAS LÍNEAS PARA CARGAR LOS PAGOS ---
+                                  .Include(f => f.PagosRecibidos)
+                                     .ThenInclude(pr => pr.PagoCliente)
+                                  // ---------------------------------------------------
+                                  .AsNoTracking()
+                                  .OrderByDescending(f => f.FechaEmision)
+                                  .ToListAsync();
         }
         public async Task<Factura> GetFacturaWithDetailsAsync(int facturaId)
         {
             return await _dbSet
-                .Include(f => f.Cliente) // Incluye el cliente relacionado
-                .Include(f => f.Usuario) // Incluye el usuario (vendedor)
-                .Include(f => f.DetallesFactura) // Incluye las líneas de detalle
-                .FirstOrDefaultAsync(f => f.Id == facturaId);
+                         .Include(f => f.Cliente)
+                         .Include(f => f.Usuario)
+                         .Include(f => f.DetallesFactura)
+
+                         // --- AÑADE ESTAS LÍNEAS PARA CARGAR LOS PAGOS RECIBIDOS ---
+                         .Include(f => f.PagosRecibidos)
+                             .ThenInclude(pr => pr.PagoCliente)
+                         // -----------------------------------------------------------
+
+                         .FirstOrDefaultAsync(f => f.Id == facturaId);
         }
 
         public async Task<IEnumerable<Factura>> GetFacturasByClienteAsync(int clienteId)

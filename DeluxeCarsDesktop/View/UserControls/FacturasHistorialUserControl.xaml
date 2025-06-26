@@ -5,6 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
              mc:Ignorable="d" 
+             xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
+
              d:DesignHeight="550" d:DesignWidth="900">
     <Grid Margin="15">
         <Grid.RowDefinitions>
@@ -33,20 +35,47 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Factura N°" Binding="{Binding NumeroFactura}" Width="*"/>
                     <DataGridTextColumn Header="Fecha" Binding="{Binding FechaEmision, StringFormat=d}" Width="Auto"/>
-
                     <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nombre}" Width="2*"/>
-                    <DataGridTextColumn Header="Método de Pago" Binding="{Binding MetodoPago.Descripcion}" Width="*"/>
 
-                    <DataGridTextColumn Header="Subtotal" Binding="{Binding SubTotal, StringFormat=C}" Width="Auto"/>
-                    <DataGridTextColumn Header="IVA" Binding="{Binding TotalIVA, StringFormat=C}" Width="Auto"/>
-                    <DataGridTextColumn Header="Total" Binding="{Binding Total, StringFormat=C, ConverterCulture=es-CO}" Width="Auto" FontWeight="Bold"/>
-
-                    <DataGridTemplateColumn Header="Acciones">
+                    <DataGridTextColumn Header="Total Factura" Binding="{Binding Total, StringFormat=C}" Width="Auto" FontWeight="Bold"/>
+                    <DataGridTextColumn Header="Saldo Pendiente" Binding="{Binding SaldoPendiente, StringFormat=C}" Width="Auto"/>
+                    <DataGridTemplateColumn Header="Estado Pago" Width="Auto" MinWidth="100">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <Button Content="Ver Detalles" Margin="5,0"/>
-                                    <Button Content="Anular" Margin="5,0"/>
+                                <Border CornerRadius="4" Padding="8,3" Margin="2">
+                                    <TextBlock Text="{Binding EstadoPago}" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="Acciones" Width="Auto" MinWidth="150">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+
+                                    <Button Style="{StaticResource DataGridIconSharpButton_Style}"
+                        Tag="{x:Static fa:IconChar.HandHoldingUsd}"
+                        ToolTip="Registrar Pago de Cliente"
+                        Command="{Binding DataContext.RegistrarPagoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        CommandParameter="{Binding}"/>
+
+                                    <Button Style="{StaticResource DataGridIconSharpButton_Style}"
+                        Tag="{x:Static fa:IconChar.Eye}"
+                        ToolTip="Ver Detalles de la Factura"
+                        Command="{Binding DataContext.VerDetallesCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        CommandParameter="{Binding}"/>
+
+                                    <Button Style="{StaticResource DataGridIconSharpButton_Style}"
+                        Tag="{x:Static fa:IconChar.Ban}"
+                        ToolTip="Anular Factura (Nota de Crédito)"
+                        Command="{Binding DataContext.AnularFacturaCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        CommandParameter="{Binding}"/>
+
+                                    <Button Style="{StaticResource DataGridIconSharpButton_Style}"
+                        Tag="{x:Static fa:IconChar.FilePdf}"
+                        ToolTip="Generar Factura en PDF"
+                        IsEnabled="False"/>
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
