@@ -1,0 +1,94 @@
+html {
+  font-size: 14px;
+}
+
+* {
+    font-family: 'Poppins', sans-serif;
+}
+
+header {
+    box-shadow: none !important;
+}
+
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+    padding-top:70px;
+    font-family: 'Poppins', sans-serif; /* Añadido */
+}
+
+@media (max-width: 576px) {
+    .navbar-nav .nav-link {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+}
+
+.nav-link {
+    font-size: 1rem; /* Tamaño legible */
+}
+
+/* Nuevos estilos para el navbar personalizado */
+.custom-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 0 80px;
+    height: 80px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+
+.navbar-brand.logo {
+    font-size: 33px;
+    color: #0f2182;
+    font-weight: 600;
+}
+
+.links a:not(:last-child) {
+    margin-right: 20px;
+}
+
+.login a {
+    padding: 8px 14px;
+    background-color: transparent;
+}
+
+.login a.signup {
+    background-color: #000;
+    color: #fff;
+    border-radius: 4px;
+    margin-left: 14px;
+}
+
+@media (max-width: 576px) {
+    .custom-navbar {
+        padding: 0 15px;
+    }
+}
+
+/* Ajuste de margen superior para el contenido para que no quede debajo del navbar fijo */
+.content {
+    margin-top: 80px; /* Asegura que el contenido no se sobreponga al navbar */
+}
+
+/* Si ya tienes un contenido principal que ocupa toda la altura de la pantalla, asegúrate de que tenga espacio suficiente */
+.main-content {
+    margin-top: 80px; /* Esto puede ajustarse según el tamaño de tu navbar */
+}
