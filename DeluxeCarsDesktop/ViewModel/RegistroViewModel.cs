@@ -1,6 +1,6 @@
 ﻿using DeluxeCarsDesktop.Data;
 using DeluxeCarsDesktop.Interfaces;
-using DeluxeCarsDesktop.Models;
+using DeluxeCarsEntities;
 using DeluxeCarsDesktop.Repositories;
 using DeluxeCarsDesktop.Utils;
 using MaterialDesignThemes.Wpf;

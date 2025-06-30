@@ -1,4 +1,4 @@
-﻿using DeluxeCarsDesktop.Models;
+﻿using DeluxeCarsEntities;
 using System;
 using System.Collections.Generic;
 using System.Linq;

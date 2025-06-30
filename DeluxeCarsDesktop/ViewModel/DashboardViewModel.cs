@@ -1,6 +1,6 @@
 ﻿using DeluxeCarsDesktop.Dtos;
 using DeluxeCarsDesktop.Interfaces;
-using DeluxeCarsDesktop.Models;
+using DeluxeCarsEntities;
 using DeluxeCarsDesktop.Services;
 using LiveCharts;
 using LiveChartsCore;

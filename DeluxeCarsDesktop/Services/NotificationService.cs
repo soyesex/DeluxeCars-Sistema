@@ -1,5 +1,5 @@
 ﻿using DeluxeCarsDesktop.Interfaces;
-using DeluxeCarsDesktop.Models;
+using DeluxeCarsEntities;
 using DeluxeCarsDesktop.Models.Notifications;
 using Notifications.Wpf.Core;
 using System;

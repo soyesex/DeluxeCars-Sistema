@@ -4,7 +4,6 @@ using DeluxeCarsDesktop.Messages;
 using DeluxeCarsDesktop.Properties;
 using DeluxeCarsDesktop.Repositories;
 using DeluxeCarsDesktop.Services;
-using DeluxeCarsDesktop.Utils;
 using DeluxeCarsDesktop.View;
 using DeluxeCarsDesktop.ViewModel;
 using Microsoft.EntityFrameworkCore;

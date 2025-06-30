@@ -1,15 +1,8 @@
 ﻿using DeluxeCarsDesktop.Data;
 using DeluxeCarsDesktop.Interfaces;
-using DeluxeCarsDesktop.Models;
 using DeluxeCarsDesktop.Utils;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
+using DeluxeCarsEntities;
 
 namespace DeluxeCarsDesktop.Repositories
 {

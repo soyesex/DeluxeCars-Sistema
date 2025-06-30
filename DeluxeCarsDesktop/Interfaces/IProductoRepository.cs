@@ -1,4 +1,4 @@
-﻿using DeluxeCarsDesktop.Models;
+﻿using DeluxeCarsEntities;
 using DeluxeCarsDesktop.Models.Search;
 using System;
 using System.Collections.Generic;

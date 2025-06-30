@@ -1,6 +1,6 @@
 ﻿using DeluxeCarsDesktop.Interfaces;
 using DeluxeCarsDesktop.Messages;
-using DeluxeCarsDesktop.Models;
+using DeluxeCarsEntities;
 using DeluxeCarsDesktop.Services;
 using Microsoft.Data.SqlClient;
 using System;

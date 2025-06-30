@@ -1,5 +1,6 @@
 ﻿using DeluxeCarsDesktop.Models;
 using QuestPDF.Fluent;
+using DeluxeCarsEntities;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using System;

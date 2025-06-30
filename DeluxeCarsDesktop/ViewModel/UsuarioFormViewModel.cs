@@ -1,15 +1,10 @@
 ﻿using DeluxeCarsDesktop.Interfaces;
-using DeluxeCarsDesktop.Models;
 using DeluxeCarsDesktop.Utils;
+using DeluxeCarsEntities;
 using Microsoft.Win32;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
 using System.Security;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 

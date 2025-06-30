@@ -1,4 +1,4 @@
-﻿using DeluxeCarsDesktop.Models;
+﻿using DeluxeCarsEntities;
 using DeluxeCarsDesktop.Utils;
 using FontAwesome.Sharp;
 using Microsoft.Extensions.DependencyInjection;

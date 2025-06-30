@@ -80,4 +80,8 @@
     <Folder Include="Migrations\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DeluxeCarsSistema\DeluxeCarsEntities\DeluxeCarsEntities.csproj" />
+  </ItemGroup>
+
 </Project>

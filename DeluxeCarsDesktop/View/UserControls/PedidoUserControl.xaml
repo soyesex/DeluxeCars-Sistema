@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
              mc:Ignorable="d" 
              xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
-             xmlns:models="clr-namespace:DeluxeCarsDesktop.Models"
+             xmlns:models="clr-namespace:DeluxeCarsEntities;assembly=DeluxeCarsEntities"
              d:DesignHeight="550" d:DesignWidth="900">
     <Grid Margin="15">
         <Grid.RowDefinitions>

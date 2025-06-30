@@ -1,6 +1,6 @@
 ﻿using DeluxeCarsDesktop.Interfaces;
 using DeluxeCarsDesktop.Messages;
-using DeluxeCarsDesktop.Models;
+using DeluxeCarsEntities;
 using DeluxeCarsDesktop.Models.Notifications;
 using DeluxeCarsDesktop.Properties;
 using DeluxeCarsDesktop.Repositories;

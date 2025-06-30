@@ -1,6 +1,6 @@
 ﻿using DeluxeCarsDesktop.Data;
 using DeluxeCarsDesktop.Interfaces;
-using DeluxeCarsDesktop.Models;
+using DeluxeCarsEntities;
 using DeluxeCarsDesktop.Models.Search;
 using Microsoft.EntityFrameworkCore;
 using System;

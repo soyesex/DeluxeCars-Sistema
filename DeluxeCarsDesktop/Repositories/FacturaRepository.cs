@@ -1,7 +1,7 @@
 ﻿using DeluxeCarsDesktop.Data;
 using DeluxeCarsDesktop.Dtos;
 using DeluxeCarsDesktop.Interfaces;
-using DeluxeCarsDesktop.Models;
+using DeluxeCarsEntities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
