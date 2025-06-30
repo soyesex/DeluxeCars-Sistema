@@ -1,0 +1,240 @@
+﻿@using Aplicacion.Models.ViewModels
+@using Aplicacion.ViewModels
+@model IEnumerable<ProductoViewModel>
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/home.css" asp-append-version="true" />
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+
+}
+
+<div class="home-page">
+    <header id="info-page" class="py-5">
+        <div class="container">
+            <div class="d-flex align-items-center justify-content-between gap-5">
+                <!-- Columna 1: Texto -->
+                <div class="col-md-6">
+                    <div class="text-start pe-4 left">
+                        <h1 class="display-6">Encuentra las Mejores Autopartes en <span class="text-primary">Deluxe Cars</span></h1>
+                        <p class="lead">Calidad, variedad y precios competitivos en un solo lugar.</p>
+                        <div class="d-flex-center">
+                            <a asp-action="Index" asp-controller="Catalogo" class="btn btn-dark d-flex align-items-center justify-content-center gap-2">
+                                <i class='bx bx-search'></i>
+                                <span>Explora el Catálogo</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- columna 2: imagen -->
+                <div class="col-md-6 text-end">
+                    <img src="~/css/img/auto-rojo-main.jpg" alt="auto rojo" class="img-fluid rounded">
+                </div>
+            </div>
+        </div>
+    </header>
+
+
+    <section id="features">
+        <h2 class="separator">Por Qué Elegirnos</h2>
+        <div class="sell-nft">
+            <div class="item">
+                <div class="header">
+                    <i class='bx bx-wallet-alt'></i>
+                    <h5>Amplia Variedad</h5>
+                </div>
+                <p>Todo lo que necesitas para tu coche en un solo lugar.</p>
+            </div>
+            <div class="item">
+                <div class="header">
+                    <i class='bx bx-cart-add'></i>
+                    <h5>Precios Competitivos</h5>
+                </div>
+                <p>Las mejores ofertas en autopartes de calidad.</p>
+            </div>
+            <div class="item">
+                <div class="header">
+                    <i class='bx bx-grid-alt'></i>
+                    <h5>Envíos Rápidos</h5>
+                </div>
+                <p>Recibe tus productos en tiempo récord.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="services">
+        <h2 class="separator">Nuestro Catálogo de Autopartes</h2>
+        <div class="nft-shop">
+            <div class="category">
+                <button class="category-btn" data-category="all">Todos</button>
+                <button class="category-btn" data-category="Motor">Motor</button>
+                <button class="category-btn" data-category="Frenos">Frenos</button>
+                <button class="category-btn" data-category="Suspensión">Suspensión</button>
+                <button class="category-btn" data-category="Filtros">Filtros</button>
+                <button class="category-btn" data-category="Transmisión">Transmisión</button>
+                <button class="category-btn" data-category="Encendido">Encendido</button>
+                <button class="category-btn" data-category="Baterías">Baterías</button>
+            </div>
+            @{
+                int contador = 0;
+            }
+            <div class="container mt-5 pt-5">
+                <div class="row" id="product-catalog">
+                    @if (contador == 0 || contador <= 1)
+                    {
+                        foreach (var producto in Model)
+                        {
+                            <div class="col-md-4 mb-4">
+                                <div class="card h-100">
+                                    <img src="@producto.ImagenUrl" alt="@producto.Nombre" class="card-img-top" />
+                                    <div class="card-body d-flex flex-column">
+                                        <h5 class="card-title">@producto.Nombre</h5>
+                                        <p class="card-text text-muted">$@producto.Precio</p>
+                                        <p class="card-text">
+                                            <small class="text-muted">@producto.Descripcion</small>
+                                        </p>
+                                        <p class="card-text">
+                                            <small class="text-muted">Stock: @producto.Stock</small>
+                                        </p>
+                                        <div class="mt-auto">
+                                            <button class="btn btn-success w-100">Agregar al Carrito</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            contador++;
+                        }
+                    }
+                    
+                </div>
+            </div>
+
+            <div class="view-more">
+                <a asp-controller="Catalogo" asp-action="Index" class="btn btn-dark d-flex align-items-center justify-content-center">
+                    <span>Ver mas</span>
+                </a>
+            </div>
+        </div>
+    </section>
+    <section id="suppliers">
+        <h2 class="separator">Nuestros servicios</h2>
+        <div class="sellers">
+            <div class="item">
+                <img src="../img/porfile 1.jpg" alt="Diana">
+                <div class="info">
+                    <h4>Juan Pérez</h4>
+                    <p>¡Encontré el repuesto exacto para mi coche y llegó rápido!</p>
+                </div>
+            </div>
+            <!-- Repite los otros suppliers aquí -->
+            <div class="item">
+                <img src="../img/porfile 1.jpg" alt="Diana">
+                <div class="info">
+                    <h4>Maria Becerra</h4>
+                    <p>¡Encontré el repuesto exacto para mi coche y llegó rápido!</p>
+                </div>
+            </div>
+            <!-- Repite los otros suppliers aquí -->
+            <div class="item">
+                <img src="../img/porfile 1.jpg" alt="Diana">
+                <div class="info">
+                    <h4>Maria Becerra</h4>
+                    <p>¡Encontré el repuesto exacto para mi coche y llegó rápido!</p>
+                </div>
+            </div>
+            <!-- Repite los otros suppliers aquí -->
+            <div class="item">
+                <img src="../img/porfile 1.jpg" alt="Diana">
+                <div class="info">
+                    <h4>Maria Becerra</h4>
+                    <p>¡Encontré el repuesto exacto para mi coche y llegó rápido!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Sección de Llamada a la Acción -->
+    <section id="cta" class="py-5 text-center">
+        <div class="container">
+            <h2 class="mb-4">Contactanos!</h2>
+            <div class="contact">
+                <a asp-action="Contact" class="btn btn-dark d-flex align-items-center justify-content-center">
+                    <span>Mensaje</span>
+                </a>
+            </div>
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    // <script>
+    //     let products = [];
+
+    //     // Función para mostrar los productos en el catálogo
+    //     function displayProducts(filteredProducts) {
+    //         const catalog = document.getElementById("product-catalog");
+    //         catalog.innerHTML = ""; // Limpiamos el catálogo
+
+    //         filteredProducts.forEach(product => {
+    //             const card = document.createElement("div");
+    //             card.className = "col-md-4 mb-4";
+    //             card.innerHTML = `
+    //                 <div class="card">
+    //                     <img src="${product.imagenUrl}" alt="${product.nombre}" class="card-img-top">
+    //                     <div class="card-body">
+    //                         <h5 class="card-title">${product.nombre}</h5>
+    //                         <p class="card-text">$${product.precio.toFixed(2)}</p>
+    //                         <p class="card-text"><small class="text-muted">${product.descripcion}</small></p>
+    //                         <p class="card-text"><small class="text-muted">Stock: ${product.stock}</small></p>
+    //                         <button class="btn btn-success" onclick="addToCart(${product.id})" ${product.stock === 0 ? 'disabled' : ''}>
+    //                             ${product.stock === 0 ? 'Sin Stock' : 'Agregar al Carrito'}
+    //                         </button>
+    //                     </div>
+    //                 </div>
+    //             `;
+    //             catalog.appendChild(card);
+    //         });
+    //     }
+
+    //     // Función para filtrar productos por categoría
+    //     function filterProducts(category) {
+    //         if (category === "all") {
+    //             displayProducts(products); // Mostrar todos los productos
+    //         } else {
+    //             const filtered = products.filter(product => product.nombreCategoria === category);
+    //             displayProducts(filtered);
+    //         }
+    //     }
+
+    //     // Evento para cada botón de categoría
+    //     document.querySelectorAll(".category-btn").forEach(button => {
+    //         button.addEventListener("click", function () {
+    //             const category = this.getAttribute("data-category");
+    //             filterProducts(category);
+    //         });
+    //     });
+
+    //     // Cargar productos desde el servidor
+    //     function loadProducts() {
+    //         $.ajax({
+    //             url: '/Catalogo/GetProducts',
+    //             type: 'GET',
+    //             success: function (data) {
+    //                 products = data; // Guardamos los productos
+    //                 displayProducts(products); // Mostramos los productos al cargar la página
+    //             },
+    //             error: function (err) {
+    //                 console.error("Error al cargar los productos", err);
+    //             }
+    //         });
+    //     }
+
+    //     // Llamar a la función para cargar productos al cargar la página
+    //     window.onload = function () {
+    //         loadProducts();
+    //     };
+    </script>
+}

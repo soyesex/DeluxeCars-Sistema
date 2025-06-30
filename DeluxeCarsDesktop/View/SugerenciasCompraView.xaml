@@ -1,0 +1,177 @@
+﻿<Window x:Class="DeluxeCarsDesktop.View.SugerenciasCompraView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DeluxeCarsDesktop.View"
+        mc:Ignorable="d"
+        Title="Sugerencias Compra" Height="450" MaxWidth="1200"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        SizeToContent="WidthAndHeight"
+        WindowStartupLocation="CenterScreen"
+        Background="Transparent"
+        AllowsTransparency="True" 
+        xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp">
+    <Border CornerRadius="15">
+        <Border.Background>
+            <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
+                <GradientStop Color="{StaticResource Color.PrimaryBack1}" Offset="0"/>
+                <GradientStop Color="{StaticResource Color.PrimaryBack2}" Offset="1"/>
+            </LinearGradientBrush>
+        </Border.Background>
+
+        <Border CornerRadius="12"
+        BorderThickness="3"
+        Opacity="0.75">
+
+            <Border.BorderBrush>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="{StaticResource Color.WinBorder1}" Offset="0"/>
+                    <GradientStop Color="{StaticResource Color.WinBorder2}" Offset="0.75"/>
+                    <GradientStop Color="{StaticResource Color.WinBorder3}" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.BorderBrush>
+
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,1" EndPoint="1,0">
+                    <GradientStop Color="{StaticResource Color.PrimaryBack1}" Offset="0"/>
+                    <GradientStop Color="{StaticResource Color.PrimaryBack2}" Offset="0.75"/>
+                </LinearGradientBrush>
+            </Border.Background>
+
+            <Border CornerRadius="10">
+
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
+                        <GradientStop Color="{StaticResource Color.PrimaryBack1}" Offset="0"/>
+                        <GradientStop Color="{StaticResource Color.PrimaryBack2}" Offset="1"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+
+                <Grid>
+
+                    <Grid.RowDefinitions>
+                        <!--Control bar-->
+                        <RowDefinition Height="25"/>
+                        <!--Header / Caption-->
+                        <RowDefinition Height="40"/>
+                        <!--Content section / Child views-->
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel x:Name="pnlControlBar"
+                Grid.Row="0"
+                Orientation="Horizontal"
+                FlowDirection="RightToLeft"
+                Background="Transparent"
+                Margin="0,0,5,0"
+                MouseLeftButtonDown="pnlControlBar_MouseLeftButtonDown"
+                MouseEnter="pnlControlBar_MouseEnter">
+                        <Button x:Name="btnClose"
+                Style="{StaticResource controlButton}"
+                Tag="{StaticResource color4}"
+                Click="btnClose_Click">
+                            <fa:IconImage Icon="Xmark" Style="{StaticResource controlButtonIcon}"/>
+
+                        </Button>
+
+                        <Button x:Name="btnMaximize"
+                Style="{StaticResource controlButton}"
+                Tag="{StaticResource color6}"
+                Click="btnMaximize_Click">
+                            <fa:IconImage Icon="Square" Style="{StaticResource controlButtonIcon}"/>
+
+                        </Button>
+
+                        <Button x:Name="btnMinimize"
+                Style="{StaticResource controlButton}"
+                Tag="{StaticResource color4}"
+                Click="btnMinimize_Click">
+                            <fa:IconImage Icon="WindowMinimize" Width="12" Style="{StaticResource controlButtonIcon}"/>
+
+                        </Button>
+
+                    </StackPanel>
+
+                    <!--Header / Caption-->
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <!--Caption-->
+                        <StackPanel Grid.Column="0"
+                    Orientation="Horizontal"
+                    VerticalAlignment="Center">
+                            <fa:IconImage Icon="{Binding Icon}"
+                          Height="20"
+                          Width="20"
+                          Foreground="{StaticResource titleColor2}"
+                          Margin="35,0,10,0"/>
+
+                            <TextBlock Text="{Binding Caption}"
+                       Foreground="{StaticResource titleColor2}"
+                       FontSize="16"
+                       FontFamily="Montserrat"
+                       FontWeight="Medium"
+                       VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <!--User options-->
+                        <StackPanel Grid.Column="1"
+                    Orientation="Horizontal"
+                    FlowDirection="RightToLeft"
+                    VerticalAlignment="Center"
+                    Margin="0,0,10,0">
+
+                            <TextBlock Text="{Binding CurrentUserAccount.DisplayName}"
+                       Foreground="{StaticResource titleColor2}"
+                       FontFamily="Montserrat"
+                       FontSize="12"
+                       VerticalAlignment="Center"/>
+
+                            <Button Style="{StaticResource iconButton}"
+                    Tag="{StaticResource color3}">
+                                <fa:IconImage Icon="Clock" Style="{StaticResource iconButtonIcon}"/>
+                            </Button>
+
+                            <Button Style="{StaticResource iconButton}"
+                    Tag="{StaticResource color4}">
+                                <fa:IconImage Icon="Envelope" Style="{StaticResource iconButtonIcon}"/>
+                            </Button>
+
+                            <Button Style="{StaticResource iconButton}"
+                    Tag="{StaticResource color5}">
+                                <fa:IconImage Icon="Bell" Style="{StaticResource iconButtonIcon}"/>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Margin="15" Grid.Row="2">
+                        <Border CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" 
+            BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
+                            <DataGrid ItemsSource="{Binding Sugerencias}" 
+                                      Style="{StaticResource ElegantDataGridStyle}"
+                  AutoGenerateColumns="False" IsReadOnly="False">
+                                <DataGrid.Columns>
+                                    <DataGridCheckBoxColumn Header="Seleccionar" Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
+
+                                    <DataGridTextColumn Header="Producto" Binding="{Binding Nombre}" IsReadOnly="True" Width="*"/>
+                                    <DataGridTextColumn Header="Stock Actual" Binding="{Binding StockActual}" IsReadOnly="True" Width="Auto"/>
+                                    <DataGridTextColumn Header="Stock Mínimo" Binding="{Binding StockMinimo}" IsReadOnly="True" Width="Auto"/>
+                                    <DataGridTextColumn Header="Cantidad Sugerida" Binding="{Binding CantidadSugerida}" IsReadOnly="True" Width="Auto"/>
+                                    <DataGridTextColumn Header="Proveedor Principal" Binding="{Binding ProveedorPrincipal}" IsReadOnly="True" Width="*"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Border>
+
+                        <Button Content="Generar Borradores de Orden de Compra" 
+            Style="{StaticResource DarkActionButtonStyle}"
+            Command="{Binding GenerarBorradorOrdenCommand}"
+            HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10"/>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Border>
+    </Border>
+</Window>

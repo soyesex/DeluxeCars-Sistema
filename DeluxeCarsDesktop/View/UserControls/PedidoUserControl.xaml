@@ -1,0 +1,169 @@
+﻿<UserControl x:Class="DeluxeCarsDesktop.View.UserControls.PedidoUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
+             mc:Ignorable="d" 
+             xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
+             xmlns:models="clr-namespace:DeluxeCarsDesktop.Models"
+             d:DesignHeight="550" d:DesignWidth="900">
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,0,15">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0" Orientation="Horizontal">
+                <Label Content="Desde:" VerticalAlignment="Center" Style="{StaticResource DarkLableForm}"/>
+                <DatePicker SelectedDate="{Binding FechaInicio}" Style="{StaticResource DarkDatePickerStyle}" Width="140" Margin="5,0,0,0"/>
+
+                <Label Content="Hasta:" VerticalAlignment="Center" Margin="15,0,0,0" Style="{StaticResource DarkLableForm}"/>
+                <DatePicker SelectedDate="{Binding FechaFin}" Style="{StaticResource DarkDatePickerStyle}" Width="140" Margin="5,0,0,0"/>
+
+                <Label Content="Proveedor:" VerticalAlignment="Center" Margin="15,0,0,0" Style="{StaticResource DarkLableForm}"/>
+                <ComboBox ItemsSource="{Binding Proveedores}"
+                          SelectedItem="{Binding ProveedorFiltro}"
+                          DisplayMemberPath="RazonSocial"
+                          Style="{StaticResource DarkComboBoxStyle}"
+                          Width="250" Margin="5,0,0,0"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                <Button Content="Filtrar" Command="{Binding FiltrarCommand}" Style="{StaticResource DarkActionButtonStyle}"/>
+                <Button Content="Nuevo Pedido" Command="{Binding NuevoPedidoCommand}" Style="{StaticResource DarkActionButtonStyle}" Margin="10,0,0,0"/>
+                
+                <Label Content="Estado:" VerticalAlignment="Center" Margin="15,0,0,0" Style="{StaticResource DarkLableForm}"/>
+                <ComboBox ItemsSource="{Binding EstadosFiltro}"
+                          SelectedItem="{Binding EstadoFiltroSeleccionado}"
+                          Style="{StaticResource DarkComboBoxStyle}"
+                          Width="150" Margin="5,0,0,0">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </StackPanel>
+        </Grid>
+
+        <Border Grid.Row="1" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" 
+                BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
+            <DataGrid ItemsSource="{Binding Pedidos}"
+                      SelectedItem="{Binding PedidoSeleccionado}"
+                      Style="{StaticResource ElegantDataGridStyle}"
+                      CanUserAddRows="False" AutoGenerateColumns="False" IsReadOnly="True"
+                      ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="N° Pedido" Binding="{Binding NumeroPedido}" Width="140"/>
+
+                    <DataGridTemplateColumn Header="Estado" Width="Auto" MinWidth="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border CornerRadius="4" Padding="8,3" Margin="2">
+                                    <TextBlock Text="{Binding Estado}" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Estado}" Value="{x:Static models:EstadoPedido.Borrador}">
+                                                    <Setter Property="Background" Value="#6B7280"/>
+                                                    <Setter Property="ToolTip" Value="Este pedido es un borrador y aún puede ser editado."/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Estado}" Value="{x:Static models:EstadoPedido.Aprobado}">
+                                                    <Setter Property="Background" Value="#10B981"/>
+                                                    <Setter Property="ToolTip" Value="El pedido ha sido aprobado. Pendiente de recepción."/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Estado}" Value="{x:Static models:EstadoPedido.Recibido}">
+                                                    <Setter Property="Background" Value="#059669"/>
+                                                    <Setter Property="ToolTip" Value="El pedido ha sido completado y la mercancía recibida."/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Estado}" Value="{x:Static models:EstadoPedido.Cancelado}">
+                                                    <Setter Property="Background" Value="#374151"/>
+                                                    <Setter Property="ToolTip" Value="Este pedido ha sido cancelado."/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTextColumn Header="Fecha Emisión" Binding="{Binding FechaEmision, StringFormat=d}" Width="Auto"/>
+
+                    <DataGridTextColumn Header="Proveedor" Binding="{Binding Proveedor.RazonSocial}" Width="*"/>
+
+                    <DataGridTextColumn Header="Monto Total" Binding="{Binding MontoTotal, StringFormat=C}" Width="Auto" FontWeight="Bold"/>
+                    <DataGridTextColumn Header="Saldo Pendiente" Binding="{Binding SaldoPendiente, StringFormat=C}" Width="Auto"/>
+
+                    <DataGridTemplateColumn Header="Estado Pago" Width="Auto" MinWidth="120">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border CornerRadius="4" Padding="8,3" Margin="2" MinWidth="70">
+                                    <TextBlock Text="{Binding EstadoPago}" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding EstadoPago}" Value="{x:Static models:EstadoPagoPedido.Pendiente}">
+                                                    <Setter Property="Background" Value="#EF4444"/>
+                                                    <Setter Property="ToolTip" Value="Este pedido está pendiente de pago."/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding EstadoPago}" Value="{x:Static models:EstadoPagoPedido.PagadoParcialmente}">
+                                                    <Setter Property="Background" Value="#F59E0B"/>
+                                                    <Setter Property="ToolTip" Value="Se han realizado abonos a este pedido."/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding EstadoPago}" Value="{x:Static models:EstadoPagoPedido.Pagado}">
+                                                    <Setter Property="Background" Value="#10B981"/>
+                                                    <Setter Property="ToolTip" Value="Este pedido ha sido pagado en su totalidad."/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="Acciones" Width="280">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Button Style="{StaticResource DataGridIconSharpButton_Style}"
+                                            Tag="{x:Static fa:IconChar.Eye}"
+                                            ToolTip="Ver Detalles"
+                                            Command="{Binding DataContext.VerDetallesCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"/>
+
+                                    <Button Style="{StaticResource DataGridIconSharpButton_Style}"
+                                            Tag="{x:Static fa:IconChar.Inbox}"
+                                            ToolTip="Recepcionar Pedido"
+                                            Command="{Binding DataContext.RecepcionarPedidoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"/>
+
+                                    <Button Style="{StaticResource DataGridIconSharpButton_Style}"
+                                            Tag="{x:Static fa:IconChar.MoneyBillWave}"
+                                            ToolTip="Registrar Pago"
+                                            Command="{Binding DataContext.RegistrarPagoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"/>
+
+                                    <Button Style="{StaticResource DataGridIconSharpButton_Style}"
+                                            Tag="{x:Static fa:IconChar.FilePdf}"
+                                            ToolTip="Generar PDF"
+                                            Command="{Binding DataContext.GenerarPdfCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"/>      
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</UserControl>

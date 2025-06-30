@@ -1,0 +1,47 @@
+﻿<UserControl x:Class="DeluxeCarsDesktop.View.UserControls.ClienteUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="550" d:DesignWidth="900">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="5,5,5,10">
+            <StackPanel Orientation="Horizontal">
+                <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource SearchBoxStyle}" 
+                         Tag="Buscar clientes..." 
+                         Width="300"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="5,0,10,0" HorizontalAlignment="Right">
+                <Button Content="Añadir" Command="{Binding NuevoClienteCommand}" Style="{StaticResource DarkActionButtonStyle}" Margin="0,0,10,0"/>
+                <Button Content="Editar" Command="{Binding EditarClienteCommand}" Style="{StaticResource DarkActionButtonStyle}" Margin="0,0,10,0"/>
+                <Button Content="Activar/Desactivar" Command="{Binding ToggleEstadoCommand}" Style="{StaticResource DarkActionButtonStyle}"/>
+            </StackPanel>
+        </Grid>
+
+        <Border Grid.Row="1" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" 
+                BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
+            <DataGrid ItemsSource="{Binding Clientes}" 
+                      SelectedItem="{Binding ClienteSeleccionado}"
+                      Style="{StaticResource ElegantDataGridStyle}"
+                      AutoGenerateColumns="False" 
+                      IsReadOnly="True">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Id" Binding="{Binding Id}" Width="Auto"/>
+                    <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="*"/>
+                    <DataGridTextColumn Header="Telefono" Binding="{Binding Telefono}" Width="*"/>
+                    <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="2*"/>
+                    <DataGridCheckBoxColumn Header="Activo" Binding="{Binding Estado}" Width="Auto"/>
+
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</UserControl>

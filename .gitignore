@@ -1,0 +1,50 @@
+# Archivo .gitignore combinado para una solución .NET (WPF + ASP.NET Core)
+
+## Ignorar carpetas de configuración y binarios de Visual Studio
+.vs/
+[Bb]in/
+[Oo]bj/
+
+## Archivos de usuario y configuraciones locales
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## Ignorar resultados de compilación y publicación
+[Rr]elease/
+[Dd]ebug/
+[Pp]ublish/
+
+## Ignorar paquetes de NuGet
+packages/
+*.nupkg
+
+## Archivos generados por herramientas de .NET
+project.lock.json
+project.assets.json
+*.nuget.props
+*.nuget.targets
+
+## Archivos de Resharper (si se usa)
+_ReSharper*/
+*.[Rr]esharper
+*.DotSettings.user
+
+## Archivos del sistema operativo
+# Windows
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+# macOS
+.DS_Store
+
+## Archivos específicos de ASP.NET Core que no se suelen versionar
+# (Opcional) Si usas secretos de usuario
+secrets.json
+
+# Archivos de entorno de desarrollo local
+appsettings.Development.json
+
+# Carpeta de librerías del lado del cliente (si usas LibMan)
+/wwwroot/lib/

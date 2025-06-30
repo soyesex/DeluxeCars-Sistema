@@ -1,0 +1,15 @@
+﻿using DeluxeCarsDesktop.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace DeluxeCarsDesktop.Interfaces
+{
+    public interface IProductoProveedorRepository : IGenericRepository<ProductoProveedor>
+    {
+        Task<IEnumerable<ProductoProveedor>> GetByProveedorWithProductoAsync(int proveedorId);
+        Task<ProductoProveedor> GetByProductAndSupplierAsync(int productoId, int proveedorId);
+    }
+}

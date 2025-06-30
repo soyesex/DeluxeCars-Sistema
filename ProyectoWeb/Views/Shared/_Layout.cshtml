@@ -1,0 +1,98 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Aplicacion</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/cart.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Aplicacion.styles.css" asp-append-version="true" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" />
+
+
+
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+    <header style="position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; box-shadow: 0 4px 2px -2px gray;">
+        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3 custom-navbar fixed-top">
+            <div class="container-fluid">
+                <!-- Logo -->
+                <a class="navbar-brand logo" asp-area="" asp-controller="Home" asp-action="Index">Deluxe Cars</a>
+
+                <!-- Botón para móviles -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Contenido del navbar -->
+                <div class="navbar-collapse collapse d-sm-inline-flex">
+                    <!-- Links -->
+                    <div class="ms-auto links">
+                        <ul class="navbar-nav flex-grow-1 justify-content-around gap-5">
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                @if (User.IsInRole("Administrador"))
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Index">Panel de Admin</a>
+                                    </li>
+                                }
+                                @if (User.IsInRole("Usuario"))
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link text-dark" asp-area="" asp-controller="Carrito" asp-action="Index">Carrito</a>
+                                    </li>
+                                }
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Contact">Contáctanos</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="AboutUs">Sobre Nosotros</a>
+                                </li> 
+                                <li class="nav-item">
+                                    <form class="nav-link text-dark" asp-controller="Account" asp-action="Logout" method="post">
+                                        <button type="submit">Cerrar Sesión</button>
+                                    </form>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Iniciar Sesión</a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+@* 
+                    <!-- Login -->
+                    <div class="ms-auto login">
+                        <partial name="_LoginPartial" />
+                    </div> *@
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container-fluid px-3 ">
+        <main role="main" class="text-center pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container text-center">
+            &copy; 2025 - Aplicacion - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

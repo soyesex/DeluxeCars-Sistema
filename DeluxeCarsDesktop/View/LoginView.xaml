@@ -1,0 +1,205 @@
+﻿<Window x:Class="DeluxeCarsDesktop.View.LoginView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DeluxeCarsDesktop.View"
+        mc:Ignorable="d"
+        xmlns:behaviors="clr-namespace:DeluxeCarsDesktop.Behaviors"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
+        xmlns:viewModel="clr-namespace:DeluxeCarsDesktop.ViewModel"
+        xmlns:customcontrols="clr-namespace:DeluxeCarsDesktop.CustomControls"
+        Title="Deluxe Cars - Inicio de Sesión" Height="550" Width="800"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        Background="Transparent"
+        AllowsTransparency="True" 
+        MouseDown="Window_MouseDown">
+
+    <Border CornerRadius="15"
+            MouseLeftButtonDown="Window_MouseLeftButtonDown_ClearFocus">
+        <Border.Background>
+            <ImageBrush ImageSource="C:\Users\suare\Source\Repos\DeluxeCarsUI\DeluxeCarsDesktop\Images\login.jpg"/>
+        </Border.Background>
+
+        <Border CornerRadius="12"
+            BorderThickness="3">
+
+            <Border.BorderBrush>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#C8C8C8" Offset="0"/>
+                    <GradientStop Color="#0A0E21" Offset="0.3"/>
+                    <GradientStop Color="#C8C8C8" Offset="0.8"/>
+                </LinearGradientBrush>
+            </Border.BorderBrush>
+
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,1" EndPoint="1,0" Opacity="0.75">
+                    <GradientStop Color="{StaticResource Color.PrimaryBack1}" Offset="0"/>
+                    <GradientStop Color="{StaticResource Color.PrimaryBack2}" Offset="0.65"/>
+                </LinearGradientBrush>
+            </Border.Background>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="150"/>
+                    <RowDefinition Height="210"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="Inicio de sesión"
+                               Foreground="DarkGray"
+                               FontSize="12"
+                               FontFamily="{StaticResource Font.SourceSans3}"
+                               Grid.Column="0"
+                               VerticalAlignment="Center"
+                               Margin="5,0,0,0"/>
+
+                    <Button x:Name="btnMinimize"
+                            Grid.Column="1"
+                            Style="{StaticResource controlButton}"
+                            Tag="{StaticResource color4}"
+                            Click="btnMinimize_Click"
+                            Margin="0">
+                        <fa:IconImage Icon="WindowMinimize" Style="{StaticResource controlButtonIcon}" Width="12"/>
+                    </Button>
+
+                    <Button x:Name="btnClose"
+                            Grid.Column="2"
+                            Style="{StaticResource controlButton}"
+                            Tag="{StaticResource color4}"
+                            Click="btnClose_Click"
+                            Margin="0">
+                        <fa:IconImage Icon="Xmark" Style="{StaticResource controlButtonIcon}"/>
+                    </Button>
+
+                </Grid>
+
+                <StackPanel Grid.Row="1">
+                    <TextBlock Text=" DELUXE CARS"
+                               Foreground="White"
+                               FontSize="50"
+                               Style="{StaticResource ProfessionalFadeInStyle}"
+                               FontFamily="{StaticResource Font.Poppins}"
+                               FontWeight="UltraBlack"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Margin="0 35 0 0"/>
+
+                    <TextBlock Text="Autopartes de lujo, potencia sin límites"
+                               Foreground="LightGray"
+                               FontSize="16"
+                               FontWeight="Regular"
+                               Style="{StaticResource ProfessionalFadeInStyle_Delayed}"
+                               TextWrapping="Wrap"
+                               TextAlignment="Center"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Margin="7 5 0 0"/>
+                </StackPanel>
+
+                <StackPanel Width="250"
+                            Grid.Row="2"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Orientation="Vertical"
+                            Margin="272,50,272,0">
+
+                    <TextBox x:Name="txtUser"
+                             Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"
+                             materialDesign:HintAssist.Hint="Ingrese su correo electronico"
+                             materialDesign:HintAssist.FloatingScale="1.0"
+                             materialDesign:TextFieldAssist.HasClearButton="True"
+                             Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                             FontSize="16"
+                             behaviors:InputBehaviors.EnterNavegaAlSiguiente="True"
+                             behaviors:InputBehaviors.ValidaEmail="True"
+                             FontWeight="Medium"
+                             FontFamily="{StaticResource Font.SourceSans3}"
+                             Background="Transparent"
+                             Foreground="DarkGray"
+                             CaretBrush="LightGray"
+                             BorderBrush="DarkGray"
+                             BorderThickness="0,0,0,1"
+                             VerticalContentAlignment="Center"
+                             Margin="0,10,0,10">
+                    </TextBox>
+
+                    <PasswordBox
+                              x:Name="txtPassword"
+                              Style="{StaticResource MaterialDesignFloatingHintRevealPasswordBox}"
+                              materialDesign:HintAssist.Hint="Contraseña"
+                              materialDesign:HintAssist.FloatingScale="1.0"
+                              FontFamily="{StaticResource Font.SourceSans3}"
+                              FontWeight="Medium"
+                              materialDesign:PasswordBoxAssist.Password="{Binding Password,
+                                   Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                              materialDesign:PasswordBoxAssist.IsPasswordRevealed="False"
+                              FontSize="16"
+                              behaviors:InputBehaviors.EnterNavegaAlSiguiente="True"
+                              behaviors:InputBehaviors.EnterEjecutaComando="{Binding LoginCommand}"
+                              Foreground="DarkGray"
+                              CaretBrush="LightGray"
+                              BorderBrush="DarkGray"
+                              BorderThickness="0,0,0,1"
+                              VerticalContentAlignment="Center"
+                              Margin="0,20,0,0">
+                        
+                    </PasswordBox>
+
+
+                    <TextBlock Text="{Binding ErrorMessage}"
+                               Foreground="#D7596D"
+                               FontSize="12"
+                               FontWeight="Medium"
+                               Style="{StaticResource SecondaryTextStyle}"
+                               Margin="5,5,0,0"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Vertical"
+                            Grid.Row="3"
+                            Width="300"
+                            HorizontalAlignment="Center"
+                            Margin="0 0 0 0">
+
+                    <Button x:Name="btnLogin" Grid.Column="2"
+                            Command="{Binding LoginCommand}"
+                            Content="Entrar"
+                            Width="130"
+                            Visibility="{Binding IsLoginEnabled, Converter={StaticResource BooleanToHiddenConverter}}"
+                            Style="{StaticResource ElegantGhostButtonStyle}"
+                             Tag="DarkGray"
+                            Margin="0,5,0,0"/>
+                    
+                    <Button x:Name="btnRecoverPassword"
+                            Command="{Binding RecoverPasswordCommand}"
+                            Content="Recuperar contraseña"
+                            Width="180"
+                            Style="{StaticResource ElegantGhostButtonStyle}"
+                            Tag="DarkGray"
+                            Margin="0 10 0 0"/>
+
+                    <Button Content="Registrarse" 
+                             Width="120"
+                             Command="{Binding ShowRegisterViewCommand}"
+                             Style="{StaticResource ElegantGhostButtonStyle}"
+                             Tag="DarkGray"
+                             Margin="0 15 0 0"/>
+                </StackPanel>
+                
+            </Grid>
+
+        </Border>
+    </Border>
+</Window>

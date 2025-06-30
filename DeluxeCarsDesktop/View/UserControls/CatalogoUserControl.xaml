@@ -1,0 +1,130 @@
+﻿<UserControl x:Class="DeluxeCarsDesktop.View.UserControls.CatalogoUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:converters="clr-namespace:DeluxeCarsDesktop.Converters"
+             xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
+             xmlns:viewModel="clr-namespace:DeluxeCarsDesktop.ViewModel"
+             mc:Ignorable="d"  
+             d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <converters:ImagePathConverter x:Key="ImagePathConverter"/>
+    </UserControl.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Border Background="Transparent">
+                <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
+
+                    <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" 
+                     Style="{StaticResource SearchBoxStyle}" 
+                     Width="200" Tag="Buscar texto universal..."/>
+
+                    <ComboBox ItemsSource="{Binding CategoriasDisponibles}"
+                      SelectedItem="{Binding CategoriaFiltroSeleccionada}"
+                      Style="{StaticResource DarkComboBoxStyle}"
+                      DisplayMemberPath="Nombre"
+                      Width="180" Margin="10,5,5,5"/>
+
+                    <ComboBox ItemsSource="{Binding StockStatusOptions}" 
+                      SelectedItem="{Binding StockStatusFiltroSeleccionado}" 
+                      Style="{StaticResource DarkComboBoxStyle}"
+                      Width="120" Margin="5"/>
+                    
+
+                    <Button Content="Limpiar" 
+                    Command="{Binding LimpiarFiltrosCommand}" 
+                    Style="{StaticResource DarkActionButtonStyle}"
+                    Margin="10,5,5,5"/>
+
+                    <Button Content="Ajuste Manual" Style="{StaticResource DarkActionButtonStyle}" Command="{Binding AjusteManualCommand}"/>
+                </WrapPanel>
+            </Border>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button Content="Nuevo Producto" Style="{StaticResource DarkActionButtonStyle}" 
+                Command="{Binding NuevoProductoCommand}"/>
+                <Button Content="Editar" Style="{StaticResource DarkActionButtonStyle}" 
+                Command="{Binding EditarProductoCommand}" Margin="10,0,0,0"/>
+                <Button Content="Eliminar" Style="{StaticResource DarkActionButtonStyle}" 
+                Command="{Binding EliminarProductoCommand}" Margin="10,0,0,0"/>
+            </StackPanel>
+
+        </Grid>
+
+        <Border Grid.Row="1" CornerRadius="10" 
+                Background="{StaticResource PrimaryBackgroundColor}" 
+                 BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
+            <DataGrid ItemsSource="{Binding Productos}"
+                      SelectedItem="{Binding ProductoSeleccionado}"
+                      Style="{StaticResource ElegantDataGridStyle}"
+                      CanUserAddRows="False"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      CanUserSortColumns="True">
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="ToolTip">
+                                    <Setter.Value>
+                                        <ToolTip Background="#2D3748" BorderThickness="0">
+                                            <StackPanel Orientation="Horizontal" Margin="10">
+                                                <Image Source="{Binding Producto.ImagenUrl, Converter={StaticResource ImagePathConverter}}" Width="100" Height="100" Margin="0,0,15,0" />
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Nombre}" FontWeight="SemiBold" FontFamily="{StaticResource Font.Poppins}" FontSize="14" Foreground="White"/>
+                                                    <TextBlock Text="{Binding OEM}" FontFamily="{StaticResource Font.SourceSans3}" Foreground="LightGray"/>
+                                                    <TextBlock Text="{Binding Producto.Descripcion}" TextWrapping="Wrap" FontFamily="Montserrat" MaxWidth="250" Margin="0,10,0,0" Foreground="White"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </ToolTip>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+
+                            <!-- En Stock: verde menta pastel -->
+                            <DataTrigger Binding="{Binding EstadoStock}" Value="En Stock">
+                                <Setter Property="Background" Value="#A8E6CF"/>
+                                <Setter Property="Foreground" Value="#020c1b"/>
+                            </DataTrigger>
+
+                            <!-- Bajo Stock: durazno pastel -->
+                            <DataTrigger Binding="{Binding EstadoStock}" Value="Bajo Stock">
+                                <Setter Property="Background" Value="#FFD3B6"/>
+                                <Setter Property="Foreground" Value="#020c1b"/>
+                            </DataTrigger>
+
+                            <!-- Agotado: rosa pastel -->
+                            <DataTrigger Binding="{Binding EstadoStock}" Value="Agotado">
+                                <Setter Property="Background" Value="#FFAAA5"/>
+                                <Setter Property="Foreground" Value="#020c1b"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
+
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50" SortMemberPath="Id"/>
+                    <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="*" SortMemberPath="Nombre"/>
+                    <DataGridTextColumn Header="OEM" Binding="{Binding OEM}" Width="120" SortMemberPath="OEM"/>
+                    <DataGridTextColumn Header="Categoría" Binding="{Binding CategoriaNombre}" Width="150" SortMemberPath="CategoriaNombre"/>
+                    <DataGridTextColumn Header="Precio" Binding="{Binding Precio, StringFormat=C, ConverterCulture=es-CO}" Width="100" SortMemberPath="Precio"/>
+                    <DataGridTextColumn Header="Stock" Binding="{Binding StockCalculado}" Width="70" SortMemberPath="StockCalculado"/>
+                    <DataGridCheckBoxColumn Header="Activo" Binding="{Binding Estado, Mode=OneWay}" Width="70" SortMemberPath="Estado"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</UserControl>

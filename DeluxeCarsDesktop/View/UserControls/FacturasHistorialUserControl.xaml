@@ -1,0 +1,93 @@
+﻿<UserControl x:Class="DeluxeCarsDesktop.View.UserControls.FacturasHistorialUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
+             mc:Ignorable="d" 
+             xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
+
+             d:DesignHeight="550" d:DesignWidth="900">
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="5,5,5,10">
+            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource SearchBoxStyle}" 
+                     Tag="Buscar por N° Factura o Cliente..." 
+                     Width="300"/>
+            <Button Content="Nueva Factura"
+                    Command="{Binding NuevaFacturaCommand}"
+                    Style="{StaticResource DarkActionButtonStyle}" 
+                    Margin="20,0,10,0"/>
+        </StackPanel>
+
+        <Border Grid.Row="1" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" 
+                BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
+            <DataGrid ItemsSource="{Binding Facturas}" 
+                      SelectedItem="{Binding FacturaSeleccionada}"
+                      Style="{StaticResource ElegantDataGridStyle}"
+                      AutoGenerateColumns="False" 
+                      IsReadOnly="True">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Factura N°" Binding="{Binding NumeroFactura}" Width="*"/>
+                    <DataGridTextColumn Header="Fecha" Binding="{Binding FechaEmision, StringFormat=d}" Width="Auto"/>
+                    <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nombre}" Width="2*"/>
+
+                    <DataGridTextColumn Header="Total Factura" Binding="{Binding Total, StringFormat=C}" Width="Auto" FontWeight="Bold"/>
+                    <DataGridTextColumn Header="Saldo Pendiente" Binding="{Binding SaldoPendiente, StringFormat=C}" Width="Auto"/>
+                    <DataGridTemplateColumn Header="Estado Pago" Width="Auto" MinWidth="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border CornerRadius="4" Padding="8,3" Margin="2">
+                                    <TextBlock Text="{Binding EstadoPago}" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="Acciones" Width="Auto" MinWidth="150">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+
+                                    <Button Style="{StaticResource DataGridIconSharpButton_Style}"
+                        Tag="{x:Static fa:IconChar.HandHoldingUsd}"
+                        ToolTip="Registrar Pago de Cliente"
+                        Command="{Binding DataContext.RegistrarPagoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        CommandParameter="{Binding}"/>
+
+                                    <Button Style="{StaticResource DataGridIconSharpButton_Style}"
+                                            Tag="{x:Static fa:IconChar.ExchangeAlt}"
+                                            ToolTip="Liquidar Saldo a Favor"
+                                            Command="{Binding DataContext.LiquidarCreditoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"/>      
+
+                                    <Button Style="{StaticResource DataGridIconSharpButton_Style}"
+                        Tag="{x:Static fa:IconChar.Eye}"
+                        ToolTip="Ver Detalles de la Factura"
+                        Command="{Binding DataContext.VerDetallesCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        CommandParameter="{Binding}"/>
+
+                                    <Button Style="{StaticResource DataGridIconSharpButton_Style}"
+                        Tag="{x:Static fa:IconChar.Ban}"
+                        ToolTip="Anular Factura (Nota de Crédito)"
+                        Command="{Binding DataContext.AnularFacturaCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        CommandParameter="{Binding}"/>
+
+                                    <Button Style="{StaticResource DataGridIconSharpButton_Style}"
+                        Tag="{x:Static fa:IconChar.FilePdf}"
+                        ToolTip="Generar Factura en PDF"
+                        IsEnabled="False"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</UserControl>

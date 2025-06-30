@@ -1,0 +1,82 @@
+﻿<UserControl x:Class="DeluxeCarsDesktop.View.UserControls.GestionarProductosProveedorUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+              xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="1000"
+             MinWidth="950" MaxWidth="1200">
+
+    <Grid Margin="15">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Columna 0: Catálogo del Proveedor (Productos ya asociados) -->
+        <Border Grid.Column="0" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top" Text="{Binding ProveedorActual.RazonSocial, StringFormat='Catálogo de {0}', FallbackValue='Catálogo del Proveedor'}" FontSize="16" FontWeight="Bold" Margin="10,10,10,5"/>
+                <DataGrid ItemsSource="{Binding ProductosAsociados}" SelectedItem="{Binding ProductoAsociadoSeleccionado}" Style="{StaticResource ElegantDataGridStyle}">
+                    <DataGrid.Columns>
+                        <!-- Nota: El binding cambió de 'Nombre' a 'Producto.Nombre' según tu segundo archivo -->
+                        <DataGridTextColumn Header="Nombre Producto" Binding="{Binding Producto.Nombre}" Width="*"/>
+                        <DataGridTextColumn Header="Precio Compra" Binding="{Binding PrecioCompra, StringFormat=C, ConverterCulture=es-CO}" Width="Auto"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </Border>
+
+        <!-- Columna 1: Controles de Acción (Añadir / Quitar / Precio) -->
+        <Grid Grid.Column="1" VerticalAlignment="Center" Margin="15,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Label Grid.Row="0" Content="Precio de Compra:" Style="{StaticResource DarkLableForm}" HorizontalAlignment="Center"/>
+            <TextBox Grid.Row="1" Text="{Binding NuevoPrecioCompra, UpdateSourceTrigger=PropertyChanged}" 
+                     Width="120" TextAlignment="Center" Style="{StaticResource DarkInputControlStyle}"/>
+
+            <Button Grid.Row="2" Command="{Binding AsociarCommand}" 
+                    Style="{StaticResource DarkActionButtonStyle}" Margin="0,10,0,0">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Añadir"/>
+                </StackPanel>
+            </Button>
+
+            <Button Grid.Row="4" Command="{Binding DesasociarCommand}" 
+                    Style="{StaticResource DarkActionButtonStyle}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Quitar >>"/>
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <!-- Columna 2: Inventario General (Productos disponibles para asociar) -->
+        <Border Grid.Column="2" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top" Text="Inventario General (Disponibles)" FontSize="16" FontWeight="Bold" Margin="10,10,10,5"/>
+
+                <!-- Cuadro de búsqueda del segundo archivo -->
+                <TextBox DockPanel.Dock="Top" Margin="5,0,5,5"
+                         Text="{Binding TextoBusquedaInventario, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource SearchBoxStyle}"
+                         Tag="Buscar en inventario..."/>
+
+                <DataGrid ItemsSource="{Binding ProductosNoAsociados}" SelectedItem="{Binding ProductoNoAsociadoSeleccionado}" Style="{StaticResource ElegantDataGridStyle}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Nombre Producto" Binding="{Binding Nombre}" Width="*"/>
+                        <DataGridTextColumn Header="Precio Venta" Binding="{Binding Precio, StringFormat=C, ConverterCulture=es-CO}" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>
