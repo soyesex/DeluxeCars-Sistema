@@ -1,5 +1,6 @@
 ﻿using DeluxeCarsDesktop.Interfaces;
 using DeluxeCarsDesktop.Models;
+using DeluxeCarsDesktop.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,7 +12,7 @@ using System.Windows.Input;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
-    public class ServicioFormViewModel : ViewModelBase
+    public class ServicioFormViewModel : ViewModelBase, IFormViewModel
     {
         // --- Dependencias y Estado ---
         private readonly IUnitOfWork _unitOfWork;

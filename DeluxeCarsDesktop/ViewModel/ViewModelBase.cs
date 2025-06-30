@@ -23,5 +23,22 @@ namespace DeluxeCarsDesktop.ViewModel
             field = value;
             OnPropertyChanged(propertyName);
         }
+
+        private string _errorMessage;
+        public string ErrorMessage
+        {
+            get => _errorMessage;
+            set => SetProperty(ref _errorMessage, value);
+        }
+
+        protected async Task ShowTemporaryErrorMessage(string message, int delayInSeconds = 5)
+        {
+            this.ErrorMessage = message;
+            await Task.Delay(delayInSeconds * 1000);
+            if (this.ErrorMessage == message)
+            {
+                this.ErrorMessage = string.Empty;
+            }
+        }
     }
 }

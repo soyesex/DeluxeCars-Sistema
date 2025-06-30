@@ -13,7 +13,7 @@ using System.Windows.Input;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
-    public class CategoriasViewModel : ViewModelBase
+    public class CategoriasViewModel : ViewModelBase, IAsyncLoadable
     {
         // --- Dependencias (¡CAMBIO!) ---
         private readonly IUnitOfWork _unitOfWork;
@@ -78,12 +78,10 @@ namespace DeluxeCarsDesktop.ViewModel
             NuevaCategoriaCommand = new ViewModelCommand(ExecuteNuevaCategoriaCommand);
             EditarCategoriaCommand = new ViewModelCommand(ExecuteEditarCategoriaCommand, CanExecuteEditDelete);
             EliminarCategoriaCommand = new ViewModelCommand(ExecuteEliminarCategoriaCommand, CanExecuteEditDelete);
-
-            LoadCategoriasAsync();
         }
 
         // --- Métodos de Lógica ---
-        private async Task LoadCategoriasAsync()
+        public async Task LoadAsync()
         {
             try
             {
@@ -125,7 +123,7 @@ namespace DeluxeCarsDesktop.ViewModel
         {
             // La lógica para gestionar el resultado del formulario se puede añadir más adelante.
             await _navigationService.OpenFormWindow(Utils.FormType.Categoria, 0);
-            await LoadCategoriasAsync(); // Recargamos por ahora.
+            await LoadAsync(); // Recargamos por ahora.
         }
 
         private async void ExecuteEditarCategoriaCommand(object obj)
@@ -135,7 +133,7 @@ namespace DeluxeCarsDesktop.ViewModel
             await _navigationService.OpenFormWindow(Utils.FormType.Categoria, CategoriaSeleccionada.Id);
 
             // 2. Al igual que antes, esta línea espera a que el formulario se cierre para refrescar la lista.
-            await LoadCategoriasAsync();
+            await LoadAsync();
         }
 
         // --- Método de Eliminar (¡CAMBIO CLAVE!) ---

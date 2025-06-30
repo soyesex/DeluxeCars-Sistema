@@ -63,7 +63,6 @@ namespace DeluxeCarsDesktop.Services
             CurrentMainView = newViewModel;
             CurrentMainViewChanged?.Invoke();
         }
-
         public void GoBack()
         {
             if (_history.Count > 0)

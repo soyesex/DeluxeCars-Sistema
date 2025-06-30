@@ -18,8 +18,8 @@ namespace DeluxeCarsDesktop.ViewModel
         private readonly IUnitOfWork _unitOfWork;
         private string _email;
         private string _token;
-        private SecureString _newPassword;
-        private SecureString _confirmPassword;
+        private string _newPassword;
+        private string _confirmPassword;
         private string _statusMessage;
         private bool _isResetStage = false; // Controla si mostramos la parte de solicitar o la de restablecer
         private readonly IEmailService _emailService;
@@ -46,24 +46,16 @@ namespace DeluxeCarsDesktop.ViewModel
             }
         }
 
-        public SecureString NewPassword
+        public string NewPassword
         {
             get => _newPassword;
-            set
-            {
-                SetProperty(ref _newPassword, value);
-                (ResetPasswordCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
-            }
+            set { SetProperty(ref _newPassword, value); (ResetPasswordCommand as ViewModelCommand)?.RaiseCanExecuteChanged(); }
         }
 
-        public SecureString ConfirmPassword
+        public string ConfirmPassword
         {
             get => _confirmPassword;
-            set
-            {
-                SetProperty(ref _confirmPassword, value);
-                (ResetPasswordCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
-            }
+            set { SetProperty(ref _confirmPassword, value); (ResetPasswordCommand as ViewModelCommand)?.RaiseCanExecuteChanged(); }
         }
 
         public string StatusMessage { get => _statusMessage; private set => SetProperty(ref _statusMessage, value); }
@@ -135,7 +127,7 @@ namespace DeluxeCarsDesktop.ViewModel
 
         private async Task ExecuteResetPassword()
         {
-            if (NewPassword.Unsecure() != ConfirmPassword.Unsecure())
+            if (NewPassword != ConfirmPassword)
             {
                 StatusMessage = "Las nuevas contraseñas no coinciden.";
                 return;
@@ -144,7 +136,7 @@ namespace DeluxeCarsDesktop.ViewModel
             StatusMessage = "Verificando token y restableciendo contraseña...";
             try
             {
-                var success = await _unitOfWork.Usuarios.ResetPasswordAsync(Email, Token, NewPassword.Unsecure());
+                var success = await _unitOfWork.Usuarios.ResetPasswordAsync(Email, Token, NewPassword);
                 await _unitOfWork.CompleteAsync(); // Guardamos el cambio de contraseña y la invalidación del token
 
                 if (success)
@@ -173,7 +165,7 @@ namespace DeluxeCarsDesktop.ViewModel
         private bool CanExecuteResetPassword()
         {
             // El botón de restablecer solo se activa si los campos necesarios no están vacíos
-            return !string.IsNullOrWhiteSpace(Token) && NewPassword != null && NewPassword.Length > 0 && ConfirmPassword != null && ConfirmPassword.Length > 0;
+            return !string.IsNullOrWhiteSpace(Token) && !string.IsNullOrEmpty(NewPassword) && !string.IsNullOrEmpty(ConfirmPassword);
         }
     }
 }

@@ -12,7 +12,7 @@ using System.Windows.Input;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
-    public class ServicioViewModel : ViewModelBase
+    public class ServicioViewModel : ViewModelBase, IAsyncLoadable
     {
         // --- Dependencias ---
         private readonly IUnitOfWork _unitOfWork;
@@ -64,11 +64,9 @@ namespace DeluxeCarsDesktop.ViewModel
             EditarServicioCommand = new ViewModelCommand(ExecuteEditarServicioCommand, CanExecuteActions);
             ToggleEstadoCommand = new ViewModelCommand(ExecuteToggleEstadoCommand, CanExecuteActions);
             ShowTipoServicioViewCommand = new ViewModelCommand(ExecuteShowTipoServicioViewCommand);
-
-            LoadInitialDataAsync();
         }
 
-        private async Task LoadInitialDataAsync()
+        public async Task LoadAsync()
         {
             await LoadTiposDeServicioAsync();
             await LoadServiciosAsync();
@@ -128,14 +126,14 @@ namespace DeluxeCarsDesktop.ViewModel
         private async void ExecuteNuevoServicioCommand(object obj)
         {
             await _navigationService.OpenFormWindow(Utils.FormType.Servicio,0);
-            await LoadInitialDataAsync();
+            await LoadAsync();
         }
 
         private async void ExecuteEditarServicioCommand(object obj)
         {
             // Le pasamos el ID del producto seleccionado
             await _navigationService.OpenFormWindow(Utils.FormType.Servicio, ServicioSeleccionado.Id);
-            await LoadInitialDataAsync();
+            await LoadAsync();
         }
 
         private async void ExecuteToggleEstadoCommand(object obj)

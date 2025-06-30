@@ -24,22 +24,42 @@ namespace DeluxeCarsDesktop.ViewModel
 
         // --- Propiedades para Binding ---
         private string _username;
-        public string Username { get => _username; set => SetProperty(ref _username, value); }
+        public string Username
+        {
+            get => _username;
+            set
+            {
+                SetProperty(ref _username, value);
+                // CADA VEZ QUE CAMBIA EL USUARIO, ACTUALIZAMOS EL ESTADO DEL BOTÓN
+                UpdateLoginButtonState();
+            }
+        }
 
-        private SecureString _password;
-        public SecureString Password { get => _password; set => SetProperty(ref _password, value); }
+        private string _password;
+        public string Password
+        {
+            get => _password;
+            set
+            {
+                SetProperty(ref _password, value);
+                // CADA VEZ QUE CAMBIA LA CONTRASEÑA, ACTUALIZAMOS EL ESTADO DEL BOTÓN
+                UpdateLoginButtonState();
+            }
+        }
 
-        private string _errorMessage;
-        public string ErrorMessage { get => _errorMessage; set => SetProperty(ref _errorMessage, value); }
-
-        private bool _isViewVisible = true;
-        public bool IsViewVisible { get => _isViewVisible; set => SetProperty(ref _isViewVisible, value); }
+        private bool _isLoginEnabled;
+        public bool IsLoginEnabled
+        {
+            get => _isLoginEnabled;
+            set => SetProperty(ref _isLoginEnabled, value);
+        }
 
         // --- Eventos y Comandos ---
         public event Action LoginSuccess;
         public ICommand LoginCommand { get; }
         public ICommand RecoverPasswordCommand { get; }
         public ICommand ShowRegisterViewCommand { get; }
+        public event Action ShowRegisterViewRequested;
 
         // --- Constructor (CAMBIO EN LA FIRMA) ---
         public LoginViewModel(IUnitOfWork unitOfWork, IServiceProvider serviceProvider)
@@ -50,18 +70,24 @@ namespace DeluxeCarsDesktop.ViewModel
             LoginCommand = new ViewModelCommand(ExecuteLoginCommand, CanExecuteLoginCommand);
             ShowRegisterViewCommand = new ViewModelCommand(ExecuteShowRegisterView);
             RecoverPasswordCommand = new ViewModelCommand(ExecuteRecoverPasswordCommand);
+
+            UpdateLoginButtonState();
         }
 
         private bool CanExecuteLoginCommand(object obj)
         {
-            return !string.IsNullOrWhiteSpace(Username) && Password != null && Password.Length > 0;
+            return !string.IsNullOrWhiteSpace(Username) && !string.IsNullOrEmpty(Password);
         }
-
+        private void UpdateLoginButtonState()
+        {
+            // La nueva propiedad IsLoginEnabled es igual al resultado de CanExecute
+            IsLoginEnabled = CanExecuteLoginCommand(null);
+        }
         private async void ExecuteLoginCommand(object obj)
         {
             if (!Utils.ValidationHelper.IsValidEmail(Username))
             {
-                ErrorMessage = "❌ Por favor, introduce un formato de correo válido.";
+                this.ErrorMessage = "❌ Por favor, introduce un formato de correo válido.";
                 return; // Detenemos la ejecución si el formato no es válido.
             }
 
@@ -69,7 +95,7 @@ namespace DeluxeCarsDesktop.ViewModel
             try
             {
                 // CAMBIO: Usamos el repositorio a través del UnitOfWork
-                var authenticatedUser = await _unitOfWork.Usuarios.AuthenticateUser(Username, new NetworkCredential(string.Empty, Password).Password);
+                var authenticatedUser = await _unitOfWork.Usuarios.AuthenticateUser(Username, Password);
 
                 if (authenticatedUser != null && authenticatedUser.Activo)
                 {
@@ -85,16 +111,16 @@ namespace DeluxeCarsDesktop.ViewModel
                 }
                 else if (authenticatedUser != null && !authenticatedUser.Activo)
                 {
-                    ErrorMessage = "❌ Este usuario ha sido desactivado.";
+                    await ShowTemporaryErrorMessage("❌ Este usuario ha sido desactivado.", 7);
                 }
                 else
                 {
-                    ErrorMessage = "❌ Email o contraseña inválidos.";
+                    await ShowTemporaryErrorMessage("❌ Email o contraseña inválidos.", 7);
                 }
             }
             catch (Exception ex)
             {
-                ErrorMessage = $"Error al iniciar sesión: {ex.Message}";
+                await ShowTemporaryErrorMessage($"Error: {ex.Message}", 10);
             }
         }
 
@@ -111,18 +137,7 @@ namespace DeluxeCarsDesktop.ViewModel
 
         private void ExecuteShowRegisterView(object obj)
         {
-            // Esta lógica para mostrar la vista de registro está bien.
-            var registerView = _serviceProvider.GetService<RegistroView>();
-            var registerViewModel = registerView.DataContext as RegistroViewModel;
-
-            if (registerViewModel != null)
-            {
-                registerViewModel.RegistrationCancelled += () =>
-                {
-                    registerView.Close();
-                };
-            }
-            registerView.ShowDialog();
+            ShowRegisterViewRequested?.Invoke();
         }
     }
 }

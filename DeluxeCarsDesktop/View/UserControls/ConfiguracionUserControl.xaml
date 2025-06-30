@@ -5,138 +5,104 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
              mc:Ignorable="d"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              d:DesignHeight="700" d:DesignWidth="1000"
-             xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
-             Background="Transparent"
-             FontFamily="Montserrat"
-             Foreground="#E0E6F1">
+             Background="{DynamicResource MaterialDesignPaper}"
+             Foreground="{DynamicResource MaterialDesignBody}">
 
-    <UserControl.Resources>
-        <Style x:Key="FormLabelStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Margin" Value="0,0,15,0"/>
-        </Style>
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="24">
 
-        <Style x:Key="FormInputStyle" TargetType="TextBox">
-            <Setter Property="Background" Value="#1F2A44" />
-            <Setter Property="Foreground" Value="#E0E6F1" />
-            <Setter Property="BorderBrush" Value="#4D5B7C" />
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Height" Value="35"/>
-            <Setter Property="Padding" Value="10,0"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="TextBox">
-                        <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10">
-                            <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="#28AEED"/>
-                            </Trigger>
-                            <Trigger Property="IsKeyboardFocused" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="#28AEED"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+                <!-- Título de la Sección -->
+                <TextBlock Text="Configuración General" 
+                           Style="{StaticResource MaterialDesignHeadline4TextBlock}" 
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,24"/>
 
-        <Style x:Key="ActionButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="#1F2A44"/>
-            <Setter Property="Foreground" Value="#E0E6F1"/>
-            <Setter Property="BorderBrush" Value="#4D5B7C"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="MinWidth" Value="180"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border" CornerRadius="15" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
-                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#2C3A5A"/>
-                                <Setter TargetName="border" Property="BorderBrush" Value="#28AEED"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </UserControl.Resources>
+                <!-- Tarjeta de Información de la Empresa -->
+                <materialDesign:Card Padding="16" Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Text="Información de la Empresa" 
+                                   Style="{StaticResource MaterialDesignHeadline6TextBlock}" 
+                                   Margin="0,0,0,16"/>
 
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+                        <TextBox Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                 materialDesign:HintAssist.Hint="Nombre de la Tienda"
+                                 Text="{Binding NombreTienda, UpdateSourceTrigger=PropertyChanged}"/>
 
-        <TextBlock Grid.Row="0" Text="Nombre de la Tienda" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,25"/>
+                        <TextBox Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                 materialDesign:HintAssist.Hint="Dirección"
+                                 Margin="0,16,0,0"
+                                 Text="{Binding Direccion, UpdateSourceTrigger=PropertyChanged}"/>
 
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2.5*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+                        <TextBox Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                 materialDesign:HintAssist.Hint="Teléfono"
+                                 Margin="0,16,0,0"
+                                 Text="{Binding Telefono, UpdateSourceTrigger=PropertyChanged}"/>
 
-            <Grid Grid.Column="0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+                        <TextBox Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                 materialDesign:HintAssist.Hint="Email"
+                                 Margin="0,16,0,0"
+                                 Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"/>
 
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="Dirección" Style="{StaticResource FormLabelStyle}"/>
-                <TextBox   Grid.Row="0" Grid.Column="1" Style="{StaticResource FormInputStyle}" Margin="0,5"/>
+                        <TextBox Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                 materialDesign:HintAssist.Hint="Horario de Atención"
+                                 Margin="0,16,0,0"
+                                 Text="{Binding HorarioAtencion, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+                </materialDesign:Card>
 
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="Teléfono" Style="{StaticResource FormLabelStyle}"/>
-                <TextBox   Grid.Row="1" Grid.Column="1" Style="{StaticResource FormInputStyle}" Margin="0,5"/>
+                <!-- Tarjeta de Configuración Financiera -->
+                <materialDesign:Card Padding="16" Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Text="Configuración Financiera" 
+                                   Style="{StaticResource MaterialDesignHeadline6TextBlock}" 
+                                   Margin="0,0,0,16"/>
 
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="Email" Style="{StaticResource FormLabelStyle}"/>
-                <TextBox   Grid.Row="2" Grid.Column="1" Style="{StaticResource FormInputStyle}" Margin="0,5"/>
+                        <TextBox Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                 materialDesign:HintAssist.Hint="Porcentaje de IVA"
+                                 materialDesign:TextFieldAssist.SuffixText="%"
+                                 Text="{Binding PorcentajeIVA, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+                </materialDesign:Card>
 
-                <TextBlock Grid.Row="3" Grid.Column="0" Text="Horario de Atención" Style="{StaticResource FormLabelStyle}"/>
-                <TextBox   Grid.Row="3" Grid.Column="1" Style="{StaticResource FormInputStyle}" Margin="0,5"/>
+                <!-- Tarjeta de Seguridad y Personalización -->
+                <materialDesign:Card Padding="16">
+                    <StackPanel>
+                        <TextBlock Text="Seguridad y Personalización" 
+                                   Style="{StaticResource MaterialDesignHeadline6TextBlock}" 
+                                   Margin="0,0,0,16"/>
 
-                <TextBlock Grid.Row="4" Grid.Column="0" Text="Descripción" Style="{StaticResource FormLabelStyle}"/>
-                <TextBox   Grid.Row="4" Grid.Column="1" Style="{StaticResource FormInputStyle}" Margin="0,5"/>
-            </Grid>
+                        <WrapPanel>
+                            <Button Content="Cambiar PIN de Administrador" 
+                                     Style="{StaticResource MaterialDesignOutlinedButton}"
+                                     Command="{Binding CambiarPinCommand}"
+                                     Margin="0,0,8,8"/>
 
-            <StackPanel Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Top">
-                <Border Width="150" Height="150" CornerRadius="10" BorderBrush="#4D5B7C" BorderThickness="1" Background="#1F2A44" Margin="0,5,0,0">
-                    <fa:IconImage Icon="Image" Foreground="#4D5B7C" Width="60" Height="60"/>
-                </Border>
-                <Button Content="Cambiar logo" Style="{StaticResource ActionButtonStyle}" Margin="0,15,0,0" Width="150"/>
+                            <Button Content="Cambiar Logo"
+                                     Style="{StaticResource MaterialDesignOutlinedButton}"
+                                     Command="{Binding CambiarLogoCommand}"
+                                     Margin="0,0,8,8"/>
+
+                            <Button Content="Cambiar Banner"
+                                     Style="{StaticResource MaterialDesignOutlinedButton}"
+                                     Command="{Binding CambiarBannerCommand}"
+                                     Margin="0,0,8,8"/>
+                        </WrapPanel>
+                    </StackPanel>
+                </materialDesign:Card>
             </StackPanel>
-        </Grid>
+        </ScrollViewer>
 
-        <Border Grid.Row="2" CornerRadius="15" Background="#1F2A44" BorderBrush="#4D5B7C" BorderThickness="1" Margin="0,30,0,0">
-            <TextBlock Text="Banner de mi marca" FontSize="22" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.5"/>
-        </Border>
-
-        <Grid Grid.Row="3" Margin="0,20,0,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <Button Grid.Column="0" Content="Guardar Config" Style="{StaticResource ActionButtonStyle}" HorizontalAlignment="Left"/>
-            <Button Grid.Column="1" Content="Cambiar banner" Style="{StaticResource ActionButtonStyle}" HorizontalAlignment="Right"/>
-        </Grid>
-
+        <!-- Botón Flotante para Guardar Cambios -->
+        <Button Style="{StaticResource MaterialDesignFloatingActionButton}"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Margin="32"
+                ToolTip="Guardar Cambios"
+                Command="{Binding GuardarCambiosCommand}">
+            <materialDesign:PackIcon Kind="ContentSave" Height="24" Width="24" />
+        </Button>
     </Grid>
 </UserControl>

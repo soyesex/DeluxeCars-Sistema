@@ -79,6 +79,71 @@ namespace DeluxeCarsDesktop.Migrations
                     b.ToTable("Clientes");
                 });
 
+            modelBuilder.Entity("DeluxeCarsDesktop.Models.Configuracion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<byte[]>("AdminPINHash")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("AdminPINSalt")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("Banner")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("Direccion")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("HorarioAtencion")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<byte[]>("Logo")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("NombreTienda")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<decimal>("PorcentajeIVA")
+                        .HasColumnType("decimal(5, 2)");
+
+                    b.Property<string>("Telefono")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Configuraciones");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Direccion = "La rosita",
+                            Email = "deluxecars@gmail.com",
+                            HorarioAtencion = "Lunes a Viernes de 8am a 6pm",
+                            NombreTienda = "Deluxe Cars",
+                            PorcentajeIVA = 19.0m,
+                            Telefono = "3001234567"
+                        });
+                });
+
             modelBuilder.Entity("DeluxeCarsDesktop.Models.Departamento", b =>
                 {
                     b.Property<int>("Id")
@@ -292,15 +357,6 @@ namespace DeluxeCarsDesktop.Migrations
 
                     b.Property<string>("Observaciones")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal?>("SubTotal")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<decimal?>("Total")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<decimal?>("TotalIVA")
-                        .HasColumnType("decimal(18, 2)");
 
                     b.HasKey("Id");
 
@@ -1179,7 +1235,7 @@ namespace DeluxeCarsDesktop.Migrations
                         .IsRequired();
 
                     b.HasOne("DeluxeCarsDesktop.Models.Factura", "Factura")
-                        .WithMany("FacturasElectronicas")
+                        .WithMany()
                         .HasForeignKey("FacturaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1479,8 +1535,6 @@ namespace DeluxeCarsDesktop.Migrations
             modelBuilder.Entity("DeluxeCarsDesktop.Models.Factura", b =>
                 {
                     b.Navigation("DetallesFactura");
-
-                    b.Navigation("FacturasElectronicas");
 
                     b.Navigation("NotasDeCredito");
 

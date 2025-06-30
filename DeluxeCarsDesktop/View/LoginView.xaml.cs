@@ -20,28 +20,16 @@ namespace DeluxeCarsDesktop.View
     /// </summary>
     public partial class LoginView : Window
     {
-        public LoginView(LoginViewModel viewModel)
+        public LoginView()
         {
             InitializeComponent();
-            DataContext = viewModel;
-            viewModel.LoginSuccess += OnLoginSuccess;
         }
-
-        private void OnLoginSuccess()
+        private void Window_MouseLeftButtonDown_ClearFocus(object sender, MouseButtonEventArgs e)
         {
-            // Este método ahora es invocado por el ViewModel.
-            // La vista se oculta a sí misma, pero no crea la nueva.
-            this.Hide();
+            // Forzamos que el foco del teclado se quite de cualquier control que lo tenga
+            Keyboard.ClearFocus();
         }
-
-        private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
-        {
-            if (DataContext is LoginViewModel vm && sender is PasswordBox pb)
-            {
-                vm.Password = pb.SecurePassword;
-            }
-        }
-
+                
         private void Window_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed)

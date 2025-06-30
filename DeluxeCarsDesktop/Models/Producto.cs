@@ -9,61 +9,44 @@ using System.Threading.Tasks;
 
 namespace DeluxeCarsDesktop.Models
 {
-    public class Producto : ViewModelBase
+    public class Producto
     {
-        private int _id;
+        // Se usan auto-propiedades, que es el estándar para modelos de EF.
+        // La lógica de notificación (SetProperty) pertenece a los ViewModels, no aquí.
         [Key]
-        public int Id { get => _id; set => SetProperty(ref _id, value); }
+        public int Id { get; set; }
 
-        private int _idCategoria;
-        public int IdCategoria { get => _idCategoria; set => SetProperty(ref _idCategoria, value); }
+        public int IdCategoria { get; set; }
 
-        private string _originalEquipamentManufacture;
-        public string OriginalEquipamentManufacture { get => _originalEquipamentManufacture; set => SetProperty(ref _originalEquipamentManufacture, value); }
+        public string OriginalEquipamentManufacture { get; set; }
 
-        private string _nombre;
         [Required]
         [StringLength(60)]
-        public string Nombre { get => _nombre; set => SetProperty(ref _nombre, value); }
+        public string Nombre { get; set; }
 
-        private decimal _precio;
-        public decimal Precio { get => _precio; set => SetProperty(ref _precio, value); }
+        public decimal Precio { get; set; }
 
-        private string _descripcion;
-        public string Descripcion { get => _descripcion; set => SetProperty(ref _descripcion, value); }
+        public string Descripcion { get; set; }
 
-        private bool _estado;
-        public bool Estado { get => _estado; set => SetProperty(ref _estado, value); }
+        public bool Estado { get; set; }
 
-        private string? _imagenUrl;
-        public string? ImagenUrl { get => _imagenUrl; set => SetProperty(ref _imagenUrl, value); }
+        public string? ImagenUrl { get; set; }
 
         // --- Nuevas Columnas de la Fase 1 ---
-        private int? _stockMinimo;
-        public int? StockMinimo { get => _stockMinimo; set => SetProperty(ref _stockMinimo, value); }
+        public int? StockMinimo { get; set; }
 
-        private int? _stockMaximo;
-        public int? StockMaximo { get => _stockMaximo; set => SetProperty(ref _stockMaximo, value); }
-        private decimal? _ultimoPrecioCompra;
-        public decimal? UltimoPrecioCompra
-        {
-            get => _ultimoPrecioCompra;
-            set => SetProperty(ref _ultimoPrecioCompra, value);
-        }
+        public int? StockMaximo { get; set; }
+
+        public decimal? UltimoPrecioCompra { get; set; }
+
+        [StringLength(20)]
+        public string? UnidadMedida { get; set; }
+
 
         // --- Propiedades de Navegación ---
-        private Categoria _categoria;
-        public virtual Categoria Categoria { get => _categoria; set => SetProperty(ref _categoria, value); }
+        public virtual Categoria Categoria { get; set; }
 
-        private string _unidadMedida;
-        [StringLength(20)] // Es bueno definir un largo máximo
-        public string? UnidadMedida
-        {
-            get => _unidadMedida;
-            set => SetProperty(ref _unidadMedida, value);
-        }
-
-        public virtual ICollection<DetalleNotaDeCredito> DetallesNotaDeCredito { get; set; }
+        public virtual ICollection<DetalleNotaDeCredito> DetallesNotaDeCredito { get; set; } = new HashSet<DetalleNotaDeCredito>();
         public virtual ICollection<DetallePedido> DetallesPedidos { get; set; } = new HashSet<DetallePedido>();
         public virtual ICollection<ProductoProveedor> ProductoProveedores { get; set; } = new HashSet<ProductoProveedor>();
     }

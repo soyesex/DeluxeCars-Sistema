@@ -5,9 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DeluxeCarsDesktop.View"
         mc:Ignorable="d"
+        xmlns:behaviors="clr-namespace:DeluxeCarsDesktop.Behaviors"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
         xmlns:viewModel="clr-namespace:DeluxeCarsDesktop.ViewModel"
         xmlns:customcontrols="clr-namespace:DeluxeCarsDesktop.CustomControls"
-        Title="Registrate!"  Height="550" Width="800"
+        Title="Deluxe Cars - Crear Cuenta"  Height="550" Width="800"
         WindowStyle="None"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
@@ -22,318 +25,232 @@
     <Window.Visibility>
         <Binding Path="IsViewVisible" Mode="TwoWay" Converter="{StaticResource BooleanToVisibility}"/>
     </Window.Visibility>
+    
+    <materialDesign:DialogHost Identifier="PinDialog" 
+                             IsOpen="{Binding IsPinDialogOpen}">
 
-    <Border CornerRadius="15">
-        <Border.Background>
-            <ImageBrush ImageSource="C:\Users\suare\Source\Repos\DeluxeCarsUI\DeluxeCarsDesktop\Images\register.jpg"/>
-        </Border.Background>
+        <!-- El contenido del diálogo del PIN -->
+        <materialDesign:DialogHost.DialogContent>
+            <StackPanel Margin="16">
+                <TextBlock Text="Se requiere autorización" FontWeight="Bold" Margin="0,0,0,8"/>
+                <TextBlock Text="Para asignar el rol de Administrador, por favor, ingrese el PIN de seguridad." TextWrapping="Wrap"/>
 
-        <Border CornerRadius="12"
-    BorderThickness="3">
+                <PasswordBox materialDesign:HintAssist.Hint="PIN de Administrador"
+                         Style="{StaticResource MaterialDesignFloatingHintPasswordBox}"
+                         Margin="0,16,0,8"
+                         materialDesign:PasswordBoxAssist.Password="{Binding AdminPin, UpdateSourceTrigger=PropertyChanged}"/>
 
-            <Border.BorderBrush>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="{StaticResource Color.Aggressive.RacingRed}" Offset="0"/>
-                    <GradientStop Color="{StaticResource Color.Aggressive.DeepBlue}" Offset="0.5"/>
-                    <GradientStop Color="{StaticResource Color.Aggressive.DeepBlue}" Offset="1"/>
-                </LinearGradientBrush>
-            </Border.BorderBrush>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <!-- El CommandParameter envía 'false' si se cancela -->
+                    <Button Style="{StaticResource MaterialDesignFlatButton}"
+                        Content="CANCELAR"
+                        Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                        CommandParameter="false"/>
+                    <!-- El CommandParameter envía 'true' si se acepta -->
+                    <Button Style="{StaticResource MaterialDesignFlatButton}"
+                        Content="ACEPTAR"
+                        Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                        CommandParameter="true"/>
+                </StackPanel>
+            </StackPanel>
+        </materialDesign:DialogHost.DialogContent>
 
+        <!-- AQUÍ VA TODO TU CONTENIDO ACTUAL DE LA VENTANA (el Border, el Grid, etc.) -->
+        <Border CornerRadius="15">
             <Border.Background>
-                <LinearGradientBrush StartPoint="0,1" EndPoint="1,0" Opacity="0.75">
-                    <GradientStop Color="{StaticResource Color.PrimaryBack1}" Offset="0"/>
-                    <GradientStop Color="{StaticResource Color.PrimaryBack2}" Offset="0.65"/>
-                </LinearGradientBrush>
+                <ImageBrush ImageSource="C:\Users\suare\Source\Repos\DeluxeCarsUI\DeluxeCarsDesktop\Images\register.jpg"/>
             </Border.Background>
 
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="30"/>
-                    <RowDefinition/>
-                </Grid.RowDefinitions>
+            <Border CornerRadius="12"
+BorderThickness="3">
+
+                <Border.BorderBrush>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#0A0E21" Offset="0"/>
+                        <GradientStop Color="#0A0E21" Offset="0.3"/>
+                        <GradientStop Color="#C8C8C8" Offset="0.8"/>
+                    </LinearGradientBrush>
+                </Border.BorderBrush>
+
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,1" EndPoint="1,0" Opacity="0.75">
+                        <GradientStop Color="{StaticResource Color.PrimaryBack1}" Offset="0"/>
+                        <GradientStop Color="{StaticResource Color.PrimaryBack2}" Offset="0.65"/>
+                    </LinearGradientBrush>
+                </Border.Background>
 
                 <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition Width="30"/>
-                        <ColumnDefinition Width="30"/>
-                        <ColumnDefinition Width="5"/>
-                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                    <TextBlock Text="Registro"
-                               Foreground="DarkGray"
-                               FontSize="12"
-                               FontFamily="{StaticResource Font.SourceSans3}"
-                               Grid.Column="0"
-                               VerticalAlignment="Center"
-                               Margin="10,0,0,0"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
+                        </Grid.ColumnDefinitions>
 
-                    <Button x:Name="btnMinimize"
-                            BorderThickness="0"
-                            Content="-"
-                            Foreground="White"
-                            FontSize="16"
-                            FontFamily="Montserrat"
-                            Cursor="Hand"
-                            Grid.Column="1"
-                            Click="btnMinimize_Click">
+                        <TextBlock Text="Crear Cuenta"
+                           Foreground="DarkGray"
+                           FontSize="12"
+                           FontFamily="{StaticResource Font.SourceSans3}"
+                           Grid.Column="0"
+                           VerticalAlignment="Center"
+                           Margin="5,0,0,0"/>
 
-                        <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="Background" Value="{StaticResource Brush.Aggressive.DeepBlue}"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource Brush.Aggressive.DarkerBlue}"/>
-                                    </Trigger>
-                                </Style.Triggers>
+                        <Button x:Name="btnMinimize"
+                        Grid.Column="1"
+                        Style="{StaticResource controlButton}"
+                        Tag="{StaticResource color4}"
+                        Click="btnMinimize_Click"
+                        Margin="0">
+                            <fa:IconImage Icon="WindowMinimize" Style="{StaticResource controlButtonIcon}" Width="12"/>
+                        </Button>
+
+                        <Button x:Name="btnClose"
+                        Grid.Column="2"
+                        Style="{StaticResource controlButton}"
+                        Tag="{StaticResource color4}"
+                        Click="btnClose_Click"
+                        Margin="0">
+                            <fa:IconImage Icon="Xmark" Style="{StaticResource controlButtonIcon}"/>
+                        </Button>
+
+                    </Grid>
+
+                    <StackPanel Grid.Row="1">
+                        <TextBlock Text=" DELUXE CARS"
+                           Foreground="White"
+                           FontSize="45"
+                           Style="{StaticResource ProfessionalFadeInStyle}"
+                           FontFamily="{StaticResource Font.Poppins}"
+                           FontWeight="UltraBlack"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Margin="0 0 0 0"/>
+                    </StackPanel>
+
+                    <StackPanel Width="325"
+                        Grid.Row="2"
+                        Orientation="Vertical"
+                        HorizontalAlignment="Center"
+                        Margin="0">
+
+                        <!-- Los estilos base ya definen la mayoría de las propiedades,
+     lo que nos permite tener un XAML mucho más limpio abajo. -->
+                        <StackPanel.Resources>
+                            <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}">
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="BorderBrush" Value="DarkGray"/>
+                                <Setter Property="FontFamily" Value="{StaticResource Font.SourceSans3}"/>
+                                <Setter Property="FontSize" Value="15"/>
+                                <Setter Property="FontWeight" Value="Medium"/>
+                                <!-- Espaciado vertical consistente para todos los campos -->
+                                <Setter Property="Margin" Value="0,20,0,0"/>
                             </Style>
-                        </Button.Style>
+                            <Style TargetType="PasswordBox" BasedOn="{StaticResource MaterialDesignFloatingHintPasswordBox}">
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="FontFamily" Value="{StaticResource Font.SourceSans3}"/>
+                                <Setter Property="FontSize" Value="15"/>
+                                <Setter Property="FontWeight" Value="Medium"/>
+                                <Setter Property="BorderBrush" Value="DarkGray"/>
+                                <Setter Property="Margin" Value="0,20,0,0"/>
+                            </Style>
+                        </StackPanel.Resources>
 
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border Width="18" Height="18"
-                                        CornerRadius="9"
-                                        Background="{TemplateBinding Background}">
-                                    <ContentPresenter VerticalAlignment="Center"
-                                                      HorizontalAlignment="Center"/>
-                                </Border>
-                            </ControlTemplate>
-                        </Button.Template>
+                        <!-- Todos los campos de texto ahora son idénticos en su estructura,
+     confiando en el estilo para su apariencia. -->
 
-                    </Button>
+                        <TextBox Text="{Binding NombreUsuario, UpdateSourceTrigger=PropertyChanged}"
+                         materialDesign:HintAssist.Hint="Nombre completo"
+                         behaviors:InputBehaviors.SoloLetras="True"
+                         behaviors:InputBehaviors.EnterNavegaAlSiguiente="True"
+                         Margin="0 10 0 0"
+                         materialDesign:TextFieldAssist.HasClearButton="True"/>
 
-                    <Button x:Name="btnClose"
-                            BorderThickness="0"
-                            Content="X"
-                            Foreground="White"
+                        <TextBox Text="{Binding TelefonoFormateado, UpdateSourceTrigger=PropertyChanged}"
+                         materialDesign:HintAssist.Hint="Teléfono"
+                         behaviors:InputBehaviors.SoloNumeros="True"
+                         behaviors:InputBehaviors.EnterNavegaAlSiguiente="True"
+                         materialDesign:TextFieldAssist.HasClearButton="True"/>
+
+                        <TextBox Text="{Binding EmailUsuario, UpdateSourceTrigger=PropertyChanged}"
+                         materialDesign:HintAssist.Hint="Correo electrónico"
+                         behaviors:InputBehaviors.EnterNavegaAlSiguiente="True"
+                         behaviors:InputBehaviors.ValidaEmail="True"
+                         materialDesign:TextFieldAssist.HasClearButton="True"/>
+
+                        <PasswordBox materialDesign:HintAssist.Hint="Contraseña"
+                             materialDesign:PasswordBoxAssist.Password="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             materialDesign:PasswordBoxAssist.IsPasswordRevealed="False"
+                             behaviors:InputBehaviors.EnterNavegaAlSiguiente="True"
+                             materialDesign:TextFieldAssist.HasClearButton="True"/>
+
+                        <PasswordBox materialDesign:HintAssist.Hint="Confirmar Contraseña"
+                             materialDesign:PasswordBoxAssist.Password="{Binding ConfirmPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             materialDesign:PasswordBoxAssist.IsPasswordRevealed="False"
+                             behaviors:InputBehaviors.EnterNavegaAlSiguiente="True"
+                             materialDesign:TextFieldAssist.HasClearButton="True"/>
+
+                        <!-- CAMBIO CLAVE: El ComboBox ahora se comporta como los demás campos -->
+                        <ComboBox ItemsSource="{Binding RolesDisponibles}"
+                          SelectedItem="{Binding RolSeleccionado}"
+                          DisplayMemberPath="Nombre"
+                          FontSize="15"
+                          FontWeight="Medium"
+                          FontFamily="{StaticResource Font.SourceSans3}"
+                          materialDesign:HintAssist.Hint="Rol"
+                          Style="{StaticResource MaterialDesignFloatingHintComboBox}"
+                          Foreground="DarkGray"
+                          BorderBrush="DarkGray"
+                          Margin="0,20,0,0"/>
+
+                        <TextBlock Text="{Binding ErrorMessage}"
+                            Foreground="#D7596D"
                             FontSize="12"
-                            FontFamily="Montserrat"
-                            Cursor="Hand"
-                            Grid.Column="2"
-                            Click="btnClose_Click">
-                        <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="Background" Value="{StaticResource Brush.Aggressive.RacingRed}"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#C62DAE"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
+                           FontFamily="{StaticResource Font.SourceSans3}"
+                            FontWeight="Medium"
+                            Margin="0,5,0,0"
+                            TextWrapping="Wrap"/>
 
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border Width="18" Height="18"
-                                        CornerRadius="9"
-                                        Background="{TemplateBinding Background}">
-                                    <ContentPresenter VerticalAlignment="Center"
-                                                      HorizontalAlignment="Center"/>
-                                </Border>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
+                    </StackPanel>
+
+                    <!-- Usamos un Grid para alinear los botones horizontalmente -->
+                    <Grid Grid.Row="3" Margin="0,0,0,0"
+                  VerticalAlignment="Center"
+                  HorizontalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="140"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- BOTÓN DE REGISTRAR -->
+                        <Button x:Name="btnRegistrar"
+                        Grid.Column="0"
+                        Command="{Binding RegistrarCommand}"
+                        Content="Registrarme"
+                        Style="{StaticResource ElegantGhostButtonStyle}"
+                        Tag="DarkGray"
+                        Margin="0,0,22.5,0"/>
+
+                        <!-- BOTÓN DE REGRESAR (Refactorizado) -->
+                        <Button x:Name="btnVolverLogin"
+                        Grid.Column="1"
+                        Command="{Binding NavigateBackToLoginCommand}"
+                        Content="Regresar"
+                        Style="{StaticResource ElegantGhostButtonStyle}"
+                        Tag="DarkGray"
+                    Margin="22.5,0,0,0"/>
+                    </Grid>
+
                 </Grid>
 
-                <StackPanel Width="250"
-                            Grid.Row="1"
-                            Orientation="Vertical"
-                            Margin="272,0,272,0">
-
-                    <TextBlock Text=" DELUXE CARS"
-                               Foreground="White"
-                               FontSize="25"
-                               Margin="10 30 10 20"
-                               FontWeight="Bold"
-                               Style="{StaticResource H1TextStyle}" 
-                               HorizontalAlignment="Center"/> 
-
-                    <TextBlock Text="Nombre completo"
-                               Foreground="DarkGray"
-                               FontSize="13"
-                               FontWeight="Medium"
-                               FontFamily="{StaticResource Font.SourceSans3}"
-                               Margin="0,10,0,0"/>
-
-                    <TextBox x:Name="txtNombre"
-                             Text="{Binding NombreUsuario, UpdateSourceTrigger=PropertyChanged}"
-                             FontSize="13"
-                             FontWeight="Medium"
-                             FontFamily="{StaticResource Font.SourceSans3}"
-                             Background="Transparent"
-                             Foreground="White"
-                             CaretBrush="LightGray"
-                             BorderBrush="DarkGray"
-                             BorderThickness="0,0,0,1"
-                             Height="28"
-                             VerticalContentAlignment="Center"
-                             Margin="0,0,0,0"/>
-
-                    <TextBlock Text="Telefono"
-                               Foreground="DarkGray"
-                               FontSize="13"
-                               FontWeight="Medium"
-                               FontFamily="{StaticResource Font.SourceSans3}"
-                               Margin="0,5,0,0"/>
-
-                    <TextBox x:Name="txtTelefono"
-                             Text="{Binding TelefonoUsuario, UpdateSourceTrigger=PropertyChanged}"
-                             FontSize="13"
-                             FontWeight="Medium"
-                             FontFamily="{StaticResource Font.SourceSans3}"
-                             Background="Transparent"
-                             Foreground="White"
-                             CaretBrush="LightGray"
-                             BorderBrush="DarkGray"
-                             BorderThickness="0,0,0,1"
-                             Height="28"
-                             VerticalContentAlignment="Center"
-                             Margin="0,0,0,0"/>
-                    
-                    <TextBlock Text="Correo electronico"
-                               Foreground="DarkGray"
-                               FontSize="13"
-                               FontWeight="Medium"
-                               FontFamily="{StaticResource Font.SourceSans3}"
-                               Margin="0,5,0,0"/>
-
-                    <TextBox x:Name="txtEmail"
-                             Text="{Binding EmailUsuario, UpdateSourceTrigger=PropertyChanged}"
-                             FontSize="13"
-                             FontWeight="Medium"
-                             FontFamily="{StaticResource Font.SourceSans3}"
-                             Background="Transparent"
-                             Foreground="White"
-                             CaretBrush="LightGray"
-                             BorderBrush="DarkGray"
-                             BorderThickness="0,0,0,1"
-                             Height="28"
-                             VerticalContentAlignment="Center"
-                             Margin="0,0,0,0"/>
-
-                    <TextBlock Text="Contraseña"
-                               Foreground="DarkGray"
-                               FontSize="13"
-                               FontWeight="Medium"
-                               FontFamily="{StaticResource Font.SourceSans3}"
-                               Margin="0,5,0,0"/>
-
-                    <customcontrols:BindablePasswordBox Password="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    Height="28"
-                    Margin="0,3,0,0">   
-                    </customcontrols:BindablePasswordBox>
-
-
-                    <TextBlock Text="Confirmar Contraseña"
-                               Foreground="DarkGray"
-                               FontSize="13"
-                               FontWeight="Medium"
-                               FontFamily="{StaticResource Font.SourceSans3}"
-                               Margin="0,5,0,0"/>
-
-                    <customcontrols:BindablePasswordBox Password="{Binding ConfirmPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    Height="28"
-                    Margin="0,3,0,0">   
-                    </customcontrols:BindablePasswordBox>
-
-                    <TextBlock Text="Rol"
-                               Foreground="DarkGray"
-                               FontSize="13"
-                               FontWeight="Medium"
-                               FontFamily="{StaticResource Font.SourceSans3}"
-                               Margin="0,5,0,0"/>
-
-                    <ComboBox ItemsSource="{Binding RolesDisponibles}"
-                              Style="{StaticResource DarkComboBoxStyle}"
-                              SelectedItem="{Binding RolSeleccionado}"
-                              DisplayMemberPath="Nombre"
-                              FontFamily="{StaticResource Font.SourceSans3}"
-                              Height="28"
-                              Margin="0,3,0,0"/>
-
-
-
-                    <TextBlock Text="{Binding ErrorMessage}"
-                               Foreground="#D7596D"
-                               FontSize="12"
-                               FontWeight="Medium"
-                               FontFamily="{StaticResource Font.SourceSans3}"
-                               Margin="0,7,0,0"
-                               TextWrapping="Wrap"/>
-
-                    <Button x:Name="btnRegistrar"
-                            Command="{Binding RegistrarCommand}"
-                            BorderThickness="0"
-                            Content="Registrarme"
-                            FontWeight="SemiBold"
-                            Foreground="White"
-                            FontSize="15"
-                            FontFamily="{StaticResource Font.SourceSans3}"
-                            Cursor="Hand"
-                            Grid.Column="2"
-                            Margin="0,10,0,0">
-
-                        <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="Background" Value="{StaticResource Brush.Aggressive.RacingRed}"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#28AEED"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border Width="150" Height="25"
-                                        CornerRadius="10"
-                                        Background="{TemplateBinding Background}">
-                                    <ContentPresenter VerticalAlignment="Center"
-                                                      HorizontalAlignment="Center"/>
-                                </Border>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
-
-                    <Button x:Name="btnVolverLogin"
-                            Command="{Binding NavigateBackToLoginCommand}"
-                            Content="Regresar loggin"
-                            Foreground="White"
-                            FontSize="15"
-                            FontWeight="SemiBold"
-                            FontFamily="{StaticResource Font.SourceSans3}"
-                            Cursor="Hand"
-                            Grid.Column="2"
-                            Margin="0,10,10,0">
-
-                        <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="Background" Value="Transparent"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource Brush.Aggressive.DarkerBlue}"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border Width="150" Height="20"
-                    CornerRadius="10"
-                    Background="{TemplateBinding Background}">
-                                    <ContentPresenter VerticalAlignment="Center"
-                    HorizontalAlignment="Center"/>
-                                </Border>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
-                    
-                </StackPanel>
-
-            </Grid>
-
+            </Border>
         </Border>
-    </Border>
+
+    </materialDesign:DialogHost>
 </Window>

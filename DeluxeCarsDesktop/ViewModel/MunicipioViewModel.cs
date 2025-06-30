@@ -12,7 +12,7 @@ using System.Windows.Input;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
-    public class MunicipioViewModel : ViewModelBase
+    public class MunicipioViewModel : ViewModelBase, IAsyncLoadable
     {
         // --- Dependencias ---
         private readonly IUnitOfWork _unitOfWork;
@@ -65,12 +65,10 @@ namespace DeluxeCarsDesktop.ViewModel
             NuevoMunicipioCommand = new ViewModelCommand(ExecuteNuevoMunicipioCommand);
             EditarMunicipioCommand = new ViewModelCommand(ExecuteEditarMunicipioCommand, CanExecuteActions);
             ToggleEstadoCommand = new ViewModelCommand(ExecuteToggleEstadoCommand, CanExecuteActions);
-
-            LoadInitialDataAsync();
         }
 
         // --- Métodos de Lógica ---
-        private async Task LoadInitialDataAsync()
+        public async Task LoadAsync()
         {
             await LoadDepartamentosAsync();
             await LoadMunicipiosAsync();
@@ -136,14 +134,14 @@ namespace DeluxeCarsDesktop.ViewModel
         private async void ExecuteNuevoMunicipioCommand(object obj)
         {
             await _navigationService.OpenFormWindow(Utils.FormType.Municipio, 0);
-            await LoadInitialDataAsync(); // Recargamos todo por si hay nuevos departamentos o municipios
+            await LoadAsync(); // Recargamos todo por si hay nuevos departamentos o municipios
         }
 
         private async void ExecuteEditarMunicipioCommand(object obj)
         {
             // Le pasamos el ID del producto seleccionado
             await _navigationService.OpenFormWindow(Utils.FormType.Municipio, MunicipioSeleccionado.Id);
-            await LoadInitialDataAsync();
+            await LoadAsync();
         }
 
         private async void ExecuteToggleEstadoCommand(object obj)

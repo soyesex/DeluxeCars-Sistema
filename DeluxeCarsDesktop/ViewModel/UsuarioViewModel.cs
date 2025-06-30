@@ -12,7 +12,7 @@ using System.Windows.Input;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
-    public class UsuarioViewModel : ViewModelBase
+    public class UsuarioViewModel : ViewModelBase, IAsyncLoadable
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly INavigationService _navigationService;
@@ -61,11 +61,9 @@ namespace DeluxeCarsDesktop.ViewModel
             EditarUsuarioCommand = new ViewModelCommand(async p => await ExecuteEditarUsuarioCommand(), p => CanExecuteActions());
             CambiarPasswordCommand = new ViewModelCommand(async p => await ExecuteCambiarPasswordCommand(), p => CanExecuteActions());
             ToggleEstadoCommand = new ViewModelCommand(async p => await ExecuteToggleEstadoCommand(), p => CanExecuteActions());
-
-            LoadUsuariosAsync();
         }
 
-        private async Task LoadUsuariosAsync()
+        public async Task LoadAsync()
         {
             try
             {
@@ -98,13 +96,13 @@ namespace DeluxeCarsDesktop.ViewModel
         private async Task ExecuteNuevoUsuarioCommand()
         {
             await _navigationService.OpenFormWindow(Utils.FormType.Usuario, 0);
-            await LoadUsuariosAsync();
+            await LoadAsync();
         }
 
         private async Task ExecuteEditarUsuarioCommand()
         {
             await _navigationService.OpenFormWindow(Utils.FormType.Usuario, UsuarioSeleccionado.Id);
-            await LoadUsuariosAsync();
+            await LoadAsync();
         }
 
         private async Task ExecuteCambiarPasswordCommand()

@@ -5,9 +5,15 @@
     <Color x:Key="Color.Aggressive.RacingRed">#D72638</Color>
     <Color x:Key="Color.Aggressive.DarkerBlue">#061229</Color>
 
+    <Color x:Key="Color.Gray.Chill">#404040</Color>
+    <Color x:Key="Color.White.Chill">#E0E0E0</Color>
+
     <SolidColorBrush x:Key="Brush.Aggressive.DeepBlue" Color="{StaticResource Color.Aggressive.DeepBlue}"/>
     <SolidColorBrush x:Key="Brush.Aggressive.RacingRed" Color="{StaticResource Color.Aggressive.RacingRed}"/>
     <SolidColorBrush x:Key="Brush.Aggressive.DarkerBlue" Color="{StaticResource Color.Aggressive.DarkerBlue}"/>
+
+    <SolidColorBrush x:Key="Brush.Gray" Color="{StaticResource Color.Gray.Chill}"/>
+    <SolidColorBrush x:Key="Brush.White" Color="{StaticResource Color.White.Chill}"/>
 
     <Color x:Key="Color.Tech.Charcoal">#0A192F</Color>
     <Color x:Key="Color.Tech.ElectricBlue">#00BFFF</Color>

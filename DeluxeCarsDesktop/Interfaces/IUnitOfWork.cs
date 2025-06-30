@@ -29,6 +29,7 @@ namespace DeluxeCarsDesktop.Interfaces
         IPagoProveedorRepository PagosProveedores { get; }
         IPagoClienteRepository PagosClientes { get; }
         INotaDeCreditoRepository NotasDeCredito { get; }
+        IConfiguracionRepository Configuraciones { get; }
         // ...Añadir aquí todas las demás interfaces de repositorio
 
         /// <summary>

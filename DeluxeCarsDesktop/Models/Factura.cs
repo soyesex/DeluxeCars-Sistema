@@ -13,62 +13,57 @@ namespace DeluxeCarsDesktop.Models
         public string NumeroFactura { get; set; }
         public DateTime FechaEmision { get; set; }
         public int IdCliente { get; set; }
-        public int? IdUsuario { get; set; } // Nullable
+        public int? IdUsuario { get; set; }
         public int IdMetodoPago { get; set; }
-        // public decimal SaldoPendiente { get; set; } // <-- ELIMINAMOS esta propiedad estática
         public string? Observaciones { get; set; }
-        public decimal? SubTotal { get; set; }
-        public decimal? TotalIVA { get; set; }
-        public decimal? Total { get; set; }
 
-        // --- Navigation Properties ---
+        // --- PROPIEDADES ESTÁTICAS ELIMINADAS ---
+        // public decimal? SubTotal { get; set; } --> Eliminada
+        // public decimal? TotalIVA { get; set; } --> Eliminada
+        // public decimal? Total { get; set; }    --> Eliminada
+
+        // --- Propiedades de Navegación ---
         public virtual Cliente Cliente { get; set; }
         public virtual Usuario Usuario { get; set; }
         public virtual MetodoPago MetodoPago { get; set; }
         public virtual ICollection<DetalleFactura> DetallesFactura { get; set; }
-        public virtual ICollection<FacturaElectronica> FacturasElectronicas { get; set; }
-
-        // --- NUEVA PROPIEDAD DE NAVEGACIÓN ---
-        /// <summary>
-        /// Colección de los enlaces a los pagos que se han recibido para esta factura.
-        /// </summary>
         public virtual ICollection<PagoClienteFactura> PagosRecibidos { get; set; }
         public virtual ICollection<NotaDeCredito> NotasDeCredito { get; set; }
 
-        /// <summary>
-        /// Calcula la suma de todos los pagos positivos (abonos) recibidos para esta factura.
-        /// </summary>
-        [NotMapped]
-        public decimal MontoAbonado => PagosRecibidos?
-            .Select(p => p.PagoCliente)
-            .Where(pc => pc.MontoRecibido > 0)
-            .Sum(pc => pc.MontoRecibido) ?? 0;
+        // --- PROPIEDADES CALCULADAS EN TIEMPO REAL ---
 
-        /// <summary>
-        /// Calcula la suma de todos los créditos (devoluciones) aplicados a esta factura.
-        /// </summary>
+        // Calcula el subtotal sumando los subtotales de cada línea de detalle.
         [NotMapped]
-        public decimal MontoAcreditado => PagosRecibidos?
-            .Select(p => p.PagoCliente)
-            .Where(pc => pc.MontoRecibido < 0)
-            .Sum(pc => pc.MontoRecibido * -1) ?? 0; // Lo volvemos positivo para la resta
+        public decimal SubTotal => DetallesFactura?.Sum(d => d.SubtotalCalculado) ?? 0;
 
-        /// <summary>
-        /// Calcula el saldo real pendiente de pago. Total Original - Abonos - Créditos.
-        /// </summary>
+        // Calcula el IVA total sumando el IVA de cada línea de detalle.
         [NotMapped]
-        public decimal SaldoPendiente => (Total ?? 0) - MontoAbonado - MontoAcreditado;
+        public decimal TotalIVA => DetallesFactura?.Sum(d => d.SubtotalCalculado * (d.IVA ?? 0) / 100) ?? 0;
 
-        /// <summary>
-        /// Determina el estado de pago de la factura basado en su saldo.
-        /// </summary>
+        // Calcula el Total sumando el Subtotal y el IVA calculados.
+        [NotMapped]
+        public decimal Total => SubTotal + TotalIVA;
+
+        // Suma solo los pagos positivos (abonos).
+        [NotMapped]
+        public decimal MontoAbonado => PagosRecibidos?.Select(p => p.PagoCliente).Where(pc => pc.MontoRecibido > 0).Sum(pc => pc.MontoRecibido) ?? 0;
+
+        // Suma solo los pagos negativos (créditos por devolución) y los convierte a positivo para la resta.
+        [NotMapped]
+        public decimal MontoAcreditado => PagosRecibidos?.Select(p => p.PagoCliente).Where(pc => pc.MontoRecibido < 0).Sum(pc => pc.MontoRecibido * -1) ?? 0;
+
+        // La fórmula final y correcta: Total Real - Abonos - Créditos.
+        [NotMapped]
+        public decimal SaldoPendiente => Total - MontoAbonado - MontoAcreditado;
+
+        // Determina el estado de pago basado en el SaldoPendiente real.
         [NotMapped]
         public EstadoPagoFactura EstadoPago
         {
             get
             {
-                // Usamos un margen pequeño para evitar problemas de redondeo con decimales
-                if (SaldoPendiente <= 0.01m) return EstadoPagoFactura.Pagada;
+                if (Total <= 0) return EstadoPagoFactura.Pagada;
+                if (SaldoPendiente <= 0.01m) return EstadoPagoFactura.Pagada; // Margen para errores de redondeo
                 if (MontoAbonado > 0 || MontoAcreditado > 0) return EstadoPagoFactura.Abonada;
                 return EstadoPagoFactura.Pendiente;
             }

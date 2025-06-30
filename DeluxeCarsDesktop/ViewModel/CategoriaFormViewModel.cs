@@ -68,7 +68,7 @@ namespace DeluxeCarsDesktop.ViewModel
 
         // --- Lógica de Carga de Datos ---
         // Este método se llama cuando el formulario anfitrión lo inicializa.
-        public async Task LoadAsync(int ignoredId)
+        public async Task LoadAsync(int entityId)
         {
             await CargarCategoriasAsync();
         }

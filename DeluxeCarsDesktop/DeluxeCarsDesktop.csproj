@@ -7,6 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>icono3.ico</ApplicationIcon>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,6 +17,9 @@
     <None Remove="Fonts\SourceSans3-Light.ttf" />
     <None Remove="Fonts\SourceSans3-Regular.ttf" />
     <None Remove="Fonts\SourceSans3-SemiBold.ttf" />
+    <None Remove="Images\login.jpg" />
+    <None Remove="Images\Products\placeholder.png" />
+    <None Remove="Images\register.jpg" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,6 +29,9 @@
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="FontAwesome.Sharp" Version="6.6.0" />
+    <PackageReference Include="LiveCharts.Wpf.Core" Version="0.9.8" />
+    <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-rc5.4" />
+    <PackageReference Include="MaterialDesignThemes" Version="5.2.1" />
     
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.5">
       <PrivateAssets>all</PrivateAssets>
@@ -37,7 +44,6 @@
     </PackageReference>
     <PackageReference Include="Notifications.Wpf.Core" Version="2.0.1" />
     <PackageReference Include="QuestPDF" Version="2025.5.1" />
-    <PackageReference Include="ScottPlot.WPF" Version="5.0.55" />
   </ItemGroup>
 
   <ItemGroup>
@@ -49,7 +55,9 @@
     <Resource Include="Fonts\SourceSans3-SemiBold.ttf" />
     <Resource Include="Images\background-car-image.jpg" />
     <Resource Include="Images\key-icon-png-11.jpg" />
-    <Resource Include="Images\logo.lux.png" />
+    <Resource Include="Images\login.jpg" />
+    <Resource Include="Images\Products\placeholder.png" />
+    <Resource Include="Images\register.jpg" />
     <Resource Include="Images\user.png" />
   </ItemGroup>
 

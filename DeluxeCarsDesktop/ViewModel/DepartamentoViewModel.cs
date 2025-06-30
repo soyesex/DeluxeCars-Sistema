@@ -13,7 +13,7 @@ using System.Windows.Input;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
-    public class DepartamentoViewModel : ViewModelBase
+    public class DepartamentoViewModel : ViewModelBase, IAsyncLoadable
     {
         // --- Dependencias ---
         private readonly IUnitOfWork _unitOfWork;
@@ -71,12 +71,10 @@ namespace DeluxeCarsDesktop.ViewModel
             NuevoDepartamentoCommand = new ViewModelCommand(ExecuteNuevoDepartamentoCommand);
             EditarDepartamentoCommand = new ViewModelCommand(ExecuteEditarDepartamentoCommand, CanExecuteEditDelete);
             EliminarDepartamentoCommand = new ViewModelCommand(ExecuteEliminarDepartamentoCommand, CanExecuteEditDelete);
-
-            LoadDepartamentosAsync();
         }
 
         // --- Métodos de Lógica ---
-        private async Task LoadDepartamentosAsync()
+        public async Task LoadAsync()
         {
             try
             {
@@ -111,12 +109,12 @@ namespace DeluxeCarsDesktop.ViewModel
             // Se usa 'await' para esperar a que el formulario se cierre.
             await _navigationService.OpenFormWindow(FormType.Departamento, 0);
             // La recarga ocurre DESPUÉS de cerrar el formulario.
-            await LoadDepartamentosAsync();
+            await LoadAsync();
         }
         private async void ExecuteEditarDepartamentoCommand(object obj)
         {
             await _navigationService.OpenFormWindow(FormType.Departamento, DepartamentoSeleccionado.Id);
-            await LoadDepartamentosAsync();
+            await LoadAsync();
         }
         private async void ExecuteEliminarDepartamentoCommand(object obj)
         {

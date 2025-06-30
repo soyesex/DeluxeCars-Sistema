@@ -16,7 +16,41 @@ namespace DeluxeCarsDesktop.Repositories
         public FacturaRepository(AppDbContext context) : base(context)
         {
         }
-        // En Repositories/FacturaRepository.cs
+        public async Task<IEnumerable<TopProductoDto>> GetTopProductosVendidosAsync(DateTime startDate, DateTime endDate, int topN = 5)
+        {
+            var effectiveEndDate = endDate.Date.AddDays(1);
+
+            // La consulta para calcular los productos más vendidos
+            var topProductos = await _context.DetallesFactura
+                // 1. Filtramos solo por detalles de tipo "Producto"
+                .Where(d => d.TipoDetalle == "Producto")
+                // 2. Filtramos por el rango de fechas, accediendo a la Factura relacionada
+                .Where(d => d.Factura.FechaEmision >= startDate.Date && d.Factura.FechaEmision < effectiveEndDate)
+                // 3. Agrupamos todos los detalles por el ID del producto
+                .GroupBy(d => d.IdItem)
+                // 4. Proyectamos el resultado en un objeto anónimo
+                .Select(g => new
+                {
+                    ProductoId = g.Key,
+                    TotalUnidades = g.Sum(d => d.Cantidad) // Sumamos las cantidades vendidas de cada producto
+                })
+                // 5. Ordenamos de mayor a menor cantidad vendida
+                .OrderByDescending(x => x.TotalUnidades)
+                // 6. Tomamos solo los primeros 'N' resultados (por defecto 5)
+                .Take(topN)
+                .ToListAsync();
+
+            // 7. Ahora, unimos estos resultados con la tabla de Productos para obtener los nombres
+            var resultadoFinal = from tp in topProductos
+                                 join p in _context.Productos on tp.ProductoId equals p.Id
+                                 select new TopProductoDto
+                                 {
+                                     NombreProducto = p.Nombre,
+                                     UnidadesVendidas = tp.TotalUnidades
+                                 };
+
+            return resultadoFinal;
+        }
 
         public async Task<IEnumerable<ReporteRentabilidadDto>> GetReporteRentabilidadAsync(DateTime startDate, DateTime endDate)
         {
@@ -52,7 +86,7 @@ namespace DeluxeCarsDesktop.Repositories
                               NumeroFactura = f.NumeroFactura,
                               Fecha = f.FechaEmision,
                               Cliente = f.Cliente.Nombre,
-                              TotalVenta = f.Total ?? 0,
+                              TotalVenta = detalles.Sum(d => d.Total),
                               TotalCosto = detalles.Sum(df => costosPorDetalle.ContainsKey(df.Id) ? costosPorDetalle[df.Id] : 0)
                           };
 
@@ -65,15 +99,19 @@ namespace DeluxeCarsDesktop.Repositories
         public async Task<IEnumerable<Factura>> GetAllWithClienteYMetodoPagoAsync()
         {
             return await _context.Facturas
-                                  .Include(f => f.Cliente)
-                                  .Include(f => f.MetodoPago)
-                                  // --- AÑADE ESTAS LÍNEAS PARA CARGAR LOS PAGOS ---
-                                  .Include(f => f.PagosRecibidos)
-                                     .ThenInclude(pr => pr.PagoCliente)
-                                  // ---------------------------------------------------
-                                  .AsNoTracking()
-                                  .OrderByDescending(f => f.FechaEmision)
-                                  .ToListAsync();
+                           .Include(f => f.Cliente)
+                           .Include(f => f.MetodoPago)
+
+                           // --- LÍNEA CLAVE 1: Cargar los detalles para calcular el Total ---
+                           .Include(f => f.DetallesFactura)
+
+                           // --- LÍNEA CLAVE 2: Cargar los pagos para calcular el Saldo ---
+                           .Include(f => f.PagosRecibidos)
+                               .ThenInclude(pr => pr.PagoCliente) // Incluimos el pago real a través de la "grapa"
+
+                           .AsNoTracking()
+                           .OrderByDescending(f => f.FechaEmision)
+                           .ToListAsync();
         }
         public async Task<Factura> GetFacturaWithDetailsAsync(int facturaId)
         {
@@ -104,6 +142,7 @@ namespace DeluxeCarsDesktop.Repositories
             return await _dbSet
                 .Where(f => f.FechaEmision >= startDate && f.FechaEmision <= endDate)
                 .Include(f => f.Cliente)
+                .Include(f => f.DetallesFactura)
                 .OrderByDescending(f => f.FechaEmision)
                 .AsNoTracking()
                 .ToListAsync();

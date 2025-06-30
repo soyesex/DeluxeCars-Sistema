@@ -13,7 +13,7 @@ using System.Windows.Input;
 namespace DeluxeCarsDesktop.ViewModel
 {
     // RECOMENDACIÓN: Usar este ViewModel para la vista de GESTIÓN de Métodos de Pago.
-    public class MetodoPagoViewModel : ViewModelBase
+    public class MetodoPagoViewModel : ViewModelBase , IAsyncLoadable
     {
         // --- Dependencias ---
         private readonly IUnitOfWork _unitOfWork;
@@ -55,12 +55,10 @@ namespace DeluxeCarsDesktop.ViewModel
             NuevoMetodoPagoCommand = new ViewModelCommand(ExecuteNuevoMetodoPagoCommand);
             EditarMetodoPagoCommand = new ViewModelCommand(ExecuteEditarMetodoPagoCommand, CanExecuteActions);
             ToggleDisponibilidadCommand = new ViewModelCommand(ExecuteToggleDisponibilidadCommand, CanExecuteActions);
-
-            LoadMetodosDePagoAsync();
         }
 
         // --- Métodos de Lógica ---
-        private async Task LoadMetodosDePagoAsync()
+        public async Task LoadAsync()
         {
             try
             {
@@ -83,14 +81,14 @@ namespace DeluxeCarsDesktop.ViewModel
             // Navega al formulario para crear un nuevo método de pago.
             // La recarga de datos se hace para reflejar cualquier cambio.
             await _navigationService.OpenFormWindow(Utils.FormType.MetodoPago,0);
-            await LoadMetodosDePagoAsync();
+            await LoadAsync();
         }
 
         private async void ExecuteEditarMetodoPagoCommand(object obj)
         {
             // Le pasamos el ID del producto seleccionado
             await _navigationService.OpenFormWindow(Utils.FormType.Producto, MetodoSeleccionado.Id);
-            await LoadMetodosDePagoAsync();
+            await LoadAsync();
         }
 
         private async void ExecuteToggleDisponibilidadCommand(object obj)
@@ -111,7 +109,7 @@ namespace DeluxeCarsDesktop.ViewModel
 
                 // Forzamos la actualización en la UI refrescando toda la lista.
                 // Es la forma más sencilla de asegurar que los bindings (ej. un color de fondo) se actualicen.
-                LoadMetodosDePagoAsync();
+                await LoadAsync();
                 MessageBox.Show($"Método de pago {accion}do exitosamente.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)

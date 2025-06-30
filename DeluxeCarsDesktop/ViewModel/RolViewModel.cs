@@ -13,7 +13,7 @@ using System.Windows.Input;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
-    public class RolViewModel : ViewModelBase
+    public class RolViewModel : ViewModelBase, IAsyncLoadable
     {
         // --- Dependencias ---
         private readonly IUnitOfWork _unitOfWork;
@@ -58,12 +58,10 @@ namespace DeluxeCarsDesktop.ViewModel
             NuevoRolCommand = new ViewModelCommand(async p => await ExecuteNuevoRolCommand());
             EditarRolCommand = new ViewModelCommand(async p => await ExecuteEditarRolCommand(), p => CanExecuteActions());
             EliminarRolCommand = new ViewModelCommand(async p => await ExecuteEliminarRolCommand(), p => CanExecuteActions());
-
-            LoadRolesAsync();
         }
 
         // --- Métodos de Lógica ---
-        private async Task LoadRolesAsync()
+        public async Task LoadAsync()
         {
             try
             {
@@ -95,13 +93,13 @@ namespace DeluxeCarsDesktop.ViewModel
         private async Task ExecuteNuevoRolCommand()
         {
             await _navigationService.OpenFormWindow(FormType.Rol, 0);
-            await LoadRolesAsync();
+            await LoadAsync();
         }
 
         private async Task ExecuteEditarRolCommand()
         {
             await _navigationService.OpenFormWindow(FormType.Rol, RolSeleccionado.Id);
-            await LoadRolesAsync();
+            await LoadAsync();
         }
 
         private async Task ExecuteEliminarRolCommand()

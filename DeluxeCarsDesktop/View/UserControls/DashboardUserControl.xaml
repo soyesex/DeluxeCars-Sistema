@@ -5,10 +5,11 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
              mc:Ignorable="d" 
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
              d:DesignHeight="600" d:DesignWidth="1000"
              xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp">
 
-    <Grid Margin="10">
+    <!--<Grid Margin="10">
         <UniformGrid Rows="2" Columns="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 
             <Button Style="{StaticResource CardButtonStyle}" Margin="10"
@@ -28,16 +29,9 @@
                     <fa:IconImage Icon="TruckFast" Opacity="0.8" Height="50" Width="50" Margin="0,15,0,0"/>
                 </StackPanel>
             </Button>
-
-            <Button Style="{StaticResource CardButtonStyle}" Margin="10"
-                    Command="{Binding DataContext.ShowClienteViewCommand, RelativeSource={RelativeSource AncestorType=Window}}">
-                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <TextBlock Style="{StaticResource CardTitleStyle}" Text="Clientes Totales"/>
-                    <TextBlock Text="{Binding NumeroDeClientes}" FontSize="36" FontWeight="Bold" HorizontalAlignment="Center"/>
-                    <fa:IconImage Icon="Users" Opacity="0.8" Height="50" Width="50" Margin="0,15,0,0"/>
-                </StackPanel>
-            </Button>
-
+            
+            
+            
             <Button Style="{StaticResource CardButtonStyle}" Margin="10"
                     Command="{Binding DataContext.ShowCatalogoViewCommand, RelativeSource={RelativeSource AncestorType=Window}}">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -57,7 +51,24 @@
             </Button>
 
         </UniformGrid>
-    </Grid>
+    </Grid>-->
+
+    <Border Margin="100" Padding="10">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0" Style="{StaticResource H2TextStyle}" Text="Top 5 Productos Vendidos (Últimos 30 días)"/>
+            
+            <lvc:CartesianChart
+                Grid.Row="1"
+                Series="{Binding SeriesTopProductos}"
+                XAxes="{Binding XAxes}"  LegendPosition="Bottom">
+            </lvc:CartesianChart>
+        </Grid>
+    </Border>
 </UserControl>
 
 

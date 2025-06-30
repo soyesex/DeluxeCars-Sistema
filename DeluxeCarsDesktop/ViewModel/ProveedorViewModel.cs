@@ -13,7 +13,7 @@ using System.Windows.Input;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
-    public class ProveedorViewModel : ViewModelBase
+    public class ProveedorViewModel : ViewModelBase, IAsyncLoadable
     {
         // --- Dependencias ---
         private readonly IUnitOfWork _unitOfWork;
@@ -86,13 +86,11 @@ namespace DeluxeCarsDesktop.ViewModel
             ToggleEstadoCommand = new ViewModelCommand(async p => await ExecuteToggleEstadoCommand(), p => CanExecuteActions());
 
             GestionarProductosCommand = new ViewModelCommand( async p => await ExecuteGestionarProductos(), p => ProveedorSeleccionado != null);
-
-            LoadInitialDataAsync(); // <-- Se llama a un método de carga general
         }
 
         // --- Métodos de Lógica ---
 
-        private async Task LoadInitialDataAsync()
+        public async Task LoadAsync()
         {
             await LoadUbicacionesAsync();
             await LoadProveedoresAsync();
@@ -233,7 +231,7 @@ namespace DeluxeCarsDesktop.ViewModel
 
                 FiltrarProveedores(); // Refresca la UI
                 MessageBox.Show($"Proveedor {accion}do exitosamente.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
-                LoadInitialDataAsync();
+                await LoadAsync();
             }
             catch (Exception ex)
             {

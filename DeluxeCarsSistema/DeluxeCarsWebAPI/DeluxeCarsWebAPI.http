@@ -1,0 +1,6 @@
+@DeluxeCarsWebAPI_HostAddress = http://localhost:5153
+
+GET {{DeluxeCarsWebAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,5 +1,6 @@
 ﻿using DeluxeCarsDesktop.Interfaces;
 using DeluxeCarsDesktop.Models;
+using DeluxeCarsDesktop.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ using System.Windows.Input;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
-    public class MetodoPagoFormViewModel : ViewModelBase
+    public class MetodoPagoFormViewModel : ViewModelBase, IFormViewModel
     {
         // --- Dependencias ---
         private readonly IUnitOfWork _unitOfWork;
@@ -67,7 +68,7 @@ namespace DeluxeCarsDesktop.ViewModel
         /// Inicializa el ViewModel para un método de pago (editar) o para uno nuevo.
         /// </summary>
         /// <param name="metodoPagoId">El ID del método a editar, o 0 para crear uno nuevo.</param>
-        public async Task LoadMetodoPagoAsync(int metodoPagoId)
+        public async Task LoadAsync(int metodoPagoId)
         {
             if (metodoPagoId == 0) // Modo Creación
             {

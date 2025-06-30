@@ -1,5 +1,6 @@
 ﻿using DeluxeCarsDesktop.Interfaces;
 using DeluxeCarsDesktop.Models;
+using DeluxeCarsDesktop.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -12,8 +13,8 @@ using static Azure.Core.HttpHeader;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
-    public class MunicipioFormViewModel : ViewModelBase
-{
+    public class MunicipioFormViewModel : ViewModelBase, IFormViewModel
+    {
         // --- Dependencias ---
         private readonly IUnitOfWork _unitOfWork;
 

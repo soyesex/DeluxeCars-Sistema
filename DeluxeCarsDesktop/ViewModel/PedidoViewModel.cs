@@ -17,7 +17,7 @@ using System.Windows.Input;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
-    public class PedidoViewModel : ViewModelBase
+    public class PedidoViewModel : ViewModelBase, IAsyncLoadable
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly INavigationService _navigationService;
@@ -80,11 +80,9 @@ namespace DeluxeCarsDesktop.ViewModel
             RecepcionarPedidoCommand = new ViewModelCommand(ExecuteRecepcionarPedido, CanExecuteRecepcionarPedido);
             RegistrarPagoCommand = new ViewModelCommand(ExecuteRegistrarPago, CanExecuteRegistrarPago);
             GenerarPdfCommand = new ViewModelCommand(ExecuteGenerarPdf, CanExecuteGenerarPdf);
-
-            LoadInitialDataAsync();
         }
 
-        private async Task LoadInitialDataAsync()
+        public async Task LoadAsync()
         {
             await LoadProveedoresAsync();
             await AplicarFiltros();

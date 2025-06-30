@@ -11,7 +11,7 @@ using System.Windows.Input;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
-    public class AjusteInventarioViewModel : ViewModelBase, ICloseable
+    public class AjusteInventarioViewModel : ViewModelBase, ICloseable, IAsyncLoadable
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IStockAlertService _stockAlertService; 
@@ -49,10 +49,9 @@ namespace DeluxeCarsDesktop.ViewModel
 
             ProductosDisponibles = new ObservableCollection<Producto>();
             GuardarAjusteCommand = new ViewModelCommand(async p => await ExecuteGuardarAjuste(), p => CanExecuteGuardar());
-            LoadProductosAsync();
         }
 
-        private async void LoadProductosAsync()
+        public async Task LoadAsync()
         {
             var productos = await _unitOfWork.Productos.GetAllAsync();
             ProductosDisponibles.Clear();

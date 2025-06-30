@@ -9,55 +9,44 @@ using System.Threading.Tasks;
 
 namespace DeluxeCarsDesktop.Models
 {
-    public class Usuario : ViewModelBase
+    public class Usuario
     {
-        private int _id;
+        // Para los modelos de EF, es más simple y estándar usar auto-propiedades.
+        // La notificación de cambios se manejará en el ViewModel, no en el modelo.
         [Key]
-        public int Id { get => _id; set => SetProperty(ref _id, value); }
+        public int Id { get; set; }
 
-        private string _nombre;
         [Required]
         [StringLength(60)]
-        public string Nombre { get => _nombre; set => SetProperty(ref _nombre, value); }
+        public string Nombre { get; set; }
 
-        private string _telefono;
         [StringLength(20)]
-        public string Telefono { get => _telefono; set => SetProperty(ref _telefono, value); }
+        public string Telefono { get; set; }
 
-        private string _email;
         [Required]
         [StringLength(80)]
-        public string Email { get => _email; set => SetProperty(ref _email, value); }
+        public string Email { get; set; }
 
-        private byte[] _passwordHash;
         [Required]
         [MaxLength(64)]
-        public byte[] PasswordHash { get => _passwordHash; set => SetProperty(ref _passwordHash, value); }
+        public byte[] PasswordHash { get; set; }
 
-        private byte[] _passwordSalt;
         [Required]
-        [MaxLength(128)] // <-- CORRECCIÓN: Tu script original usa VARBINARY(128) para el Salt
-        public byte[] PasswordSalt { get => _passwordSalt; set => SetProperty(ref _passwordSalt, value); }
+        [MaxLength(128)]
+        public byte[] PasswordSalt { get; set; }
 
-        private int _idRol;
         [Required]
-        public int IdRol { get => _idRol; set => SetProperty(ref _idRol, value); }
+        public int IdRol { get; set; }
 
-        private bool _activo;
         [Required]
-        public bool Activo { get => _activo; set => SetProperty(ref _activo, value); }
+        public bool Activo { get; set; }
 
-        private byte[]? _profilePicture;
-        public byte[]? ProfilePicture { get => _profilePicture; set => SetProperty(ref _profilePicture, value); }
+        public byte[]? ProfilePicture { get; set; }
 
 
         // --- Propiedades de Navegación ---
-        // Estas generalmente pueden quedarse como auto-propiedades, ya que es raro
-        // que reemplaces el objeto de rol completo, sino más bien una propiedad dentro de él.
-        // Pero para consistencia, también las podemos envolver.
-        private Rol _rol;
         [ForeignKey("IdRol")]
-        public virtual Rol Rol { get => _rol; set => SetProperty(ref _rol, value); }
+        public virtual Rol Rol { get; set; }
 
         public virtual ICollection<Pedido> Pedidos { get; set; } = new HashSet<Pedido>();
         public virtual ICollection<Factura> Facturas { get; set; } = new HashSet<Factura>();

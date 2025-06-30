@@ -33,6 +33,7 @@ namespace DeluxeCarsDesktop.Repositories
         public IPagoProveedorRepository PagosProveedores { get; private set; }
         public IPagoClienteRepository PagosClientes { get; private set; }
         public INotaDeCreditoRepository NotasDeCredito { get; private set; }
+        public IConfiguracionRepository Configuraciones { get; private set; }
 
         // ...Y las demás propiedades
 
@@ -54,6 +55,7 @@ namespace DeluxeCarsDesktop.Repositories
             PagosProveedores = new PagoProveedorRepository(_context);
             PagosClientes = new PagoClienteRepository(_context);
             NotasDeCredito = new NotaDeCreditoRepository(_context);
+            Configuraciones = new ConfiguracionRepository(_context);
 
             // ...Inicializar aquí todos los demás repositorios
             // Ejemplo para los que faltan:

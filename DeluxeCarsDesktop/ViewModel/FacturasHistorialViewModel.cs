@@ -13,7 +13,7 @@ using System.Windows.Input;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
-    public class FacturasHistorialViewModel : ViewModelBase
+    public class FacturasHistorialViewModel : ViewModelBase, IAsyncLoadable
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly INavigationService _navigationService;
@@ -47,6 +47,7 @@ namespace DeluxeCarsDesktop.ViewModel
                 (VerDetallesCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
                 (AnularFacturaCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
                 (RegistrarPagoCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+                (LiquidarCreditoCommand as ViewModelCommand)?.RaiseCanExecuteChanged(); // <-- AÑADE ESTA LÍNEA
             }
         }
 
@@ -57,6 +58,7 @@ namespace DeluxeCarsDesktop.ViewModel
         public ICommand AnularFacturaCommand { get; }
         public ICommand RefrescarCommand { get; }
         public ICommand RegistrarPagoCommand { get; }
+        public ICommand LiquidarCreditoCommand { get; }
         public FacturasHistorialViewModel(IUnitOfWork unitOfWork, INavigationService navigationService)
         {
             _unitOfWork = unitOfWork;
@@ -67,14 +69,13 @@ namespace DeluxeCarsDesktop.ViewModel
 
             VerDetallesCommand = new ViewModelCommand(ExecuteVerDetallesCommand, CanExecuteActions);
             AnularFacturaCommand = new ViewModelCommand(ExecuteAnularFacturaCommand, CanExecuteActions);
-            RefrescarCommand = new ViewModelCommand(p => LoadFacturasAsync());
+            RefrescarCommand = new ViewModelCommand(async p => await LoadAsync());
             RegistrarPagoCommand = new ViewModelCommand(ExecuteRegistrarPago, CanExecuteRegistrarPago);
             NuevaFacturaCommand = new ViewModelCommand(p => OnRequestNuevaFactura?.Invoke());
-
-            LoadFacturasAsync();
+            LiquidarCreditoCommand = new ViewModelCommand(async _ => await ExecuteLiquidarCredito(), _ => CanExecuteLiquidarCredito()); 
         }
 
-        private async Task LoadFacturasAsync()
+        public async Task LoadAsync()
         {
             try
             {
@@ -119,7 +120,7 @@ namespace DeluxeCarsDesktop.ViewModel
             await _navigationService.OpenFormWindow(FormType.RegistrarPagoCliente, FacturaSeleccionada.Id);
 
             // 3. Refrescamos la lista después de que la ventana se cierre
-            await LoadFacturasAsync();
+            await LoadAsync();
         }
         private void ExecuteVerDetallesCommand(object obj)
         {
@@ -138,7 +139,59 @@ namespace DeluxeCarsDesktop.ViewModel
             await _navigationService.OpenFormWindow(FormType.NotaDeCredito, FacturaSeleccionada.Id);
 
             // Al volver, refrescamos por si la factura cambió de estado
-            await LoadFacturasAsync();
+            await LoadAsync();
+        }
+
+        private bool CanExecuteLiquidarCredito()
+        {
+            // El botón solo estará activo si hay una factura seleccionada Y su saldo es negativo.
+            return FacturaSeleccionada != null && FacturaSeleccionada.SaldoPendiente < 0;
+        }
+
+        private async Task ExecuteLiquidarCredito()
+        {
+            if (!CanExecuteLiquidarCredito()) return;
+
+            // Pedimos confirmación al usuario
+            var confirmacion = MessageBox.Show(
+                $"Esto registrará un reembolso por el crédito de {FacturaSeleccionada.SaldoPendiente:C} y el saldo de la factura volverá a ser $0.00.\n\n¿Desea continuar?",
+                "Confirmar Liquidación de Saldo a Favor",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (confirmacion == MessageBoxResult.No) return;
+
+            try
+            {
+                // Creamos una transacción POSITIVA que cancela exactamente el crédito negativo.
+                var pagoReembolso = new PagoCliente
+                {
+                    IdCliente = FacturaSeleccionada.IdCliente,
+                    IdMetodoPago = FacturaSeleccionada.IdMetodoPago, // Asumimos el mismo método
+                    IdUsuario = _unitOfWork.Usuarios.GetAdminUserAsync().Result.Id, // Asignamos al admin por defecto
+
+                    // ¡LA CLAVE! El monto es el saldo pendiente negativo, multiplicado por -1 para hacerlo positivo.
+                    MontoRecibido = FacturaSeleccionada.SaldoPendiente * -1,
+
+                    FechaPago = DateTime.Now,
+                    Referencia = $"Liquidación de crédito para Factura {FacturaSeleccionada.NumeroFactura}",
+                    FacturasCubiertas = new List<PagoClienteFactura>()
+                };
+
+                // Creamos la "grapa" para vincularlo a la factura original
+                var enlace = new PagoClienteFactura { IdFactura = FacturaSeleccionada.Id, PagoCliente = pagoReembolso };
+                pagoReembolso.FacturasCubiertas.Add(enlace);
+
+                await _unitOfWork.PagosClientes.AddAsync(pagoReembolso);
+                await _unitOfWork.CompleteAsync();
+
+                // Refrescamos la lista para ver el resultado
+                await LoadAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ocurrió un error al liquidar el crédito: {ex.Message}", "Error");
+            }
         }
     }
 }

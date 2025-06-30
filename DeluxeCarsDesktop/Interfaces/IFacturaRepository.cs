@@ -10,6 +10,7 @@ namespace DeluxeCarsDesktop.Interfaces
 {
     public interface IFacturaRepository : IGenericRepository<Factura>
     {
+        Task<IEnumerable<TopProductoDto>> GetTopProductosVendidosAsync(DateTime startDate, DateTime endDate, int topN = 5);
         // Obtiene una factura incluyendo todos sus detalles (productos y servicios vendidos).
         Task<Factura> GetFacturaWithDetailsAsync(int facturaId);
 

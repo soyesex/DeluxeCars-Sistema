@@ -25,6 +25,8 @@ public partial class App : Application
     // Campo para nuestro "Proveedor de Servicios"
     private readonly ServiceProvider _serviceProvider;
 
+    private LoginView _loginView;
+
     //Contructor de la clase App
     public App()
     {
@@ -102,6 +104,7 @@ public partial class App : Application
         services.AddTransient<ReportesRentabilidadViewModel>();
         services.AddTransient<RegistrarPagoClienteViewModel>();
         services.AddTransient<NotaDeCreditoViewModel>();
+        services.AddTransient<ConfiguracionViewModel>();
 
         // Registra tus Vistas (las ventanas). Singleton o Transient son opciones comunes.
         // Usaremos Transient para asegurar que siempre se abran limpias.
@@ -161,20 +164,57 @@ public partial class App : Application
     // MÉTODO AUXILIAR PARA MOSTRAR LA VISTA DE LOGIN
     private void ShowLoginView()
     {
-        var loginView = _serviceProvider.GetService<LoginView>();
-        var loginViewModel = loginView.DataContext as LoginViewModel;
+        _loginView = _serviceProvider.GetService<LoginView>(); // Asignamos la instancia al campo de la clase
+        var loginViewModel = _serviceProvider.GetService<LoginViewModel>(); // Obtenemos el ViewModel
+        _loginView.DataContext = loginViewModel; // Asignamos el DataContext
 
         if (loginViewModel != null)
         {
-            // Cuando el login es exitoso...
+            // Suscripción para cuando el login es exitoso
             loginViewModel.LoginSuccess += () =>
             {
-                // ... cerramos el login y mostramos el MainView
                 ShowMainViewAndSubscribe();
-                loginView.Close();
+                _loginView.Close(); // Cerramos la ventana de login
             };
+
+            // =================================================================
+            // INICIO DEL CAMBIO: Suscripción para la navegación al registro
+            // =================================================================
+            loginViewModel.ShowRegisterViewRequested += OnShowRegisterViewRequested;
         }
-        loginView.Show();
+        _loginView.Show();
+    }
+
+    private async void OnShowRegisterViewRequested()
+    {
+        if (_loginView != null)
+        {
+            _loginView.IsEnabled = false;
+        }
+
+        // Creamos las instancias de la vista y el viewmodel de registro
+        var registerView = _serviceProvider.GetRequiredService<RegistroView>();
+        var registerViewModel = _serviceProvider.GetRequiredService<RegistroViewModel>();
+        registerView.DataContext = registerViewModel;
+
+        // Esperamos a que el ViewModel de registro cargue sus datos (como los roles)
+        await registerViewModel.InitializeAsync();
+
+        // Nos suscribimos a su evento de cierre para saber cuándo volver
+        registerViewModel.CloseAction += () =>
+        {
+            registerView.Close(); // Cierra la ventana de registro
+
+            // Volvemos a habilitar la ventana de login
+            if (_loginView != null)
+            {
+                _loginView.IsEnabled = true;
+                _loginView.Activate(); // Nos aseguramos de que vuelva al frente
+            }
+        };
+
+        // Paso 2: Mostramos la ventana de registro con Show(), que no es bloqueante.
+        registerView.Show();
     }
 
     // MÉTODO AUXILIAR PARA MOSTRAR LA VISTA PRINCIPAL Y SUSCRIBIR SU EVENTO DE LOGOUT

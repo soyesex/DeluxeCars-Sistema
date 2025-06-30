@@ -391,9 +391,6 @@ namespace DeluxeCarsDesktop.ViewModel
             _facturaEnProgreso.FechaEmision = DateTime.Now;
             _facturaEnProgreso.NumeroFactura = $"F-{DateTime.Now:yyyyMMddHHmmss}";
             _facturaEnProgreso.IdUsuario = _currentUserService.CurrentUserId;
-            _facturaEnProgreso.SubTotal = SubTotal;
-            _facturaEnProgreso.TotalIVA = TotalIVA;
-            _facturaEnProgreso.Total = Total;
             _facturaEnProgreso.DetallesFactura = LineasDeFactura;
 
             try

@@ -61,6 +61,12 @@
                         CommandParameter="{Binding}"/>
 
                                     <Button Style="{StaticResource DataGridIconSharpButton_Style}"
+                                            Tag="{x:Static fa:IconChar.ExchangeAlt}"
+                                            ToolTip="Liquidar Saldo a Favor"
+                                            Command="{Binding DataContext.LiquidarCreditoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"/>      
+
+                                    <Button Style="{StaticResource DataGridIconSharpButton_Style}"
                         Tag="{x:Static fa:IconChar.Eye}"
                         ToolTip="Ver Detalles de la Factura"
                         Command="{Binding DataContext.VerDetallesCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"

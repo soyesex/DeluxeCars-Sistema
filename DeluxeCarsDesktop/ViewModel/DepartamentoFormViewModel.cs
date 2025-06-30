@@ -1,5 +1,6 @@
 ﻿using DeluxeCarsDesktop.Interfaces;
 using DeluxeCarsDesktop.Models;
+using DeluxeCarsDesktop.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ using System.Windows.Input;
 namespace DeluxeCarsDesktop.ViewModel
 {
     // PENDIENTE POR REVISAR
-    public class DepartamentoFormViewModel : ViewModelBase
+    public class DepartamentoFormViewModel : ViewModelBase, IFormViewModel
     {
         // --- Dependencias ---
         private readonly IUnitOfWork _unitOfWork;
@@ -54,7 +55,7 @@ namespace DeluxeCarsDesktop.ViewModel
         /// Método de inicialización para cargar una categoría existente o preparar una nueva.
         /// </summary>
         /// <param name="departamentoId">El ID de la categoría a editar, o 0 para crear una nueva.</param>
-        public async Task LoadDepartamentoAsync(int departamentoId)
+        public async Task LoadAsync(int departamentoId)
         {
             if (departamentoId == 0) // Modo Creación
             {

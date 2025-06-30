@@ -25,6 +25,7 @@ namespace DeluxeCarsDesktop.Data
         public DbSet<EstadoFacturaElectronica> EstadosFacturaElectronica { get; set; }
         public DbSet<TipoDocumentoElectronico> TiposDocumentoElectronico { get; set; }
         public DbSet<Notificacion> Notificaciones { get; set; }
+        public DbSet<Configuracion> Configuraciones { get; set; }
 
         // Grupo 2: Entidades Principales (Core)
         public DbSet<Producto> Productos { get; set; }
@@ -59,355 +60,189 @@ namespace DeluxeCarsDesktop.Data
         /// <param name="modelBuilder">El constructor que se usa para crear el modelo para este contexto.</param>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Llama a la implementación base para que aplique sus propias convenciones antes de nuestras configuraciones.
             base.OnModelCreating(modelBuilder);
 
-            // Aquí empieza la magia del "Data Seeding"
-
+            // --- SEEDING DE DATOS ---
             modelBuilder.Entity<Rol>().HasData(
-                new Rol
-                {
-                    // ¡MUY IMPORTANTE! Debemos especificar el Id manualmente para que EF pueda rastrearlo.
-                    Id = 1,
-                    Nombre = "Administrador",
-                    Descripcion = "Acceso total al sistema."
-                },
-                new Rol
-                {
-                    Id = 2,
-                    Nombre = "Empleado",
-                    Descripcion = "Acceso limitado a ventas y operaciones diarias."
-                }
-            // Puedes añadir más roles aquí si lo necesitas
+                new Rol { Id = 1, Nombre = "Administrador", Descripcion = "Acceso total al sistema." },
+                new Rol { Id = 2, Nombre = "Empleado", Descripcion = "Acceso limitado a ventas y operaciones diarias." }
+            );
+            modelBuilder.Entity<MetodoPago>().HasData(
+                new MetodoPago { Id = 1, Codigo = "EFE", Descripcion = "Efectivo", Disponible = true, Tipo = TipoMetodoPago.Efectivo, AplicaParaVentas = true, AplicaParaCompras = true },
+                new MetodoPago { Id = 2, Codigo = "TDC", Descripcion = "Tarjeta de Crédito", Disponible = true, Tipo = TipoMetodoPago.Credito, AplicaParaVentas = true, AplicaParaCompras = false }
+            );
+            modelBuilder.Entity<Configuracion>().HasData(
+                new Configuracion { Id = 1, NombreTienda = "Deluxe Cars", Direccion = "La rosita", Telefono = "3001234567", Email = "deluxecars@gmail.com", HorarioAtencion = "Lunes a Viernes de 8am a 6pm", PorcentajeIVA = 19.0m }
             );
 
-            modelBuilder.Entity<MetodoPago>().HasData(
-                 new MetodoPago { Id = 1, Codigo = "EFE", 
-                     Descripcion = "Efectivo", Disponible = true,
-                     Tipo = TipoMetodoPago.Efectivo, AplicaParaVentas = true,
-                     AplicaParaCompras = true },
+            // --- CONFIGURACIÓN DE ENTIDADES ---
 
-                 new MetodoPago { Id = 2, Codigo = "TDC",
-                     Descripcion = "Tarjeta de Crédito", Disponible = true,
-                     Tipo = TipoMetodoPago.Credito, AplicaParaVentas = true, 
-                     AplicaParaCompras = false }
-             );
-
-            // --- SECCIÓN 1: Configuraciones de Llaves Únicas (UNIQUE CONSTRAINTS) ---
-            // Asegura que ciertos campos no puedan tener valores duplicados en la base de datos.
-
+            // Usuario
             modelBuilder.Entity<Usuario>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
 
+            // Cliente
             modelBuilder.Entity<Cliente>()
                 .HasIndex(c => c.Email)
                 .IsUnique();
 
-            modelBuilder.Entity<Proveedor>()
-                .HasIndex(p => p.NIT)
-                .IsUnique();
-
-            modelBuilder.Entity<Pedido>()
-                .HasIndex(p => p.NumeroPedido)
-                .IsUnique();
-
-            modelBuilder.Entity<Factura>()
-                .HasIndex(f => f.NumeroFactura)
-                .IsUnique();
-
-            // Configuración para la llave única compuesta en la tabla de unión ProductoProveedor.
-            // Configuración para la entidad ProductoProveedor.
-            modelBuilder.Entity<ProductoProveedor>(entity =>
-            {
-                // Le decimos a EF que la tabla en SQL se llama 'ProductoProveedor' (singular)
-                entity.ToTable("ProductoProveedor");
-
-                // Esta configuración para la llave única ya la tenías y está perfecta.
-                entity.HasIndex(pp => new { pp.IdProveedor, pp.IdProducto }).IsUnique();
-            });
-
-            // --- SECCIÓN 2: Configuraciones de Comportamiento al Eliminar (ON DELETE) ---
-            // Define qué sucede con las entidades relacionadas cuando una entidad principal es eliminada.
-
-            // ON DELETE SET NULL: Si se borra un Usuario, el IdUsuario en la Factura se establece a NULL.
-            // Esto conserva el registro de la factura incluso si el empleado ya no trabaja en la empresa.
-
-            modelBuilder.Entity<Factura>(entity =>
-            {
-                // Esta es la relación que causa el error actual
-                entity.HasOne(f => f.Cliente)
-                      .WithMany(c => c.Facturas)
-                      .HasForeignKey(f => f.IdCliente) // Le decimos que la columna se llama IdCliente
-                      .OnDelete(DeleteBehavior.NoAction);
-
-                // Aprovechamos para configurar las otras relaciones de Factura
-                entity.HasOne(f => f.Usuario)
-                      .WithMany(u => u.Facturas)
-                      .HasForeignKey(f => f.IdUsuario)
-                      .OnDelete(DeleteBehavior.SetNull); // No borrar facturas si se elimina un usuario
-
-                entity.HasOne(f => f.MetodoPago)
-                      .WithMany(mp => mp.Facturas)
-                      .HasForeignKey(f => f.IdMetodoPago)
-                      .OnDelete(DeleteBehavior.NoAction);
-            });
-
-            // ON DELETE CASCADE: Si se borra una entidad principal, sus detalles asociados también se borran.
-            // Ejemplo: Al eliminar un Pedido, se eliminan todas sus líneas de DetallePedido.
-            modelBuilder.Entity<DetallePedido>(entity =>
-            {
-                // La relación con Pedido se queda igual, está perfecta.
-                entity.HasOne(dp => dp.Pedido)
-                      .WithMany(p => p.DetallesPedidos)
-                      .HasForeignKey(dp => dp.IdPedido)
-                      .OnDelete(DeleteBehavior.Cascade);
-
-                // --- CORRECCIÓN FINAL ---
-                // Ahora especificamos la colección correcta en WithMany.
-                entity.HasOne(dp => dp.Producto)
-                      .WithMany(p => p.DetallesPedidos) // <-- ASÍ SE CORRIGE
-                      .HasForeignKey(dp => dp.IdProducto)
-                      .OnDelete(DeleteBehavior.NoAction);
-            });
-
-            // --- Configuración para la nueva entidad NotaDeCredito ---
-            modelBuilder.Entity<NotaDeCredito>(entity =>
-            {
-                // Llave única para el número de nota
-                entity.HasIndex(n => n.NumeroNota).IsUnique();
-
-                // Precisión para el campo monetario
-                entity.Property(n => n.MontoTotal).HasColumnType("decimal(18, 2)");
-
-                // Relación con la Factura original
-                entity.HasOne(n => n.FacturaOriginal)
-                      .WithMany(f => f.NotasDeCredito)
-                      .HasForeignKey(n => n.IdFacturaOriginal)
-                      .OnDelete(DeleteBehavior.NoAction); // No borrar NC si se borra la factura
-
-                // Relación con Cliente
-                entity.HasOne(n => n.Cliente)
-                      .WithMany() // No necesitamos una colección de NC en Cliente
-                      .HasForeignKey(n => n.IdCliente)
-                      .OnDelete(DeleteBehavior.NoAction);
-
-                // Relación con Usuario
-                entity.HasOne(n => n.Usuario)
-                      .WithMany() // No necesitamos una colección de NC en Usuario
-                      .HasForeignKey(n => n.IdUsuario)
-                      .OnDelete(DeleteBehavior.NoAction);
-            });
-
-            // --- Configuración para la nueva entidad DetalleNotaDeCredito ---
-            modelBuilder.Entity<DetalleNotaDeCredito>(entity =>
-            {
-                // Precisión para los campos monetarios
-                entity.Property(d => d.PrecioUnitario).HasColumnType("decimal(18, 2)");
-                entity.Property(d => d.Total).HasColumnType("decimal(18, 2)");
-
-                // Relación con el encabezado de la Nota de Crédito
-                entity.HasOne(d => d.NotaDeCredito)
-                      .WithMany(n => n.Detalles)
-                      .HasForeignKey(d => d.IdNotaDeCredito); // onDelete es Cascade por defecto, lo cual está bien aquí.
-
-                // Relación con Producto
-                entity.HasOne(d => d.Producto)
-                      .WithMany(p => p.DetallesNotaDeCredito)
-                      .HasForeignKey(d => d.IdProducto)
-                      .OnDelete(DeleteBehavior.NoAction);
-            });
-
-            modelBuilder.Entity<DetalleFactura>()
-                .HasOne(df => df.Factura)
-                .WithMany(f => f.DetallesFactura)
-                .HasForeignKey(df => df.IdFactura)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // ON DELETE RESTRICT (NO ACTION): Es el comportamiento por defecto de EF Core.
-            // Previene que se elimine una entidad si hay otras que dependen de ella.
-            // Ejemplo explícito: No se puede borrar una Categoría si tiene Productos asociados.
-            modelBuilder.Entity<Producto>()
-                .HasOne(p => p.Categoria)
-                .WithMany(c => c.Productos)
-                .HasForeignKey(p => p.IdCategoria)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Configuración para la entidad Pedido
-            modelBuilder.Entity<Pedido>(entity =>
-            {
-                // La relación con Proveedor usa la clave foránea 'IdProveedor'
-                entity.HasOne(p => p.Proveedor)
-                      .WithMany(prov => prov.Pedidos)
-                      .HasForeignKey(p => p.IdProveedor)
-                      .OnDelete(DeleteBehavior.NoAction); // Coincide con tu ON DELETE NO ACTION
-
-                // La relación con Usuario usa la clave foránea 'IdUsuario'
-                entity.HasOne(p => p.Usuario)
-                      .WithMany(u => u.Pedidos)
-                      .HasForeignKey(p => p.IdUsuario)
-                      .OnDelete(DeleteBehavior.NoAction);
-
-                // La relación con MetodoPago usa la clave foránea 'IdMetodoPago'
-                entity.HasOne(p => p.MetodoPago)
-                      .WithMany(mp => mp.Pedidos)
-                      .HasForeignKey(p => p.IdMetodoPago)
-                      .OnDelete(DeleteBehavior.NoAction);
-            });
-
-            // Hacemos lo mismo para Proveedor y su relación con Municipio
+            // Proveedor
             modelBuilder.Entity<Proveedor>(entity =>
             {
-                // La relación con Municipio usa la clave foránea 'IdMunicipio'
+                entity.HasIndex(p => p.NIT).IsUnique();
                 entity.HasOne(p => p.Municipio)
                       .WithMany(m => m.Proveedores)
                       .HasForeignKey(p => p.IdMunicipio)
                       .OnDelete(DeleteBehavior.NoAction);
             });
 
-            // Y para Factura, que también se relaciona con Usuario y MetodoPago
-            modelBuilder.Entity<Factura>(entity =>
+            // Producto
+            modelBuilder.Entity<Producto>(entity =>
             {
-                entity.HasOne(f => f.Usuario)
-                     .WithMany(u => u.Facturas)
-                     .HasForeignKey(f => f.IdUsuario)
-                     .OnDelete(DeleteBehavior.SetNull); // Este ya lo tenías, pero lo agrupamos
-
-                entity.HasOne(f => f.MetodoPago)
-                     .WithMany(mp => mp.Facturas)
-                     .HasForeignKey(f => f.IdMetodoPago)
-                     .OnDelete(DeleteBehavior.NoAction);
+                entity.Property(p => p.Precio).HasColumnType("decimal(18, 2)");
+                entity.HasOne(p => p.Categoria)
+                      .WithMany(c => c.Productos)
+                      .HasForeignKey(p => p.IdCategoria)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // --- Configuración para la nueva entidad PagoProveedor ---
-            modelBuilder.Entity<PagoProveedor>(entity =>
+            // Pedido
+            modelBuilder.Entity<Pedido>(entity =>
             {
-                // Relación con Proveedor: Un Proveedor puede tener muchos Pagos.
+                entity.HasIndex(p => p.NumeroPedido).IsUnique();
                 entity.HasOne(p => p.Proveedor)
-                      .WithMany() // No necesitamos una colección de Pagos en la clase Proveedor, así que lo dejamos vacío.
-                      .HasForeignKey(p => p.IdProveedor) // Le decimos explícitamente qué columna usar.
-                      .OnDelete(DeleteBehavior.NoAction); // Evita borrados en cascada si se elimina un proveedor.
-
-                // Relación con MetodoPago: Un MetodoPago se puede usar en muchos Pagos.
-                entity.HasOne(p => p.MetodoPago)
-                      .WithMany() // Tampoco necesitamos una colección en MetodoPago.
-                      .HasForeignKey(p => p.IdMetodoPago)
+                      .WithMany(prov => prov.Pedidos)
+                      .HasForeignKey(p => p.IdProveedor)
                       .OnDelete(DeleteBehavior.NoAction);
-
-                // Relación con Usuario: Un Usuario puede registrar muchos Pagos.
                 entity.HasOne(p => p.Usuario)
-                      .WithMany() // Tampoco necesitamos una colección en Usuario.
+                      .WithMany(u => u.Pedidos)
                       .HasForeignKey(p => p.IdUsuario)
                       .OnDelete(DeleteBehavior.NoAction);
+                entity.HasOne(p => p.MetodoPago)
+                      .WithMany(mp => mp.Pedidos)
+                      .HasForeignKey(p => p.IdMetodoPago)
+                      .OnDelete(DeleteBehavior.NoAction);
             });
 
-            // --- Configuración para la tabla de enlace PagoProveedorPedido ---
+            // DetallePedido
+            modelBuilder.Entity<DetallePedido>(entity =>
+            {
+                entity.Property(dp => dp.PrecioUnitario).HasColumnType("decimal(18, 2)");
+                entity.Property(dp => dp.Descuento).HasColumnType("decimal(18, 2)");
+                entity.Property(dp => dp.IVA).HasColumnType("decimal(18, 2)");
+                entity.Property(dp => dp.Total).HasComputedColumnSql("((Cantidad * PrecioUnitario - ISNULL(Descuento, 0)) * (1 + ISNULL(IVA, 0)/100))", stored: true);
+                entity.HasOne(dp => dp.Pedido)
+                      .WithMany(p => p.DetallesPedidos)
+                      .HasForeignKey(dp => dp.IdPedido)
+                      .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(dp => dp.Producto)
+                      .WithMany(p => p.DetallesPedidos)
+                      .HasForeignKey(dp => dp.IdProducto)
+                      .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            // Factura
+            modelBuilder.Entity<Factura>(entity =>
+            {
+                entity.HasIndex(f => f.NumeroFactura).IsUnique();
+                entity.HasOne(f => f.Cliente)
+                      .WithMany(c => c.Facturas)
+                      .HasForeignKey(f => f.IdCliente)
+                      .OnDelete(DeleteBehavior.NoAction);
+                entity.HasOne(f => f.Usuario)
+                      .WithMany(u => u.Facturas)
+                      .HasForeignKey(f => f.IdUsuario)
+                      .OnDelete(DeleteBehavior.SetNull);
+                entity.HasOne(f => f.MetodoPago)
+                      .WithMany(mp => mp.Facturas)
+                      .HasForeignKey(f => f.IdMetodoPago)
+                      .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            // DetalleFactura
+            modelBuilder.Entity<DetalleFactura>(entity =>
+            {
+                entity.Property(df => df.PrecioUnitario).HasColumnType("decimal(18, 2)");
+                entity.Property(df => df.Descuento).HasColumnType("decimal(18, 2)");
+                entity.Property(df => df.IVA).HasColumnType("decimal(18, 2)");
+                entity.Property(df => df.SubTotalLinea).HasComputedColumnSql("(Cantidad * PrecioUnitario - ISNULL(Descuento, 0))", stored: true);
+                entity.Property(df => df.Total).HasComputedColumnSql("((Cantidad * PrecioUnitario - ISNULL(Descuento, 0)) * (1 + ISNULL(IVA, 0)/100))", stored: true);
+                entity.HasOne(df => df.Factura)
+                      .WithMany(f => f.DetallesFactura)
+                      .HasForeignKey(df => df.IdFactura)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // ProductoProveedor
+            modelBuilder.Entity<ProductoProveedor>(entity =>
+            {
+                entity.ToTable("ProductoProveedor");
+                entity.HasIndex(pp => new { pp.IdProveedor, pp.IdProducto }).IsUnique();
+                entity.Property(pp => pp.PrecioCompra).HasColumnType("decimal(18, 2)");
+            });
+
+            // NotaDeCredito y su Detalle
+            modelBuilder.Entity<NotaDeCredito>(entity =>
+            {
+                entity.HasIndex(n => n.NumeroNota).IsUnique();
+                entity.Property(n => n.MontoTotal).HasColumnType("decimal(18, 2)");
+                entity.HasOne(n => n.FacturaOriginal)
+                      .WithMany(f => f.NotasDeCredito)
+                      .HasForeignKey(n => n.IdFacturaOriginal)
+                      .OnDelete(DeleteBehavior.NoAction);
+                entity.HasOne(n => n.Cliente).WithMany().HasForeignKey(n => n.IdCliente).OnDelete(DeleteBehavior.NoAction);
+                entity.HasOne(n => n.Usuario).WithMany().HasForeignKey(n => n.IdUsuario).OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<DetalleNotaDeCredito>(entity =>
+            {
+                entity.Property(d => d.PrecioUnitario).HasColumnType("decimal(18, 2)");
+                entity.Property(d => d.Total).HasColumnType("decimal(18, 2)");
+                entity.HasOne(d => d.NotaDeCredito)
+                      .WithMany(n => n.Detalles)
+                      .HasForeignKey(d => d.IdNotaDeCredito);
+                entity.HasOne(d => d.Producto)
+                      .WithMany(p => p.DetallesNotaDeCredito)
+                      .HasForeignKey(d => d.IdProducto)
+                      .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            // PagoProveedor y su enlace
+            modelBuilder.Entity<PagoProveedor>(entity =>
+            {
+                entity.Property(p => p.MontoPagado).HasColumnType("decimal(18, 2)");
+                entity.HasOne(p => p.Proveedor).WithMany().HasForeignKey(p => p.IdProveedor).OnDelete(DeleteBehavior.NoAction);
+                entity.HasOne(p => p.MetodoPago).WithMany().HasForeignKey(p => p.IdMetodoPago).OnDelete(DeleteBehavior.NoAction);
+                entity.HasOne(p => p.Usuario).WithMany().HasForeignKey(p => p.IdUsuario).OnDelete(DeleteBehavior.NoAction);
+            });
+
             modelBuilder.Entity<PagoProveedorPedido>(entity =>
             {
-                // Define la llave primaria compuesta
                 entity.HasKey(pp => new { pp.IdPagoProveedor, pp.IdPedido });
-
-                // Define la relación con Pedido
-                entity.HasOne(pp => pp.Pedido)
-                      .WithMany(p => p.PagosAplicados)
-                      .HasForeignKey(pp => pp.IdPedido);
-
-                // Define la relación con PagoProveedor
-                entity.HasOne(pp => pp.PagoProveedor)
-                      .WithMany(p => p.PedidosCubiertos)
-                      .HasForeignKey(pp => pp.IdPagoProveedor);
+                entity.HasOne(pp => pp.Pedido).WithMany(p => p.PagosAplicados).HasForeignKey(pp => pp.IdPedido);
+                entity.HasOne(pp => pp.PagoProveedor).WithMany(p => p.PedidosCubiertos).HasForeignKey(pp => pp.IdPagoProveedor);
             });
 
-            // En AppDbContext.cs -> OnModelCreating
-
-            // --- Configuración para la nueva entidad PagoCliente ---
+            // PagoCliente y su enlace
             modelBuilder.Entity<PagoCliente>(entity =>
             {
                 entity.Property(p => p.MontoRecibido).HasColumnType("decimal(18, 2)");
-
-                entity.HasOne(p => p.Cliente)
-                      .WithMany()
-                      .HasForeignKey(p => p.IdCliente)
-                      .OnDelete(DeleteBehavior.NoAction);
-
-                entity.HasOne(p => p.MetodoPago)
-                      .WithMany()
-                      .HasForeignKey(p => p.IdMetodoPago)
-                      .OnDelete(DeleteBehavior.NoAction);
-
-                entity.HasOne(p => p.Usuario)
-                      .WithMany()
-                      .HasForeignKey(p => p.IdUsuario)
-                      .OnDelete(DeleteBehavior.NoAction);
+                entity.HasOne(p => p.Cliente).WithMany().HasForeignKey(p => p.IdCliente).OnDelete(DeleteBehavior.NoAction);
+                entity.HasOne(p => p.MetodoPago).WithMany().HasForeignKey(p => p.IdMetodoPago).OnDelete(DeleteBehavior.NoAction);
+                entity.HasOne(p => p.Usuario).WithMany().HasForeignKey(p => p.IdUsuario).OnDelete(DeleteBehavior.NoAction);
             });
 
-            // --- Configuración para la tabla de enlace PagoClienteFactura ---
             modelBuilder.Entity<PagoClienteFactura>(entity =>
             {
                 entity.HasKey(pf => new { pf.IdPagoCliente, pf.IdFactura });
-
-                entity.HasOne(pf => pf.Factura)
-                      .WithMany(f => f.PagosRecibidos)
-                      .HasForeignKey(pf => pf.IdFactura);
-
-                entity.HasOne(pf => pf.PagoCliente)
-                      .WithMany(p => p.FacturasCubiertas)
-                      .HasForeignKey(pf => pf.IdPagoCliente);
+                entity.HasOne(pf => pf.Factura).WithMany(f => f.PagosRecibidos).HasForeignKey(pf => pf.IdFactura);
+                entity.HasOne(pf => pf.PagoCliente).WithMany(p => p.FacturasCubiertas).HasForeignKey(pf => pf.IdPagoCliente);
             });
 
-            modelBuilder.Entity<PasswordReset>(entity =>
-            {
-                // Le decimos a EF que la columna Token tiene un valor por defecto generado por SQL.
-                // Esto le indica que debe leer el valor de vuelta después de un INSERT.
-                entity.Property(e => e.Token).HasDefaultValueSql("NEWID()");
-            });
-
-            // --- SECCIÓN 3: Configuraciones de Precisión para Campos Decimales ---
-            // Define el tipo de dato SQL exacto para todos los campos monetarios y decimales.
-            // Esto es crucial para evitar problemas de redondeo y asegurar la consistencia con la DB.
-
-            // Modelo: Producto
-            modelBuilder.Entity<Producto>().Property(p => p.Precio).HasColumnType("decimal(18, 2)");
-            //modelBuilder.Entity<Producto>().Property(p => p.UltimoPrecioCompra).HasColumnType("decimal(18, 2)");
-
-            // Modelo: Servicio
+            // Otros modelos
+            modelBuilder.Entity<PasswordReset>().Property(e => e.Token).HasDefaultValueSql("NEWID()");
             modelBuilder.Entity<Servicio>().Property(s => s.Precio).HasColumnType("decimal(18, 2)");
-
-            // Modelo: ProductoProveedor
-            modelBuilder.Entity<ProductoProveedor>().Property(pp => pp.PrecioCompra).HasColumnType("decimal(18, 2)");
-
-            // Modelo: Pedido y Detalles
-            modelBuilder.Entity<DetallePedido>().Property(dp => dp.PrecioUnitario).HasColumnType("decimal(18, 2)");
-            modelBuilder.Entity<DetallePedido>().Property(dp => dp.Descuento).HasColumnType("decimal(18, 2)");
-            modelBuilder.Entity<DetallePedido>().Property(dp => dp.IVA).HasColumnType("decimal(18, 2)");
-
-            // Modelo: Factura y Detalles
-            modelBuilder.Entity<Factura>().Property(f => f.SubTotal).HasColumnType("decimal(18, 2)");
-            modelBuilder.Entity<Factura>().Property(f => f.TotalIVA).HasColumnType("decimal(18, 2)");
-            modelBuilder.Entity<Factura>().Property(f => f.Total).HasColumnType("decimal(18, 2)");
-
-            modelBuilder.Entity<DetalleFactura>().Property(df => df.PrecioUnitario).HasColumnType("decimal(18, 2)");
-            modelBuilder.Entity<DetalleFactura>().Property(df => df.Descuento).HasColumnType("decimal(18, 2)");
-            modelBuilder.Entity<DetalleFactura>().Property(df => df.IVA).HasColumnType("decimal(18, 2)");
-
-            modelBuilder.Entity<PagoProveedor>().Property(p => p.MontoPagado).HasColumnType("decimal(18, 2)");
-
-            // --- SECCIÓN 4: Configuración de Columnas Calculadas (COMPUTED COLUMNS) ---
-            // Informa a Entity Framework que estas propiedades son calculadas por la base de datos (PERSISTED).
-            // EF no intentará insertar o actualizar valores en estas columnas.
-
-            modelBuilder.Entity<DetallePedido>()
-                .Property(dp => dp.Total)
-                .HasComputedColumnSql("((Cantidad * PrecioUnitario - ISNULL(Descuento, 0)) * (1 + ISNULL(IVA, 0)/100))", stored: true);
-
-            modelBuilder.Entity<DetalleFactura>()
-                .Property(df => df.SubTotalLinea)
-                .HasComputedColumnSql("(Cantidad * PrecioUnitario - ISNULL(Descuento, 0))", stored: true);
-
-            modelBuilder.Entity<DetalleFactura>()
-                .Property(df => df.Total)
-                .HasComputedColumnSql("((Cantidad * PrecioUnitario - ISNULL(Descuento, 0)) * (1 + ISNULL(IVA, 0)/100))", stored: true);
         }
-
     }
 }

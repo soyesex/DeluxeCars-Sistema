@@ -2,9 +2,11 @@
 using DeluxeCarsDesktop.Models;
 using DeluxeCarsDesktop.Services;
 using DeluxeCarsDesktop.Utils;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -72,11 +74,15 @@ namespace DeluxeCarsDesktop.ViewModel
             set { SetProperty(ref _categoriaSeleccionada, value); (GuardarCommand as ViewModelCommand)?.RaiseCanExecuteChanged(); }
         }
 
+        private string _imagenUrl;
+        public string ImagenUrl { get => _imagenUrl; set => SetProperty(ref _imagenUrl, value); }
+
         // --- Comandos ---
         public ICommand GuardarCommand { get; }
         public ICommand CancelarCommand { get; }
         public ICommand NuevaCategoriaCommand { get; }
         public Action CloseAction { get; set; }
+        public ICommand SeleccionarImagenCommand { get; }
 
         public ProductoFormViewModel(IUnitOfWork unitOfWork, IStockAlertService stockAlertService,
                                   INotificationService notificationService, INavigationService navigationService)
@@ -90,6 +96,7 @@ namespace DeluxeCarsDesktop.ViewModel
             GuardarCommand = new ViewModelCommand(ExecuteGuardarCommand, CanExecuteGuardarCommand);
             NuevaCategoriaCommand = new ViewModelCommand(ExecuteShowCategoriaCommand);
             CancelarCommand = new ViewModelCommand(p => CloseAction?.Invoke());
+            SeleccionarImagenCommand = new ViewModelCommand(_ => ExecuteSeleccionarImagen());
         }
 
         public async Task LoadAsync(int productoId)
@@ -121,10 +128,48 @@ namespace DeluxeCarsDesktop.ViewModel
                     StockMaximo = _productoActual.StockMaximo;
                     Estado = _productoActual.Estado;
                     CategoriaSeleccionada = Categorias.FirstOrDefault(c => c.Id == _productoActual.IdCategoria);
+                    this.ImagenUrl = _productoActual.ImagenUrl;
                 }
             }
         }
+        private void ExecuteSeleccionarImagen()
+        {
+            // 1. Creamos un diálogo para que el usuario seleccione un archivo
+            var openFileDialog = new OpenFileDialog
+            {
+                Filter = "Archivos de Imagen|*.jpg;*.jpeg;*.png;*.gif;*.bmp",
+                Title = "Seleccionar Imagen del Producto"
+            };
 
+            // 2. Si el usuario selecciona un archivo y hace clic en "OK"
+            if (openFileDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    // 3. Definimos una carpeta segura dentro de nuestra aplicación para guardar las imágenes.
+                    string destinationFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", "Products");
+
+                    // Si la carpeta no existe, la creamos.
+                    Directory.CreateDirectory(destinationFolder);
+
+                    // 4. Creamos un nombre de archivo único para evitar conflictos y sobreescrituras.
+                    string originalFilePath = openFileDialog.FileName;
+                    string newFileName = Guid.NewGuid().ToString() + Path.GetExtension(originalFilePath);
+                    string destinationPath = Path.Combine(destinationFolder, newFileName);
+
+                    // 5. Copiamos el archivo seleccionado por el usuario a nuestra carpeta de destino.
+                    File.Copy(originalFilePath, destinationPath);
+
+                    // 6. Actualizamos la propiedad del ViewModel con el NUEVO nombre del archivo.
+                    // El binding y el converter se encargarán de mostrar la nueva imagen en la UI.
+                    ImagenUrl = newFileName;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ocurrió un error al procesar la imagen: {ex.Message}", "Error de Imagen", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
         private async Task LoadCategoriasAsync()
         {
             var cats = await _unitOfWork.Categorias.GetAllAsync();
@@ -166,6 +211,7 @@ namespace DeluxeCarsDesktop.ViewModel
             _productoActual.Descripcion = Descripcion;
             _productoActual.Estado = Estado;
             _productoActual.IdCategoria = CategoriaSeleccionada.Id;
+            _productoActual.ImagenUrl = this.ImagenUrl;
 
             try
             {

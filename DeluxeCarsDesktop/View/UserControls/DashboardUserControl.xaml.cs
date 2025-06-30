@@ -1,6 +1,7 @@
 ﻿using DeluxeCarsDesktop.ViewModel;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,6 +25,7 @@ namespace DeluxeCarsDesktop.View.UserControls
         public DashboardUserControl()
         {
             InitializeComponent();
+            if (DesignerProperties.GetIsInDesignMode(this)) return;
         }
     }
 }

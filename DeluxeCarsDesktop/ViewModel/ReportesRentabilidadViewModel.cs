@@ -1,5 +1,6 @@
 ﻿using DeluxeCarsDesktop.Dtos;
 using DeluxeCarsDesktop.Interfaces;
+using DeluxeCarsDesktop.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,7 +11,7 @@ using System.Windows.Input;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
-    public class ReportesRentabilidadViewModel : ViewModelBase
+    public class ReportesRentabilidadViewModel : ViewModelBase, IAsyncLoadable
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -28,13 +29,10 @@ namespace DeluxeCarsDesktop.ViewModel
         {
             _unitOfWork = unitOfWork;
             Resultados = new ObservableCollection<ReporteRentabilidadDto>();
-            CargarReporteCommand = new ViewModelCommand(async _ => await CargarReporteAsync());
-
-            // Carga inicial
-            _ = CargarReporteAsync();
+            CargarReporteCommand = new ViewModelCommand(async _ => await LoadAsync());
         }
 
-        private async Task CargarReporteAsync()
+        public async Task LoadAsync()
         {
             try
             {
