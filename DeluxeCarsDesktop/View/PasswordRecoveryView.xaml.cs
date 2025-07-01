@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DeluxeCarsDesktop.ViewModel;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,7 +25,6 @@ namespace DeluxeCarsDesktop.View
             InitializeComponent();
         }
         // --- LÓGICA PARA LA VENTANA PERSONALIZADA ---
-
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed)

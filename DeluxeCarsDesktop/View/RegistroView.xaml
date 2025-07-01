@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DeluxeCarsDesktop.View"
         mc:Ignorable="d"
+        UseLayoutRounding="True"
         xmlns:behaviors="clr-namespace:DeluxeCarsDesktop.Behaviors"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
@@ -32,10 +33,16 @@
         <!-- El contenido del diálogo del PIN -->
         <materialDesign:DialogHost.DialogContent>
             <StackPanel Margin="16">
-                <TextBlock Text="Se requiere autorización" FontWeight="Bold" Margin="0,0,0,8"/>
-                <TextBlock Text="Para asignar el rol de Administrador, por favor, ingrese el PIN de seguridad." TextWrapping="Wrap"/>
+                <TextBlock Text="Se requiere autorización" FontWeight="Bold" FontSize="17" FontFamily="{StaticResource Font.Poppins}" Margin="0,0,0,8"/>
+                <TextBlock Text="Para asignar el rol de Administrador, por favor, ingrese el PIN de seguridad." FontFamily="{StaticResource Font.SourceSans3}"
+                           FontSize="15"
+                           TextWrapping="Wrap"/>
 
-                <PasswordBox materialDesign:HintAssist.Hint="PIN de Administrador"
+                <PasswordBox x:Name="PinPasswordBox" materialDesign:HintAssist.Hint="PIN de Administrador"
+                             FontFamily="{StaticResource Font.SourceSans3}"
+                             FontWeight="Medium"
+                             FontSize="16"
+                             Loaded="PinPasswordBox_Loaded"
                          Style="{StaticResource MaterialDesignFloatingHintPasswordBox}"
                          Margin="0,16,0,8"
                          materialDesign:PasswordBoxAssist.Password="{Binding AdminPin, UpdateSourceTrigger=PropertyChanged}"/>
@@ -43,14 +50,17 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <!-- El CommandParameter envía 'false' si se cancela -->
                     <Button Style="{StaticResource MaterialDesignFlatButton}"
+                            FontFamily="{StaticResource Font.SourceSans3}"
                         Content="CANCELAR"
-                        Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
-                        CommandParameter="false"/>
+                        Command="{Binding CancelarPinCommand}"/> 
                     <!-- El CommandParameter envía 'true' si se acepta -->
                     <Button Style="{StaticResource MaterialDesignFlatButton}"
+                            FontFamily="{StaticResource Font.SourceSans3}"
                         Content="ACEPTAR"
-                        Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                        behaviors:InputBehaviors.EnterEjecutaComando="{Binding ValidarPinCommand}"
+                        Command="{Binding ValidarPinCommand}"
                         CommandParameter="true"/>
+                    
                 </StackPanel>
             </StackPanel>
         </materialDesign:DialogHost.DialogContent>

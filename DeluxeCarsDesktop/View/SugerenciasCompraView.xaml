@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DeluxeCarsDesktop.View"
         mc:Ignorable="d"
+        UseLayoutRounding="True"
         Title="Sugerencias Compra" Height="450" MaxWidth="1200"
         WindowStyle="None"
         ResizeMode="NoResize"

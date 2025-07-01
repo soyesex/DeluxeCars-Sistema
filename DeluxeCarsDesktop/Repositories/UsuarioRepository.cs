@@ -93,22 +93,84 @@ namespace DeluxeCarsDesktop.Repositories
             }
         }
 
-        // ... Implementación de los otros métodos específicos de IUsuarioRepository ...
-        public Task<PasswordReset> GeneratePasswordResetTokenAsync(string email)
+        public async Task<PasswordReset> GeneratePasswordResetTokenAsync(string email)
         {
-            // Estos métodos más complejos que acceden a otras tablas como 'PasswordResets'
-            // deben usar el '_context' protegido que viene de la clase base.
-            throw new NotImplementedException();
+            var user = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == email);
+            if (user == null)
+            {
+                return null;
+            }
+
+            Guid token = Guid.NewGuid();
+
+            var passwordReset = new PasswordReset
+            {
+                UsuarioId = user.Id,
+                Token = token,
+                FechaCreacion = DateTime.UtcNow,
+                FechaExpiracion = DateTime.UtcNow.AddHours(1),
+                Usado = false // Corregido de 'Utilizado' a 'Usado'
+            };
+
+            await _context.PasswordResets.AddAsync(passwordReset);
+            return passwordReset;
         }
 
-        public Task<bool> ResetPasswordAsync(string email, string token, string newPassword)
+        public async Task<bool> ResetPasswordAsync(string email, string token, string newPassword)
         {
-            throw new NotImplementedException();
+            // Intentamos convertir el token de string a Guid
+            if (!Guid.TryParse(token, out Guid tokenGuid))
+            {
+                return false; // El token proporcionado no tiene el formato correcto de Guid.
+            }
+
+            // 1. Buscamos la solicitud de reseteo que coincida y no haya sido usada.
+            var passwordResetRequest = await _context.PasswordResets
+                .Include(pr => pr.Usuario)
+                .FirstOrDefaultAsync(pr => pr.Usuario.Email == email &&
+                                            pr.Token == tokenGuid &&
+                                            !pr.Usado &&
+                                            pr.FechaExpiracion > DateTime.UtcNow);
+
+            if (passwordResetRequest == null)
+            {
+                // Si no se encuentra una solicitud válida, fallamos.
+                return false;
+            }
+
+            // 2. Si es válida, actualizamos la contraseña del usuario.
+            var userToUpdate = passwordResetRequest.Usuario;
+            PasswordHelper.CreatePasswordHash(newPassword, out byte[] passwordHash, out byte[] passwordSalt);
+            userToUpdate.PasswordHash = passwordHash;
+            userToUpdate.PasswordSalt = passwordSalt;
+
+            // 3. Marcamos el token como USADO para que no se pueda volver a utilizar.
+            passwordResetRequest.Usado = true;
+
+            return true;
         }
 
-        public Task<bool> ChangePassword(int userId, string oldPassword, string newPassword)
+        public async Task<bool> ChangePassword(int userId, string oldPassword, string newPassword)
         {
-            throw new NotImplementedException();
+            // 1. Buscamos al usuario por su ID
+            var user = await _context.Usuarios.FindAsync(userId);
+            if (user == null)
+            {
+                return false; // Usuario no encontrado
+            }
+
+            // 2. Verificamos que su contraseña antigua sea correcta
+            if (!PasswordHelper.VerifyPasswordHash(oldPassword, user.PasswordHash, user.PasswordSalt))
+            {
+                return false; // La contraseña antigua no coincide
+            }
+
+            // 3. Si es correcta, establecemos la nueva contraseña
+            PasswordHelper.CreatePasswordHash(newPassword, out byte[] passwordHash, out byte[] passwordSalt);
+            user.PasswordHash = passwordHash;
+            user.PasswordSalt = passwordSalt;
+
+            return true;
         }
         //public async Task<IEnumerable<Usuario>> GetAllWithRolAsync()
         //{
@@ -124,32 +186,6 @@ namespace DeluxeCarsDesktop.Repositories
         //        .Include(u => u.Rol) // Incluimos el Rol para poder filtrar por su nombre
         //        .FirstOrDefaultAsync(u => u.Rol.Nombre.ToUpper() == "ADMINISTRADOR");
         //}
-        //// MÉTODO 1 ACTUALIZADO: Para generar el token
-        //public async Task<PasswordReset> GeneratePasswordResetTokenAsync(string email)
-        //{
-        //    var user = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == email);
-        //    if (user == null)
-        //    {
-        //        return null; // No revelamos si el email existe
-        //    }
-
-        //    var passwordReset = new PasswordReset
-        //    {
-        //        UsuarioId = user.Id,
-        //        // El Token y FechaCreacion se generan por defecto en la BD.
-        //        // Establecemos una expiración, por ejemplo, de 1 hora.
-        //        FechaExpiracion = DateTime.UtcNow.AddHours(1),
-        //        Usado = false
-        //    };
-
-        //    await _context.PasswordResets.AddAsync(passwordReset);
-        //    // El UnitOfWork.CompleteAsync() guardará este registro.
-
-        //    // Devolvemos el token en formato string para que sea fácil de manejar.
-        //    return passwordReset;
-        //}
-
-
         //// MÉTODO 2 ACTUALIZADO: Para validar el token y cambiar la contraseña
         //public async Task<bool> ResetPasswordAsync(string email, string token, string newPassword)
         //{

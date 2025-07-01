@@ -4,6 +4,7 @@ using DeluxeCarsDesktop.Utils;
 using Microsoft.VisualBasic.ApplicationServices;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Security;
 using System.Text;
@@ -16,64 +17,77 @@ namespace DeluxeCarsDesktop.ViewModel
     {
         // --- Dependencias y Estado ---
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IEmailService _emailService;
         private string _email;
         private string _token;
         private string _newPassword;
         private string _confirmPassword;
         private string _statusMessage;
-        private bool _isResetStage = false; // Controla si mostramos la parte de solicitar o la de restablecer
-        private readonly IEmailService _emailService;
+        private bool _isResetStage = false;
 
         // --- Propiedades para el Binding en XAML ---
-        public string Email
-        {
-            get => _email;
-            set
-            {
-                SetProperty(ref _email, value);
-                // Notificamos al comando que su condición 'CanExecute' pudo haber cambiado
-                (RequestTokenCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
-            }
-        }
-
-        public string Token
-        {
-            get => _token;
-            set
-            {
-                SetProperty(ref _token, value);
-                (ResetPasswordCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
-            }
-        }
-
-        public string NewPassword
-        {
-            get => _newPassword;
-            set { SetProperty(ref _newPassword, value); (ResetPasswordCommand as ViewModelCommand)?.RaiseCanExecuteChanged(); }
-        }
-
-        public string ConfirmPassword
-        {
-            get => _confirmPassword;
-            set { SetProperty(ref _confirmPassword, value); (ResetPasswordCommand as ViewModelCommand)?.RaiseCanExecuteChanged(); }
-        }
-
+        public string Email { get => _email; set { SetProperty(ref _email, value); OnPropertyChanged(nameof(CanRequestToken)); } }
+        public string Token { get => _token; set { SetProperty(ref _token, value); OnPropertyChanged(nameof(CanResetPassword)); } }
+        public string NewPassword { get => _newPassword; set { SetProperty(ref _newPassword, value); OnPropertyChanged(nameof(CanResetPassword)); } }
+        public string ConfirmPassword { get => _confirmPassword; set { SetProperty(ref _confirmPassword, value); OnPropertyChanged(nameof(CanResetPassword)); } }
         public string StatusMessage { get => _statusMessage; private set => SetProperty(ref _statusMessage, value); }
-        public bool IsResetStage { get => _isResetStage; private set => SetProperty(ref _isResetStage, value); }
+        public bool IsResetStage
+        {
+            get => _isResetStage;
+            private set
+            {
+                SetProperty(ref _isResetStage, value);
+
+                // AVISO CLAVE: Notificamos a la interfaz que la propiedad dependiente también cambió.
+                OnPropertyChanged(nameof(IsRequestStage));
+            }
+        }
+
+        // --- NUEVA PROPIEDAD para controlar la primera etapa del formulario ---
+        public bool IsRequestStage => !IsResetStage;
+
+        // --- Propiedades para habilitar/deshabilitar botones ---
+        public bool CanRequestToken => !string.IsNullOrWhiteSpace(Email);
+        public bool CanResetPassword => !string.IsNullOrWhiteSpace(Token) && !string.IsNullOrEmpty(NewPassword) && !string.IsNullOrEmpty(ConfirmPassword);
+        public event Action GoBackToLoginRequested;
 
         // --- Comandos ---
         public ICommand RequestTokenCommand { get; }
         public ICommand ResetPasswordCommand { get; }
+        public ICommand OpenEmailClientCommand { get; } 
+        public ICommand GoBackToLoginCommand { get; }
 
         // --- Constructor ---
         public PasswordRecoveryViewModel(IUnitOfWork unitOfWork, IEmailService emailService)
         {
             _unitOfWork = unitOfWork;
-            _emailService = emailService; // <-- Guárdalo
+            _emailService = emailService;
+            RequestTokenCommand = new ViewModelCommand(async p => await ExecuteRequestToken());
+            ResetPasswordCommand = new ViewModelCommand(async p => await ExecuteResetPassword());
+            OpenEmailClientCommand = new ViewModelCommand(ExecuteOpenEmailClient); // <-- INICIALIZACIÓN
 
-            // Inicializamos los comandos con su lógica de ejecución y validación
-            RequestTokenCommand = new ViewModelCommand(async p => await ExecuteRequestToken(), p => CanExecuteRequestToken());
-            ResetPasswordCommand = new ViewModelCommand(async p => await ExecuteResetPassword(), p => CanExecuteResetPassword());
+            GoBackToLoginCommand = new ViewModelCommand(ExecuteGoBackToLogin);
+        }
+
+        // --- Métodos de Ejecución de Comandos ---
+
+        private void ExecuteOpenEmailClient(object obj)
+        {
+            string url = "mailto:"; // Comando genérico para abrir el cliente de correo por defecto
+            if (!string.IsNullOrEmpty(Email))
+            {
+                if (Email.Contains("gmail")) url = "https://mail.google.com";
+                else if (Email.Contains("outlook") || Email.Contains("hotmail")) url = "https://outlook.live.com";
+            }
+
+            try
+            {
+                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"No se pudo abrir el cliente de correo: {ex.Message}";
+            }
         }
 
         // --- Métodos de Ejecución de Comandos ---
@@ -109,7 +123,7 @@ namespace DeluxeCarsDesktop.ViewModel
                     // Enviamos el email con los datos correctos del usuario que encontramos.
                     await _emailService.SendPasswordResetEmailAsync(user.Email, user.Nombre, generatedToken);
 
-                    StatusMessage = "Se ha enviado un token a tu correo. Por favor, revísalo y pégalo abajo.";
+                    StatusMessage = "Se ha enviado un token a tu correo. Por favor, revísalo y pégalo arriba.";
                     IsResetStage = true; // Cambiamos a la segunda etapa del formulario.
                 }
                 else
@@ -166,6 +180,11 @@ namespace DeluxeCarsDesktop.ViewModel
         {
             // El botón de restablecer solo se activa si los campos necesarios no están vacíos
             return !string.IsNullOrWhiteSpace(Token) && !string.IsNullOrEmpty(NewPassword) && !string.IsNullOrEmpty(ConfirmPassword);
+        }
+
+        private void ExecuteGoBackToLogin(object obj)
+        {
+            GoBackToLoginRequested?.Invoke();
         }
     }
 }

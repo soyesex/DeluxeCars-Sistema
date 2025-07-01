@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DeluxeCarsDesktop.View"
         mc:Ignorable="d"
+        UseLayoutRounding="True"
         xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
         Title="Formulario" MinHeight="200" MinWidth="900"
         WindowStyle="None"

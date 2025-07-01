@@ -420,61 +420,85 @@
     </Style>
 
     <!-- Estilo para la barra de búsqueda principal -->
-    <Style x:Key="SearchBoxStyle" TargetType="TextBox">
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="Foreground" Value="{StaticResource PrimaryTextColor}" />
+    <Style x:Key="SearchBoxStyle" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
+
+        <Setter Property="Background" Value="{DynamicResource Background.Primary}"/>
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
+        <Setter Property="CaretBrush" Value="{DynamicResource PrimaryTextColor}"/>
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="FontSize" Value="14"/>
-        <Setter Property="FontFamily" Value="Montserrat"/>
+        <Setter Property="FontFamily" Value="{StaticResource Font.SourceSans3}"/>
+        <Setter Property="FontSize" Value="16"/>
         <Setter Property="Height" Value="40"/>
-        <Setter Property="Padding" Value="15,0,40,0"/>
+        <Setter Property="Padding" Value="13,0,40,0"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
-
-        <!-- 
-            CAMBIO TÉCNICO:
-            La propiedad 'CaretBrush' controla el color del cursor de texto parpadeante.
-            La enlazamos a nuestro 'PrimaryTextColor' para que coincida con el color
-            del texto que el usuario está escribiendo, creando una experiencia visual coherente.
-        -->
-        <Setter Property="CaretBrush" Value="{StaticResource PrimaryTextColor}"/>
-
+        <Setter Property="BorderBrush" Value="{DynamicResource Text.Secondary}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
-                    <Border x:Name="border" CornerRadius="15" Background="{StaticResource PrimaryBackgroundColor}" BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
+                    <Border x:Name="border"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="15"
+                    SnapsToDevicePixels="True">
                         <Grid>
-                            <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
-                            <TextBlock Text="{TemplateBinding Tag}" Foreground="{StaticResource PlaceholderTextColor}" IsHitTestVisible="False" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="{TemplateBinding Padding}">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                  Margin="{TemplateBinding Padding}"
+                                  VerticalAlignment="Center"
+                                  HorizontalScrollBarVisibility="Hidden"
+                                  VerticalScrollBarVisibility="Hidden"/>
+
+                            <TextBlock Text="{TemplateBinding Tag}"
+                               Foreground="{DynamicResource PlaceholderTextColor}"
+                               IsHitTestVisible="False"
+                               VerticalAlignment="Center"
+                               Margin="{TemplateBinding Padding}">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Visibility" Value="Collapsed"/>
                                         <Style.Triggers>
                                             <MultiDataTrigger>
                                                 <MultiDataTrigger.Conditions>
-                                                    <Condition Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="" />
-                                                    <Condition Binding="{Binding IsKeyboardFocused, RelativeSource={RelativeSource TemplatedParent}}" Value="False" />
+                                                    <Condition Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value=""/>
+                                                    <Condition Binding="{Binding IsKeyboardFocused, RelativeSource={RelativeSource TemplatedParent}}" Value="False"/>
                                                 </MultiDataTrigger.Conditions>
-                                                <Setter Property="Visibility" Value="Visible" />
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </MultiDataTrigger>
+
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="{x:Null}"/>
+                                                    <Condition Binding="{Binding IsKeyboardFocused, RelativeSource={RelativeSource TemplatedParent}}" Value="False"/>
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter Property="Visibility" Value="Visible"/>
                                             </MultiDataTrigger>
                                         </Style.Triggers>
                                     </Style>
                                 </TextBlock.Style>
                             </TextBlock>
-                            <fa:IconImage Icon="MagnifyingGlass" Width="16" Height="16" Foreground="{Binding BorderBrush, ElementName=border}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,15,0" />
+
+                            <fa:IconImage Icon="MagnifyingGlass"
+                                  Width="18" Height="18"
+                                  VerticalAlignment="Center"
+                                  HorizontalAlignment="Right"
+                                  Margin="0,0,15,0"
+                                  Foreground="{Binding BorderBrush, ElementName=border}"/>
                         </Grid>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource HighlightBorderColor}"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource Brush.Neutral.WhitePure}"/>
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource HighlightBorderColor}"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource Brush.Neutral.WhitePure}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
+
+
 
     <!-- Estilos Data Grid -->
     <Style x:Key="ElegantDataGridStyle" TargetType="DataGrid">
@@ -605,42 +629,43 @@
         </Setter>
     </Style>
 
-    <!-- Estilos del boton dentro de un control despegable -->
-    <Style x:Key="menuItemBotton" TargetType="MenuItem">
-        <Setter Property="Background" Value="#1F2A44"/>
-        <Setter Property="Foreground" Value="#b0b9c6"/>
-        <Setter Property="FontSize" Value="12"/>
-        <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}"/>
-        <Setter Property="Padding" Value="10 6"/>
-        <Setter Property="Width" Value="120"/>
-        <Setter Property="Height" Value="30"/>
-        <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="BorderBrush" Value="Transparent"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="MenuItem">
-                    <Border 
-                    Background="{TemplateBinding Background}" 
-                    CornerRadius="15" 
-                    Padding="{TemplateBinding Padding}">
-                        <ContentPresenter 
-                        VerticalAlignment="Center" 
-                        HorizontalAlignment="Center" 
-                        ContentSource="Header" 
-                        RecognizesAccessKey="True"/>
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
+    <Style x:Key="AppMenuItemIconStyle" TargetType="fa:IconImage">
+        <!-- Ajuste para evitar recorte -->
+        <Setter Property="Width" Value="20"/>
+        <Setter Property="Height" Value="20"/>
+        <Setter Property="Margin" Value="-2"/>
+        <!-- espacio interno horizontal -->
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <!-- Enlazar directamente al Foreground del MenuItem -->
+        <Setter Property="Foreground"
+          Value="{Binding RelativeSource={RelativeSource AncestorType=MenuItem}, Path=Foreground}"/>
+    </Style>
+
+    <Style x:Key="AppMenuItemStyle" TargetType="MenuItem" BasedOn="{StaticResource MaterialDesignMenuItem}">
+        <Setter Property="MinWidth" Value="160"/>
+        <Setter Property="Height" Value="44"/>
+        <!-- un poco más alto para mejorar estética -->
+        <Setter Property="Padding" Value="12 2 10 2"/>
+        <!-- espacio interior uniforme -->
+        <Setter Property="Margin" Value="0,2"/>
+        <Setter Property="FontFamily" Value="Montserrat"/>
+        <Setter Property="FontSize" Value="14"/>
+        <!-- Permitir modificar Foreground desde el parent -->
+        <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
 
         <Style.Triggers>
-            <!-- Efecto hover -->
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="#2C3A5A"/>
-                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="Background" Value="{StaticResource Background.Surface.Hover}"/>
+                <Setter Property="BorderBrush" 
+              Value="{Binding RelativeSource={RelativeSource Self}, Path=Foreground}"/>
+                <Setter Property="BorderThickness" Value="4,0,0,0"/>
             </Trigger>
         </Style.Triggers>
     </Style>
+
+
+
+
 
     <!-- Estilos barra de busquedad -->
     <Style x:Key="textBoxSearch" TargetType="TextBox">
@@ -865,14 +890,15 @@
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
-        <Setter Property="Width" Value="25"/>
+        <Setter Property="Width" Value="30"/>
+        <Setter Property="Width" Value="30"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{StaticResource plainTextColor1}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border Background="{TemplateBinding Background}">
-                        <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>

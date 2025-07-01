@@ -1,5 +1,7 @@
 ﻿using DeluxeCarsDesktop.Data;
 using DeluxeCarsDesktop.Interfaces;
+using DeluxeCarsDesktop.Utils;
+using System.Diagnostics;
 
 namespace DeluxeCarsDesktop.Repositories
 {
@@ -67,6 +69,31 @@ namespace DeluxeCarsDesktop.Repositories
         public void Dispose()
         {
             _context.Dispose();
+        }
+
+        // En UnitOfWork.cs
+        public async Task<bool> ValidarPinAdministradorAsync(string pinIntroducido)
+        {
+            if (string.IsNullOrEmpty(pinIntroducido)) return false;
+
+            try
+            {
+                var config = await Configuraciones.GetByIdAsync(1);
+
+                // Si no hay configuración o no se ha establecido un PIN, la validación falla.
+                if (config == null || config.AdminPINHash == null || config.AdminPINSalt == null)
+                {
+                    return false;
+                }
+
+                // ¡Usamos tu PasswordHelper existente!
+                return PasswordHelper.VerifyPasswordHash(pinIntroducido, config.AdminPINHash, config.AdminPINSalt);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error al validar PIN: {ex.Message}");
+                return false;
+            }
         }
     }
 }

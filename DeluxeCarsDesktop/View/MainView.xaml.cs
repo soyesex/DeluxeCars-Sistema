@@ -28,6 +28,17 @@ namespace DeluxeCarsDesktop.View
             this.MaxHeight = SystemParameters.MaximizedPrimaryScreenHeight;
             this.DataContext = viewModel;
         }
+        private void OpenContextMenu_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            // Este método funciona para cualquier botón que lo llame.
+            if (sender is Button button && button.ContextMenu != null)
+            {
+                // Le decimos al menú que se posicione relativo al botón que se acaba de presionar.
+                button.ContextMenu.PlacementTarget = button;
+                // Abrimos el menú.
+                button.ContextMenu.IsOpen = true;
+            }
+        }
         [DllImport("user32.dll")]
         public static extern IntPtr SendMessage(IntPtr hWnd, int msg, int wParam, int lParam);
         private void pnlControlBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

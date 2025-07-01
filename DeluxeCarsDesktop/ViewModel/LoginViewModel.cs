@@ -56,6 +56,7 @@ namespace DeluxeCarsDesktop.ViewModel
 
         // --- Eventos y Comandos ---
         public event Action LoginSuccess;
+        public event Action ShowPasswordRecoveryViewRequested;
         public ICommand LoginCommand { get; }
         public ICommand RecoverPasswordCommand { get; }
         public ICommand ShowRegisterViewCommand { get; }
@@ -126,13 +127,8 @@ namespace DeluxeCarsDesktop.ViewModel
 
         private void ExecuteRecoverPasswordCommand(object obj)
         {
-            // Usamos el ServiceProvider para crear la vista y el viewmodel
-            var recoveryView = _serviceProvider.GetRequiredService<PasswordRecoveryView>();
-            var recoveryViewModel = _serviceProvider.GetRequiredService<PasswordRecoveryViewModel>();
-
-            // Conectamos la vista con su lógica y la mostramos
-            recoveryView.DataContext = recoveryViewModel;
-            recoveryView.ShowDialog();
+            // El ViewModel solo notifica la intención. No crea vistas.
+            ShowPasswordRecoveryViewRequested?.Invoke();
         }
 
         private void ExecuteShowRegisterView(object obj)

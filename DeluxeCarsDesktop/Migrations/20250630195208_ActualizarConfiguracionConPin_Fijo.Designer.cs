@@ -4,6 +4,7 @@ using DeluxeCarsDesktop.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DeluxeCarsDesktop.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250630195208_ActualizarConfiguracionConPin_Fijo")]
+    partial class ActualizarConfiguracionConPin_Fijo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -111,9 +114,6 @@ namespace DeluxeCarsDesktop.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
-                    b.Property<DateTime?>("LockoutEndTimeUtc")
-                        .HasColumnType("datetime2");
-
                     b.Property<byte[]>("Logo")
                         .HasColumnType("varbinary(max)");
 
@@ -121,9 +121,6 @@ namespace DeluxeCarsDesktop.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("PinFailedAttempts")
-                        .HasColumnType("int");
 
                     b.Property<decimal>("PorcentajeIVA")
                         .HasColumnType("decimal(5, 2)");
@@ -147,7 +144,6 @@ namespace DeluxeCarsDesktop.Migrations
                             Email = "deluxecars@gmail.com",
                             HorarioAtencion = "Lunes a Viernes de 8am a 6pm",
                             NombreTienda = "Deluxe Cars",
-                            PinFailedAttempts = 0,
                             PorcentajeIVA = 19.0m,
                             Telefono = "3001234567"
                         });

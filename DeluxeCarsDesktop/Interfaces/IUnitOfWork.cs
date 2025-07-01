@@ -32,5 +32,7 @@ namespace DeluxeCarsDesktop.Interfaces
         /// </summary>
         /// <returns>El número de objetos de estado escritos en la base de datos.</returns>
         Task<int> CompleteAsync();
+
+        Task<bool> ValidarPinAdministradorAsync(string pinIntroducido);
     }
 }

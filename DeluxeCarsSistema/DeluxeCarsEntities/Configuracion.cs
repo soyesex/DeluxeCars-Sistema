@@ -41,5 +41,12 @@ namespace DeluxeCarsEntities
         // --- Personalización ---
         public byte[]? Logo { get; set; }
         public byte[]? Banner { get; set; }
+
+        // Guarda la fecha y hora (en UTC) hasta la cual el PIN está bloqueado.
+        // Es nullable (DateTime?) porque puede que no haya ningún bloqueo activo.
+        public DateTime? LockoutEndTimeUtc { get; set; }
+
+        // Guarda el número de intentos fallidos.
+        public int PinFailedAttempts { get; set; }
     }
 }

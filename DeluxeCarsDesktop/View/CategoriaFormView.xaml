@@ -7,6 +7,7 @@
         xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
         Title="Categoria nueva" MinHeight="200" MinWidth="900"
         WindowStyle="None"
+        UseLayoutRounding="True"
         ResizeMode="NoResize"
         SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterScreen"

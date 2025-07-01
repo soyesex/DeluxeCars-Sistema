@@ -20,10 +20,33 @@ namespace DeluxeCarsDesktop.View
     /// </summary>
     public partial class RegistroView : Window
     {
-        public RegistroView(RegistroViewModel viewModel)
+        private PasswordBox _pinPasswordBoxReference;
+        public RegistroView()
         {
             InitializeComponent();
-            this.DataContext = viewModel;
+
+            // Nos suscribimos al evento del DataContext cuando la ventana ha cargado
+            this.DataContextChanged += (s, e) =>
+            {
+                if (e.NewValue is RegistroViewModel vm)
+                {
+                    // Nos suscribimos al evento que creamos en el ViewModel
+                    vm.FocusPinBoxRequested += OnFocusPinBoxRequested;
+                }
+            };
+        }
+        // Este método se ejecutará cuando el ViewModel pida el foco
+        private void OnFocusPinBoxRequested()
+        {
+            // Usamos el operador '?' para asegurarnos de que no es nulo
+            _pinPasswordBoxReference?.Focus();
+        }
+
+        private void PinPasswordBox_Loaded(object sender, RoutedEventArgs e)
+        {
+            // El 'sender' es el PasswordBox que acaba de cargarse.
+            // Lo guardamos en nuestra variable para usarlo después.
+            _pinPasswordBoxReference = sender as PasswordBox;
         }
 
         private void Window_MouseDown(object sender, MouseEventArgs e)

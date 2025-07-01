@@ -17,7 +17,7 @@ namespace DeluxeCarsEntities
     {
         public string Username { get; set; }
         public string FirstName { get; set; }
-        public string DisplayName => $"Bienvenido, {FirstName}";
+        public string DisplayName => FirstName;
 
         public byte[] ProfilePicture { get; set; }
         // --- AÑADE ESTA PROPIEDAD ---

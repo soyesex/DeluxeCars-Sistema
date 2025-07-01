@@ -9,6 +9,8 @@
         xmlns:notification="clr-namespace:Notifications.Wpf.Core.Controls;assembly=Notifications.Wpf.Core"
         xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
         mc:Ignorable="d" 
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        UseLayoutRounding="True"
         xmlns:converters="clr-namespace:DeluxeCarsDesktop.Converters"
         xmlns:utils="clr-namespace:DeluxeCarsDesktop.Utils"
         x:Name="MainViewWindow"
@@ -77,9 +79,9 @@
 
         <Border.BorderBrush>
             <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                <GradientStop Color="{StaticResource Color.Aggressive.DeepBlue}" Offset="0"/>
-                <GradientStop Color="{StaticResource Color.Aggressive.RacingRed}" Offset="0.75"/>
-                <GradientStop Color="{StaticResource Color.WinBorder3}" Offset="1"/>
+                <GradientStop Color="{StaticResource Color.Brand.GraySteel}" Offset="0"/>
+                <GradientStop Color="{StaticResource Color.Brand.CharcoalDark}" Offset="0.5"/>
+                <GradientStop Color="{StaticResource Color.Brand.GraySteel}" Offset="1"/>
             </LinearGradientBrush>
         </Border.BorderBrush>
 
@@ -97,8 +99,8 @@
                     Grid.Column="0">
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,0.7">
-                        <GradientStop Color="{StaticResource Color.SecundaryBack1}" Offset="0"/>
-                        <GradientStop Color="{StaticResource Color.SecundaryBack2}" Offset="1"/>
+                        <GradientStop Color="{StaticResource Color.Brand.CharcoalLight}" Offset="0"/>
+                        <GradientStop Color="{StaticResource Color.Brand.CharcoalDark}" Offset="1"/>
                     </LinearGradientBrush>
                 </Border.Background>
 
@@ -295,12 +297,11 @@
             <!-- Main Section -->
             <Border CornerRadius="0,10,10,0"
                     Grid.Column="1">
-
                 <Border.Background>
-                    <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
-                        <GradientStop Color="{StaticResource Color.PrimaryBack1}" Offset="0"/>
-                        <GradientStop Color="{StaticResource Color.PrimaryBack2}" Offset="1"/>
-                    </LinearGradientBrush>
+                    <RadialGradientBrush GradientOrigin="0,0" Center="0,0" RadiusX="1.2" RadiusY="1.2">
+                        <GradientStop Color="{StaticResource Color.Brand.CharcoalLight}" Offset="0.1"/>
+                        <GradientStop Color="{StaticResource Color.Brand.NavyDeep}" Offset="0.9"/>
+                    </RadialGradientBrush>
                 </Border.Background>
 
                 <Grid>
@@ -373,11 +374,11 @@
                             <fa:IconImage Icon="{Binding Icon}"
                                           Height="20"
                                           Width="20"
-                                          Foreground="{StaticResource titleColor2}"
+                                          Foreground="{Binding CurrentViewAccentColor}"
                                           Margin="35,0,10,0"/>
 
                             <TextBlock Text="{Binding Caption}"
-                                       Foreground="{StaticResource titleColor2}"
+                                       Foreground="{Binding CurrentViewAccentColor}"
                                        FontSize="16"
                                        FontFamily="{StaticResource Font.SourceSans3}"
                                        FontWeight="Medium"
@@ -392,31 +393,46 @@
 
                             <Button x:Name="btnOpciones"
                                     Style="{StaticResource iconButton}"
-                                    Tag="{StaticResource color1}"
-                                    Click="btnOpciones_Click">
-
-                                <fa:IconImage Icon="AngleDown" 
-                                     Width="12" Height="12"
-                                     Style="{StaticResource iconButtonIcon}"/>
+                                    Tag="{StaticResource Brush.Menu.BlueSteel}"
+                                    Margin="5 0"
+                                    Click="btnOpciones_Click">      
+                                <fa:IconImage Icon="AngleDown"
+                                              Style="{StaticResource iconButtonIcon}"/>
 
                                 <Button.ContextMenu>
-                                    <ContextMenu Placement="Bottom" VerticalOffset="2"
-                                                 DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
-                                        <MenuItem Header="Cerrar sesión"
-                                          Command="{Binding LogoutCommand}"
-                                          Style="{StaticResource menuItemBotton}">
-
+                                    <ContextMenu FlowDirection="LeftToRight" Margin="0 115 0 0">
+                                        <MenuItem Header="Mi Perfil"
+                                                  Style="{StaticResource AppMenuItemStyle}"
+                                                  Foreground="{StaticResource Brush.Menu.Teal}"
+                                                  Command="{Binding ShowMyProfileCommand}">     
+                                            <MenuItem.Icon>
+                                                <fa:IconImage Icon="UserCog" Foreground="{StaticResource Brush.Menu.Teal}" Style="{StaticResource AppMenuItemIconStyle}"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                        <MenuItem Header="Ayuda"
+                                                  Style="{StaticResource AppMenuItemStyle}">
+                                            <MenuItem.Icon>
+                                                <fa:IconImage Icon="QuestionCircle" Style="{StaticResource AppMenuItemIconStyle}"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                        <MenuItem Header="Cerrar Sesión"
+                                                  Style="{StaticResource AppMenuItemStyle}"
+                                                  Foreground="{StaticResource Brush.Accent.DestructiveRed}"
+                                                  Command="{Binding LogoutCommand}">
+                                            <MenuItem.Icon>
+                                                <fa:IconImage Icon="SignOutAlt"  Foreground="{StaticResource Brush.Accent.DestructiveRed}" Style="{StaticResource AppMenuItemIconStyle}"/>
+                                            </MenuItem.Icon>
                                         </MenuItem>
                                     </ContextMenu>
                                 </Button.ContextMenu>
-
                             </Button>
 
-                            <TextBlock Text="{Binding CurrentUserAccount.DisplayName}"
+
+                            <TextBlock Text="{Binding GreetingText}"
                                        Foreground="{StaticResource titleColor2}"
-                                       FontFamily="Montserrat"
-                                       FontSize="12"
-                                       FontWeight="Normal"
+                                       FontFamily="{StaticResource Font.SourceSans3}"
+                                       FontSize="16"
+                                       FontWeight="Medium"
                                        VerticalAlignment="Center"/>
 
                             <Border Width="30" Height="30" CornerRadius="15" Margin="10,0,10,0">
@@ -471,6 +487,46 @@
                                 </Border>
 
                             </Grid>
+
+                            <Button Style="{StaticResource iconButton}"
+                                    ToolTip="Búsqueda Global (Próximamente)"
+                                    Command="{Binding ShowGlobalSearchCommand}"
+                                    Tag="{StaticResource Brush.Menu.YellowGold}">
+                                <fa:IconImage Icon="MagnifyingGlass" Style="{StaticResource iconButtonIcon}"/>
+                            </Button>
+
+                            <Button Style="{StaticResource iconButton}"
+                                    ToolTip="Acciones Rápidas"
+                                    Tag="{StaticResource Brush.Menu.GreenForest}" Click="OpenContextMenu_Click"
+                                    x:Name="btnQuickAdd">
+                                <fa:IconImage Icon="Plus" Style="{StaticResource iconButtonIcon}"/>
+
+                                <Button.ContextMenu>
+                                    <ContextMenu FlowDirection="LeftToRight" Margin="0 5 523 0">
+                                        <MenuItem Header="Nuevo Producto" 
+                                                  Foreground="{DynamicResource Brush.Menu.BlueCornflower}"
+                                                  Style="{StaticResource AppMenuItemStyle}" Command="{Binding ShowNewProductCommand}">
+                                            <MenuItem.Icon>
+                                                <fa:IconImage Icon="Box" Foreground="{DynamicResource Brush.Menu.BlueCornflower}" Style="{StaticResource AppMenuItemIconStyle}"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                        <MenuItem Header="Nuevo Cliente" 
+                                                  Foreground="{DynamicResource Brush.Menu.Lavender}"
+                                                  Style="{StaticResource AppMenuItemStyle}" Command="{Binding ShowNewClientCommand}">
+                                            <MenuItem.Icon>
+                                                <fa:IconImage Icon="UserPlus" Foreground="{DynamicResource Brush.Menu.Lavender}" Style="{StaticResource AppMenuItemIconStyle}"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                        <MenuItem Header="Nueva Factura"
+                                                  Foreground="{DynamicResource Brush.Menu.GreenForest}"
+                                                  Style="{StaticResource AppMenuItemStyle}" Command="{Binding ShowNewInvoiceCommand}">
+                                            <MenuItem.Icon>
+                                                <fa:IconImage Icon="FileInvoiceDollar" Foreground="{DynamicResource Brush.Menu.GreenForest}" Style="{StaticResource AppMenuItemIconStyle}"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                    </ContextMenu>
+                                </Button.ContextMenu>
+                            </Button>
                         </StackPanel>
                     </Grid>
 

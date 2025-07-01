@@ -4,8 +4,10 @@ using DeluxeCarsDesktop.Messages;
 using DeluxeCarsDesktop.Properties;
 using DeluxeCarsDesktop.Repositories;
 using DeluxeCarsDesktop.Services;
+using DeluxeCarsDesktop.Utils;
 using DeluxeCarsDesktop.View;
 using DeluxeCarsDesktop.ViewModel;
+using MaterialDesignThemes.Wpf;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using QuestPDF.Infrastructure;
@@ -65,6 +67,8 @@ public partial class App : Application
 
         services.AddTransient<IPedidoStatusCheckService, PedidoStatusCheckService>();
 
+        services.AddSingleton<IPinLockoutService, PinLockoutService>();
+
         // Registrar tus ViewModels. Transient significa que se creará una nueva instancia cada vez que se pida.
         services.AddTransient<LoginViewModel>();
         services.AddTransient<MainViewModel>();
@@ -105,6 +109,8 @@ public partial class App : Application
         services.AddTransient<NotaDeCreditoViewModel>();
         services.AddTransient<ConfiguracionViewModel>();
 
+        services.AddSingleton<ISnackbarMessageQueue>(new SnackbarMessageQueue());
+
         // Registra tus Vistas (las ventanas). Singleton o Transient son opciones comunes.
         // Usaremos Transient para asegurar que siempre se abran limpias.
         services.AddTransient<LoginView>();
@@ -116,6 +122,36 @@ public partial class App : Application
 
     protected override async void OnStartup(StartupEventArgs e)
     {
+        // =====================================================================
+        //           INICIO: CÓDIGO TEMPORAL PARA GENERAR PIN
+        // =====================================================================
+        #if DEBUG // Esto asegura que el código solo se compile en modo Debug
+        // Cambia a 'if (false)' después de obtener los valores para que no se ejecute más.
+        if (false)
+        {
+            // Asegúrate de que la clase PasswordHelper sea accesible aquí
+            PasswordHelper.CreatePasswordHash("0000", out byte[] hash, out byte[] salt);
+
+            string hashString = $"new byte[] {{ {string.Join(", ", hash)} }}";
+            string saltString = $"new byte[] {{ {string.Join(", ", salt)} }}";
+
+            Debug.WriteLine("--- VALORES DE PIN GENERADOS ---");
+            Debug.WriteLine("Copia las siguientes líneas en tu AppDbContext.cs dentro del método OnModelCreating:\n");
+            Debug.WriteLine("// HASH para el PIN '0000':");
+            Debug.WriteLine(hashString);
+            Debug.WriteLine("\n// SALT para el PIN '0000':");
+            Debug.WriteLine(saltString);
+            Debug.WriteLine("\n---------------------------------");
+
+            // Detenemos la aplicación para no continuar.
+            Application.Current.Shutdown();
+            return;
+        }
+        #endif
+        // =====================================================================
+        //            FIN: CÓDIGO TEMPORAL PARA GENERAR PIN
+        // =====================================================================
+
         base.OnStartup(e);
 
         var savedUsername = Settings.Default.SavedUsername;

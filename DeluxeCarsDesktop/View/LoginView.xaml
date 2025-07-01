@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DeluxeCarsDesktop.View"
         mc:Ignorable="d"
+        UseLayoutRounding="True"
         xmlns:behaviors="clr-namespace:DeluxeCarsDesktop.Behaviors"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
@@ -94,18 +95,18 @@
                                FontWeight="UltraBlack"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center"
-                               Margin="0 35 0 0"/>
+                               Margin="0 3 0 0"/>
 
                     <TextBlock Text="Autopartes de lujo, potencia sin límites"
-                               Foreground="LightGray"
-                               FontSize="16"
+                               Foreground="DarkGray"
+                               FontSize="17"
                                FontWeight="Regular"
                                Style="{StaticResource ProfessionalFadeInStyle_Delayed}"
                                TextWrapping="Wrap"
                                TextAlignment="Center"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center"
-                               Margin="7 5 0 0"/>
+                               Margin="7 0 0 0"/>
                 </StackPanel>
 
                 <StackPanel Width="250"
@@ -113,7 +114,7 @@
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Orientation="Vertical"
-                            Margin="272,50,272,0">
+                            Margin="272,20,272,0">
 
                     <TextBox x:Name="txtUser"
                              Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"
@@ -121,7 +122,7 @@
                              materialDesign:HintAssist.FloatingScale="1.0"
                              materialDesign:TextFieldAssist.HasClearButton="True"
                              Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                             FontSize="16"
+                             FontSize="17"
                              behaviors:InputBehaviors.EnterNavegaAlSiguiente="True"
                              behaviors:InputBehaviors.ValidaEmail="True"
                              FontWeight="Medium"
@@ -145,7 +146,7 @@
                               materialDesign:PasswordBoxAssist.Password="{Binding Password,
                                    Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                               materialDesign:PasswordBoxAssist.IsPasswordRevealed="False"
-                              FontSize="16"
+                              FontSize="17"
                               behaviors:InputBehaviors.EnterNavegaAlSiguiente="True"
                               behaviors:InputBehaviors.EnterEjecutaComando="{Binding LoginCommand}"
                               Foreground="DarkGray"
@@ -176,22 +177,25 @@
                     <Button x:Name="btnLogin" Grid.Column="2"
                             Command="{Binding LoginCommand}"
                             Content="Entrar"
-                            Width="130"
+                            FontSize="17"
+                            Width="110"
                             Visibility="{Binding IsLoginEnabled, Converter={StaticResource BooleanToHiddenConverter}}"
                             Style="{StaticResource ElegantGhostButtonStyle}"
                              Tag="DarkGray"
-                            Margin="0,5,0,0"/>
+                            Margin="0,4,0,0"/>
                     
                     <Button x:Name="btnRecoverPassword"
                             Command="{Binding RecoverPasswordCommand}"
                             Content="Recuperar contraseña"
-                            Width="180"
+                            Width="190"
+                            FontSize="17"
                             Style="{StaticResource ElegantGhostButtonStyle}"
                             Tag="DarkGray"
                             Margin="0 10 0 0"/>
 
                     <Button Content="Registrarse" 
-                             Width="120"
+                             Width="115"
+                             FontSize="17"
                              Command="{Binding ShowRegisterViewCommand}"
                              Style="{StaticResource ElegantGhostButtonStyle}"
                              Tag="DarkGray"

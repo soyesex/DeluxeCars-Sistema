@@ -1,22 +1,15 @@
 ﻿using DeluxeCarsDesktop.Interfaces;
 using DeluxeCarsDesktop.Messages;
-using DeluxeCarsEntities;
 using DeluxeCarsDesktop.Models.Notifications;
-using DeluxeCarsDesktop.Properties;
-using DeluxeCarsDesktop.Repositories;
 using DeluxeCarsDesktop.Services;
-using DeluxeCarsDesktop.View;
+using DeluxeCarsEntities;
 using FontAwesome.Sharp;
 using Microsoft.Extensions.DependencyInjection;
 using Notifications.Wpf.Core;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
+using System.Windows.Media;
 using System.Security.Principal;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
@@ -47,6 +40,11 @@ namespace DeluxeCarsDesktop.ViewModel
         public IconChar Icon { get => _icon; set => SetProperty(ref _icon, value); }
         public bool IsAdmin => _currentUserService.IsAdmin;
 
+        private Brush _currentViewAccentColor;
+        public Brush CurrentViewAccentColor { get => _currentViewAccentColor; set => SetProperty(ref _currentViewAccentColor, value); }
+        private string _greetingText;
+        public string GreetingText { get => _greetingText; set => SetProperty(ref _greetingText, value); }
+
         // --- Sistema de Notificaciones ---
         public ObservableCollection<AppNotification> AlertasNuevas { get; }
         public ObservableCollection<AppNotification> HistorialYEstados { get; }
@@ -71,6 +69,12 @@ namespace DeluxeCarsDesktop.ViewModel
         public ICommand LogoutCommand { get; }
         public ICommand ToggleNotificationsPanelCommand { get; }
         public ICommand ShowSugerenciasCompraViewCommand { get; }
+
+        public ICommand ShowGlobalSearchCommand { get; }
+        public ICommand ShowMyProfileCommand { get; }
+        public ICommand ShowNewProductCommand { get; }
+        public ICommand ShowNewClientCommand { get; }
+        public ICommand ShowNewInvoiceCommand { get; }
 
         public MainViewModel(ICurrentUserService currentUserService, IMessengerService messengerService, INavigationService navigationService, IUnitOfWork unitOfWork, IServiceProvider serviceProvider, INotificationService notificationService)
         {
@@ -109,11 +113,43 @@ namespace DeluxeCarsDesktop.ViewModel
             // --- Comando para Volver ---
             GoBackCommand = new ViewModelCommand(p => _navigationService.GoBack(), p => _navigationService.CanGoBack);
             LogoutCommand = new ViewModelCommand(ExecuteLogout);
+
+            // Comandos para los nuevos menús (por ahora, podemos dejarlos vacíos o navegar si ya tienes las vistas)
+            ShowMyProfileCommand = new ViewModelCommand(p => { /* TODO: Navegar a la vista de perfil de usuario */ });
+            ShowNewProductCommand = new ViewModelCommand(async p => await _navigationService.OpenFormWindow(Utils.FormType.Producto, 0));
+            ShowNewClientCommand = new ViewModelCommand(async p => await _navigationService.OpenFormWindow(Utils.FormType.Cliente, 0));
+            ShowNewInvoiceCommand = new ViewModelCommand(async p => await _navigationService.NavigateTo<FacturacionViewModel>());
+            ShowGlobalSearchCommand = new ViewModelCommand(p => { /* TODO: Lógica para la búsqueda global */ });
+
         }
 
         public async Task InitializeAsync()
         {
             await LoadCurrentUserData(); // Carga los datos del usuario logueado
+
+            // 1. Establece el saludo inicial.
+            GreetingText = $"Bienvenido, {CurrentUserAccount.DisplayName}";
+
+            // 2. Crea un temporizador que se ejecutará en el hilo de la UI.
+            var greetingTimer = new System.Windows.Threading.DispatcherTimer
+            {
+                // Se disparará una sola vez después de 5 segundos.
+                Interval = TimeSpan.FromSeconds(5)
+            };
+
+            // 3. Define qué hacer cuando el tiempo se cumpla.
+            greetingTimer.Tick += (sender, e) =>
+            {
+                // Cambia el saludo para mostrar solo el nombre.
+                GreetingText = CurrentUserAccount.DisplayName;
+                // Detiene el temporizador para que no se vuelva a ejecutar.
+                greetingTimer.Stop();
+            };
+
+            // 4. Inicia el temporizador.
+            greetingTimer.Start();
+
+
             await CargarEstadoDeNotificacionesAsync();
             await _navigationService.NavigateTo<DashboardViewModel>();// Carga la vista por defecto (el dashboard)
         }
@@ -273,18 +309,37 @@ namespace DeluxeCarsDesktop.ViewModel
         // Centraliza toda la lógica para actualizar el título y el ícono de la ventana.
         private void UpdateCaptionAndIcon(ViewModelBase viewModel)
         {
-            if (viewModel is DashboardViewModel) { Caption = "Panel Principal"; Icon = IconChar.Home; }
-            else if (viewModel is CatalogoViewModel) { Caption = "Inventario"; Icon = IconChar.List; }
-            else if (viewModel is ClientesViewModel) { Caption = "Clientes"; Icon = IconChar.Users; }
-            else if (viewModel is ProveedorViewModel) { Caption = "Proveedores"; Icon = IconChar.Truck; }
-            else if (viewModel is PedidoViewModel) { Caption = "Pedidos"; Icon = IconChar.ShoppingCart; }
-            else if (viewModel is FacturacionViewModel) { Caption = "Punto de Venta (POS)"; Icon = IconChar.CashRegister; }
-            else if (viewModel is FacturasHistorialViewModel) { Caption = "Historial de Ventas"; Icon = IconChar.History; }
-            else if (viewModel is ReportesRentabilidadViewModel) { Caption = "Reportes"; Icon = IconChar.ChartColumn; }
-            else if (viewModel is UsuarioViewModel) { Caption = "Usuarios"; Icon = IconChar.UserGear; }
-            else if (viewModel is RolViewModel) { Caption = "Roles de Usuario"; Icon = IconChar.UserShield; }
-            else if (viewModel is ConfiguracionViewModel) { Caption = "Configuración"; Icon = IconChar.Tools; }
-            else { Caption = "Deluxe Cars"; Icon = IconChar.Car; } // Un valor por defecto
+            // Mapeo centralizado de ViewModel a sus metadatos de UI
+            var viewMetadata = new Dictionary<Type, (string Caption, IconChar Icon, Brush AccentBrush)>
+            {
+                [typeof(DashboardViewModel)] = ("Panel Principal", IconChar.Home, (Brush)Application.Current.FindResource("Brush.Menu.BlueSteel")),
+                [typeof(CatalogoViewModel)] = ("Inventario", IconChar.List, (Brush)Application.Current.FindResource("Brush.Menu.BlueCornflower")),
+                [typeof(ClientesViewModel)] = ("Clientes", IconChar.Users, (Brush)Application.Current.FindResource("Brush.Menu.Lavender")),
+                [typeof(ProveedorViewModel)] = ("Proveedores", IconChar.Truck, (Brush)Application.Current.FindResource("Brush.Menu.YellowGold")),
+                [typeof(PedidoViewModel)] = ("Pedidos", IconChar.ShoppingCart, (Brush)Application.Current.FindResource("Brush.Menu.OrangePastel")),
+                [typeof(FacturacionViewModel)] = ("Punto de Venta (POS)", IconChar.CashRegister, (Brush)Application.Current.FindResource("Brush.Menu.GreenForest")),
+                [typeof(FacturasHistorialViewModel)] = ("Historial de Ventas", IconChar.History, (Brush)Application.Current.FindResource("Brush.Menu.Teal")),
+                [typeof(ReportesRentabilidadViewModel)] = ("Reportes", IconChar.ChartColumn, (Brush)Application.Current.FindResource("Brush.Menu.Cyan")),
+                [typeof(UsuarioViewModel)] = ("Usuarios", IconChar.UserGear, (Brush)Application.Current.FindResource("Brush.Menu.PurpleRoyal")),
+                [typeof(RolViewModel)] = ("Roles de Usuario", IconChar.UserShield, (Brush)Application.Current.FindResource("Brush.Menu.Magenta")),
+                [typeof(ConfiguracionViewModel)] = ("Configuración", IconChar.Tools, (Brush)Application.Current.FindResource("Brush.Brand.GrayLight"))
+            };
+
+            var viewModelType = viewModel.GetType();
+
+            if (viewMetadata.TryGetValue(viewModelType, out var metadata))
+            {
+                Caption = metadata.Caption;
+                Icon = metadata.Icon;
+                CurrentViewAccentColor = metadata.AccentBrush;
+            }
+            else
+            {
+                // Valores por defecto si la vista no está en el diccionario
+                Caption = "Deluxe Cars";
+                Icon = IconChar.Car;
+                CurrentViewAccentColor = (Brush)Application.Current.FindResource("Text.Primary");
+            }
         }
         private void ExecuteLogout(object obj)
         {

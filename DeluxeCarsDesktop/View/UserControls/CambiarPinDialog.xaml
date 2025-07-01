@@ -1,0 +1,54 @@
+﻿<UserControl x:Class="DeluxeCarsDesktop.View.UserControls.CambiarPinDialog"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
+             xmlns:converters="clr-namespace:DeluxeCarsDesktop.Converters"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             Width="400">
+
+    <UserControl.Resources>
+        <converters:StringNotNullOrEmptyToVisibilityConverter x:Key="StringNotNullOrEmptyToVisibilityConverter" />
+    </UserControl.Resources>
+
+    <StackPanel Margin="24">
+
+        <TextBlock Text="Cambiar PIN de Administrador" 
+                   Style="{StaticResource MaterialDesignHeadline6TextBlock}" 
+                   Margin="0,0,0,16"/>
+
+        <PasswordBox materialDesign:HintAssist.Hint="PIN Actual"
+                     materialDesign:PasswordBoxAssist.Password="{Binding PinActual, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource MaterialDesignFloatingHintPasswordBox}"
+                     Margin="0,8,0,8"/>
+
+        <PasswordBox materialDesign:HintAssist.Hint="Nuevo PIN"
+                     materialDesign:PasswordBoxAssist.Password="{Binding NuevoPin, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource MaterialDesignFloatingHintPasswordBox}"
+                     Margin="0,8,0,8"/>
+
+        <PasswordBox materialDesign:HintAssist.Hint="Confirmar Nuevo PIN"
+                     materialDesign:PasswordBoxAssist.Password="{Binding ConfirmarPin, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource MaterialDesignFloatingHintPasswordBox}"
+                     Margin="0,8,0,16"/>
+
+        <TextBlock Text="{Binding ErrorMessage}"
+                   Foreground="Red"
+                   TextWrapping="Wrap"
+                   Margin="0,0,0,16"
+                   Visibility="{Binding ErrorMessage, Converter={StaticResource StringNotNullOrEmptyToVisibilityConverter}}"/>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="CANCELAR" 
+                    Command="{Binding CancelarCommand}"
+                    Margin="0,0,8,0"/>
+
+            <Button Content="GUARDAR"
+                    Command="{Binding GuardarCommand}"
+                    IsDefault="True"/>
+        </StackPanel>
+
+    </StackPanel>
+</UserControl>
