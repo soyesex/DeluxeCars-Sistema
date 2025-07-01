@@ -1,0 +1,40 @@
+﻿@page
+@model DeluxeCarsWebAPI.Pages.ProductosModel
+@{
+    ViewData["Title"] = "Nuestro Stock";
+}
+<div class="container">
+    <h1 class="my-4">@ViewData["Title"]</h1>
+
+    @if (Model.ProductosEnStock.Any())
+    {
+        <div class="row">
+            @foreach (var producto in Model.ProductosEnStock)
+            {
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100">
+                        <a href="#">
+                            <img class="card-img-top" src="@(producto.ImagenUrl ?? "https://placehold.co/700x400/cccccc/ffffff?text=Sin+Imagen")" alt="@producto.Nombre">
+                        </a>
+                        <div class="card-body">
+                            <h4 class="card-title">
+                                <a href="#">@producto.Nombre</a>
+                            </h4>
+                            <h5>$@producto.Precio.ToString("N2")</h5>
+                            <p class="card-text">Unidades disponibles: @producto.StockActual</p>
+                        </div>
+                        <div class="card-footer">
+                            <small class="text-muted">&#9733; &#9733; &#9733; &#9733; &#9734;</small>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning" role="alert">
+            No hay productos en stock para mostrar en este momento. Por favor, intente más tarde.
+        </div>
+    }
+</div>
