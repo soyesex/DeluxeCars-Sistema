@@ -46,14 +46,16 @@ public partial class App : Application
     private void ConfigureServices(IServiceCollection services)
     {
         // Registrar el DataContext
-        services.AddDbContext<AppDbContext>(options =>
+        services.AddTransient<AppDbContext>(options =>
         {
             string connectionString = ConfigurationManager.ConnectionStrings["AppDbContext"].ConnectionString;
-            options.UseSqlServer(connectionString);
-        }, ServiceLifetime.Scoped);  
+            var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
+            optionsBuilder.UseSqlServer(connectionString);
+            return new AppDbContext(optionsBuilder.Options);
+        });
 
-        // AHORA (El nuevo modo, registrando todo de una vez con Unit of Work)
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        // UnitOfWork también debe ser Transient para que use un DbContext nuevo cada vez.
+        services.AddTransient<IUnitOfWork, UnitOfWork>();
 
         services.AddScoped<INavigationService, NavigationService>();
         services.AddScoped<IStockAlertService, StockAlertService>();

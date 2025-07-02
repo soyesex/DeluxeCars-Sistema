@@ -2,6 +2,55 @@
                     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <Style x:Key="DarkDatePickerStyle" TargetType="DatePicker"
+       BasedOn="{StaticResource MaterialDesignFloatingHintDatePicker}">
+        <!-- Personalización general -->
+        <Setter Property="Background" Value="{DynamicResource PrimaryBackgroundColor}"/>
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBorderColor}"/>
+        <Setter Property="FontFamily" Value="Montserrat"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="Padding" Value="10,0"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+
+        <!-- Hint flotante -->
+        <Setter Property="materialDesign:HintAssist.Hint" Value="{Binding Tag, RelativeSource={RelativeSource Self}}"/>
+        <Setter Property="materialDesign:HintAssist.Foreground" Value="{DynamicResource PlaceholderTextColor}"/>
+        <Setter Property="materialDesign:HintAssist.HintOpacity" Value="0.6"/>
+
+        <!-- Ajuste del calendario desplegable -->
+        <Setter Property="CalendarStyle">
+            <Setter.Value>
+                <Style TargetType="Calendar" BasedOn="{StaticResource MaterialDesignDatePickerCalendarPortrait}">
+                    <Style.Resources>
+                        <SolidColorBrush x:Key="PrimaryHueMidBrush" Color="{DynamicResource Color.Brand.GraySteel}"/>
+                        <SolidColorBrush x:Key="PrimaryHueDarkBrush" Color="{DynamicResource Color.Accent.DeepSkyBlue}"/>
+                    </Style.Resources>
+                </Style>
+            </Setter.Value>
+        </Setter>
+
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="BorderBrush" Value="{DynamicResource HighlightBorderColor}"/>
+            </Trigger>
+            <Trigger Property="IsKeyboardFocused" Value="True">
+                <Setter Property="BorderBrush" Value="{DynamicResource HighlightBorderColor}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="DarkLabelForm" TargetType="Label">
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
+        <Setter Property="FontFamily" Value="Montserrat"/>
+        <Setter Property="FontSize" Value="14"/>
+    </Style>
+
+
+
+
     <Style x:Key="AppFormComboBoxStyle" TargetType="ComboBox">
         <Setter Property="FontFamily" Value="{DynamicResource Font.SourceSans3}"/>
         <Setter Property="FontSize" Value="15"/>

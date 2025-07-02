@@ -17,18 +17,16 @@ namespace DeluxeCars.DataAccess.Repositories.Implementations
             return await _dbSet
                 .Select(p => new ProductoStockDto
                 {
-                    // Mapeo directo de las propiedades del Producto
                     Id = p.Id,
                     Nombre = p.Nombre,
                     Precio = p.Precio,
                     ImagenUrl = p.ImagenUrl,
+                    Descripcion = p.Descripcion, // <-- AÑADE ESTA LÍNEA
 
-                    // Cálculo del stock en la misma consulta
                     StockActual = _context.MovimientosInventario
                                           .Where(m => m.IdProducto == p.Id)
                                           .Sum(m => m.TipoMovimiento == "ENTRADA" ? m.Cantidad : -m.Cantidad)
                 })
-                // Filtramos DESPUÉS de haber calculado el stock
                 .Where(dto => dto.StockActual > 0)
                 .ToListAsync();
         }

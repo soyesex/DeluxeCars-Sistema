@@ -93,8 +93,15 @@ namespace DeluxeCarsDesktop.ViewModel
 
         public async Task LoadAsync()
         {
-            await LoadUbicacionesAsync();
+            // 1. Cargar la lista completa de proveedores en la caché PRIMERO.
             await LoadProveedoresAsync();
+
+            // 2. Cargar los filtros. Esto disparará la lógica de filtrado,
+            //    pero ahora se ejecutará sobre una lista que ya tiene datos.
+            await LoadUbicacionesAsync();
+
+            // 3. Llama a FiltrarProveedores una vez al final para asegurar que la UI se muestre.
+            FiltrarProveedores();
         }
 
         private async Task LoadUbicacionesAsync()
@@ -140,7 +147,7 @@ namespace DeluxeCarsDesktop.ViewModel
             {
                 var proveedoresDesdeRepo = await _unitOfWork.Proveedores.GetAllWithLocationAsync();
                 _todosLosProveedores = proveedoresDesdeRepo.ToList();
-                FiltrarProveedores();
+                // Se elimina la llamada a FiltrarProveedores() de aquí.
             }
             catch (Exception ex)
             {
@@ -229,6 +236,8 @@ namespace DeluxeCarsDesktop.ViewModel
                 // No necesitas llamar a UpdateAsync si tu UnitOfWork ya maneja el seguimiento
                 // Simplemente el CompleteAsync (SaveChanges) detectará el cambio
                 await _unitOfWork.CompleteAsync();
+
+                await LoadProveedoresAsync();
 
                 FiltrarProveedores(); // Refresca la UI
                 MessageBox.Show($"Proveedor {accion}do exitosamente.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);

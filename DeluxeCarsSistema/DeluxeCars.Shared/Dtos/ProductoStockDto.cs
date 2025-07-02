@@ -19,6 +19,7 @@ namespace DeluxeCarsShared.Dtos
 
         /// URL de la imagen del producto.
         public string? ImagenUrl { get; set; }
+        public string Descripcion { get; set; }
 
         /// La cantidad de unidades disponibles en inventario.
         /// Este valor es calculado, no viene directamente de una columna de la base de datos.

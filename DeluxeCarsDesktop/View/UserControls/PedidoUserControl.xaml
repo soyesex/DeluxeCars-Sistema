@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
              mc:Ignorable="d" 
+              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
              xmlns:models="clr-namespace:DeluxeCarsEntities;assembly=DeluxeCarsEntities"
              d:DesignHeight="550" d:DesignWidth="900">
@@ -25,19 +26,28 @@
                 <DatePicker SelectedDate="{Binding FechaInicio}" Style="{StaticResource DarkDatePickerStyle}" Width="140" Margin="5,0,0,0"/>
 
                 <Label Content="Hasta:" VerticalAlignment="Center" Margin="15,0,0,0" Style="{StaticResource DarkLableForm}"/>
-                <DatePicker SelectedDate="{Binding FechaFin}" Style="{StaticResource DarkDatePickerStyle}" Width="140" Margin="5,0,0,0"/>
+                <DatePicker SelectedDate="{Binding FechaFin}" Style="{StaticResource  DarkDatePickerStyle}" Width="140" Margin="5,0,0,0"/>
 
                 <Label Content="Proveedor:" VerticalAlignment="Center" Margin="15,0,0,0" Style="{StaticResource DarkLableForm}"/>
                 <ComboBox ItemsSource="{Binding Proveedores}"
                           SelectedItem="{Binding ProveedorFiltro}"
                           DisplayMemberPath="RazonSocial"
-                          Style="{StaticResource DarkComboBoxStyle}"
+                          Style="{DynamicResource MaterialDesignComboBox}"
+                            Foreground="{StaticResource Text.Secondary}"
+                            FontFamily="{StaticResource Font.SourceSans3}"
+                            FontWeight="Medium"
+                            FontSize="16"
+                            BorderBrush="{DynamicResource Background.Disabled}"
+                            materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource Brush.Menu.BlueCornflower}"
                           Width="250" Margin="5,0,0,0"/>
             </StackPanel>
 
             <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
                 <Button Content="Filtrar" Command="{Binding FiltrarCommand}" Style="{StaticResource DarkActionButtonStyle}"/>
-                <Button Content="Nuevo Pedido" Command="{Binding NuevoPedidoCommand}" Style="{StaticResource DarkActionButtonStyle}" Margin="10,0,0,0"/>
+                <Button Content="Nuevo Pedido" Command="{Binding NuevoPedidoCommand}"
+                        Style="{StaticResource ElegantShadowGhostButton}"
+Tag="{StaticResource Brush.Menu.GreenForest}"
+                        Margin="10,0,0,0"/>
                 
                 <Label Content="Estado:" VerticalAlignment="Center" Margin="15,0,0,0" Style="{StaticResource DarkLableForm}"/>
                 <ComboBox ItemsSource="{Binding EstadosFiltro}"

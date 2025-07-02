@@ -97,6 +97,39 @@ namespace DeluxeCars.DataAccess
                 new Categoria { Id = 6, Nombre = "Transmisión", Descripcion = "Componentes de la caja de cambios y embrague." },
                 new Categoria { Id = 7, Nombre = "Llantas y Rines", Descripcion = "Neumáticos y rines de varias medidas." }
             );
+
+            // Seeding de Departamento y Municipios de Santander
+            modelBuilder.Entity<Departamento>().HasData(
+                new Departamento { Id = 1, Nombre = "Santander" },
+                new Departamento { Id = 2, Nombre = "Antioquia" },
+                new Departamento { Id = 3, Nombre = "Cundinamarca" },
+                new Departamento { Id = 4, Nombre = "Valle del Cauca" }
+            );
+
+            modelBuilder.Entity<Municipio>().HasData(
+                new Municipio { Id = 1, Nombre = "Bucaramanga", IdDepartamento = 1, Estado = true },
+                new Municipio { Id = 2, Nombre = "Floridablanca", IdDepartamento = 1, Estado = true },
+                new Municipio { Id = 3, Nombre = "Girón", IdDepartamento = 1, Estado = true },
+                new Municipio { Id = 4, Nombre = "Piedecuesta", IdDepartamento = 1, Estado = true },
+                new Municipio { Id = 5, Nombre = "San Gil", IdDepartamento = 1, Estado = true },
+                new Municipio { Id = 6, Nombre = "Barichara", IdDepartamento = 1, Estado = true },
+                                // Antioquia
+                new Municipio { Id = 7, Nombre = "Medellín", IdDepartamento = 2, Estado = true },
+                new Municipio { Id = 8, Nombre = "Itagüí", IdDepartamento = 2, Estado = true },
+                new Municipio { Id = 9, Nombre = "Envigado", IdDepartamento = 2, Estado = true },
+                new Municipio { Id = 10, Nombre = "Bello", IdDepartamento = 2, Estado = true },
+                new Municipio { Id = 11, Nombre = "Rionegro", IdDepartamento = 2, Estado = true },
+                // Cundinamarca
+                new Municipio { Id = 12, Nombre = "Bogotá D.C.", IdDepartamento = 3, Estado = true },
+                new Municipio { Id = 13, Nombre = "Soacha", IdDepartamento = 3, Estado = true },
+                new Municipio { Id = 14, Nombre = "Chía", IdDepartamento = 3, Estado = true },
+                new Municipio { Id = 15, Nombre = "Funza", IdDepartamento = 3, Estado = true },
+                // Valle del Cauca
+                new Municipio { Id = 16, Nombre = "Cali", IdDepartamento = 4, Estado = true },
+                new Municipio { Id = 17, Nombre = "Yumbo", IdDepartamento = 4, Estado = true },
+                new Municipio { Id = 18, Nombre = "Palmira", IdDepartamento = 4, Estado = true },
+                new Municipio { Id = 19, Nombre = "Buenaventura", IdDepartamento = 4, Estado = true }
+            );
             // --- CONFIGURACIÓN DE ENTIDADES ---
 
             // Usuario

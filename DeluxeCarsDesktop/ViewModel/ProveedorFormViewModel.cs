@@ -114,6 +114,14 @@ namespace DeluxeCarsDesktop.ViewModel
             var depts = await _unitOfWork.Departamentos.GetAllAsync();
             var munis = await _unitOfWork.Municipios.GetAllAsync();
             _todosLosMunicipios = munis.ToList();
+
+            Departamentos.Clear();
+
+            foreach (var d in depts.OrderBy(d => d.Nombre))
+            {
+                Departamentos.Add(d);
+            }
+
             Departamentos = new ObservableCollection<Departamento>(depts.OrderBy(d => d.Nombre));
         }
 

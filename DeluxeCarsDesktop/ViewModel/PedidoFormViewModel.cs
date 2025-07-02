@@ -30,6 +30,8 @@ namespace DeluxeCarsDesktop.ViewModel
         private bool _isUpdatingFromSelection = false;
 
         // --- Propiedades para Binding (Estandarizadas con SetProperty) ---
+        // En PedidoFormViewModel.cs, junto a las otras propiedades
+        public ObservableCollection<Producto> ProductosDisponibles { get; private set; }
         public Producto ProductoSeleccionado
         {
             get => _productoSeleccionado;
@@ -73,6 +75,7 @@ namespace DeluxeCarsDesktop.ViewModel
                 TextoBusquedaProducto = string.Empty;
                 ResultadosBusquedaProducto.Clear();
                 IsProductPopupOpen = false;
+                _ = CargarProductosPorProveedorAsync();
             }
         }
 
@@ -162,6 +165,7 @@ namespace DeluxeCarsDesktop.ViewModel
             ResultadosBusquedaProducto = new ObservableCollection<Producto>();
             Proveedores = new ObservableCollection<Proveedor>();
             MetodosDePago = new ObservableCollection<MetodoPago>();
+            ProductosDisponibles = new ObservableCollection<Producto>();
 
             AgregarProductoCommand = new ViewModelCommand(ExecuteAgregarProductoCommand, CanExecuteAgregarProductoCommand);
             EliminarProductoCommand = new ViewModelCommand(ExecuteEliminarProductoCommand);
@@ -222,6 +226,8 @@ namespace DeluxeCarsDesktop.ViewModel
             RecalcularTotal();
         }
 
+        // En PedidoFormViewModel.cs
+
         private async Task LoadProveedoresYMetodosDePago()
         {
             try
@@ -229,19 +235,48 @@ namespace DeluxeCarsDesktop.ViewModel
                 var provs = await _unitOfWork.Proveedores.GetAllAsync();
                 var metodos = await _unitOfWork.MetodosPago.GetAllAsync();
 
-                Proveedores = new ObservableCollection<Proveedor>(provs.OrderBy(p => p.RazonSocial));
-                MetodosDePago = new ObservableCollection<MetodoPago>(metodos.Where(m => m.Disponible).OrderBy(m => m.Descripcion));
+                Proveedores.Clear();
+                MetodosDePago.Clear();
 
-                // Notificamos a la UI que estas colecciones han cambiado
-                OnPropertyChanged(nameof(Proveedores));
-                OnPropertyChanged(nameof(MetodosDePago));
+                // Llenamos las colecciones existentes una por una.
+                // Esto mantiene el enlace con la UI y la notifica de cada nuevo item.
+                foreach (var p in provs.OrderBy(p => p.RazonSocial))
+                {
+                    Proveedores.Add(p);
+                }
+                foreach (var m in metodos.Where(m => m.Disponible).OrderBy(m => m.Descripcion))
+                {
+                    MetodosDePago.Add(m);
+                }
+
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error al cargar datos iniciales: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+        private async Task CargarProductosPorProveedorAsync()
+        {
+            // Limpiamos la lista de productos cada vez que se llama
+            ProductosDisponibles.Clear();
 
+            if (ProveedorSeleccionado != null && ProveedorSeleccionado.Id != 0)
+            {
+                try
+                {
+                    // Usamos el método que ya existe para traer los productos asociados
+                    var productos = await _unitOfWork.Productos.GetAssociatedProductsAsync(ProveedorSeleccionado.Id);
+                    foreach (var producto in productos.OrderBy(p => p.Nombre))
+                    {
+                        ProductosDisponibles.Add(producto);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error cargando los productos del proveedor: {ex.Message}", "Error");
+                }
+            }
+        }
         private async void BuscarProductos()
         {
             if (_isBuscandoProductos) return;
