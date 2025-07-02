@@ -31,7 +31,12 @@ namespace DeluxeCarsDesktop.ViewModel
                 FiltrarProductos();
             }
         }
-
+        private string _cambiarEstadoButtonText = "Activar/Desactivar";
+        public string CambiarEstadoButtonText
+        {
+            get => _cambiarEstadoButtonText;
+            set => SetProperty(ref _cambiarEstadoButtonText, value);
+        }
         private Categoria _categoriaFiltroSeleccionada;
         public Categoria CategoriaFiltroSeleccionada
         {
@@ -59,14 +64,26 @@ namespace DeluxeCarsDesktop.ViewModel
             {
                 SetProperty(ref _productoSeleccionado, value);
                 (EditarProductoCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
-                (EliminarProductoCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+                (CambiarEstadoProductoCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+
+                // --- LÍNEAS A AÑADIR ---
+                if (value != null)
+                {
+                    // Si el producto está activo, el botón dirá "Desactivar", si no, "Activar"
+                    CambiarEstadoButtonText = value.Producto.Estado ? "Desactivar" : "Activar";
+                }
+                else
+                {
+                    // Texto por defecto si no hay nada seleccionado
+                    CambiarEstadoButtonText = "Activar/Desactivar";
+                }
             }
         }
 
         // --- Comandos ---
         public ICommand NuevoProductoCommand { get; }
         public ICommand EditarProductoCommand { get; }
-        public ICommand EliminarProductoCommand { get; }
+        public ICommand CambiarEstadoProductoCommand { get; }
         public ICommand LimpiarFiltrosCommand { get; }
         public ICommand AjusteManualCommand { get; }
 
@@ -85,7 +102,7 @@ namespace DeluxeCarsDesktop.ViewModel
 
             NuevoProductoCommand = new ViewModelCommand(async p => await ExecuteNuevoProductoCommand());
             EditarProductoCommand = new ViewModelCommand(async p => await ExecuteEditarProductoCommand(), p => CanExecuteEditDelete());
-            EliminarProductoCommand = new ViewModelCommand(async p => await ExecuteEliminarProductoCommand(), p => CanExecuteEditDelete());
+            CambiarEstadoProductoCommand = new ViewModelCommand(async p => await ExecuteCambiarEstadoProductoCommand(), p => CanExecuteEditDelete());
             LimpiarFiltrosCommand = new ViewModelCommand(ExecuteLimpiarFiltros);
             AjusteManualCommand = new ViewModelCommand(ExecuteAjusteManual);
         }
@@ -207,33 +224,42 @@ namespace DeluxeCarsDesktop.ViewModel
             FiltrarProductos();
         }
 
-        private async Task ExecuteEliminarProductoCommand()
+        private async Task ExecuteCambiarEstadoProductoCommand()
         {
-            // Esta parte está perfecta, no cambia.
-            var productoAEliminar = ProductoSeleccionado.Producto;
-            if (productoAEliminar == null) return;
+            var productoSeleccionado = ProductoSeleccionado;
+            if (productoSeleccionado == null) return;
 
-            var result = MessageBox.Show($"¿Estás seguro de que deseas eliminar el producto '{productoAEliminar.Nombre}'?", "Confirmar Eliminación", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            // Lógica para determinar la acción y el mensaje
+            var producto = productoSeleccionado.Producto;
+            string accion = producto.Estado ? "desactivar" : "activar";
+            string accionPasado = producto.Estado ? "desactivado" : "activado";
+
+            var result = MessageBox.Show($"¿Estás seguro de que deseas {accion} el producto '{producto.Nombre}'?",
+                                         $"Confirmar {char.ToUpper(accion[0]) + accion.Substring(1)}",
+                                         MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
             if (result == MessageBoxResult.No) return;
 
             try
             {
-                // Esta parte es correcta: le dices al UnitOfWork que elimine y guarde.
-                // Asumiendo que tu repositorio tiene un método Remove que toma la entidad.
-                await _unitOfWork.Productos.RemoveAsync(productoAEliminar); // O RemoveAsync si lo tienes
+                // La nueva lógica: invierte el estado actual
+                producto.Estado = !producto.Estado;
+
                 await _unitOfWork.CompleteAsync();
 
-                // --- ESTA ES LA PARTE IMPORTANTE ---
-                // Ya no eliminamos de '_todosLosProductos'. En su lugar, simplemente
-                // volvemos a ejecutar la búsqueda actual. Los resultados vendrán
-                // de la base de datos y el producto eliminado ya no estará.
+                // Refrescar la vista para que el cambio se vea reflejado
                 FiltrarProductos();
 
-                MessageBox.Show("Producto eliminado exitosamente.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show($"Producto {accionPasado} exitosamente.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ocurrió un error al eliminar el producto. Es posible que esté asociado a una factura o pedido.\n\nError: {ex.Message}", "Error de Eliminación", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Ocurrió un error al {accion} el producto.\n\nError: {ex.Message}",
+                                $"Error de {char.ToUpper(accion[0]) + accion.Substring(1)}",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Error);
+                // Revertir el cambio en el objeto si falla el guardado
+                producto.Estado = !producto.Estado;
             }
         }
     }

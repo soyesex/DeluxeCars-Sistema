@@ -88,6 +88,15 @@ namespace DeluxeCars.DataAccess
                 }
             );
 
+            modelBuilder.Entity<Categoria>().HasData(
+                new Categoria { Id = 1, Nombre = "Frenos", Descripcion = "Componentes del sistema de frenado." },
+                new Categoria { Id = 2, Nombre = "Suspensión y Dirección", Descripcion = "Amortiguadores, rótulas y componentes de dirección." },
+                new Categoria { Id = 3, Nombre = "Motor", Descripcion = "Partes internas y externas del motor." },
+                new Categoria { Id = 4, Nombre = "Filtros", Descripcion = "Filtros de aceite, aire, combustible y cabina." },
+                new Categoria { Id = 5, Nombre = "Sistema Eléctrico", Descripcion = "Baterías, alternadores y sensores." },
+                new Categoria { Id = 6, Nombre = "Transmisión", Descripcion = "Componentes de la caja de cambios y embrague." },
+                new Categoria { Id = 7, Nombre = "Llantas y Rines", Descripcion = "Neumáticos y rines de varias medidas." }
+            );
             // --- CONFIGURACIÓN DE ENTIDADES ---
 
             // Usuario

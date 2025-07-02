@@ -299,8 +299,8 @@
                     Grid.Column="1">
                 <Border.Background>
                     <RadialGradientBrush GradientOrigin="0,0" Center="0,0" RadiusX="1.2" RadiusY="1.2">
-                        <GradientStop Color="{StaticResource Color.Brand.CharcoalLight}" Offset="0.1"/>
-                        <GradientStop Color="{StaticResource Color.Brand.NavyDeep}" Offset="0.9"/>
+                        <GradientStop Color="{StaticResource Color.Brand.NavyDeep}" Offset="0.1"/>
+                        <GradientStop Color="{StaticResource Color.PrimaryBack2}" Offset="0.9"/>
                     </RadialGradientBrush>
                 </Border.Background>
 
@@ -502,7 +502,7 @@
                                 <fa:IconImage Icon="Plus" Style="{StaticResource iconButtonIcon}"/>
 
                                 <Button.ContextMenu>
-                                    <ContextMenu FlowDirection="LeftToRight" Margin="0 5 523 0">
+                                    <ContextMenu FlowDirection="LeftToRight" Margin="0 0 513 0">
                                         <MenuItem Header="Nuevo Producto" 
                                                   Foreground="{DynamicResource Brush.Menu.BlueCornflower}"
                                                   Style="{StaticResource AppMenuItemStyle}" Command="{Binding ShowNewProductCommand}">

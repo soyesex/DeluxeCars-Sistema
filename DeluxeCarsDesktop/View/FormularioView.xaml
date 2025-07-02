@@ -108,9 +108,9 @@
 
             <Border.BorderBrush>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="{StaticResource Color.WinBorder1}" Offset="0"/>
-                    <GradientStop Color="{StaticResource Color.WinBorder2}" Offset="0.75"/>
-                    <GradientStop Color="{StaticResource Color.WinBorder3}" Offset="1"/>
+                    <GradientStop Color="{StaticResource Color.Brand.GraySteel}" Offset="0" />
+                    <GradientStop Color="{StaticResource Color.Menu.YellowGold}" Offset="0.5" />
+                    <GradientStop Color="{StaticResource Color.Brand.GraySteel}" Offset="1" />
                 </LinearGradientBrush>
             </Border.BorderBrush>
 
@@ -124,13 +124,13 @@
             <Border CornerRadius="10">
                 
                 <Border.Background>
-                    <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
-                        <GradientStop Color="{StaticResource Color.PrimaryBack1}" Offset="0"/>
-                        <GradientStop Color="{StaticResource Color.PrimaryBack2}" Offset="1"/>
-                    </LinearGradientBrush>
-                </Border.Background>
+                        <RadialGradientBrush GradientOrigin="0,0" Center="0,0" RadiusX="1.2" RadiusY="1.2">
+                            <GradientStop Color="{StaticResource Color.Brand.NavyDeep}" Offset="0.1"/>
+                            <GradientStop Color="{StaticResource Color.PrimaryBack2}" Offset="0.9"/>
+                        </RadialGradientBrush>
+                    </Border.Background>
 
-                <Grid>
+                    <Grid>
 
                     <Grid.RowDefinitions>
                         <!--Control bar-->
@@ -198,34 +198,6 @@
                            FontFamily="Montserrat"
                            FontWeight="Medium"
                            VerticalAlignment="Center"/>
-                        </StackPanel>
-                        <!--User options-->
-                        <StackPanel Grid.Column="1"
-                        Orientation="Horizontal"
-                        FlowDirection="RightToLeft"
-                        VerticalAlignment="Center"
-                        Margin="0,0,10,0">
-
-                            <TextBlock Text="{Binding CurrentUserAccount.DisplayName}"
-                           Foreground="{StaticResource titleColor2}"
-                           FontFamily="Montserrat"
-                           FontSize="12"
-                           VerticalAlignment="Center"/>
-
-                            <Button Style="{StaticResource iconButton}"
-                        Tag="{StaticResource color3}">
-                                <fa:IconImage Icon="Clock" Style="{StaticResource iconButtonIcon}"/>
-                            </Button>
-
-                            <Button Style="{StaticResource iconButton}"
-                        Tag="{StaticResource color4}">
-                                <fa:IconImage Icon="Envelope" Style="{StaticResource iconButtonIcon}"/>
-                            </Button>
-
-                            <Button Style="{StaticResource iconButton}"
-                        Tag="{StaticResource color5}">
-                                <fa:IconImage Icon="Bell" Style="{StaticResource iconButtonIcon}"/>
-                            </Button>
                         </StackPanel>
                     </Grid>
 

@@ -8,73 +8,174 @@
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
              xmlns:viewModel="clr-namespace:DeluxeCarsDesktop.ViewModel"
              mc:Ignorable="d"  
+             xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
              d:DesignHeight="450" d:DesignWidth="800">
 
     <UserControl.Resources>
         <converters:ImagePathConverter x:Key="ImagePathConverter"/>
     </UserControl.Resources>
-    
-    <Grid>
+
+    <Grid Margin="5">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Margin="0,0,0,10">
+        <Grid Grid.Row="0" Margin="0,10,0,20">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" 
-                      Style="{StaticResource SearchBoxStyle}"
-                     MinWidth="300"
-                     Margin="0 0 10 0"
-                      Tag="Buscar por N° Factura o Cliente..."/>     
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Column="0">
+                <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource SearchBoxStyle}"
+                         MinWidth="300" MaxWidth="500"
+                         Tag="Buscar por N° Factura o Cliente..."/>
 
-            <!--<Border Background="Transparent">
-                <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <ComboBox ItemsSource="{Binding CategoriasDisponibles}"
+                            SelectedItem="{Binding CategoriaFiltroSeleccionada}"
+                            Style="{DynamicResource MaterialDesignComboBox}"
+                            Foreground="{StaticResource Text.Secondary}"
+                            FontFamily="{StaticResource Font.SourceSans3}"
+                            FontWeight="Medium"
+                            FontSize="16"
+                            BorderBrush="{DynamicResource Background.Disabled}"
+                            materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource Brush.Menu.BlueCornflower}"
+                            DisplayMemberPath="Nombre"
+                            Width="180" Margin="70 0 30 0"/>
 
-                    
+                <ComboBox ItemsSource="{Binding StockStatusOptions}" 
+                            SelectedItem="{Binding StockStatusFiltroSeleccionado}" 
+                            Style="{DynamicResource MaterialDesignComboBox}"
+                            Foreground="{StaticResource Text.Secondary}"
+                            FontFamily="{StaticResource Font.SourceSans3}"
+                            FontWeight="Medium"
+                            FontSize="16"
+                            BorderBrush="{DynamicResource Background.Disabled}"
+                            materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource Brush.Menu.BlueCornflower}"
+                            Width="120" Margin="55 0 0 0"/>
 
-                    <ComboBox ItemsSource="{Binding CategoriasDisponibles}"
-                      SelectedItem="{Binding CategoriaFiltroSeleccionada}"
-                      Style="{StaticResource DarkComboBoxStyle}"
-                      DisplayMemberPath="Nombre"
-                      Width="180" Margin="10,5,5,5"/>
+                <Button Command="{Binding LimpiarFiltrosCommand}"
+                        Margin="50 0"
+                        Style="{StaticResource controlButton}"
+                        Tag="{StaticResource color4}"
+                        ToolTip="Limpiar Filtros">
 
-                    <ComboBox ItemsSource="{Binding StockStatusOptions}" 
-                      SelectedItem="{Binding StockStatusFiltroSeleccionado}" 
-                      Style="{StaticResource DarkComboBoxStyle}"
-                      Width="120" Margin="5"/>
-                    
+                    <fa:IconImage Icon="Eraser" Width="15" Height="15" Style="{StaticResource controlButtonIcon}"/>
 
-                    <Button Content="Limpiar" 
-                    Command="{Binding LimpiarFiltrosCommand}" 
-                    Style="{StaticResource DarkActionButtonStyle}"
-                    Margin="10,5,5,5"/>
-
-                    <Button Content="Ajuste Manual" Style="{StaticResource DarkActionButtonStyle}" Command="{Binding AjusteManualCommand}"/>
-                </WrapPanel>
-            </Border>-->
-
-            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <Button Content="Nuevo Producto" Style="{StaticResource DarkActionButtonStyle}" 
-                Command="{Binding NuevoProductoCommand}"/>
-                <Button Content="Editar" Style="{StaticResource DarkActionButtonStyle}" 
-                Command="{Binding EditarProductoCommand}" Margin="10,0,0,0"/>
-                <Button Content="Eliminar" Style="{StaticResource DarkActionButtonStyle}" 
-                Command="{Binding EliminarProductoCommand}" Margin="10,0,0,0"/>
+                </Button>
             </StackPanel>
 
+            
         </Grid>
 
-        <Border Grid.Row="1" CornerRadius="10" 
-                Background="{StaticResource PrimaryBackgroundColor}" 
-                 BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,20">
+            <Button Content="Ajuste Manual"
+                Style="{StaticResource ElegantShadowGhostButton}"
+                Tag="{StaticResource Brush.Menu.YellowGold}"
+                Command="{Binding AjusteManualCommand}" Margin="40,0,40,0"/>
+
+            <Button Content="Nuevo Producto"
+                Style="{StaticResource ElegantShadowGhostButton}"
+                Tag="{StaticResource Brush.Menu.GreenForest}"
+                Command="{Binding NuevoProductoCommand}" Margin="40,0,40,0"/>
+
+            <Button Content="Editar"
+                Style="{StaticResource ElegantShadowGhostButton}"
+                Tag="{StaticResource Brush.Menu.BlueSteel}"
+                Command="{Binding EditarProductoCommand}" Margin="40,0,40,0"/>
+
+            <Button Content="{Binding CambiarEstadoButtonText}"
+                Style="{StaticResource ElegantShadowGhostButton}"
+                Tag="{StaticResource Brush.Accent.DestructiveRed}"
+                MinWidth="120"
+                Command="{Binding CambiarEstadoProductoCommand}" Margin="40,0,40,0"/>
+        </StackPanel>
+        
+    <!--<Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0 10 0 30">
+            
+            <Border Background="Transparent">
+                <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" 
+                         Style="{StaticResource SearchBoxStyle}"
+                         MinWidth="300"
+                         MaxWidth="400"
+                         HorizontalAlignment="Left"
+                         Margin="0 0 50 0"
+                          Tag="Buscar por N° Factura o Cliente..."/>
+            </Border>
+
+            
+            <ComboBox ItemsSource="{Binding CategoriasDisponibles}"
+                        SelectedItem="{Binding CategoriaFiltroSeleccionada}"
+                        Style="{DynamicResource MaterialDesignComboBox}"
+                        Foreground="{StaticResource Text.Secondary}"
+                        FontFamily="Montserrat"
+                        FontSize="16"
+                        BorderBrush="{DynamicResource Background.Disabled}"
+                        materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource Background.Primary}"
+                        DisplayMemberPath="Nombre"
+                        Width="180" Margin="0 0 50 0"/>
+
+            <ComboBox ItemsSource="{Binding StockStatusOptions}" 
+                        SelectedItem="{Binding StockStatusFiltroSeleccionado}" 
+                        Style="{DynamicResource MaterialDesignComboBox}"
+                        Foreground="{StaticResource Text.Secondary}"
+                        FontSize="16"
+                        FontFamily="Montserrat"
+                        BorderBrush="{DynamicResource Background.Disabled}"
+                        materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource Background.Primary}"
+                        Width="120" Margin="0 0 30 0"/>
+
+            <Button Command="{Binding LimpiarFiltrosCommand}"
+                Margin="5 5 0 0" Width="22" Height="22"
+                    Style="{StaticResource controlButton}"
+                    Tag="{StaticResource color4}">
+                
+                <fa:IconImage Icon="Xmark" Style="{StaticResource controlButtonIcon}"/>
+
+            </Button>
+
+
+        </StackPanel>
+        
+        <StackPanel Grid.Row="1" Orientation="Horizontal" 
+                    Margin="0 10 0 30"
+                    HorizontalAlignment="Left" VerticalAlignment="Center">
+
+            <Button Content="Ajuste Manual" Style="{StaticResource ElegantShadowGhostButton}"
+                    Tag="{StaticResource Brush.Accent.ElectricBlue}"
+                    Margin="50,0,0,0" 
+                    Command="{Binding AjusteManualCommand}"/>
+
+            <Button Content="Nuevo Producto" Style="{StaticResource ElegantShadowGhostButton}"
+                    Command="{Binding NuevoProductoCommand}" Margin="50,0,0,0"/>
+
+            <Button Content="Editar" Style="{StaticResource ElegantShadowGhostButton}" 
+                    Command="{Binding EditarProductoCommand}" Margin="50,0,0,0"/>
+            
+            <Button Content="{Binding CambiarEstadoButtonText}" 
+                    Style="{StaticResource ElegantShadowGhostButton}" 
+                    Command="{Binding CambiarEstadoProductoCommand}" Margin="50,0,30,0"/>
+        </StackPanel>-->
+            
+
+        <Border Grid.Row="3" CornerRadius="10" 
+                Background="{StaticResource Brush.Brand.CharcoalLight}" 
+                 BorderBrush="{StaticResource Brush.Brand.NavyDark}" BorderThickness="1.2">
             <DataGrid ItemsSource="{Binding Productos}"
                       SelectedItem="{Binding ProductoSeleccionado}"
-                      Style="{StaticResource ElegantDataGridStyle}"
+                      Style="{StaticResource AppDataGridStyle}"
                       CanUserAddRows="False"
                       AutoGenerateColumns="False"
                       IsReadOnly="True"
@@ -122,12 +223,12 @@
 
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50" SortMemberPath="Id"/>
-                    <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="*" SortMemberPath="Nombre"/>
+                    <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="auto" SortMemberPath="Nombre"/>
                     <DataGridTextColumn Header="OEM" Binding="{Binding OEM}" Width="120" SortMemberPath="OEM"/>
-                    <DataGridTextColumn Header="Categoría" Binding="{Binding CategoriaNombre}" Width="150" SortMemberPath="CategoriaNombre"/>
-                    <DataGridTextColumn Header="Precio" Binding="{Binding Precio, StringFormat=C, ConverterCulture=es-CO}" Width="100" SortMemberPath="Precio"/>
-                    <DataGridTextColumn Header="Stock" Binding="{Binding StockCalculado}" Width="70" SortMemberPath="StockCalculado"/>
-                    <DataGridCheckBoxColumn Header="Activo" Binding="{Binding Estado, Mode=OneWay}" Width="70" SortMemberPath="Estado"/>
+                    <DataGridTextColumn Header="Categoría" Binding="{Binding CategoriaNombre}" Width="*" SortMemberPath="CategoriaNombre"/>
+                    <DataGridTextColumn Header="Precio" Binding="{Binding Precio, StringFormat=C, ConverterCulture=es-CO}" Width="*" SortMemberPath="Precio"/>
+                    <DataGridTextColumn Header="Stock" Binding="{Binding StockCalculado}" Width="80" SortMemberPath="StockCalculado"/>
+                    <DataGridCheckBoxColumn Header="Activo" Binding="{Binding Estado, Mode=OneWay}" Width="80" SortMemberPath="Estado"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>

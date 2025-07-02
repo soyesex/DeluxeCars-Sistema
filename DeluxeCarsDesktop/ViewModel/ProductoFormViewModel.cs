@@ -84,6 +84,8 @@ namespace DeluxeCarsDesktop.ViewModel
         public ICommand NuevaCategoriaCommand { get; }
         public Action CloseAction { get; set; }
         public ICommand SeleccionarImagenCommand { get; }
+        // ...junto a tus otros ICommand...
+        public ICommand EliminarImagenCommand { get; }
 
         public ProductoFormViewModel(IUnitOfWork unitOfWork, IStockAlertService stockAlertService,
                                   INotificationService notificationService, INavigationService navigationService)
@@ -98,6 +100,7 @@ namespace DeluxeCarsDesktop.ViewModel
             NuevaCategoriaCommand = new ViewModelCommand(ExecuteShowCategoriaCommand);
             CancelarCommand = new ViewModelCommand(p => CloseAction?.Invoke());
             SeleccionarImagenCommand = new ViewModelCommand(_ => ExecuteSeleccionarImagen());
+            EliminarImagenCommand = new ViewModelCommand(_ => ExecuteEliminarImagen());
         }
 
         public async Task LoadAsync(int productoId)
@@ -173,6 +176,11 @@ namespace DeluxeCarsDesktop.ViewModel
         }
         private async Task LoadCategoriasAsync()
         {
+            if (Categorias.Any())
+            {
+                return;
+            }
+
             var cats = await _unitOfWork.Categorias.GetAllAsync();
             Categorias.Clear(); // Limpiamos la colección existente
             foreach (var cat in cats.OrderBy(c => c.Nombre))
@@ -247,6 +255,13 @@ namespace DeluxeCarsDesktop.ViewModel
             _navigationService.OpenFormWindow(Utils.FormType.Categoria, 0);
             // No necesitamos esperar a que se cierre, ya que las categorías se recargarán al abrir el formulario de Producto.
 
+        }
+
+        private void ExecuteEliminarImagen()
+        {
+            // Simplemente limpiamos la URL. El binding se encargará de actualizar la vista.
+            // Si quieres poner una imagen por defecto, aquí asignarías su ruta.
+            ImagenUrl = null;
         }
     }
 }
