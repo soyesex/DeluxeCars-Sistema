@@ -121,6 +121,24 @@ namespace DeluxeCars.DataAccess.Migrations
                         .IsUnique();
 
                     b.ToTable("Clientes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 2,
+                            Email = "compras@tallerrapido.com",
+                            Estado = true,
+                            Nombre = "Taller \"El Rápido\"",
+                            Telefono = "3009988776"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Email = "lucia.f@email.com",
+                            Estado = true,
+                            Nombre = "Lucía Fernandez",
+                            Telefono = "3215554433"
+                        });
                 });
 
             modelBuilder.Entity("DeluxeCarsEntities.Configuracion", b =>
@@ -213,6 +231,28 @@ namespace DeluxeCars.DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Departamentos");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Nombre = "Santander"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Nombre = "Antioquia"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Nombre = "Cundinamarca"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Nombre = "Valle del Cauca"
+                        });
                 });
 
             modelBuilder.Entity("DeluxeCarsEntities.DetalleFactura", b =>
@@ -622,6 +662,141 @@ namespace DeluxeCars.DataAccess.Migrations
                     b.HasIndex("IdDepartamento");
 
                     b.ToTable("Municipios");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Estado = true,
+                            IdDepartamento = 1,
+                            Nombre = "Bucaramanga"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Estado = true,
+                            IdDepartamento = 1,
+                            Nombre = "Floridablanca"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Estado = true,
+                            IdDepartamento = 1,
+                            Nombre = "Girón"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Estado = true,
+                            IdDepartamento = 1,
+                            Nombre = "Piedecuesta"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Estado = true,
+                            IdDepartamento = 1,
+                            Nombre = "San Gil"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Estado = true,
+                            IdDepartamento = 1,
+                            Nombre = "Barichara"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Estado = true,
+                            IdDepartamento = 2,
+                            Nombre = "Medellín"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Estado = true,
+                            IdDepartamento = 2,
+                            Nombre = "Itagüí"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Estado = true,
+                            IdDepartamento = 2,
+                            Nombre = "Envigado"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Estado = true,
+                            IdDepartamento = 2,
+                            Nombre = "Bello"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Estado = true,
+                            IdDepartamento = 2,
+                            Nombre = "Rionegro"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Estado = true,
+                            IdDepartamento = 3,
+                            Nombre = "Bogotá D.C."
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Estado = true,
+                            IdDepartamento = 3,
+                            Nombre = "Soacha"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Estado = true,
+                            IdDepartamento = 3,
+                            Nombre = "Chía"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Estado = true,
+                            IdDepartamento = 3,
+                            Nombre = "Funza"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            Estado = true,
+                            IdDepartamento = 4,
+                            Nombre = "Cali"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            Estado = true,
+                            IdDepartamento = 4,
+                            Nombre = "Yumbo"
+                        },
+                        new
+                        {
+                            Id = 18,
+                            Estado = true,
+                            IdDepartamento = 4,
+                            Nombre = "Palmira"
+                        },
+                        new
+                        {
+                            Id = 19,
+                            Estado = true,
+                            IdDepartamento = 4,
+                            Nombre = "Buenaventura"
+                        });
                 });
 
             modelBuilder.Entity("DeluxeCarsEntities.NotaDeCredito", b =>
@@ -711,6 +886,74 @@ namespace DeluxeCars.DataAccess.Migrations
                     b.HasIndex("PedidoId");
 
                     b.ToTable("Notificaciones");
+                });
+
+            modelBuilder.Entity("DeluxeCarsEntities.Orden", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("DireccionEnvio")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("FechaOrden")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("NombreCliente")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Telefono")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("TotalOrden")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Ordenes");
+                });
+
+            modelBuilder.Entity("DeluxeCarsEntities.OrdenDetalle", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Cantidad")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrdenId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PrecioUnitario")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ProductoId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrdenId");
+
+                    b.HasIndex("ProductoId");
+
+                    b.ToTable("OrdenDetalles");
                 });
 
             modelBuilder.Entity("DeluxeCarsEntities.PagoCliente", b =>
@@ -956,6 +1199,73 @@ namespace DeluxeCars.DataAccess.Migrations
                     b.HasIndex("IdCategoria");
 
                     b.ToTable("Productos");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 6,
+                            Descripcion = "Disco de freno delantero para Chevrolet Captiva, Hyundai Tucson.",
+                            Estado = true,
+                            IdCategoria = 1,
+                            Nombre = "Disco de Freno Ventilado",
+                            OriginalEquipamentManufacture = "DK-455A",
+                            Precio = 220000m,
+                            StockMinimo = 8,
+                            UltimoPrecioCompra = 150000m,
+                            UnidadMedida = "Unidad"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Descripcion = "Rótula inferior para Toyota Hilux y Fortuner.",
+                            Estado = true,
+                            IdCategoria = 2,
+                            Nombre = "Rótula de Suspensión",
+                            OriginalEquipamentManufacture = "ROT-221B",
+                            Precio = 75000m,
+                            StockMinimo = 15,
+                            UltimoPrecioCompra = 45000m,
+                            UnidadMedida = "Unidad"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Descripcion = "Bujía de alto rendimiento NGK para una mejor combustión.",
+                            Estado = true,
+                            IdCategoria = 3,
+                            Nombre = "Bujía de Iridio",
+                            OriginalEquipamentManufacture = "IR-7700",
+                            Precio = 45000m,
+                            StockMinimo = 20,
+                            UltimoPrecioCompra = 25000m,
+                            UnidadMedida = "Unidad"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Descripcion = "Batería sellada MAC Gold Plus, libre de mantenimiento.",
+                            Estado = true,
+                            IdCategoria = 5,
+                            Nombre = "Batería 12V 850A",
+                            OriginalEquipamentManufacture = "BAT-12850",
+                            Precio = 550000m,
+                            StockMinimo = 5,
+                            UltimoPrecioCompra = 390000m,
+                            UnidadMedida = "Unidad"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Descripcion = "Kit de clutch completo LUK para Chevrolet Spark GT.",
+                            Estado = true,
+                            IdCategoria = 6,
+                            Nombre = "Kit de Embrague",
+                            OriginalEquipamentManufacture = "ACK-2105",
+                            Precio = 750000m,
+                            StockMinimo = 4,
+                            UltimoPrecioCompra = 550000m,
+                            UnidadMedida = "Kit"
+                        });
                 });
 
             modelBuilder.Entity("DeluxeCarsEntities.ProductoProveedor", b =>
@@ -1029,6 +1339,38 @@ namespace DeluxeCars.DataAccess.Migrations
                         .IsUnique();
 
                     b.ToTable("Proveedores");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Email = "compras@elfrenazo.com",
+                            Estado = true,
+                            IdMunicipio = 7,
+                            NIT = "900.123.456-7",
+                            RazonSocial = "AutoPartes El Frenazo S.A.S.",
+                            Telefono = "3101234567"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Email = "contacto@ruedalibre.co",
+                            Estado = true,
+                            IdMunicipio = 12,
+                            NIT = "830.987.654-1",
+                            RazonSocial = "Importaciones Rueda Libre Ltda.",
+                            Telefono = "3159876543"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Email = "proveedor@pistonveloz.com",
+                            Estado = true,
+                            IdMunicipio = 16,
+                            NIT = "789.456.123-2",
+                            RazonSocial = "Distribuciones El Pistón Veloz",
+                            Telefono = "3005551212"
+                        });
                 });
 
             modelBuilder.Entity("DeluxeCarsEntities.Rol", b =>
@@ -1104,6 +1446,20 @@ namespace DeluxeCars.DataAccess.Migrations
                     b.HasIndex("TipoServicioId");
 
                     b.ToTable("Servicios");
+                });
+
+            modelBuilder.Entity("DeluxeCarsEntities.SiteContent", b =>
+                {
+                    b.Property<string>("Key")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Key");
+
+                    b.ToTable("SiteContents");
                 });
 
             modelBuilder.Entity("DeluxeCarsEntities.TipoDocumentoElectronico", b =>
@@ -1570,6 +1926,25 @@ namespace DeluxeCars.DataAccess.Migrations
                     b.Navigation("Usuario");
                 });
 
+            modelBuilder.Entity("DeluxeCarsEntities.OrdenDetalle", b =>
+                {
+                    b.HasOne("DeluxeCarsEntities.Orden", "Orden")
+                        .WithMany("OrdenDetalles")
+                        .HasForeignKey("OrdenId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DeluxeCarsEntities.Producto", "Producto")
+                        .WithMany()
+                        .HasForeignKey("ProductoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Orden");
+
+                    b.Navigation("Producto");
+                });
+
             modelBuilder.Entity("DeluxeCarsEntities.PagoCliente", b =>
                 {
                     b.HasOne("DeluxeCarsEntities.Cliente", "Cliente")
@@ -1858,6 +2233,11 @@ namespace DeluxeCars.DataAccess.Migrations
             modelBuilder.Entity("DeluxeCarsEntities.NotaDeCredito", b =>
                 {
                     b.Navigation("Detalles");
+                });
+
+            modelBuilder.Entity("DeluxeCarsEntities.Orden", b =>
+                {
+                    b.Navigation("OrdenDetalles");
                 });
 
             modelBuilder.Entity("DeluxeCarsEntities.PagoCliente", b =>

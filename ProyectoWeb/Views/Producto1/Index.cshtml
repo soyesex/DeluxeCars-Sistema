@@ -1,0 +1,65 @@
+﻿@using Aplicacion.Models.ViewModels
+@model IEnumerable<ProductoViewModel>
+
+@{
+    ViewData["Title"] = "Listado de Productos";
+}
+
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Detalles de los Productos (con Stock)</h2>
+    <div class="card-body">
+        <div class="d-flex justify-content-between mb-3">
+            <div>
+                <a asp-action="Create" class="btn btn-success">
+                    <i class="bi bi-person-plus"></i> Nuevo Producto
+                </a>
+            </div>
+            <form class="d-flex">
+                <input class="form-control me-2" type="search" name="filtro" value="@ViewBag.FiltroActual" placeholder="Buscar..." aria-label="Buscar">
+                <button class="btn btn-outline-secondary" type="submit">Buscar</button>
+            </form>
+        </div>
+    </div>
+    <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Categoría</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Estado</th>
+                <th>OEM</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var producto in Model)
+            {
+                <tr>
+                    <td>@producto.Id</td>
+                    <td>@producto.Nombre</td>
+                    <td>@producto.Descripcion</td>
+                    <td>@producto.NombreCategoria</td>
+                    <td>@producto.Precio.ToString("C")</td>
+                    <td><b>@producto.Stock</b></td>
+                    <td>
+                        <span class="badge @((producto.Estado ? "bg-success" : "bg-danger"))">
+                            @(producto.Estado ? "Activo" : "Inactivo")
+                        </span>
+                    </td>
+                    <td>@producto.OriginalEquipmentManufacture</td>
+
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@producto.Id" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> Editar</a>
+                        <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="@producto.Id" data-nombre="@producto.Nombre">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+

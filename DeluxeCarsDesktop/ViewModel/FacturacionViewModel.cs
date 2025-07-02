@@ -82,6 +82,8 @@ namespace DeluxeCarsDesktop.ViewModel
             }
         }
 
+        public ObservableCollection<Cliente> ClientesDisponibles { get; private set; }
+
         private MetodoPago _metodoPagoSeleccionado;
         public MetodoPago MetodoPagoSeleccionado { get => _metodoPagoSeleccionado; set => SetProperty(ref _metodoPagoSeleccionado, value); }
 
@@ -129,6 +131,7 @@ namespace DeluxeCarsDesktop.ViewModel
             LineasDeFactura = new ObservableCollection<DetalleFactura>();
             ResultadosBusquedaCliente = new ObservableCollection<Cliente>();
             ResultadosBusquedaItem = new ObservableCollection<object>();
+            ClientesDisponibles = new ObservableCollection<Cliente>();
             MetodosDePago = new ObservableCollection<MetodoPago>();
             AgregarItemCommand = new ViewModelCommand( async p => await ExecuteAgregarItem(p), p => p != null && CantidadItem > 0);
             EliminarItemCommand = new ViewModelCommand(ExecuteEliminarItem);
@@ -153,37 +156,41 @@ namespace DeluxeCarsDesktop.ViewModel
         {
             _facturaEnProgreso = new Factura();
             try
-            {
+            {// --- INICIO DE LA LÓGICA MODIFICADA ---
+
+                // Carga de Clientes
+                var clientes = await _unitOfWork.Clientes.GetAllAsync();
+                ClientesDisponibles.Clear();
+                // Añadimos una opción para "Cliente Genérico" o "Venta Rápida"
+                ClientesDisponibles.Add(new Cliente { Id = 0, Nombre = "Cliente Ocasional" });
+                foreach (var cliente in clientes.Where(c => c.Estado).OrderBy(c => c.Nombre))
+                {
+                    ClientesDisponibles.Add(cliente);
+                }
+
+                // Carga de Métodos de Pago (sin cambios)
                 var metodos = await _unitOfWork.MetodosPago.GetAllAsync();
-
-                // --- INICIO DE LA CORRECCIÓN ---
-
-                // 1. Limpiamos la colección existente.
                 MetodosDePago.Clear();
-
-                // 2. Añadimos los nuevos métodos a la colección que la UI ya conoce.
                 foreach (var metodo in metodos.Where(m => m.Disponible))
                 {
                     MetodosDePago.Add(metodo);
                 }
-
-                // Ya no necesitas la línea OnPropertyChanged(nameof(MetodosDePago));
-
-                // --- FIN DE LA CORRECCIÓN ---
-
-                MetodoPagoSeleccionado = MetodosDePago.FirstOrDefault();
             }
             catch (Exception ex) { MessageBox.Show($"Error cargando métodos de pago: {ex.Message}", "Error"); }
 
             LineasDeFactura.Clear();
-            ResultadosBusquedaCliente?.Clear(); // Usamos el '?' por si acaso
             ResultadosBusquedaItem?.Clear();
-            ClienteSeleccionado = null; // Esto ya lo tenías, pero es clave
 
-            TextoBusquedaCliente = string.Empty; OnPropertyChanged(nameof(TextoBusquedaCliente));
-            TextoBusquedaItem = string.Empty; OnPropertyChanged(nameof(TextoBusquedaItem));
+            // Seleccionamos los valores por defecto
+            ClienteSeleccionado = ClientesDisponibles.FirstOrDefault();
+            MetodoPagoSeleccionado = MetodosDePago.FirstOrDefault();
+
+            TextoBusquedaItem = string.Empty;
             CantidadItem = 1;
             RecalcularTotales();
+
+            // Notificamos a la UI que estas propiedades han cambiado
+            OnPropertyChanged(nameof(TextoBusquedaItem));
         }
 
         // --- MÉTODOS DE BÚSQUEDA CORREGIDOS ---

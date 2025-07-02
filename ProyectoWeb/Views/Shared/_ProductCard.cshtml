@@ -1,0 +1,106 @@
+﻿@model Aplicacion.Application.ViewModels.ProductoViewModel
+
+<div class="product-card">
+    <div class="product-card-image-container">
+        <a asp-controller="Producto" asp-action="Detalles" asp-route-id="@Model.Id">
+            <img src="@Model.ImagenUrl" alt="@Model.Nombre">
+        </a>
+    </div>
+    <div class="product-card-body">
+        <div class="product-oem">@Model.OriginalEquipmentManufacture</div>
+        <h5 class="product-name">
+            <a asp-controller="Producto" asp-action="Detalles" asp-route-id="@Model.Id" class="text-white text-decoration-none">
+                @Model.Nombre
+            </a>
+        </h5>
+        <p class="product-price">@Model.Precio.ToString("C0")</p>
+    </div>
+    <div class="product-card-footer mt-auto">
+        <button class="btn btn-brand-accent w-100 add-to-cart-btn"
+                data-producto-id="@Model.Id"
+                data-cantidad="1">
+            <i class="bi bi-cart-plus me-2"></i>Añadir al Carrito
+        </button>
+
+    </div>
+</div>
+
+<style>
+    .product-card-body {
+        padding: 1rem;
+        flex-grow: 1;
+    }
+
+    .product-card-footer {
+        padding: 0 1rem 1rem 1rem;
+    }
+
+    .product-oem {
+        font-size: 0.8rem;
+        color: var(--color-texto-secundario, #A0A0A0);
+        text-transform: uppercase;
+    }
+
+    .product-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0.25rem 0;
+        min-height: 3.3em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .product-price {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--color-primario, #E53559);
+        margin-bottom: 0.75rem;
+    }
+
+    .btn-brand-accent {
+        background-color: var(--color-primario);
+        color: #FFFFFF;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+    }
+
+        .btn-brand-accent:hover {
+            filter: brightness(1.2);
+        }
+
+    /* --- CONTENEDOR DE IMAGEN --- */
+    .product-card-image-container {
+        background-color: #FFFFFF;
+        border-radius: 8px;
+        padding: 0.5rem; /* Un padding un poco más pequeño */
+        margin-bottom: 1rem;
+        height: 140px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+        .product-card-image-container a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Nos aseguramos de que la imagen se escale correctamente dentro del enlace */
+        .product-card-image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain; /* 'contain' asegura que toda la imagen sea visible sin deformarse */
+            transition: transform 0.3s ease; /* Opcional: añade una suave transición */
+        }
+
+    .product-card:hover .product-card-image-container img {
+        transform: scale(1.05); /* Opcional: un sutil efecto de zoom al pasar el mouse */
+    }
+
+</style>
+

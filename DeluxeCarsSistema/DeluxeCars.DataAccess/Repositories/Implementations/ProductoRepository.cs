@@ -11,35 +11,63 @@ namespace DeluxeCars.DataAccess.Repositories.Implementations
         public ProductoRepository(AppDbContext context) : base(context)
         {
         }
+        public async Task<int> CountAllAsync()
+        {
+            return await _context.Productos.CountAsync();
+        }
+        private IQueryable<ProductoStockDto> GetProductosConStockCalculado()
+        {
+            return _dbSet.Select(p => new ProductoStockDto
+            {
+                Id = p.Id,
+                Nombre = p.Nombre,
+                Precio = p.Precio,
+                ImagenUrl = p.ImagenUrl,
+                Descripcion = p.Descripcion,
+                NombreCategoria = p.Categoria.Nombre,
+                StockActual = _context.MovimientosInventario
+                                      .Where(m => m.IdProducto == p.Id)
+                                      .Sum(m => m.TipoMovimiento == "Entrada por Compra" ? m.Cantidad : -m.Cantidad)
+            });
+        }
+        public async Task<IEnumerable<ProductoStockDto>> SearchPublicCatalogAsync(string categoria, string orden)
+        {
+            var query = GetProductosConStockCalculado().Where(dto => dto.StockActual > 0);
 
+            if (!string.IsNullOrEmpty(categoria))
+            {
+                query = query.Where(p => p.NombreCategoria.Equals(categoria));
+            }
+
+            switch (orden)
+            {
+                case "precio-asc":
+                    query = query.OrderBy(p => p.Precio);
+                    break;
+                case "precio-desc":
+                    query = query.OrderByDescending(p => p.Precio);
+                    break;
+                case "nombre-asc":
+                default:
+                    query = query.OrderBy(p => p.Nombre);
+                    break;
+            }
+            return await query.AsNoTracking().ToListAsync();
+        }
         public async Task<IEnumerable<ProductoStockDto>> GetProductosConStockPositivoAsync()
         {
-            return await _dbSet
-                .Select(p => new ProductoStockDto
-                {
-                    Id = p.Id,
-                    Nombre = p.Nombre,
-                    Precio = p.Precio,
-                    ImagenUrl = p.ImagenUrl,
-                    Descripcion = p.Descripcion, // <-- AÑADE ESTA LÍNEA
-
-                    StockActual = _context.MovimientosInventario
-                                          .Where(m => m.IdProducto == p.Id)
-                                          .Sum(m => m.TipoMovimiento == "ENTRADA" ? m.Cantidad : -m.Cantidad)
-                })
+            // Ahora usa la lógica centralizada y correcta
+            return await GetProductosConStockCalculado()
                 .Where(dto => dto.StockActual > 0)
                 .ToListAsync();
         }
         public async Task<int> CountLowStockProductsAsync()
         {
-            // Es la misma lógica que GetLowStockProductsAsync, pero en lugar de
-            // devolver la lista completa, usamos CountAsync() para que EF
-            // genere un "SELECT COUNT(*)" en SQL. Mucho más rápido.
             return await _context.Productos
                 .CountAsync(p => p.StockMinimo.HasValue && p.StockMinimo > 0 &&
-                            (_context.MovimientosInventario
-                                   .Where(m => m.IdProducto == p.Id)
-                                   .Sum(m => (int?)m.Cantidad) ?? 0) < p.StockMinimo);
+                    (_context.MovimientosInventario
+                           .Where(m => m.IdProducto == p.Id)
+                           .Sum(m => m.TipoMovimiento == "Entrada por Compra" ? m.Cantidad : -m.Cantidad) < p.StockMinimo.Value));
         }
         public async Task<Dictionary<int, int>> GetCurrentStocksAsync(IEnumerable<int> productIds)
         {
@@ -56,11 +84,9 @@ namespace DeluxeCars.DataAccess.Repositories.Implementations
         }
         public async Task<int> GetCurrentStockAsync(int productoId)
         {
-            // Suma todas las cantidades (positivas y negativas) para un producto.
-            // Si no hay movimientos, devuelve 0.
             return await _context.MovimientosInventario
-                                 .Where(m => m.IdProducto == productoId)
-                                 .SumAsync(m => (int?)m.Cantidad) ?? 0;
+                .Where(m => m.IdProducto == productoId)
+                .SumAsync(m => m.TipoMovimiento == "Entrada por Compra" ? m.Cantidad : -m.Cantidad);
         }
         public async Task<Producto> GetByIdWithCategoriaAsync(int productoId)
         {

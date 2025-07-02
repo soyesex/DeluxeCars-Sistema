@@ -1,239 +1,1361 @@
-﻿@using Aplicacion.Models.ViewModels
-@model IEnumerable<ProductoViewModel>
+﻿@model Aplicacion.Application.ViewModels.HomeViewModel
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Deluxe Cars | Repuestos y Autopartes de Alto Rendimiento";
+    Func<string, string> GetContent = key =>
+        Model.PageContent.ContainsKey(key) ? Model.PageContent[key] : $"[{key} no encontrado]";
+}
+<section class="hero-search-section">
+    <div class="video-background-container">
+        <video autoplay muted loop id="heroVideo">
+            <source src="~/videos/hero-video.mp4" type="video/mp4">
+        </video>
+        <div class="video-overlay"></div>
+    </div>
+
+    <div class="container hero-content text-center">
+        <div class="editable-container" data-aos="fade-up" data-aos-delay="100">
+            <h1 data-key="Home_HeroTitle1" class="display-3 fw-bold text-white mb-4">@GetContent("Home_HeroTitle1")</h1>
+            @if (User.IsInRole("Administrador"))
+            {
+                <button class="btn-edit-content"><i class="bi bi-pencil-fill"></i></button>
+            }
+        </div>
+        <div class="editable-container" data-aos="fade-up" data-aos-delay="200">
+            <h1 data-key="Home_HeroTitle2" class="display-3 fw-bold text-white mb-4">@GetContent("Home_HeroTitle2")</h1>
+            @if (User.IsInRole("Administrador"))
+            {
+                <button class="btn-edit-content"><i class="bi bi-pencil-fill"></i></button>
+            }
+        </div>
+        <div class="editable-container" data-aos="fade-up" data-aos-delay="300">
+            <p data-key="Home_HeroSubtitle" class="lead text-white-50 mb-5">@GetContent("Home_HeroSubtitle")</p>
+            @if (User.IsInRole("Administrador"))
+            {
+                <button class="btn-edit-content"><i class="bi bi-pencil-fill"></i></button>
+            }
+        </div>
+    </div>
+</section>
+
+@if (User.IsInRole("Administrador"))
+{
+    <div class="modal fade" id="editTextModal" tabindex="-1" aria-labelledby="editTextModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="editTextModalLabel">Editar Contenido</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="contentKey" />
+                    <div class="mb-3">
+                        <label for="contentText" class="form-label">Texto a editar:</label>
+                        <textarea class="form-control bg-dark text-white" id="contentText" rows="8"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="saveContentBtn">Guardar Cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3"></div>
 }
 
-@section Styles {
-    <link rel="stylesheet" href="~/css/home.css" asp-append-version="true" />
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+<section class="section-final-cta">
+    <div class="container">
+        <div class="cta-content text-center">
+            <h2 class="display-4 fw-bold mb-3" data-aos="zoom-in" data-aos-duration="800">
+                Tu carro lo merece, tu bolsillo también
+            </h2>
+            <p class="lead text-white-75 mx-auto mb-4" style="max-width: 600px;" data-aos="fade-up" data-aos-delay="200">
+                Autopartes confiables, a buen precio y sin complicaciones.
+            </p>
+            <div class="d-grid gap-3 d-sm-flex justify-content-sm-center" data-aos="fade-up" data-aos-delay="400">
+                <a asp-controller="Catalogo" asp-action="Index" class="btn btn-primary btn-lg px-4 gap-3 shadow-lg">
+                    <i class="bi bi-cart-check me-2"></i> Ver Productos
+                </a>
+                <a asp-controller="Home" asp-action="Contactanos" class="btn btn-outline-light btn-lg px-4">
+                    <i class="bi bi-person-lines-fill me-2"></i> Hablar con un Experto
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
 
-}
 
-<div class="home-page">
-    <header id="info-page" class="py-5">
-        <div class="container">
-            <div class="d-flex align-items-center justify-content-between gap-5">
-                <!-- Columna 1: Texto -->
-                <div class="col-md-6">
-                    <div class="text-start pe-4 left">
-                        <h1 class="display-6">Encuentra las Mejores Autopartes en <span class="text-primary">Deluxe Cars</span></h1>
-                        <p class="lead">Calidad, variedad y precios competitivos en un solo lugar.</p>
-                        <div class="d-flex-center">
-                            <a asp-action="Index" asp-controller="Catalogo" class="btn btn-dark d-flex align-items-center justify-content-center gap-2">
-                                <i class='bx bx-search'></i>
-                                <span>Explora el Catálogo</span>
-                            </a>
+<section class="py-5 bg-black text-light">
+    <div class="container my-5">
+        <div class="row justify-content-center text-center mb-5">
+            <div class="col-lg-8">
+                <div class="editable-container" data-aos="fade-up">
+                    <h2 data-key="Home_InventoryTitle" class="section-title-dark">@GetContent("Home_InventoryTitle")</h2>
+                    @if (User.IsInRole("Administrador"))
+                    {
+                        <button class="btn-edit-content"><i class="bi bi-pencil-fill"></i></button>
+                    }
+                </div>
+                <div class="editable-container" data-aos="fade-up" data-aos-delay="100">
+                    <p data-key="Home_InventorySubtitle" class="lead text-white-50 mt-3">@GetContent("Home_InventorySubtitle")</p>
+                    @if (User.IsInRole("Administrador"))
+                    {
+                        <button class="btn-edit-content"><i class="bi bi-pencil-fill"></i></button>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-6" data-aos="fade-right" data-aos-delay="200">
+                <div class="feature-card-dark h-100">
+                    <div class="feature-item">
+                        <div class="feature-icon"><i class="bi bi-stack"></i></div>
+                        <div>
+                            <div class="editable-container">
+                                <h5 data-key="HomeFeatures_CatalogTitle">@GetContent("HomeFeatures_CatalogTitle")</h5>
+                                @if (User.IsInRole("Administrador"))
+                                {
+                                    <button class="btn-edit-content"><i class="bi bi-pencil-fill"></i></button>
+                                }
+                            </div>
+                            <div class="editable-container">
+                                <p data-key="HomeFeatures_CatalogDesc" class="text-white-50">@GetContent("HomeFeatures_CatalogDesc")</p>
+                                @if (User.IsInRole("Administrador"))
+                                {
+                                    <button class="btn-edit-content"><i class="bi bi-pencil-fill"></i></button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon"><i class="bi bi-patch-check-fill"></i></div>
+                        <div>
+                            <div class="editable-container">
+                                <h5 data-key="HomeFeatures_BrandsTitle">@GetContent("HomeFeatures_BrandsTitle")</h5>
+                                @if (User.IsInRole("Administrador"))
+                                {
+                                    <button class="btn-edit-content"><i class="bi bi-pencil-fill"></i></button>
+                                }
+                            </div>
+                            <div class="editable-container">
+                                <p data-key="HomeFeatures_BrandsDesc" class="text-white-50">@GetContent("HomeFeatures_BrandsDesc")</p>
+                                @if (User.IsInRole("Administrador"))
+                                {
+                                    <button class="btn-edit-content"><i class="bi bi-pencil-fill"></i></button>
+                                }
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- columna 2: imagen -->
-                <div class="col-md-6 text-end">
-                    <img src="~/css/img/auto-rojo-main.jpg" alt="auto rojo" class="img-fluid rounded">
-                </div>
-            </div>
-        </div>
-    </header>
-
-
-    <section id="features">
-        <h2 class="separator">Por Qué Elegirnos</h2>
-        <div class="sell-nft">
-            <div class="item">
-                <div class="header">
-                    <i class='bx bx-wallet-alt'></i>
-                    <h5>Amplia Variedad</h5>
-                </div>
-                <p>Todo lo que necesitas para tu coche en un solo lugar.</p>
-            </div>
-            <div class="item">
-                <div class="header">
-                    <i class='bx bx-cart-add'></i>
-                    <h5>Precios Competitivos</h5>
-                </div>
-                <p>Las mejores ofertas en autopartes de calidad.</p>
-            </div>
-            <div class="item">
-                <div class="header">
-                    <i class='bx bx-grid-alt'></i>
-                    <h5>Envíos Rápidos</h5>
-                </div>
-                <p>Recibe tus productos en tiempo récord.</p>
-            </div>
-        </div>
-    </section>
-
-    <section id="services">
-        <h2 class="separator">Nuestro Catálogo de Autopartes</h2>
-        <div class="nft-shop">
-            <div class="category">
-                <button class="category-btn" data-category="all">Todos</button>
-                <button class="category-btn" data-category="Motor">Motor</button>
-                <button class="category-btn" data-category="Frenos">Frenos</button>
-                <button class="category-btn" data-category="Suspensión">Suspensión</button>
-                <button class="category-btn" data-category="Filtros">Filtros</button>
-                <button class="category-btn" data-category="Transmisión">Transmisión</button>
-                <button class="category-btn" data-category="Encendido">Encendido</button>
-                <button class="category-btn" data-category="Baterías">Baterías</button>
-            </div>
-            @{
-                int contador = 0;
-            }
-            <div class="container mt-5 pt-5">
-                <div class="row" id="product-catalog">
-                    @if (contador == 0 || contador <= 1)
-                    {
-                        foreach (var producto in Model)
-                        {
-                            <div class="col-md-4 mb-4">
-                                <div class="card h-100">
-                                    <img src="@producto.ImagenUrl" alt="@producto.Nombre" class="card-img-top" />
-                                    <div class="card-body d-flex flex-column">
-                                        <h5 class="card-title">@producto.Nombre</h5>
-                                        <p class="card-text text-muted">$@producto.Precio</p>
-                                        <p class="card-text">
-                                            <small class="text-muted">@producto.Descripcion</small>
-                                        </p>
-                                        <p class="card-text">
-                                            <small class="text-muted">Stock: @producto.Stock</small>
-                                        </p>
-                                        <div class="mt-auto">
-                                            <button class="btn btn-success w-100">Agregar al Carrito</button>
-                                        </div>
-                                    </div>
-                                </div>
+            <div class="col-lg-6" data-aos="fade-left" data-aos-delay="200">
+                <div class="feature-card-dark h-100">
+                    <div class="feature-item">
+                        <div class="feature-icon"><i class="bi bi-wrench-adjustable-circle-fill"></i></div>
+                        <div>
+                            <div class="editable-container">
+                                <h5 data-key="HomeFeatures_CompatTitle">@GetContent("HomeFeatures_CompatTitle")</h5>
+                                @if (User.IsInRole("Administrador"))
+                                {
+                                    <button class="btn-edit-content"><i class="bi bi-pencil-fill"></i></button>
+                                }
                             </div>
-                            contador++;
-                        }
-                    }
-                    
+                            <div class="editable-container">
+                                <p data-key="HomeFeatures_CompatDesc" class="text-white-50">@GetContent("HomeFeatures_CompatDesc")</p>
+                                @if (User.IsInRole("Administrador"))
+                                {
+                                    <button class="btn-edit-content"><i class="bi bi-pencil-fill"></i></button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon"><i class="bi bi-lightbulb-fill"></i></div>
+                        <div>
+                            <div class="editable-container">
+                                <h5 data-key="HomeFeatures_InnovateTitle">@GetContent("HomeFeatures_InnovateTitle")</h5>
+                                @if (User.IsInRole("Administrador"))
+                                {
+                                    <button class="btn-edit-content"><i class="bi bi-pencil-fill"></i></button>
+                                }
+                            </div>
+                            <div class="editable-container">
+                                <p data-key="HomeFeatures_InnovateDesc" class="text-white-50">@GetContent("HomeFeatures_InnovateDesc")</p>
+                                @if (User.IsInRole("Administrador"))
+                                {
+                                    <button class="btn-edit-content"><i class="bi bi-pencil-fill"></i></button>
+                                }
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </div>
+    </div>
+</section>
 
-            <div class="view-more">
-                <a asp-controller="Catalogo" asp-action="Index" class="btn btn-dark d-flex align-items-center justify-content-center">
-                    <span>Ver mas</span>
+<section class="location-section animate-on-scroll" data-animation="fade-up">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <h2 class="location-title">Pásate por nuestra tienda en Bucaramanga</h2>
+                <p class="location-text">
+                    ¿Prefieres ver el repuesto con tus propios ojos? ¡Te esperamos!
+                    Acércate, recibe asesoría clara y encuentra justo lo que tu carro necesita.
+                    Nos tomamos el tiempo para ayudarte bien.
+                </p>
+                <div class="location-details mt-4">
+                    <p><i class="bi bi-geo-alt-fill me-2"></i> Cra. 27 #10-50, Bucaramanga, Santander</p>
+                    <p><i class="bi bi-telephone-fill me-2"></i> +57 310 123 4567</p>
+                </div>
+                <a href="https://www.google.com/maps/place/Bucaramanga,+Santander" target="_blank" class="btn btn-outline-light btn-lg mt-3">
+                    Ver en Google Maps
                 </a>
             </div>
-        </div>
-    </section>
-    <section id="suppliers">
-        <h2 class="separator">Nuestros servicios</h2>
-        <div class="sellers">
-            <div class="item">
-                <img src="../img/porfile 1.jpg" alt="Diana">
-                <div class="info">
-                    <h4>Juan Pérez</h4>
-                    <p>¡Encontré el repuesto exacto para mi coche y llegó rápido!</p>
-                </div>
-            </div>
-            <!-- Repite los otros suppliers aquí -->
-            <div class="item">
-                <img src="../img/porfile 1.jpg" alt="Diana">
-                <div class="info">
-                    <h4>Maria Becerra</h4>
-                    <p>¡Encontré el repuesto exacto para mi coche y llegó rápido!</p>
-                </div>
-            </div>
-            <!-- Repite los otros suppliers aquí -->
-            <div class="item">
-                <img src="../img/porfile 1.jpg" alt="Diana">
-                <div class="info">
-                    <h4>Maria Becerra</h4>
-                    <p>¡Encontré el repuesto exacto para mi coche y llegó rápido!</p>
-                </div>
-            </div>
-            <!-- Repite los otros suppliers aquí -->
-            <div class="item">
-                <img src="../img/porfile 1.jpg" alt="Diana">
-                <div class="info">
-                    <h4>Maria Becerra</h4>
-                    <p>¡Encontré el repuesto exacto para mi coche y llegó rápido!</p>
+            <div class="col-lg-6">
+                <div class="map-wrapper">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126684.81488179216!2d-73.1642345695325!3d7.12642502219904!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e683f3b7c345b81%3A0x94689617327c62ca!2sBucaramanga%2C%20Santander!5e0!3m2!1ses-419!2sco!4v1718299710359!5m2!1ses-419!2sco" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                 </div>
             </div>
         </div>
-    </section>
-    <!-- Sección de Llamada a la Acción -->
-    <section id="cta" class="py-5 text-center">
-        <div class="container">
-            <h2 class="mb-4">Contactanos!</h2>
-            <div class="contact">
-                <a asp-action="Contact" class="btn btn-dark d-flex align-items-center justify-content-center">
-                    <span>Mensaje</span>
-                </a>
+    </div>
+</section>
+
+
+<div class="container my-5 py-5">
+    <section data-aos="fade-up">
+        <h2 class="section-title">Trabajamos con las Mejores Marcas</h2>
+        <div class="row g-4 justify-content-center">
+            <div class="col-6 col-md-4 col-lg-2" data-aos="fade-up" data-aos-delay="0">
+                <div class="brand-card">
+                    <img src="~/images/brand-bosch.png" alt="Bosch" onerror="this.onerror=null;this.src='/images/bosch_logo.png';">
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2" data-aos="fade-up" data-aos-delay="100">
+                <div class="brand-card">
+                    <img src="~/images/brand-acdelco.png" alt="ACDelco" onerror="this.onerror=null;this.src='/images/acdelco_logo.png';">
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2" data-aos="fade-up" data-aos-delay="200">
+                <div class="brand-card">
+                    <img src="~/images/brand-denso.png" alt="Denso" onerror="this.onerror=null;this.src='/images/denso_logo.png';">
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2" data-aos="fade-up" data-aos-delay="300">
+                <div class="brand-card">
+                    <img src="~/images/brand-gates.png" alt="Gates" onerror="this.onerror=null;this.src='/images/gates_logo.png';">
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2" data-aos="fade-up" data-aos-delay="400">
+                <div class="brand-card">
+                    <img src="~/images/brand-ngk.png" alt="NGK" onerror="this.onerror=null;this.src='/images/ngk_logo.png';">
+                </div>
             </div>
         </div>
     </section>
 </div>
 
+<section class="section-promise-pro">
+    <div class="container py-5">
+        <div class="header-section text-center mb-5 pb-3" data-aos="fade-up">
+            <h2 class="display-5 fw-bold section-title">Lo que prometemos, lo cumplimos</h2>
+            <p class="lead text-white-50 mx-auto" style="max-width: 700px;">Al elegir Deluxe Cars, estás confiando en un servicio que responde, sin excusas ni vueltas.</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="promise-card-pro h-100">
+                    <div class="promise-icon mb-3"><i class="bi bi-shield-check"></i></div>
+                    <h4 class="mb-2">Calidad que da confianza</h4>
+                    <p>Revisamos cada pieza para que funcione bien desde el primer día. Tu seguridad va primero.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="promise-card-pro h-100">
+                    <div class="promise-icon mb-3"><i class="bi bi-headset"></i></div>
+                    <h4 class="mb-2">Gente que sabe ayudarte</h4>
+                    <p>Nuestro equipo conoce de repuestos y te explica todo sin enredos. Te ayudamos a comprar bien.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="promise-card-pro h-100">
+                    <div class="promise-icon mb-3"><i class="bi bi-truck"></i></div>
+                    <h4 class="mb-2">Envíos que llegan de verdad</h4>
+                    <p>Despachamos rápido y con cuidado. Hacemos que tu pedido llegue donde estés, sin problemas.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                <div class="promise-card-pro h-100">
+                    <div class="promise-icon mb-3"><i class="bi bi-arrow-repeat"></i></div>
+                    <h4 class="mb-2">Garantía sin enredos</h4>
+                    <p>Si algo no sale como esperabas, no te preocupes. Te ayudamos con la garantía o el cambio, así de fácil.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container my-5 py-5">
+    <section data-aos="fade-up">
+        <h2 class="section-title">Nuestros Clientes</h2>
+        <div class="row">
+            <div class="col-md-6 col-lg-4 mb-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="testimonial-card-v3">
+                    <img src="~/images/client-1.jpg" alt="Cliente Juan Pérez" class="testimonial-img" onerror="this.onerror=null;this.src='https://placehold.co/80x80/212529/FFF?text=JP';">
+                    <p class="testimonial-text">“Excelente atención. Llevaba rato buscando un repuesto complicado y en menos de dos días ya lo tenía en el taller. Así da gusto trabajar.”</p>
+                    <div class="testimonial-author">Juan Pérez</div>
+                    <div class="testimonial-location">Mecánico, Barranquilla</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 mb-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="testimonial-card-v3">
+                    <img src="~/images/client-2.jpg" alt="Cliente María Becerra" class="testimonial-img" onerror="this.onerror=null;this.src='https://placehold.co/80x80/d90429/FFF?text=MB';">
+                    <p class="testimonial-text">“Compré unas piezas para mi carro antiguo y quedó andando como nuevo. Me explicaron todo con calma. Se nota que saben lo que hacen.”</p>
+                    <div class="testimonial-author">María Becerra</div>
+                    <div class="testimonial-location">Entusiasta, Medellín</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 mb-4" data-aos="fade-up" data-aos-delay="300">
+                <div class="testimonial-card-v3">
+                    <img src="~/images/client-3.jpg" alt="Cliente Ricardo Gómez" class="testimonial-img" onerror="this.onerror=null;this.src='https://placehold.co/80x80/ffc107/000?text=RG';">
+                    <p class="testimonial-text">“Aquí no me preocupo por repuestos falsos o de mala calidad. Me dan confianza, buenos precios y cumplen con lo que prometen. Por eso siempre vuelvo.”</p>
+                    <div class="testimonial-author">Ricardo Gómez</div>
+                    <div class="testimonial-location">Dueño de Taller, Cali</div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+
+
+<footer class="footer-dark pt-5 pb-4">
+    <div class="container text-center text-md-start">
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6 mb-4 mb-md-0" data-aos="fade-up" data-aos-delay="100">
+                <h5 class="text-uppercase mb-4">Deluxe Cars</h5>
+                <p>Tu aliado de confianza en autopartes de calidad en Bucaramanga y toda Colombia. Pasión por los autos, compromiso con el servicio.</p>
+                <div class="mt-4 social-icons">
+                    <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" class="me-3" aria-label="Facebook">
+                        <i class="bi bi-facebook"></i>
+                    </a>
+                    <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" class="me-3" aria-label="Instagram">
+                        <i class="bi bi-instagram"></i>
+                    </a>
+                    <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer" class="me-3" aria-label="YouTube">
+                        <i class="bi bi-youtube"></i>
+                    </a>
+                    <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+                        <i class="bi bi-tiktok"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-6 mb-4 mb-md-0" data-aos="fade-up" data-aos-delay="200">
+                <h5 class="text-uppercase mb-4">Navegación</h5>
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2"><a asp-action="Index">Inicio</a></li>
+                    <li class="mb-2"><a asp-controller="Catalogo" asp-action="Index">Tienda</a></li>
+                    <li class="mb-2"><a asp-action="SobreNosotros">Sobre Nosotros</a></li>
+                    <li class="mb-2"><a asp-action="Contactanos">Contacto</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-2 col-md-6 mb-4 mb-md-0" data-aos="fade-up" data-aos-delay="300">
+                <h5 class="text-uppercase mb-4">Soporte</h5>
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2"><a href="#">Preguntas Frecuentes</a></li>
+                    <li class="mb-2"><a asp-action="Privacy">Política de Privacidad</a></li>
+                    <li class="mb-2"><a href="#">Términos y Condiciones</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4 mb-md-0" data-aos="fade-up" data-aos-delay="400">
+                <h5 class="text-uppercase mb-4">Recibe Ofertas Exclusivas</h5>
+                <p>Suscríbete a nuestro boletín y sé el primero en conocer nuestras promociones.</p>
+                <form>
+                    <div class="input-group">
+                        <input type="email" class="form-control" placeholder="Tu correo electrónico" aria-label="Tu correo electrónico">
+                        <button class="btn btn-primary find-parts-btn" type="button">Suscribirse</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</footer>
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    // <script>
-    //     let products = [];
+    @if (User.IsInRole("Administrador"))
+    {
+        <script>
+            // 
+            // FUNCIÓN AUXILIAR PARA MOSTRAR NOTIFICACIONES "TOAST"
+            // 
+            function showToast(message, isError = false) {
+                const toastContainer = document.querySelector('.toast-container');
+                if (!toastContainer) return;
 
-    //     // Función para mostrar los productos en el catálogo
-    //     function displayProducts(filteredProducts) {
-    //         const catalog = document.getElementById("product-catalog");
-    //         catalog.innerHTML = ""; // Limpiamos el catálogo
+                const toastId = 'toast-' + Math.random().toString(36).substr(2, 9);
+                const toastHTML = `
+                                <div id="${toastId}" class="toast align-items-center text-white ${isError ? 'bg-danger' : 'bg-success'}" role="alert" aria-live="assertive" aria-atomic="true">
+                                    <div class="d-flex">
+                                        <div class="toast-body">${message}</div>
+                                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                                    </div>
+                                </div>`;
 
-    //         filteredProducts.forEach(product => {
-    //             const card = document.createElement("div");
-    //             card.className = "col-md-4 mb-4";
-    //             card.innerHTML = `
-    //                 <div class="card">
-    //                     <img src="${product.imagenUrl}" alt="${product.nombre}" class="card-img-top">
-    //                     <div class="card-body">
-    //                         <h5 class="card-title">${product.nombre}</h5>
-    //                         <p class="card-text">$${product.precio.toFixed(2)}</p>
-    //                         <p class="card-text"><small class="text-muted">${product.descripcion}</small></p>
-    //                         <p class="card-text"><small class="text-muted">Stock: ${product.stock}</small></p>
-    //                         <button class="btn btn-success" onclick="addToCart(${product.id})" ${product.stock === 0 ? 'disabled' : ''}>
-    //                             ${product.stock === 0 ? 'Sin Stock' : 'Agregar al Carrito'}
-    //                         </button>
-    //                     </div>
-    //                 </div>
-    //             `;
-    //             catalog.appendChild(card);
-    //         });
-    //     }
+                toastContainer.insertAdjacentHTML('beforeend', toastHTML);
 
-    //     // Función para filtrar productos por categoría
-    //     function filterProducts(category) {
-    //         if (category === "all") {
-    //             displayProducts(products); // Mostrar todos los productos
-    //         } else {
-    //             const filtered = products.filter(product => product.nombreCategoria === category);
-    //             displayProducts(filtered);
-    //         }
-    //     }
+                const toastElement = document.getElementById(toastId);
+                const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
+                toast.show();
+                // Limpiar el toast del DOM después de que se oculte
+                toastElement.addEventListener('hidden.bs.toast', () => toastElement.remove());
+            }
 
-    //     // Evento para cada botón de categoría
-    //     document.querySelectorAll(".category-btn").forEach(button => {
-    //         button.addEventListener("click", function () {
-    //             const category = this.getAttribute("data-category");
-    //             filterProducts(category);
-    //         });
-    //     });
 
-    //     // Cargar productos desde el servidor
-    //     function loadProducts() {
-    //         $.ajax({
-    //             url: '/Catalogo/GetProducts',
-    //             type: 'GET',
-    //             success: function (data) {
-    //                 products = data; // Guardamos los productos
-    //                 displayProducts(products); // Mostramos los productos al cargar la página
-    //             },
-    //             error: function (err) {
-    //                 console.error("Error al cargar los productos", err);
-    //             }
-    //         });
-    //     }
+            // 
+            // LÓGICA PRINCIPAL DE EDICIÓN CON MODAL
+            // 
+            function initializeEditModal() {
+                const modalElement = document.getElementById('editTextModal');
+                if (!modalElement) return;
 
-    //     // Llamar a la función para cargar productos al cargar la página
-    //     window.onload = function () {
-    //         loadProducts();
-    //     };
-    </script>
+                if (typeof bootstrap === 'undefined' || typeof bootstrap.Modal === 'undefined') {
+                    setTimeout(initializeEditModal, 100);
+                    return;
+                }
+
+                const editModal = new bootstrap.Modal(modalElement);
+                const contentKeyInput = document.getElementById('contentKey');
+                const contentTextInput = document.getElementById('contentText');
+                const saveButton = document.getElementById('saveContentBtn');
+
+                // Asignar el evento a todos los botones de edición
+                document.querySelectorAll('.btn-edit-content').forEach(button => {
+                    button.addEventListener('click', function (e) {
+                        e.stopPropagation(); // Prevenir eventos conflictivos
+                        const container = this.closest('.editable-container');
+                        const elementToEdit = container.querySelector('[data-key]');
+                        const key = elementToEdit.dataset.key;
+                        // MEJORA: Usamos innerHTML para capturar saltos de línea (<br>) y otras etiquetas
+                        const currentContent = elementToEdit.innerHTML;
+
+                        contentKeyInput.value = key;
+                        // Reemplazamos <br> por saltos de línea reales en el textarea
+                        contentTextInput.value = currentContent.replace(/<br\s*\/?>/gi, '\n');
+                        editModal.show();
+                    });
+                });
+
+                // Asignar el evento al botón de Guardar
+                saveButton.addEventListener('click', function () {
+                    this.disabled = true;
+                    const key = contentKeyInput.value;
+                    // MEJORA: Al guardar, reemplazamos saltos de línea por <br> para conservar el formato en HTML
+                    const value = contentTextInput.value.replace(/\n/g, '<br>');
+
+                    fetch('/ContentAdmin/Update', { // Asegúrate que esta URL sea la correcta
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ key: key, value: value })
+                    })
+                        .then(response => {
+                            if (!response.ok) throw new Error('La respuesta del servidor no fue exitosa.');
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                editModal.hide();
+
+                                // =============================================================
+                                // MEJORA CLAVE: Actualización dinámica sin recargar la página
+                                // =============================================================
+                                const elementToUpdate = document.querySelector(`[data-key="${key}"]`);
+                                if (elementToUpdate) {
+                                    elementToUpdate.innerHTML = value; // Actualizamos el contenido en la página
+                                }
+                                showToast('Contenido guardado con éxito.'); // Feedback visual
+
+                            } else {
+                                showToast(data.message || 'Error al guardar el contenido.', true);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error en la petición Fetch:', error);
+                            showToast('Ocurrió un error de comunicación al guardar.', true);
+                        })
+                        .finally(() => {
+                            this.disabled = false; // Volvemos a habilitar el botón
+                        });
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', initializeEditModal);
+        </script>
+    }
+}
+@functions {
+    // Esta función ahora busca en el diccionario que viene en el Modelo.
+    string GetContent(string key)
+    {
+        if (Model?.PageContent != null && Model.PageContent.TryGetValue(key, out var value))
+        {
+            return value;
+        }
+        return $"[{key} no encontrado]";
+    }
+}
+
+@section Styles {
+    <style>
+        /* VARIABLES GLOBALES */
+        :root {
+            --color-primario: #d90429;
+            --color-fondo-oscuro: #000000;
+            --ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 4rem;
+            font-weight: 800;
+            position: relative;
+        }
+
+            .section-title::after {
+                content: '';
+                display: block;
+                width: 70px;
+                height: 4px;
+                background-color: var(--color-primario);
+                margin: 10px auto 0;
+            }
+
+        /* ESTILOS PARA SECCIÓN 1: HERO CON BÚSQUEDA */
+        .hero-search-section {
+            position: relative;
+            height: 90vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            overflow: hidden;
+        }
+
+        .video-background-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('/images/tallercarros.png');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.2));
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .vehicle-finder-v2 {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 1rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+            .vehicle-finder-v2 .form-label {
+                display: none;
+            }
+
+            .vehicle-finder-v2 .form-select, .vehicle-finder-v2 .btn {
+                border: none;
+            }
+
+        .find-parts-btn {
+            background-color: var(--color-primario);
+            color: white;
+            font-weight: 600;
+        }
+        
+        /* =======================================================
+           ESTILOS PARA TARJETAS DE CATEGORÍA PROFESIONALES
+           ======================================================= */
+
+        /* --- Base de la Tarjeta --- */
+        .category-card-pro {
+            display: block;
+            position: relative;
+            overflow: hidden;
+            height: 300px; /* Altura uniforme para las tarjetas */
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            text-decoration: none;
+            transition: box-shadow 0.3s ease;
+        }
+
+            .category-card-pro:hover {
+                box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
+            }
+
+            /* --- Capa de Imagen con Efecto Zoom --- */
+            .category-card-pro::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: inherit; /* Hereda el background-image del inline style */
+                background-size: cover;
+                background-position: center;
+                transition: transform 0.4s ease-out;
+                z-index: 1;
+            }
+
+            .category-card-pro:hover::before {
+                transform: scale(1.08); /* Sutil zoom al pasar el cursor */
+            }
+
+            /* --- Overlay de Gradiente para Legibilidad --- */
+            .category-card-pro::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                /* Gradiente oscuro abajo que se desvanece hacia arriba */
+                background: linear-gradient(to top, rgba(10, 10, 10, 0.9) 0%, rgba(10, 10, 10, 0.7) 25%, transparent 60%);
+                z-index: 2;
+                transition: background 0.3s ease;
+            }
+
+            /* --- Contenido de Texto --- */
+            .category-card-pro .card-content {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                padding: 25px 30px;
+                z-index: 3; /* Siempre al frente */
+                color: #ffffff;
+                transition: transform 0.35s ease-out;
+            }
+
+            .category-card-pro:hover .card-content {
+                transform: translateY(-10px); /* Eleva el texto sutilmente */
+            }
+
+            /* --- Tipografía Premium --- */
+            .category-card-pro h3 {
+                font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                font-size: 1.8rem;
+                font-weight: 700;
+                margin: 0 0 5px 0;
+                /* Sombra sutil que despega el texto del fondo */
+                text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.6);
+            }
+
+            .category-card-pro p {
+                font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                font-size: 1rem;
+                margin: 0;
+                color: rgba(255, 255, 255, 0.85);
+                text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+            }
+
+            /* --- Ícono de Acción --- */
+            .category-card-pro .card-action {
+                position: absolute;
+                top: 25px;
+                right: 30px;
+                z-index: 3;
+                font-size: 2.2rem;
+                color: rgba(255, 255, 255, 0.7);
+                opacity: 0; /* Oculto por defecto */
+                transform: translateX(15px);
+                transition: opacity 0.4s ease, transform 0.4s ease;
+            }
+
+            .category-card-pro:hover .card-action {
+                opacity: 1; /* Aparece en hover */
+                transform: translateX(0);
+            }
+
+        /* ESTILOS PARA SECCIÓN 3: NUESTRA PROMESA */
+        .promise-card {
+            background: #fff;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
+        }
+
+            .promise-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+            }
+
+        .promise-icon {
+            font-size: 3rem;
+            color: var(--color-primario);
+        }
+        /*  NUEVOS ESTILOS PARA LAS TARJETAS DE MARCAS */
+        /* Estilos para la rejilla de marcas con logos más grandes */
+
+        .brand-logo-card {
+            background-color: #1a1a1a;
+            padding: 2rem 1rem;
+            height: 120px; /* La altura de la tarjeta sigue igual */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 0.5rem;
+            border: 1px solid #333;
+            transition: all 0.3s ease;
+        }
+
+            .brand-logo-card:hover {
+                transform: translateY(-5px);
+                border-color: #dc3545; /* Borde rojo al pasar el mouse */
+                background-color: #222;
+            }
+
+            .brand-logo-card img {
+                max-width: 90%;
+                /* El ajuste clave para logos más grandes y visibles */
+                max-height: 65px;
+                object-fit: contain; /* Asegura que el logo no se deforme */
+                filter: grayscale(1) brightness(1.5);
+                transition: filter 0.3s ease;
+            }
+
+            .brand-logo-card:hover img {
+                filter: grayscale(0) brightness(1);
+            }
+
+
+        /* --- Estilo para los Testimonios --- */
+        .testimonial-card-v3 {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            text-align: center;
+            color: var(--color-texto-secundario);
+        }
+
+        .testimonial-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: -50px auto 1rem;
+            border: 4px solid var(--color-fondo-oscuro);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .testimonial-text {
+            font-style: italic;
+        }
+
+        .testimonial-author {
+            font-weight: 600;
+            color: var(--color-texto-principal);
+            margin-top: 1rem;
+        }
+
+        .testimonial-location {
+            font-size: 0.9rem;
+            color: var(--color-primario);
+        }
+
+        /*  NUEVOS ESTILOS PARA LA SECCIÓN DE SOPORTE */
+        .support-section {
+            background-color: var(--color-fondo-oscuro);
+        }
+
+        .support-container {
+            background-color: #fff; /* Fondo blanco para el contenedor combinado */
+            box-shadow: 0 20px 50px rgba(0,0,0,0.08);
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+
+        .support-image {
+            height: 100%;
+            object-fit: cover;
+            min-height: 450px;
+        }
+
+        .support-content h2 {
+            line-height: 1.2;
+            color: var(--color-texto-oscuro-fuerte);
+        }
+
+        .support-content .lead {
+            color: var(--color-texto-oscuro-suave) !important;
+        }
+
+        .contact-details p {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--color-texto-oscuro-fuerte);
+        }
+
+        .contact-details .bi {
+            color: var(--color-primario);
+        }
+
+
+        /* --- Eliminamos los estilos del newsletter anterior --- */
+        .newsletter-section {
+            display: none;
+        }
+
+        /* ESTILOS PARA EL NUEVO FOOTER */
+        .footer-dark {
+            background-color: var(--color-fondo-oscuro);
+            color: #adb5bd;
+        }
+
+            .footer-dark h5 {
+                color: #fff;
+                font-weight: 600;
+                margin-bottom: 1.5rem;
+            }
+
+            .footer-dark a {
+                color: #adb5bd;
+                text-decoration: none;
+                transition: color 0.2s ease-in-out;
+            }
+
+                .footer-dark a:hover {
+                    color: #fff;
+                    text-decoration: underline;
+                }
+
+            .footer-dark .social-icons a {
+                font-size: 1.5rem;
+                color: #adb5bd;
+            }
+
+                .footer-dark .social-icons a:hover {
+                    color: var(--color-primario);
+                }
+
+            .footer-dark .input-group .form-control {
+                background-color: #2c2c2e;
+                border-color: #424245;
+                color: #fff;
+            }
+
+                .footer-dark .input-group .form-control::placeholder {
+                    color: #adb5bd;
+                }
+                /* =======================================================
+                     ESTILOS PARA SECCIÓN DE SOPORTE (DISEÑO LIMPIO)
+                ======================================================= */
+
+        /* --- Contenedor Principal y Layout --- */
+        .support-container-pro {
+            position: relative;
+        }
+
+        .support-image-wrapper {
+            border-radius: 12px;
+            overflow: hidden; /* Asegura que la imagen respete los bordes redondeados */
+        }
+
+        /* --- La Tarjeta de Contenido Superpuesta --- */
+        .support-content-pro {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            /* La magia del layout: margen negativo para moverla sobre la imagen */
+            margin-left: -80px;
+            position: relative; /* Para asegurar que esté por encima */
+            z-index: 2;
+            border: 1px solid #dee2e6;
+        }
+
+        /* --- Tipografía y Acentos de Marca --- */
+        .support-content-pro h3 {
+            position: relative;
+            padding-bottom: 10px;
+            color: #212529;
+        }
+
+        /* Línea decorativa roja debajo del título */
+        .support-content-pro h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 4px;
+            background-color: #E53935; /* Color rojo de la marca */
+            border-radius: 2px;
+        }
+
+        .support-content-pro p {
+            color: #495057;
+            line-height: 1.7;
+        }
+
+        /* --- Detalles de Contacto Mejorados --- */
+        .contact-details-pro p {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 1.05rem;
+            font-weight: 500;
+        }
+
+        .contact-details-pro i {
+            color: #E53935; /* Íconos en el color de la marca */
+            font-size: 1.5rem;
+            margin-right: 15px;
+            width: 25px; /* Ancho fijo para alineación perfecta */
+        }
+
+
+        /*
+         * Estilos para la sección de Inventario Superior (TEMA OSCURO)
+        */
+
+        /* El estilo para .section-title-dark ya lo tienes de la propuesta anterior.
+           Si no lo has copiado, es este: */
+        .section-title-dark {
+            color: #fff;
+            font-weight: 600;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+            .section-title-dark::after {
+                content: '';
+                position: absolute;
+                display: block;
+                width: 80px;
+                height: 3px;
+                background-color: #dc3545; /* Color rojo de acento */
+                bottom: 0;
+                left: 50%;
+                transform: translateX(-50%); /* Centrar la línea */
+            }
+
+        /* Estilo para las tarjetas principales */
+        .feature-card-dark {
+            background-color: #1a1a1a; /* Un gris muy oscuro, para destacar sobre el fondo negro */
+            border: 1px solid #333;
+            border-radius: 0.5rem;
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem; /* Espacio entre los ítems dentro de la tarjeta */
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+            .feature-card-dark:hover {
+                transform: translateY(-5px);
+                border-color: #dc3545;
+            }
+
+        /* Cada uno de los puntos de valor dentro de la tarjeta */
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.25rem;
+        }
+
+        .feature-icon {
+            font-size: 2rem; /* Ícono más grande */
+            color: #dc3545; /* Ícono directamente en rojo, sin fondo */
+            margin-top: 5px;
+        }
+
+        .feature-item h5 {
+            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        /* estilo boton de editar */
+        .editable-container {
+            position: relative;
+            display: inline-block;
+        }
+
+            .editable-container.d-block {
+                display: block;
+            }
+
+        .btn-edit-content {
+            position: absolute;
+            top: 0;
+            right: 0;
+            transform: translateX(110%);
+            background: var(--color-primario);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.5;
+            transition: all 0.2s;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .btn-edit-content-inner {
+            right: -15px;
+        }
+
+        .editable-container:hover .btn-edit-content {
+            opacity: 1;
+            transform: translateX(110%) scale(1.1);
+        }
+
+        .modal-content {
+            background-color: #2c2c2e;
+            color: white;
+        }
+
+        .modal-header, .modal-footer {
+            border-color: #444;
+        }
+        /* =================================================================
+        ESTILOS AJUSTADOS PARA CTA FINAL (NEGRO, ROJO Y BLUR)
+        ================================================================== */
+
+        .section-final-cta {
+            position: relative;
+            padding: 100px 0;
+            color: #ffffff;
+            background-image: url('https://images.unsplash.com/photo-1497032628192-86f99d791b7e?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center center;
+            background-attachment: fixed;
+        }
+
+            /* --- CAPA DE SUPERPOSICIÓN (OVERLAY) CON BLUR --- */
+            .section-final-cta::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 1;
+                /* CAMBIO: Gradiente ajustado a la paleta Negro y Rojo */
+                background: linear-gradient(135deg, rgba(198, 40, 40, 0.6) 0%, rgba(17, 17, 17, 0.85) 100%);
+                /* CAMBIO: Efecto de desenfoque aplicado al fondo */
+                /* Puedes ajustar el valor en píxeles (e.g., 3px, 8px) para más o menos desenfoque */
+                -webkit-backdrop-filter: blur(5px); /* Para compatibilidad con Safari */
+                backdrop-filter: blur(5px);
+            }
+
+            /* Contenido del CTA */
+            .section-final-cta .container {
+                position: relative;
+                z-index: 2;
+            }
+
+            /* --- BOTÓN PRIMARIO ROJO --- */
+            .section-final-cta .btn-primary {
+                /* CAMBIO: Color de fondo y borde a rojo */
+                background-color: #E53935; /* Un rojo intenso y moderno */
+                border-color: #E53935;
+                font-weight: 600;
+                border-width: 2px;
+                transition: all 0.3s ease;
+            }
+
+                .section-final-cta .btn-primary:hover {
+                    /* CAMBIO: Hover a un rojo más oscuro y sombra roja */
+                    background-color: #C62828;
+                    border-color: #B71C1C;
+                    transform: translateY(-3px) scale(1.05);
+                    box-shadow: 0 10px 20px rgba(229, 57, 53, 0.3); /* Sombra con tonalidad roja */
+                }
+
+            /* --- BOTÓN SECUNDARIO (OUTLINE) --- */
+            .section-final-cta .btn-outline-light {
+                font-weight: 600;
+                border-width: 2px;
+                transition: all 0.3s ease;
+            }
+
+                .section-final-cta .btn-outline-light:hover {
+                    background-color: #ffffff;
+                    /* CAMBIO: El texto se vuelve rojo para mayor cohesión de marca */
+                    color: #C62828;
+                    transform: translateY(-3px);
+                }
+
+        .text-white-75 {
+            color: rgba(255, 255, 255, 0.75) !important;
+        }
+        /* =======================================================
+           ESTILOS PARA SECCIÓN DE PROMESA PREMIUM
+           ======================================================= */
+
+        /* --- 1. Contenedor Principal de la Sección --- */
+        .section-promise-pro {
+            position: relative;
+            padding: 80px 0;
+            color: #ffffff;
+            /* Usa la misma imagen o una similar a la del CTA para coherencia */
+            background-image: url('https://images.unsplash.com/photo-1497032628192-86f99d791b7e?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center center;
+            background-attachment: fixed; /* Efecto Parallax */
+        }
+
+            /* --- Capa de Overlay con Gradiente y Difuminado --- */
+            .section-promise-pro::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 1;
+                /* Mismo gradiente negro/rojo para mantener la identidad de marca */
+                background: linear-gradient(135deg, rgba(198, 40, 40, 0.75) 0%, rgba(17, 17, 17, 0.9) 100%);
+                /* Efecto de desenfoque del fondo */
+                -webkit-backdrop-filter: blur(8px);
+                backdrop-filter: blur(8px);
+            }
+
+            /* --- Contenido de la sección (título, tarjetas, etc.) --- */
+            .section-promise-pro .container {
+                position: relative;
+                z-index: 2; /* Posiciona el contenido por encima del overlay */
+            }
+
+            .section-promise-pro .section-title {
+                color: #ffffff;
+            }
+
+        /* --- 2. Diseño de las Tarjetas de Promesa ("Glassmorphism") --- */
+        .promise-card-pro {
+            background-color: rgba(255, 255, 255, 0.07); /* Fondo traslúcido tipo cristal */
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 30px 25px;
+            text-align: center;
+            transition: all 0.3s ease-in-out;
+        }
+
+            .promise-card-pro:hover {
+                transform: translateY(-10px); /* Efecto de "levantar" la tarjeta */
+                background-color: rgba(255, 255, 255, 0.15);
+                border-color: rgba(255, 255, 255, 0.3);
+            }
+
+            .promise-card-pro .promise-icon {
+                display: inline-flex;
+                justify-content: center;
+                align-items: center;
+                width: 65px;
+                height: 65px;
+                /* Fondo rojo para el ícono, creando un punto focal */
+                background-color: #E53935;
+                color: #ffffff;
+                font-size: 2rem;
+                border-radius: 50%;
+                box-shadow: 0 5px 15px rgba(229, 57, 53, 0.3);
+            }
+
+            .promise-card-pro h4 {
+                font-weight: 600;
+                color: #ffffff;
+            }
+
+            .promise-card-pro p {
+                color: rgba(255, 255, 255, 0.8);
+                font-size: 0.95rem;
+                line-height: 1.6;
+            }
+        /* =======================================================
+           ESTILOS PARA SECCIÓN DE BLOG PREMIUM
+           ======================================================= */
+
+        /* --- 1. Contenedor Principal de la Sección --- */
+        .section-blog-pro {
+            position: relative;
+            padding: 80px 0;
+            /* Consistencia con el resto de las secciones premium */
+            background-image: url('https://images.unsplash.com/photo-1497032628192-86f99d791b7e?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center center;
+            background-attachment: fixed;
+        }
+
+            /* --- Capa de Overlay con Gradiente y Difuminado --- */
+            .section-blog-pro::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 1;
+                background: linear-gradient(135deg, rgba(198, 40, 40, 0.75) 0%, rgba(17, 17, 17, 0.9) 100%);
+                -webkit-backdrop-filter: blur(8px);
+                backdrop-filter: blur(8px);
+            }
+
+            /* --- Contenido de la sección (título, tarjetas, etc.) --- */
+            .section-blog-pro .container {
+                position: relative;
+                z-index: 2;
+            }
+
+            .section-blog-pro .section-title {
+                color: #ffffff;
+            }
+
+        /* --- 2. Diseño de las Tarjetas de Blog (Sólidas y Elevadas) --- */
+        .blog-card-pro {
+            display: flex;
+            flex-direction: column;
+            background-color: #212529; /* Fondo oscuro sólido para la tarjeta */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden; /* Asegura que la imagen no se salga de los bordes redondeados */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease-in-out;
+        }
+
+            .blog-card-pro:hover {
+                transform: translateY(-12px); /* Efecto de "lift" más pronunciado */
+                box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+            }
+
+        .blog-card-img-container {
+            overflow: hidden;
+            height: 200px;
+        }
+
+            .blog-card-img-container img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover; /* Asegura que la imagen cubra el área sin deformarse */
+                transition: transform 0.3s ease;
+            }
+
+        .blog-card-pro:hover .card-img-top {
+            transform: scale(1.08); /* Zoom a la imagen en hover */
+        }
+
+        .blog-card-pro .card-body {
+            flex-grow: 1; /* El cuerpo de la tarjeta crece para llenar el espacio */
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .blog-card-pro .card-title {
+            color: #ffffff;
+        }
+
+        .blog-card-pro .card-footer {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* --- Botón "Leer más" con el color de la marca --- */
+        .btn-brand-red {
+            background-color: #E53935;
+            color: #ffffff;
+            border: none;
+            font-weight: 500;
+        }
+
+            .btn-brand-red:hover {
+                background-color: #C62828;
+                color: #ffffff;
+            }
+
+            .btn-brand-red i {
+                transition: transform 0.2s ease-out;
+            }
+
+            .btn-brand-red:hover i {
+                transform: translateX(4px);
+            }
+        /* ... (Estilos anteriores sin cambios) ... */
+
+        /* =================================================================
+               NUEVOS ESTILOS PARA LA SECCIÓN DE UBICACIÓN
+               ================================================================= */
+        .location-section {
+            background-color: var(--color-primario);
+            color: #fff;
+            padding: 6rem 0;
+        }
+
+            .location-section .location-title {
+                color: #fff;
+                font-weight: 800;
+                font-size: 2.8rem;
+            }
+
+            .location-section .location-text {
+                color: rgba(255, 255, 255, 0.85);
+                font-size: 1.1rem;
+            }
+
+            .location-section .location-details p {
+                font-size: 1.1rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .location-section .location-details .bi {
+                vertical-align: middle;
+                margin-right: 0.5rem;
+            }
+
+        .map-wrapper {
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            height: 400px;
+        }
+
+            .map-wrapper iframe {
+                border: 0;
+                height: 100%;
+                width: 100%;
+                filter: grayscale(100%) contrast(1.2) opacity(0.8);
+                transition: filter 0.3s ease;
+            }
+
+            .map-wrapper:hover iframe {
+                filter: grayscale(0%) contrast(1) opacity(1);
+            }
+    </style>
 }

@@ -1,0 +1,25 @@
+﻿@model Aplicacion.Application.ViewModels.ProductoViewModel
+@{
+    ViewData["Title"] = "Eliminar Producto";
+}
+
+<h1 class="h2 text-danger">@ViewData["Title"]</h1>
+<h3>¿Estás seguro de que quieres eliminar este producto?</h3>
+<p class="text-warning">Esta acción no se puede deshacer.</p>
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">Nombre</dt>
+        <dd class="col-sm-9">@Model.Nombre</dd>
+        <dt class="col-sm-3">Categoría</dt>
+        <dd class="col-sm-9">@Model.NombreCategoria</dd>
+        <dt class="col-sm-3">Precio</dt>
+        <dd class="col-sm-9">@Model.Precio.ToString("C")</dd>
+    </dl>
+
+    <form asp-action="Eliminar" method="post">
+        <input type="hidden" asp-for="Id" />
+        <input type="submit" value="Sí, Eliminar Producto" class="btn btn-danger" />
+        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>

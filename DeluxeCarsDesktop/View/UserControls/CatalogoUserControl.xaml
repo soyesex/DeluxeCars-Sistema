@@ -18,11 +18,11 @@
     <Grid Margin="5">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="31*"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="154*"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Margin="0,10,0,20">
+        <Grid Grid.Row="0" Margin="0,10,0,30">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
@@ -72,7 +72,7 @@
 
         </Grid>
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,20">
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,30">
             <Button Content="Ajuste Manual"
                 Style="{StaticResource ElegantShadowGhostButton}"
                 Tag="{StaticResource Brush.Menu.YellowGold}"
@@ -170,9 +170,9 @@
         </StackPanel>-->
 
 
-        <Border Grid.Row="3" CornerRadius="10" 
+        <Border Margin="0 0 0 30" Grid.Row="3" CornerRadius="10" 
                 Background="{StaticResource Brush.Brand.CharcoalLight}" 
-                 BorderBrush="{StaticResource Brush.Brand.NavyDark}" BorderThickness="1.2">
+                 BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1.2">
             <DataGrid ItemsSource="{Binding Productos}"
                       SelectedItem="{Binding ProductoSeleccionado}"
                       Style="{StaticResource AppDataGridStyle}"
@@ -190,9 +190,12 @@
                                             <StackPanel Orientation="Horizontal" Margin="10">
                                                 <Image Source="{Binding Producto.ImagenUrl, Converter={StaticResource ImagePathConverter}}" Width="100" Height="100" Margin="0,0,15,0" />
                                                 <StackPanel>
-                                                    <TextBlock Text="{Binding Nombre}" FontWeight="SemiBold" FontFamily="{StaticResource Font.Poppins}" FontSize="14" Foreground="White"/>
-                                                    <TextBlock Text="{Binding OEM}" FontFamily="{StaticResource Font.SourceSans3}" Foreground="LightGray"/>
-                                                    <TextBlock Text="{Binding Producto.Descripcion}" TextWrapping="Wrap" FontFamily="Montserrat" MaxWidth="250" Margin="0,10,0,0" Foreground="White"/>
+                                                    <TextBlock Text="{Binding Nombre}" FontFamily="{StaticResource Font.SourceSans3}" FontWeight="Medium"
+                                                                FontSize="16" Foreground="{StaticResource Brush.Brand.NavyDark}"/>
+                                                    <TextBlock Text="{Binding OEM}" FontFamily="{StaticResource Font.SourceSans3}" FontWeight="Medium"
+                                                                FontSize="16" Foreground="{StaticResource Brush.Brand.GraySteel}"/>
+                                                    <TextBlock Text="{Binding Producto.Descripcion}" TextWrapping="Wrap" FontFamily="{StaticResource Font.SourceSans3}" FontWeight="Normal"
+                                                                FontSize="16" Foreground="White" MaxWidth="250" Margin="0,10,0,0"/>
                                                 </StackPanel>
                                             </StackPanel>
                                         </ToolTip>
@@ -222,7 +225,7 @@
                 </DataGrid.RowStyle>
 
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50" SortMemberPath="Id"/>
+                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="60" SortMemberPath="Id"/>
                     <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="auto" SortMemberPath="Nombre"/>
                     <DataGridTextColumn Header="OEM" Binding="{Binding OEM}" Width="120" SortMemberPath="OEM"/>
                     <DataGridTextColumn Header="Categoría" Binding="{Binding CategoriaNombre}" Width="*" SortMemberPath="CategoriaNombre"/>

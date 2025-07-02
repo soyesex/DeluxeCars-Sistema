@@ -1,49 +1,144 @@
-﻿@using Aplicacion.Models.ViewModels
-@model LoginViewModel
+﻿@model Aplicacion.Application.ViewModels.RegisterViewModel
 @{
     ViewData["Title"] = "Registro";
-    Layout = null;
+    Layout = null; // Esta página no usará el layout principal
 }
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"]</title>
+    <title>@ViewData["Title"] - Deluxe Cars</title>
+
+    <!-- Librerías de Estilos -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Estilos Personalizados (Compartidos con el Login) -->
+    <style>
+        :root {
+            --color-primario: #d90429;
+            --color-texto-principal: #f5f5f7;
+            --color-texto-secundario: #a8a8a8;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .auth-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-image: linear-gradient(rgba(18, 18, 18, 0.85), rgba(18, 18, 18, 0.95)), url('/images/hero-main-bg.jpg');
+            background-size: cover;
+            background-position: center;
+            padding: 2rem;
+        }
+
+        .auth-card {
+            max-width: 450px;
+            width: 100%;
+            background: rgba(30, 30, 30, 0.75);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            color: var(--color-texto-principal);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+
+        .auth-card h2 {
+            font-weight: 800;
+        }
+
+        .auth-card .form-floating > .form-control {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+        .auth-card .form-floating > .form-control:focus {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: var(--color-primario);
+            box-shadow: none;
+        }
+        .auth-card .form-floating > label {
+            color: var(--color-texto-secundario);
+        }
+
+        .auth-card .btn-primary {
+            background-color: var(--color-primario);
+            border: none;
+            font-weight: 600;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease;
+        }
+        .auth-card .btn-primary:hover {
+            background-color: #b80322;
+        }
+
+        .auth-card .small-links a {
+            color: var(--color-texto-secundario);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        .auth-card .small-links a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-    <h1>@ViewData["Title"]</h1>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="text-center mb-4">
+                <h2 class="fw-bold">Crea tu Cuenta</h2>
+                <p class="text-white-50">Únete a la comunidad de Deluxe Cars</p>
+            </div>
 
-    <div class="row">
-        <div class="col-md-4">
-            <form method="post">
-                <h2>Crea tu nueva cuenta</h2>
-                <hr />
-                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-                <div class="form-floating mb-3">
-                    <input asp-for="Email" class="form-control" />
-                    <label asp-for="Email">Email</label>
-                    <span asp-validation-for="Email" class="text-danger"></span>
-                </div>
-                <div class="form-floating mb-3">
-                    <input asp-for="Password" class="form-control"/>
-                    <label asp-for="Password">Password</label>
-                    <span asp-validation-for="Password" class="text-danger"></span>
-                </div>
-                @*  <div class="form-floating mb-3">
-                <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="ConfirmPassword">Confirm Password</label>
-                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-                </div> *@
-                <button type="submit" class="w-100 btn btn-lg btn-primary">Registrame</button>
-            </form>
+            <section>
+                <form asp-controller="Account" asp-action="Register" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+
+                    <div class="form-floating mb-3">
+                        <input asp-for="Email" class="form-control" autocomplete="email" aria-required="true" placeholder="nombre@ejemplo.com" />
+                        <label asp-for="Email" class="form-label"></label>
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input asp-for="Password" class="form-control" type="password" autocomplete="new-password" aria-required="true" placeholder="contraseña" />
+                        <label asp-for="Password" class="form-label"></label>
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input asp-for="ConfirmPassword" class="form-control" type="password" autocomplete="new-password" aria-required="true" placeholder="confirmar contraseña" />
+                        <label asp-for="ConfirmPassword" class="form-label"></label>
+                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">Registrarme</button>
+                    </div>
+
+                    <div class="text-center mt-4 small-links">
+                        <a asp-action="Login" asp-controller="Account">¿Ya tienes una cuenta? Inicia Sesión</a>
+                    </div>
+                </form>
+            </section>
         </div>
     </div>
-</body>
-<</html>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+</body>
+</html>

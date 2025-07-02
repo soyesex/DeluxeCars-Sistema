@@ -1,0 +1,82 @@
+﻿@{
+    ViewData["Title"] = "Orden Confirmada";
+    var ordenId = ViewBag.OrdenId;
+}
+
+<div class="container my-5 py-5 text-center">
+    <div class="row">
+        <div class="col-lg-6 mx-auto">
+            <div class="confirmation-card" data-aos="zoom-in">
+
+                <div class="confirmation-icon">
+                    <i class="bi bi-patch-check-fill"></i>
+                </div>
+
+                <h1 class="display-5 fw-bold mt-4">¡Gracias por tu compra!</h1>
+
+                <p class="lead text-muted mt-3">
+                    Tu orden ha sido procesada exitosamente.
+                </p>
+
+                <div class="order-number-box">
+                    <span>Tu número de orden es:</span>
+                    <strong>#@ordenId</strong>
+                </div>
+
+                <p class="mt-4">
+                    Hemos enviado un correo electrónico de confirmación con los detalles de tu pedido. Estamos preparando tus productos para el envío y te notificaremos una vez que estén en camino.
+                </p>
+
+                <div class="mt-5">
+                    <a asp-controller="Catalogo" asp-action="Index" class="btn btn-brand-accent btn-lg">Seguir Comprando</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    /* =======================================================
+       ESTILOS PARA PÁGINA DE CONFIRMACIÓN DE ORDEN
+       ======================================================= */
+
+    .confirmation-card {
+        background-color: #ffffff;
+        padding: 3rem;
+        border-radius: 12px;
+        border: 1px solid var(--color-borde-claro, #dee2e6);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+    }
+
+    .confirmation-icon {
+        font-size: 5rem;
+        /* Usamos un color verde para éxito, es un estándar de UX universal */
+        color: #198754;
+    }
+
+    .confirmation-card h1 {
+        color: var(--color-texto-sobre-claro, #212529);
+    }
+
+    .order-number-box {
+        background-color: #f8f9fa;
+        border: 1px dashed #ced4da;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 2rem;
+    }
+
+        .order-number-box span {
+            display: block;
+            color: var(--color-texto-suave, #495057);
+        }
+
+        .order-number-box strong {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-texto-sobre-claro, #212529);
+            letter-spacing: 1px;
+        }
+
+    /* El botón usará la clase .btn-brand-accent que ya hemos definido con el color rojo */
+</style>

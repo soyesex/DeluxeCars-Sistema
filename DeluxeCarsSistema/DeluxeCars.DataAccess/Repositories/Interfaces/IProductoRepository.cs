@@ -18,5 +18,7 @@ namespace DeluxeCars.DataAccess.Repositories.Interfaces
         Task<IEnumerable<Producto>> GetAssociatedProductsAsync(int proveedorId);
         Task<IEnumerable<Producto>> GetUnassociatedProductsAsync(int proveedorId);
         Task<IEnumerable<ProductoStockDto>> GetProductosConStockPositivoAsync();
+        Task<int> CountAllAsync();
+        Task<IEnumerable<ProductoStockDto>> SearchPublicCatalogAsync(string categoria, string orden);
     }
 }

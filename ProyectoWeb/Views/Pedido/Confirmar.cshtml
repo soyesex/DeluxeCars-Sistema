@@ -1,5 +1,4 @@
-﻿@using Aplicacion.Models.ViewModels
-@model List<ProductoViewModel>
+﻿@model List<Aplicacion.Application.ViewModels.ProductoViewModel>
 @{
     ViewData["Title"] = "Resumen del Pedido";
 }
@@ -66,7 +65,7 @@
                 mensaje += `\nTotal del Pedido: $${total.toFixed(2)}`;
 
                 // Número de WhatsApp del dueño (cambiar por el real)
-                let numeroWhatsApp = "573137591775";
+                let numeroWhatsApp = "573174383064";
                 let url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
 
                 document.getElementById("whatsapp-btn").href = url;

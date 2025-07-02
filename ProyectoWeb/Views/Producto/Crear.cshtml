@@ -1,0 +1,77 @@
+﻿@model Aplicacion.Application.ViewModels.CrearProductoViewModel
+@{
+    ViewData["Title"] = "Crear Nuevo Producto";
+}
+
+<div class="container-fluid mt-4">
+    <h1 class="h2">@ViewData["Title"]</h1>
+    <p class="text-muted">Rellena los detalles del nuevo repuesto para añadirlo a tu inventario.</p>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card order-details-card p-4">
+                <form asp-action="Crear" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Nombre" class="form-label"></label>
+                        <input asp-for="Nombre" class="form-control" />
+                        <span asp-validation-for="Nombre" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="OEM" class="form-label"></label>
+                            <input asp-for="OEM" class="form-control" />
+                            <span asp-validation-for="OEM" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="IdCategoria" class="form-label"></label>
+                            <select asp-for="IdCategoria" class="form-select" asp-items="ViewBag.Categorias">
+                                <option value="">-- Seleccione una categoría --</option>
+                            </select>
+                            <span asp-validation-for="IdCategoria" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Precio" class="form-label"></label>
+                            <input asp-for="Precio" class="form-control" type="number" step="0.01" />
+                            <span asp-validation-for="Precio" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Stock" class="form-label"></label>
+                            <input asp-for="Stock" class="form-control" type="number" />
+                            <span asp-validation-for="Stock" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Descripcion" class="form-label"></label>
+                        <textarea asp-for="Descripcion" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="Descripcion" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ImagenUrl" class="form-label"></label>
+                        <input asp-for="ImagenUrl" class="form-control" placeholder="Ej: nombre-de-imagen.png" />
+                        <span asp-validation-for="ImagenUrl" class="text-danger"></span>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">Crear Producto</button>
+                        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

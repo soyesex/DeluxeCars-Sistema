@@ -21,15 +21,16 @@
                      Width="300"/>
             <Button Content="Nueva Factura"
                     Command="{Binding NuevaFacturaCommand}"
-                    Style="{StaticResource DarkActionButtonStyle}" 
+                    Style="{StaticResource ElegantShadowGhostButton}"
+                    Tag="{StaticResource Brush.Menu.GreenForest}"
                     Margin="20,0,10,0"/>
         </StackPanel>
 
-        <Border Grid.Row="1" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" 
-                BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
+        <Border Grid.Row="1" CornerRadius="10" Background="{StaticResource Brush.Brand.CharcoalLight}" 
+ BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1.2">
             <DataGrid ItemsSource="{Binding Facturas}" 
                       SelectedItem="{Binding FacturaSeleccionada}"
-                      Style="{StaticResource ElegantDataGridStyle}"
+                      Style="{StaticResource AppDataGridStyle}"
                       AutoGenerateColumns="False" 
                       IsReadOnly="True">
                 <DataGrid.Columns>

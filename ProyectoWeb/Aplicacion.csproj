@@ -30,4 +30,12 @@
     <ProjectReference Include="..\DeluxeCarsSistema\DeluxeCarsEntities\DeluxeCarsEntities.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\css\img\baterias\" />
+    <Folder Include="wwwroot\css\img\encendido\" />
+    <Folder Include="wwwroot\css\img\motor\" />
+    <Folder Include="wwwroot\css\img\suspension\" />
+    <Folder Include="wwwroot\css\img\transmision\" />
+  </ItemGroup>
+
 </Project>

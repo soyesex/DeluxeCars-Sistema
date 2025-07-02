@@ -1,94 +1,265 @@
-html {
-  font-size: 14px;
+/*  MODO OSCURO PROFESIONAL PARA DELUXE CARS */
+
+/* --- 1. Definición de Variables Globales y Colores Base --- */
+:root {
+    --color-primario: #d90429; /* Rojo de la marca */
+    --color-fondo-oscuro: #121212; /* Un negro elegante, no puro */
+    --color-superficie-oscura: #1e1e1e; /* Para tarjetas y elementos elevados */
+    --color-borde-oscuro: #333333;
+    --color-texto-principal: #f5f5f7; /* Blanco ligeramente grisáceo */
+    --color-texto-secundario: #a8a8a8; /* Gris para texto menos importante */
+    --color-texto-oscuro-fuerte: #212529; /* Para títulos en tarjetas claras */
+    --color-texto-oscuro-suave: #6c757d; /* Para párrafos en tarjetas claras */
 }
 
-* {
+/* --- 2. Estilos Globales para el Body --- */
+body {
+    background-color: var(--color-fondo-oscuro);
+    color: var(--color-texto-secundario);
     font-family: 'Poppins', sans-serif;
 }
 
-header {
-    box-shadow: none !important;
+/* --- 3. Tipografía y Encabezados --- */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--color-texto-principal);
+    font-weight: 700;
 }
 
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+a {
+    color: var(--color-primario);
+    text-decoration: none;
+    transition: color 0.2s ease-in-out;
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
-
-body {
-    padding-top:70px;
-    font-family: 'Poppins', sans-serif; /* Añadido */
-}
-
-@media (max-width: 576px) {
-    .navbar-nav .nav-link {
-        padding-top: 0.5rem;
-        padding-bottom: 0.5rem;
+    a:hover {
+        color: #ff4d6d;
     }
+/*  NUEVOS ESTILOS Y CORRECCIONES PARA TABLAS DEL ADMIN*/
+
+.table-dark-custom {
+    background-color: var(--color-superficie-oscura);
+    color: var(--color-texto-secundario); /* Color de texto por defecto para la tabla */
 }
 
-.nav-link {
-    font-size: 1rem; /* Tamaño legible */
+    .table-dark-custom thead th {
+        color: var(--color-texto-principal);
+        border-bottom: 2px solid var(--color-borde-oscuro);
+        font-weight: 600;
+    }
+
+    .table-dark-custom tbody tr {
+        border-top: 1px solid var(--color-borde-oscuro);
+    }
+
+    .table-dark-custom tbody td {
+        vertical-align: middle; /* Alinea el contenido verticalmente */
+    }
+    /* Asegura que el texto en negrita sea del color principal */
+    .table-dark-custom strong {
+        color: var(--color-texto-principal);
+    }
+
+.table.table-dark-custom a {
+    color: var(--color-texto-secundario); /* Corrige el color de los enlaces dentro de la tabla si es necesario */
 }
 
-/* Nuevos estilos para el navbar personalizado */
-.custom-navbar {
-    position: fixed;
-    top: 0;
-    left: 0;
+
+/* --- 4. Estilos para Componentes de Bootstrap Genéricos --- */
+.card {
+    background-color: var(--color-superficie-oscura);
+    border: 1px solid var(--color-borde-oscuro);
+}
+
+.card-header, .card-footer {
+    background-color: #252525;
+    border-color: var(--color-borde-oscuro);
+}
+
+.list-group-item {
+    background-color: var(--color-superficie-oscura);
+    border-color: var(--color-borde-oscuro);
+    color: var(--color-texto-secundario);
+}
+
+    .list-group-item strong {
+        color: var(--color-texto-principal);
+    }
+
+.accordion-item, .accordion-button {
+    background-color: var(--color-superficie-oscura);
+    border-color: var(--color-borde-oscuro);
+    color: var(--color-texto-principal);
+}
+
+    .accordion-button:not(.collapsed) {
+        background-color: var(--color-primario);
+        color: #fff;
+    }
+
+.accordion-body {
+    color: var(--color-texto-secundario);
+}
+
+.footer.text-muted {
+    background-color: var(--color-superficie-oscura);
+    color: var(--color-texto-secundario) !important;
+}
+
+/* --- 5. Estilos Específicos para Secciones y Tarjetas --- */
+
+.bg-light {
+    background-color: var(--color-fondo-oscuro) !important;
+}
+
+.text-muted {
+    color: var(--color-texto-secundario) !important;
+}
+
+
+/* --- A. Tarjetas Claras sobre Fondo Oscuro (Index) --- */
+.promise-card,
+.testimonial-card-v2 {
+    background-color: #fff !important;
+    color: var(--color-texto-oscuro-suave) !important;
+    border: 1px solid #dee2e6;
+}
+
+    .promise-card:hover,
+    .testimonial-card-v2:hover {
+        border-color: var(--color-primario);
+    }
+    /* Títulos dentro de las tarjetas claras */
+    .promise-card h4,
+    .testimonial-card-v2 .testimonial-author {
+        color: var(--color-texto-oscuro-fuerte) !important;
+    }
+
+    .testimonial-card-v2 .testimonial-author {
+        color: var(--color-primario) !important; /* El autor mantiene el color de la marca */
+    }
+    /* Párrafos dentro de las tarjetas claras */
+    .promise-card p,
+    .testimonial-card-v2 .testimonial-text,
+    .testimonial-card-v2 .testimonial-location {
+        color: var(--color-texto-oscuro-suave) !important;
+    }
+
+/* --- B. Formulario de Contacto --- */
+.contact-form-box {
+    background-color: #fff !important; /* Fondo blanco para la caja del formulario */
+    border: 1px solid var(--color-borde-oscuro);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    padding: 2.5rem;
+    border-radius: 0.5rem;
+}
+    /* Títulos y etiquetas dentro de la caja blanca del formulario */
+    .contact-form-box h4,
+    .contact-form-box label {
+        color: var(--color-texto-oscuro-fuerte) !important;
+    }
+    /* Campos de texto del formulario */
+    .contact-form-box .form-control {
+        background-color: #f8f9fa; /* Fondo ligeramente gris para los inputs */
+        color: var(--color-texto-oscuro-fuerte); /* Texto que se escribe es negro */
+        border: 1px solid #ced4da;
+    }
+
+        .contact-form-box .form-control:focus {
+            background-color: #fff;
+            border-color: var(--color-primario);
+        }
+
+/* --- C. Resto de Componentes de Contacto --- */
+.contact-info-box {
+    background-color: var(--color-superficie-oscura);
+    border: 1px solid var(--color-borde-oscuro);
+}
+
+    .contact-info-box h3, .contact-info-box span, .contact-info-box p {
+        color: var(--color-texto-principal);
+    }
+
+.map-container iframe {
+    filter: invert(90%) hue-rotate(180deg);
+}
+
+.department-card {
+    background-color: var(--color-superficie-oscura);
+    border: 1px solid var(--color-borde-oscuro);
+}
+
+    .department-card .icon-circle {
+        background-color: #2c2c2e;
+    }
+/* ... (ESTILOS ANTERIORES) ... */
+
+/* --- Contenedor principal de la página de Login --- */
+.login-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-image: linear-gradient(rgba(18, 18, 18, 0.8), rgba(18, 18, 18, 0.9)), url('/images/hero-main-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    padding: 2rem;
+}
+
+/* --- Tarjeta de Login con efecto de vidrio --- */
+.login-card {
+    max-width: 450px;
     width: 100%;
-    padding: 0 80px;
-    height: 80px;
-    background-color: #fff;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    z-index: 1000;
+    background: rgba(30, 30, 30, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1.5rem;
+    padding: 2.5rem;
+    color: var(--color-texto-principal);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
 }
 
-.navbar-brand.logo {
-    font-size: 33px;
-    color: #0f2182;
-    font-weight: 600;
-}
-
-.links a:not(:last-child) {
-    margin-right: 20px;
-}
-
-.login a {
-    padding: 8px 14px;
-    background-color: transparent;
-}
-
-.login a.signup {
-    background-color: #000;
-    color: #fff;
-    border-radius: 4px;
-    margin-left: 14px;
-}
-
-@media (max-width: 576px) {
-    .custom-navbar {
-        padding: 0 15px;
+    .login-card h2 {
+        font-weight: 800;
     }
-}
 
-/* Ajuste de margen superior para el contenido para que no quede debajo del navbar fijo */
-.content {
-    margin-top: 80px; /* Asegura que el contenido no se sobreponga al navbar */
-}
+    /* --- Formularios dentro de la tarjeta de Login --- */
+    .login-card .form-floating > .form-control {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.2);
+        color: #fff;
+    }
 
-/* Si ya tienes un contenido principal que ocupa toda la altura de la pantalla, asegúrate de que tenga espacio suficiente */
-.main-content {
-    margin-top: 80px; /* Esto puede ajustarse según el tamaño de tu navbar */
-}
+        .login-card .form-floating > .form-control:focus {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: var(--color-primario);
+            box-shadow: none;
+        }
+
+    .login-card .form-floating > label {
+        color: var(--color-texto-secundario);
+    }
+
+    .login-card .form-check-label {
+        color: var(--color-texto-secundario);
+    }
+
+    /* --- Botón de Ingresar --- */
+    .login-card .btn-primary {
+        background-color: var(--color-primario);
+        border: none;
+        font-weight: 600;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+    }
+
+    /* --- Enlaces de "Olvidé mi contraseña" y "Registrarse" --- */
+    .login-card .small-links a {
+        color: var(--color-texto-secundario);
+        text-decoration: none;
+    }
+
+        .login-card .small-links a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }

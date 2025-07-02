@@ -1,0 +1,64 @@
+﻿@model IEnumerable<Aplicacion.Application.ViewModels.ProductoViewModel>
+
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4">
+    @if (Model != null && Model.Any())
+    {
+        @foreach (var producto in Model)
+        {
+            <div class="col">
+                <div class="card h-100 product-card">
+
+                    @* Wrapper para la imagen, para un mejor control del estilo *@
+                    <div class="product-card-img-wrapper">
+                        <img src="@producto.ImagenUrl" class="product-card-img" alt="@producto.Nombre" onerror="this.onerror=null;this.src='/images/placeholder.png';">
+                    </div>
+
+                    <div class="card-body">
+                        <h5 class="card-title">@producto.Nombre</h5>
+
+                        @* Aquí usamos la propiedad correcta de tu ViewModel, ej: OriginalEquipmentManufacture *@
+                        <p class="card-text oem">OEM: @producto.OriginalEquipmentManufacture</p>
+
+                        @* Descripción del producto *@
+                        <p class="card-text description">@producto.Descripcion</p>
+
+                        @* Sección de precio y stock, alineada al final *@
+                        <div class="d-flex justify-content-between align-items-center mt-auto">
+                            <span class="price">$@producto.Precio.ToString("N2")</span>
+                            @{
+                                var stockClass = producto.Stock > 20 ? "stock-ok" : (producto.Stock > 0 ? "stock-low" : "stock-out");
+                                var stockText = producto.Stock > 0 ? $"Disponible ({producto.Stock})" : "Agotado";
+                            }
+                            <span class="badge rounded-pill @stockClass stock-badge">@stockText</span>
+                        </div>
+                    </div>
+
+                    @* Pie de la tarjeta con los botones de acción *@
+                    <div class="card-footer">
+                        <div class="d-grid gap-2 d-flex justify-content-end">
+
+                            @* Botón de "Editar" para el Administrador *@
+                            <a asp-controller="Producto" asp-action="Editar" asp-route-id="@producto.Id" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-pencil"></i> Editar
+                            </a>
+
+                            @* Botón de "Ver Detalles" para el Cliente, que apunta al HomeController *@
+                            <a asp-controller="Home" asp-action="Detalles" asp-route-id="@producto.Id" class="btn btn-sm btn-primary" style="background-color: var(--color-primario); border-color: var(--color-primario);">
+                                <i class="bi bi-eye"></i> Ver Detalles
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        @* Mensaje que se muestra si no hay productos que mostrar *@
+        <div class="col-12">
+            <div class="alert alert-warning text-center" role="alert">
+                No se encontraron productos que coincidan con los criterios de búsqueda.
+            </div>
+        </div>
+    }
+</div>

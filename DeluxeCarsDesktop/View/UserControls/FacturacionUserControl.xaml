@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="1000">
@@ -23,48 +24,19 @@
                     <ColumnDefinition Width="250"/>
                 </Grid.ColumnDefinitions>
                 <Label Content="Cliente:" Style="{StaticResource DarkLableForm}"/>
-                
-                <Grid Grid.Column="1">
-                    <TextBox x:Name="ClientSearchTextBox" 
-             Text="{Binding TextoBusquedaCliente, UpdateSourceTrigger=PropertyChanged}"
-             Style="{StaticResource DarkInputControlStyle}" />
 
-                    <Popup IsOpen="{Binding IsClientPopupOpen, Mode=TwoWay}" 
-           PlacementTarget="{Binding ElementName=ClientSearchTextBox}"
-           StaysOpen="False">
-                        <Border Background="#2D3748" BorderBrush="#4A5568" BorderThickness="1" CornerRadius="5">
-                            <ListBox ItemsSource="{Binding ResultadosBusquedaCliente}"
-                     SelectedItem="{Binding ClienteSeleccionado, Mode=TwoWay}"
-                     DisplayMemberPath="Nombre"
-                     MaxHeight="200"
-                     BorderThickness="0">
-                                <ListBox.ItemContainerStyle>
-                                    <Style TargetType="ListBoxItem">
-                                        <Setter Property="Padding" Value="5"/>
-                                        <Setter Property="Foreground" Value="White"/>
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="ListBoxItem">
-                                                    <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter />
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsSelected" Value="True">
-                                                            <Setter Property="Background" Value="#4A5568"/>
-                                                        </Trigger>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="#4A5568"/>
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </ListBox.ItemContainerStyle>
-                            </ListBox>
-                        </Border>
-                    </Popup>
-                </Grid>
+                <ComboBox Grid.Column="1" 
+                          ItemsSource="{Binding ClientesDisponibles}"
+                          SelectedItem="{Binding ClienteSeleccionado}"
+                          DisplayMemberPath="Nombre"
+                          Style="{DynamicResource MaterialDesignComboBox}"
+                          Foreground="{StaticResource Text.Secondary}"
+                          FontFamily="{StaticResource Font.SourceSans3}"
+                          FontWeight="Medium"
+                          FontSize="16"
+                          BorderBrush="{DynamicResource Background.Disabled}"
+                          materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource Brush.Menu.BlueCornflower}"
+                          Margin="5"/>
                 <Label Grid.Column="2" Content="Método de Pago:" Style="{StaticResource DarkLableForm}" Margin="10,0,0,0"/>
                 <ComboBox Grid.Column="3" ItemsSource="{Binding MetodosDePago}"
                           SelectedItem="{Binding MetodoPagoSeleccionado}"
@@ -80,42 +52,56 @@
                 <ColumnDefinition Width="80"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Label Grid.Column="0" Content="Buscar Producto/Servicio:" Style="{StaticResource DarkLableForm}"/>
+            <Label Grid.Column="0" Content="Buscar Producto:" Style="{StaticResource DarkLableForm}"/>
+
             <Grid Grid.Column="1">
                 <TextBox x:Name="ProductSearchTextBox" 
              Text="{Binding TextoBusquedaItem, UpdateSourceTrigger=PropertyChanged}"
              Style="{StaticResource DarkInputControlStyle}" />
 
-                <Popup IsOpen="{Binding IsProductPopupOpen, Mode=TwoWay}" 
+                <Popup IsOpen="{Binding IsProductPopupOpen, Mode=TwoWay}"
            PlacementTarget="{Binding ElementName=ProductSearchTextBox}"
-           StaysOpen="False">
-                    <Border Background="#2D3748" BorderBrush="#4A5568" BorderThickness="1" CornerRadius="5">
+           StaysOpen="False"
+           AllowsTransparency="True">
+                    <Border Background="#2D3748" BorderBrush="#4A5568" BorderThickness="1" CornerRadius="5" MinWidth="{Binding ActualWidth, ElementName=ProductSearchTextBox}">
                         <ListBox ItemsSource="{Binding ResultadosBusquedaItem}"
                      SelectedItem="{Binding ItemSeleccionado, Mode=TwoWay}"
-                     DisplayMemberPath="Nombre"
-                     MaxHeight="200"
+                     MaxHeight="250"
                      BorderThickness="0">
+
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="5">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="50" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="{Binding Nombre}" FontWeight="SemiBold" FontSize="14" Foreground="White"/>
+                                            <TextBlock Text="{Binding OEM}" FontSize="11" Foreground="LightGray" />
+                                        </StackPanel>
+
+                                        <TextBlock Grid.Column="1" VerticalAlignment="Center">
+                                <Run Text="Stock:" FontSize="11" Foreground="Gray"/>
+                                <Run Text="{Binding StockActual}" FontWeight="Bold" Foreground="LawnGreen"/>
+                                        </TextBlock>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
                             <ListBox.ItemContainerStyle>
                                 <Style TargetType="ListBoxItem">
-                                    <Setter Property="Padding" Value="5"/>
+                                    <Setter Property="Padding" Value="8,5"/>
                                     <Setter Property="Foreground" Value="White"/>
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="ListBoxItem">
-                                                <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
-                                                    <ContentPresenter />
-                                                </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsSelected" Value="True">
-                                                        <Setter Property="Background" Value="#4A5568"/>
-                                                    </Trigger>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="#4A5568"/>
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Background" Value="#4A5568"/>
+                                        </Trigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#3A4454"/>
+                                        </Trigger>
+                                    </Style.Triggers>
                                 </Style>
                             </ListBox.ItemContainerStyle>
                         </ListBox>
@@ -130,7 +116,7 @@
                     Margin="10,0,0,0"/>
         </Grid>
 
-        <Border Grid.Row="2" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
+        <Border Grid.Row="2" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1.2">
             <DataGrid ItemsSource="{Binding LineasDeFactura}" Style="{StaticResource ElegantDataGridStyle}" CanUserAddRows="False" AutoGenerateColumns="False" IsReadOnly="True">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Descripción" Binding="{Binding Descripcion}" Width="*"/>

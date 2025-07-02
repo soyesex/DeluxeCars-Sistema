@@ -35,7 +35,7 @@
         </Grid>
 
         <Border Grid.Row="1" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" 
-                BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
+                BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1.2">
 
             <DataGrid ItemsSource="{Binding Usuarios}"
                       SelectedItem="{Binding UsuarioSeleccionado}"

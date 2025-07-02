@@ -7,48 +7,53 @@
              mc:Ignorable="d"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              d:DesignHeight="700" d:DesignWidth="1000"
-             Background="{DynamicResource MaterialDesignPaper}"
+             Background="Transparent"
              Foreground="{DynamicResource MaterialDesignBody}">
 
     <Grid>
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel Margin="24">
 
-                <!-- Título de la Sección -->
-                <TextBlock Text="Configuración General" 
-                           Style="{StaticResource MaterialDesignHeadline4TextBlock}" 
-                           HorizontalAlignment="Center"
-                           Margin="0,0,0,24"/>
-
                 <!-- Tarjeta de Información de la Empresa -->
                 <materialDesign:Card Padding="16" Margin="0,0,0,16">
                     <StackPanel>
                         <TextBlock Text="Información de la Empresa" 
                                    Style="{StaticResource MaterialDesignHeadline6TextBlock}" 
+                                   FontFamily="{StaticResource Font.SourceSans3}"
                                    Margin="0,0,0,16"/>
 
                         <TextBox Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                                  materialDesign:HintAssist.Hint="Nombre de la Tienda"
+                                 FontFamily="{StaticResource Font.SourceSans3}"
+                                 FontSize="16"
                                  Text="{Binding NombreTienda, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <TextBox Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                                  materialDesign:HintAssist.Hint="Dirección"
+                                 FontFamily="{StaticResource Font.SourceSans3}"
                                  Margin="0,16,0,0"
+                                 FontSize="16"
                                  Text="{Binding Direccion, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <TextBox Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                                  materialDesign:HintAssist.Hint="Teléfono"
+                                 FontFamily="{StaticResource Font.SourceSans3}"
                                  Margin="0,16,0,0"
+                                 FontSize="16"
                                  Text="{Binding Telefono, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <TextBox Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                                  materialDesign:HintAssist.Hint="Email"
                                  Margin="0,16,0,0"
+                                 FontSize="16"
+                                 FontFamily="{StaticResource Font.SourceSans3}"
                                  Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <TextBox Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                                  materialDesign:HintAssist.Hint="Horario de Atención"
+                                 FontFamily="{StaticResource Font.SourceSans3}"
                                  Margin="0,16,0,0"
+                                 FontSize="16"
                                  Text="{Binding HorarioAtencion, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
                 </materialDesign:Card>
@@ -58,11 +63,15 @@
                     <StackPanel>
                         <TextBlock Text="Configuración Financiera" 
                                    Style="{StaticResource MaterialDesignHeadline6TextBlock}" 
+                                   FontFamily="{StaticResource Font.SourceSans3}"
+                                   FontSize="16"
                                    Margin="0,0,0,16"/>
 
                         <TextBox Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                                  materialDesign:HintAssist.Hint="Porcentaje de IVA"
                                  materialDesign:TextFieldAssist.SuffixText="%"
+                                 FontSize="16"
+                                 FontFamily="{StaticResource Font.SourceSans3}"
                                  Text="{Binding PorcentajeIVA, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
                 </materialDesign:Card>
@@ -72,21 +81,29 @@
                     <StackPanel>
                         <TextBlock Text="Seguridad y Personalización" 
                                    Style="{StaticResource MaterialDesignHeadline6TextBlock}" 
+                                   FontFamily="{StaticResource Font.SourceSans3}"
+                                   FontSize="16"
                                    Margin="0,0,0,16"/>
 
                         <WrapPanel>
                             <Button Content="Cambiar PIN de Administrador" 
                                      Style="{StaticResource MaterialDesignOutlinedButton}"
+                                    FontFamily="{StaticResource Font.SourceSans3}"
+                                    FontSize="16"
                                      Command="{Binding CambiarPinCommand}"
                                      Margin="0,0,8,8"/>
 
                             <Button Content="Cambiar Logo"
                                      Style="{StaticResource MaterialDesignOutlinedButton}"
+                                    FontFamily="{StaticResource Font.SourceSans3}"
+                                    FontSize="16"
                                      Command="{Binding CambiarLogoCommand}"
                                      Margin="0,0,8,8"/>
 
                             <Button Content="Cambiar Banner"
                                      Style="{StaticResource MaterialDesignOutlinedButton}"
+                                    FontFamily="{StaticResource Font.SourceSans3}"
+                                    FontSize="16"
                                      Command="{Binding CambiarBannerCommand}"
                                      Margin="0,0,8,8"/>
                         </WrapPanel>

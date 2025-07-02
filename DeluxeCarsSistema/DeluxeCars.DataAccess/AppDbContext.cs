@@ -46,6 +46,9 @@ namespace DeluxeCars.DataAccess
         public DbSet<PagoClienteFactura> PagoClienteFacturas { get; set; }
         public DbSet<NotaDeCredito> NotasDeCredito { get; set; }
         public DbSet<DetalleNotaDeCredito> DetallesNotaDeCredito { get; set; }
+        public DbSet<SiteContent> SiteContents { get; set; }
+        public DbSet<Orden> Ordenes { get; set; }
+        public DbSet<OrdenDetalle> OrdenDetalles { get; set; }
 
         /// <summary>
         /// Configura el modelo de la base de datos usando Fluent API.
@@ -130,6 +133,28 @@ namespace DeluxeCars.DataAccess
                 new Municipio { Id = 18, Nombre = "Palmira", IdDepartamento = 4, Estado = true },
                 new Municipio { Id = 19, Nombre = "Buenaventura", IdDepartamento = 4, Estado = true }
             );
+
+            // --- INICIO DEL CÓDIGO A PEGAR ---
+
+            modelBuilder.Entity<Cliente>().HasData(
+                new Cliente { Id = 2, Nombre = "Taller \"El Rápido\"", Telefono = "3009988776", Email = "compras@tallerrapido.com", Estado = true },
+                new Cliente { Id = 3, Nombre = "Lucía Fernandez", Telefono = "3215554433", Email = "lucia.f@email.com", Estado = true }
+            );
+
+            modelBuilder.Entity<Proveedor>().HasData(
+                new Proveedor { Id = 1, RazonSocial = "AutoPartes El Frenazo S.A.S.", NIT = "900.123.456-7", Telefono = "3101234567", Email = "compras@elfrenazo.com", IdMunicipio = 7, Estado = true },
+                new Proveedor { Id = 2, RazonSocial = "Importaciones Rueda Libre Ltda.", NIT = "830.987.654-1", Telefono = "3159876543", Email = "contacto@ruedalibre.co", IdMunicipio = 12, Estado = true },
+                new Proveedor { Id = 3, RazonSocial = "Distribuciones El Pistón Veloz", NIT = "789.456.123-2", Telefono = "3005551212", Email = "proveedor@pistonveloz.com", IdMunicipio = 16, Estado = true }
+            );
+
+            modelBuilder.Entity<Producto>().HasData(
+                new Producto { Id = 6, IdCategoria = 1, Nombre = "Disco de Freno Ventilado", OriginalEquipamentManufacture = "DK-455A", Precio = 220000, Descripcion = "Disco de freno delantero para Chevrolet Captiva, Hyundai Tucson.", Estado = true, UnidadMedida = "Unidad", StockMinimo = 8, UltimoPrecioCompra = 150000 },
+                new Producto { Id = 7, IdCategoria = 2, Nombre = "Rótula de Suspensión", OriginalEquipamentManufacture = "ROT-221B", Precio = 75000, Descripcion = "Rótula inferior para Toyota Hilux y Fortuner.", Estado = true, UnidadMedida = "Unidad", StockMinimo = 15, UltimoPrecioCompra = 45000 },
+                new Producto { Id = 8, IdCategoria = 3, Nombre = "Bujía de Iridio", OriginalEquipamentManufacture = "IR-7700", Precio = 45000, Descripcion = "Bujía de alto rendimiento NGK para una mejor combustión.", Estado = true, UnidadMedida = "Unidad", StockMinimo = 20, UltimoPrecioCompra = 25000 },
+                new Producto { Id = 9, IdCategoria = 5, Nombre = "Batería 12V 850A", OriginalEquipamentManufacture = "BAT-12850", Precio = 550000, Descripcion = "Batería sellada MAC Gold Plus, libre de mantenimiento.", Estado = true, UnidadMedida = "Unidad", StockMinimo = 5, UltimoPrecioCompra = 390000 },
+                new Producto { Id = 10, IdCategoria = 6, Nombre = "Kit de Embrague", OriginalEquipamentManufacture = "ACK-2105", Precio = 750000, Descripcion = "Kit de clutch completo LUK para Chevrolet Spark GT.", Estado = true, UnidadMedida = "Kit", StockMinimo = 4, UltimoPrecioCompra = 550000 }
+            );
+
             // --- CONFIGURACIÓN DE ENTIDADES ---
 
             // Usuario

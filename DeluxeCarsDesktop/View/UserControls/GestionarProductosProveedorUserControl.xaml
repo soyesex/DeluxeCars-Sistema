@@ -19,7 +19,7 @@
         <!-- Columna 0: Catálogo del Proveedor (Productos ya asociados) -->
         <Border Grid.Column="0" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
             <DockPanel>
-                <TextBlock DockPanel.Dock="Top" Text="{Binding ProveedorActual.RazonSocial, StringFormat='Catálogo de {0}', FallbackValue='Catálogo del Proveedor'}" FontSize="16" FontWeight="Bold" Margin="10,10,10,5"/>
+                <TextBlock DockPanel.Dock="Top" Text="{Binding ProveedorActual.RazonSocial, StringFormat='Catálogo de {0}', FallbackValue='Catálogo del Proveedor'}"  Foreground="White" FontSize="16" FontWeight="Bold" Margin="10,10,10,5"/>
                 <DataGrid ItemsSource="{Binding ProductosAsociados}" SelectedItem="{Binding ProductoAsociadoSeleccionado}" Style="{StaticResource ElegantDataGridStyle}">
                     <DataGrid.Columns>
                         <!-- Nota: El binding cambió de 'Nombre' a 'Producto.Nombre' según tu segundo archivo -->
@@ -62,7 +62,7 @@
         <!-- Columna 2: Inventario General (Productos disponibles para asociar) -->
         <Border Grid.Column="2" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
             <DockPanel>
-                <TextBlock DockPanel.Dock="Top" Text="Inventario General (Disponibles)" FontSize="16" FontWeight="Bold" Margin="10,10,10,5"/>
+                <TextBlock DockPanel.Dock="Top" Text="Inventario General (Disponibles)" Foreground="White" FontSize="16" FontWeight="Bold" Margin="10,10,10,5"/>
 
                 <!-- Cuadro de búsqueda del segundo archivo -->
                 <TextBox DockPanel.Dock="Top" Margin="5,0,5,5"

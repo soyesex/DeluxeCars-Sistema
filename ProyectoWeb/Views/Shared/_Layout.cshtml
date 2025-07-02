@@ -3,21 +3,63 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Aplicacion</title>
+    <title>@ViewData["Title"] - Deluxe Cars</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/cart.css" asp-append-version="true" />
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/custom.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Aplicacion.styles.css" asp-append-version="true" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="~/css/site.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        .animate-on-scroll {
+            opacity: 0;
+            transition: opacity 1s cubic-bezier(0.23, 1, 0.32, 1), transform 1s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+            .animate-on-scroll[data-animation="fade-up"] {
+                transform: translateY(50px);
+            }
+
+            .animate-on-scroll[data-animation="zoom-in"] {
+                transform: scale(0.95);
+            }
+
+            .animate-on-scroll.is-visible {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+
+        #notificacion {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #1f2937;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
+            font-weight: 500;
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease-in-out;
+            pointer-events: none; /* ✅ permite hacer clic a través del div */
+        }
 
 
+            #notificacion.mostrar {
+                opacity: 1;
+                transform: translateY(0);
+            }
+    </style>
 
     @RenderSection("Styles", required: false)
 </head>
 <body>
-    <header style="position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; box-shadow: 0 4px 2px -2px gray;">
-        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3 custom-navbar fixed-top">
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-dark border-bottom box-shadow mb-3 fixed-top" style="background-color: var(--color-fondo-oscuro);">
             <div class="container-fluid">
                 <!-- Logo -->
                 <a class="navbar-brand logo" asp-area="" asp-controller="Home" asp-action="Index">Deluxe Cars</a>
@@ -29,70 +71,169 @@
 
                 <!-- Contenido del navbar -->
                 <div class="navbar-collapse collapse d-sm-inline-flex">
-                    <!-- Links -->
-                    <div class="ms-auto links">
-                        <ul class="navbar-nav flex-grow-1 justify-content-around gap-5">
+
+                    <div class="ms-auto d-flex align-items-center">
+
+                        <!-- Links de Navegación -->
+                        <ul class="navbar-nav flex-grow-1">
+                            <li class="nav-item">
+                                <a class="nav-link text-light" asp-controller="Home" asp-action="Index">Inicio</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-light" asp-controller="Catalogo" asp-action="Index">Tienda</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-light" asp-controller="Home" asp-action="SobreNosotros">Sobre Nosotros</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-light" asp-controller="Home" asp-action="Contactanos">Contáctanos</a>
+                            </li>
+
                             @if (User.Identity.IsAuthenticated)
                             {
                                 @if (User.IsInRole("Administrador"))
                                 {
                                     <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Index">Panel de Admin</a>
-                                    </li>
-                                }
-                                @if (User.IsInRole("Usuario"))
-                                {
-                                    <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Carrito" asp-action="Index">Carrito</a>
+                                        <a class="nav-link text-light" asp-controller="Admin" asp-action="Index">Panel de Admin</a>
                                     </li>
                                 }
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Contact">Contáctanos</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="AboutUs">Sobre Nosotros</a>
-                                </li> 
-                                <li class="nav-item">
-                                    <form class="nav-link text-dark" asp-controller="Account" asp-action="Logout" method="post">
-                                        <button type="submit">Cerrar Sesión</button>
+                                    <form class="nav-link text-light" asp-controller="Account" asp-action="Logout" method="post">
+                                        <button type="submit" class="btn btn-link nav-link text-light p-0" style="border: none;">Cerrar Sesión</button>
                                     </form>
                                 </li>
                             }
                             else
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Iniciar Sesión</a>
+                                    <a class="nav-link text-light" asp-controller="Account" asp-action="Login">Iniciar Sesión</a>
                                 </li>
                             }
                         </ul>
+                        <!-- Icono del Carrito con contador -->
+                        <a href="/Carrito" class="position-relative nav-link text-light ms-3" title="Ver mi carrito">
+                            <i class="bi bi-cart" style="font-size: 1.5rem;"></i>
+                            <span id="cart-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                0
+                            </span>
+                        </a>
+
                     </div>
-@* 
-                    <!-- Login -->
-                    <div class="ms-auto login">
-                        <partial name="_LoginPartial" />
-                    </div> *@
                 </div>
             </div>
         </nav>
     </header>
 
-    <div class="container-fluid px-3 ">
-        <main role="main" class="text-center pb-3">
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
+        <div id="toastCarrito" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body fw-semibold">
+                    ¡Producto añadido al carrito!
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    @* Padding para que el contenido no quede debajo de la navbar *@
+    <div style="padding-top: 70px;">
+        <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container text-center">
-            &copy; 2025 - Aplicacion - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const botones = document.querySelectorAll('.add-to-cart-btn');
+
+            botones.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const productoId = this.dataset.productoId;
+                    const cantidad = 1;
+
+                    fetch('/Carrito/AddToCart', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: `productoId=${productoId}&cantidad=${cantidad}`
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                mostrarToast();
+                                actualizarContadorCarrito(data.itemCount);
+                            } else {
+                                alert(data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error(error);
+                            alert('Error al añadir al carrito.');
+                        });
+                });
+            });
+
+            function actualizarContadorCarrito(cantidad) {
+                const badge = document.querySelector('#cart-badge');
+                if (badge) {
+                    badge.textContent = cantidad;
+                }
+            }
+
+            function mostrarToast() {
+                const toastEl = document.getElementById('toastCarrito');
+                const toast = new bootstrap.Toast(toastEl);
+                toast.show();
+            }
+        });
+    </script>
+
+    @* SCRIPT GLOBAL PARA ANIMACIONES *@
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const observerOptions = {
+                root: null,
+                rootMargin: "0px",
+                threshold: 0.1
+            };
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const delay = entry.target.dataset.delay || 0;
+                        setTimeout(() => {
+                            entry.target.classList.add("is-visible");
+                        }, parseInt(delay));
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+            const animatedElements = document.querySelectorAll('.animate-on-scroll');
+            animatedElements.forEach(el => observer.observe(el));
+        });
+    </script>
+    <script>
+        function actualizarContadorCarrito() {
+            fetch('/Carrito/GetCartCount')
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.getElementById('cart-badge');
+                    badge.textContent = data.itemCount;
+                    badge.style.display = data.itemCount > 0 ? 'inline-block' : 'none';
+                });
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            actualizarContadorCarrito();
+        });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

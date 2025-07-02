@@ -1,0 +1,308 @@
+﻿@model Aplicacion.Application.ViewModels.CheckoutViewModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Finalizar Compra";
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Deluxe Cars</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+
+    <div class="checkout-container">
+        <div class="checkout-form-panel">
+            <div class="panel-content">
+                <h1 class="logo-header text-center mb-4">Deluxe Cars</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb justify-content-center">
+                        <li class="breadcrumb-item"><a asp-controller="Carrito" asp-action="Index">Carrito</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Información</li>
+                        <li class="breadcrumb-item text-muted">Confirmación</li>
+                    </ol>
+                </nav>
+                <hr class="mb-4">
+
+                <form id="checkout-form">
+                    <div class="form-section">
+                        <h4 class="form-section-title">Información de Contacto</h4>
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-section">
+                        <h4 class="form-section-title">Dirección de Envío</h4>
+                        <div class="mb-3">
+                            <label asp-for="Nombre" class="form-label"></label>
+                            <input asp-for="Nombre" class="form-control" />
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Direccion" class="form-label"></label>
+                            <input asp-for="Direccion" class="form-control" placeholder="Calle, número, barrio..." />
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Telefono" class="form-label"></label>
+                            <input asp-for="Telefono" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-5">
+                        <a asp-controller="Carrito" asp-action="Index" class="text-dark fw-bold"><i class="bi bi-chevron-left"></i> Volver al carrito</a>
+                        <button type="submit" class="btn btn-brand-accent btn-lg">Enviar Pedido por WhatsApp</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="checkout-summary-panel">
+            <div class="summary-content">
+                @if (Model.Carrito != null && Model.Carrito.Items.Any())
+                {
+                    @foreach (var item in Model.Carrito.Items)
+                    {
+                        <div class="summary-product-item">
+                            <div class="product-image">
+                                <img src="@item.ImagenUrl" alt="@item.NombreProducto" />
+                                <span class="product-quantity">@item.Cantidad</span>
+                            </div>
+                            <div class="product-info">
+                                <strong>@item.NombreProducto</strong>
+                            </div>
+                            <div class="product-price">
+                                <strong>@item.Subtotal.ToString("C0")</strong>
+                            </div>
+                        </div>
+                    }
+                    <hr />
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <strong>@Model.Carrito.Total.ToString("C0")</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span>Envío</span>
+                        <small>A coordinar</small>
+                    </div>
+                    <hr />
+                    <div class="summary-total">
+                        <span>Total</span>
+                        <span class="total-price">@Model.Carrito.Total.ToString("C0")</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    @* AÑADIMOS EL SCRIPT AL FINAL DE LA VISTA *@
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const checkoutForm = document.getElementById('checkout-form');
+            if (checkoutForm) {
+                checkoutForm.addEventListener('submit', function (event) {
+                    event.preventDefault(); // Prevenimos que el formulario se envíe al servidor
+
+                    // Recopilamos los datos
+                    const nombre = document.querySelector('input[name="Nombre"]').value;
+                    const email = document.querySelector('input[name="Email"]').value;
+                    const direccion = document.querySelector('input[name="Direccion"]').value;
+                    const telefono = document.querySelector('input[name="Telefono"]').value;
+
+                    let itemsText = '';
+                    document.querySelectorAll('.summary-product-item').forEach(item => {
+                        const cantidad = item.querySelector('.product-quantity').textContent.trim();
+                        const nombreProducto = item.querySelector('.product-info strong').textContent.trim();
+                        const subtotal = item.querySelector('.product-price strong').textContent.trim();
+                        itemsText += `- (${cantidad}x) ${nombreProducto} - ${subtotal}\n`;
+                    });
+
+                    const total = document.querySelector('.summary-total .total-price').textContent.trim();
+
+                    // Construimos el mensaje para WhatsApp
+                    let mensajeWhatsApp = `*¡Llego un nuevo pedido!* 👋\n\n`;
+                    mensajeWhatsApp += `Quisiera realizar el siguiente pedido desde la página web:\n\n`;
+                    mensajeWhatsApp += `*DATOS DE CONTACTO:*\n`;
+                    mensajeWhatsApp += `*Nombre:* ${nombre}\n`;
+                    mensajeWhatsApp += `*Email:* ${email}\n`;
+                    mensajeWhatsApp += `*Teléfono:* ${telefono}\n`;
+                    mensajeWhatsApp += `*Dirección de Envío:* ${direccion}\n\n`;
+                    mensajeWhatsApp += `*RESUMEN DEL PEDIDO:*\n`;
+                    mensajeWhatsApp += itemsText;
+                    mensajeWhatsApp += `\n*TOTAL:* ${total}\n\n`;
+                    mensajeWhatsApp += `Quedo atento para coordinar el pago y el envío. ¡Gracias!`;
+
+                    // ¡IMPORTANTE! Reemplaza este número con el de tu negocio
+                    const numeroWhatsApp = '573138304983';
+                    const mensajeCodificado = encodeURIComponent(mensajeWhatsApp);
+                    const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${mensajeCodificado}`;
+
+                    // Para depurar: muestra el enlace en la consola antes de abrirlo
+                    console.log("URL de WhatsApp generada:", urlWhatsApp);
+
+                    // Abrimos el enlace en una nueva pestaña
+                    window.open(urlWhatsApp, '_blank');
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>
+<style>
+/* --- 1. Definición de Variables de Color y Fuentes --- */
+:root {
+    --color-texto-principal: #000000; /* Negro para todo el texto principal */
+    --color-texto-blanco: #ffffff;    /* Blanco para usar sobre fondos oscuros */
+    --color-fondo-principal: #ffffff;
+    --color-fondo-secundario: #f8f9fa; /* Gris claro para el panel de resumen */
+    --color-borde: #dee2e6;
+    --color-boton-principal: #212529; /* Negro para el fondo del botón */
+    --color-boton-principal-hover: #000000;
+}
+
+/* --- 2. Estilos Generales y del Body --- */
+body {
+    background-color: var(--color-fondo-secundario); /* Fondo gris claro para toda la página */
+    color: var(--color-texto-principal);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* --- 3. Layout Principal del Checkout --- */
+.checkout-container {
+    display: flex;
+    flex-direction: column; /* Diseño de una columna para móviles (mobile-first) */
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* --- 4. Panel Izquierdo (Formulario) --- */
+.checkout-form-panel {
+    background-color: var(--color-fondo-principal);
+    padding: 2rem;
+}
+
+.checkout-form-panel .panel-content {
+    max-width: 580px;
+    margin: 0 auto;
+}
+
+/* --- 5. Panel Derecho (Resumen de Compra) --- */
+.checkout-summary-panel {
+    background-color: var(--color-fondo-secundario);
+    padding: 2rem;
+    border-top: 1px solid var(--color-borde); /* Separador en vista móvil */
+}
+
+.checkout-summary-panel .summary-content {
+    max-width: 580px;
+    margin: 0 auto;
+}
+/* --- 7. Estilos de Componentes Específicos (Todo el texto es negro) --- */
+
+/* Encabezados y Títulos */
+.logo-header,
+.form-section-title {
+    color: var(--color-texto-principal);
+    font-weight: 700;
+}
+
+/* Migas de Pan (Breadcrumbs) */
+.breadcrumb, .breadcrumb-item, .breadcrumb-item a {
+    color: var(--color-texto-principal) !important; /* Forzamos el negro sobre estilos de Bootstrap */
+    text-decoration: none;
+}
+.breadcrumb .active {
+    font-weight: 600;
+}
+
+/* Formularios: Labels e Inputs */
+.form-label, .form-control {
+    color: var(--color-texto-principal);
+}
+.form-control::placeholder {
+    color: var(--color-texto-principal);
+    opacity: 0.6;
+}
+.form-control:focus {
+    border-color: #86b7fe; /* Mantenemos el foco azul de Bootstrap para buena UX */
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Enlaces */
+.checkout-form-panel a {
+    color: var(--color-texto-principal);
+    font-weight: 600;
+}
+
+/* Botones */
+.btn-brand-accent {
+    background-color: var(--color-boton-principal);
+    color: var(--color-texto-blanco) !important; /* EXCEPCIÓN: Texto blanco para legibilidad */
+    border: none;
+    font-weight: 600;
+    padding: 0.8rem 1.5rem;
+}
+.btn-brand-accent:hover {
+    background-color: var(--color-boton-principal-hover);
+}
+
+/* Resumen de Compra */
+.summary-product-item, .summary-row, .summary-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    color: var(--color-texto-principal);
+    margin-bottom: 1rem;
+}
+.summary-product-item .product-info {
+    flex-grow: 1;
+}
+.summary-product-item .product-image {
+    position: relative;
+    width: 65px;
+    height: 65px;
+    border-radius: 8px;
+    border: 1px solid var(--color-borde);
+    background-color: var(--color-fondo-principal);
+    overflow: hidden;
+}
+.summary-product-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 5px;
+}
+.summary-product-item .product-quantity {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background-color: #6c757d; /* Gris de Bootstrap para el contador */
+    color: var(--color-texto-blanco) !important; /* EXCEPCIÓN: Texto blanco para legibilidad */
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.summary-total {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-borde);
+}
+.summary-total .total-price {
+    font-size: 1.5rem;
+}
+hr {
+    border-color: var(--color-borde);
+}
+</style>
