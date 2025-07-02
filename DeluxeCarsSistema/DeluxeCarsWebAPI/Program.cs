@@ -22,6 +22,14 @@ builder.Services.AddHttpClient<IApiClient, ApiClient>(client =>
     client.BaseAddress = new Uri(baseUrl);
 });
 
+// 1. Registra el DbContext, apuntando a tu cadena de conexión en appsettings.json
+//builder.Services.AddDbContext<ApplicationDbContext>(options =>
+//    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+//// 2. Registra la Unit of Work para que pueda ser inyectada en los controladores
+//builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

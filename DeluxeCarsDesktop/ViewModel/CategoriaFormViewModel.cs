@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
+using DeluxeCars.DataAccess.Repositories.Interfaces;
 
 namespace DeluxeCarsDesktop.ViewModel
 {

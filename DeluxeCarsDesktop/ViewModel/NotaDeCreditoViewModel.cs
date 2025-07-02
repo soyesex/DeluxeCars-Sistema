@@ -8,6 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using DeluxeCars.DataAccess.Repositories.Interfaces;
+using DeluxeCarsShared.Interfaces;
 
 namespace DeluxeCarsDesktop.ViewModel
 {

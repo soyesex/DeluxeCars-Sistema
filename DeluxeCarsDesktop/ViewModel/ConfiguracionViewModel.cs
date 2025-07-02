@@ -1,4 +1,5 @@
-﻿using DeluxeCarsDesktop.Interfaces;
+﻿using DeluxeCars.DataAccess.Repositories.Interfaces;
+using DeluxeCarsDesktop.Interfaces;
 using DeluxeCarsDesktop.Services;
 using DeluxeCarsDesktop.Utils;
 using DeluxeCarsDesktop.View.UserControls;

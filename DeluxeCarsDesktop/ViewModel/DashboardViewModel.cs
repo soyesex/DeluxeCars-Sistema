@@ -1,11 +1,7 @@
-﻿using DeluxeCarsDesktop.Dtos;
-using DeluxeCarsDesktop.Interfaces;
-using DeluxeCarsEntities;
+﻿using DeluxeCars.DataAccess.Repositories.Interfaces;
 using DeluxeCarsDesktop.Services;
-using LiveCharts;
-using LiveChartsCore;
-using LiveChartsCore.SkiaSharpView;
-using System.Windows.Media;
+using DeluxeCarsEntities;
+using DeluxeCarsShared.Dtos;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
@@ -30,14 +26,13 @@ namespace DeluxeCarsDesktop.ViewModel
         private int _pedidosPendientes;
         public int PedidosPendientes { get => _pedidosPendientes; set => SetProperty(ref _pedidosPendientes, value); }
 
-        public ISeries[] SeriesTopProductos { get; set; }
-        public Axis[] XAxes { get; set; } // <-- AÑADE ESTA LÍNEA
+        //public ISeries[] SeriesTopProductos { get; set; }
+        //public Axis[] XAxes { get; set; } // <-- AÑADE ESTA LÍNEA
 
         public DashboardViewModel(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
 
-            SeriesTopProductos = new ISeries[0];
         }
 
         public async Task LoadAsync()
@@ -56,33 +51,33 @@ namespace DeluxeCarsDesktop.ViewModel
                 // --- LÓGICA DEFINITIVA PARA CARGAR DATOS DEL GRÁFICO ---
                 var topProductosData = await _unitOfWork.Facturas.GetTopProductosVendidosAsync(DateTime.Now.AddDays(-30), DateTime.Now);
 
-                SeriesTopProductos = new ISeries[]
-                {
-                    // Usaremos ColumnSeries para un gráfico de barras vertical, es más común
-                    new ColumnSeries<TopProductoDto>
-                    {
-                        // Le pasamos la colección completa de nuestros objetos
-                        Values = topProductosData.ToList(), 
+                //SeriesTopProductos = new ISeries[]
+                //{
+                //    // Usaremos ColumnSeries para un gráfico de barras vertical, es más común
+                //    new ColumnSeries<TopProductoDto>
+                //    {
+                //        // Le pasamos la colección completa de nuestros objetos
+                //        Values = topProductosData.ToList(), 
                         
-                        // Le decimos cómo "mapear" cada objeto al gráfico
-                        Mapping = (producto, index) => new(index, producto.UnidadesVendidas),
+                //        // Le decimos cómo "mapear" cada objeto al gráfico
+                //        Mapping = (producto, index) => new(index, producto.UnidadesVendidas),
 
-                        Name = "Unidades Vendidas"
-                    }
-                };
+                //        Name = "Unidades Vendidas"
+                //    }
+                //};
 
-                XAxes = new Axis[]
-                {
-                    new Axis
-                    {
-                        // Le decimos al eje que use los nombres de los productos como etiquetas
-                        Labels = topProductosData.Select(p => p.NombreProducto).ToArray(),
-                        // Giramos un poco las etiquetas por si son largas para que no se solapen
-                    }
-                };
+                //XAxes = new Axis[]
+                //{
+                //    new Axis
+                //    {
+                //        // Le decimos al eje que use los nombres de los productos como etiquetas
+                //        Labels = topProductosData.Select(p => p.NombreProducto).ToArray(),
+                //        // Giramos un poco las etiquetas por si son largas para que no se solapen
+                //    }
+                //};
 
-                OnPropertyChanged(nameof(SeriesTopProductos));
-                OnPropertyChanged(nameof(XAxes));
+                //OnPropertyChanged(nameof(SeriesTopProductos));
+                //OnPropertyChanged(nameof(XAxes));
             }
             catch (Exception ex)
             {

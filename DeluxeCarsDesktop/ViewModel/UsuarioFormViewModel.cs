@@ -1,4 +1,5 @@
-﻿using DeluxeCarsDesktop.Interfaces;
+﻿using DeluxeCars.DataAccess.Repositories.Interfaces;
+using DeluxeCarsDesktop.Interfaces;
 using DeluxeCarsDesktop.Utils;
 using DeluxeCarsEntities;
 using Microsoft.Win32;

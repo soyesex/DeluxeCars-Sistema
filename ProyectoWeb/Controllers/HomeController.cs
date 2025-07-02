@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using Aplicacion.Core.Models;
+using Aplicacion.Models;
 using Aplicacion.Models.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 

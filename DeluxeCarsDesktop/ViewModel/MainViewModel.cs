@@ -12,6 +12,8 @@ using System.Windows.Media;
 using System.Security.Principal;
 using System.Windows;
 using System.Windows.Input;
+using DeluxeCarsShared.Interfaces;
+using DeluxeCars.DataAccess.Repositories.Interfaces;
 
 namespace DeluxeCarsDesktop.ViewModel
 {

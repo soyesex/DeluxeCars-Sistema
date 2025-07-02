@@ -1,4 +1,4 @@
-﻿using DeluxeCarsShared;
+﻿using DeluxeCarsShared.Dtos;
 
 namespace DeluxeCarsWebAPI.Services
 {

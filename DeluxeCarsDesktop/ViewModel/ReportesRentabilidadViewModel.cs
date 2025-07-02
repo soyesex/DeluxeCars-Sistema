@@ -1,12 +1,7 @@
-﻿using DeluxeCarsDesktop.Dtos;
-using DeluxeCarsDesktop.Interfaces;
+﻿using DeluxeCars.DataAccess.Repositories.Interfaces;
 using DeluxeCarsDesktop.Services;
-using System;
-using System.Collections.Generic;
+using DeluxeCarsShared.Dtos;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace DeluxeCarsDesktop.ViewModel

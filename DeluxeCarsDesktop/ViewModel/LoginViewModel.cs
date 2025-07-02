@@ -1,17 +1,6 @@
-﻿using DeluxeCarsDesktop.Interfaces;
-using DeluxeCarsEntities;
-using DeluxeCarsDesktop.Repositories;
-using DeluxeCarsDesktop.Utils;
-using DeluxeCarsDesktop.View;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Security;
+﻿using DeluxeCars.DataAccess.Repositories.Interfaces;
+using DeluxeCarsShared.Services;
 using System.Security.Principal;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace DeluxeCarsDesktop.ViewModel
@@ -86,7 +75,7 @@ namespace DeluxeCarsDesktop.ViewModel
         }
         private async void ExecuteLoginCommand(object obj)
         {
-            if (!Utils.ValidationHelper.IsValidEmail(Username))
+            if (!ValidationHelper.IsValidEmail(Username))
             {
                 this.ErrorMessage = "❌ Por favor, introduce un formato de correo válido.";
                 return; // Detenemos la ejecución si el formato no es válido.

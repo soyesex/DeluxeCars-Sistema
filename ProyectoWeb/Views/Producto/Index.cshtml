@@ -1,5 +1,4 @@
-﻿@using Aplicacion.Application.ViewModels
-@using Aplicacion.ViewModels
+﻿@using Aplicacion.Models.ViewModels
 @model IEnumerable<ProductoViewModel>
 
 @{
@@ -7,7 +6,7 @@
 }
 
 <div class="container mt-4">
-    <h2 class="text-center mb-4">Detalles de los Productos</h2>
+    <h2 class="text-center mb-4">Detalles de los Productos (con Stock)</h2>
     <div class="card-body">
         <div class="d-flex justify-content-between mb-3">
             <div>
@@ -29,8 +28,8 @@
                 <th>Descripción</th>
                 <th>Categoría</th>
                 <th>Precio</th>
+                <th>Stock</th>
                 <th>Estado</th>
-                <th>Fecha Ingreso</th>
                 <th>OEM</th>
                 <th>Acciones</th>
             </tr>
@@ -44,13 +43,14 @@
                     <td>@producto.Descripcion</td>
                     <td>@producto.NombreCategoria</td>
                     <td>@producto.Precio.ToString("C")</td>
+                    <td><b>@producto.Stock</b></td>
                     <td>
                         <span class="badge @((producto.Estado ? "bg-success" : "bg-danger"))">
                             @(producto.Estado ? "Activo" : "Inactivo")
                         </span>
                     </td>
-                    <td>@producto.FechaIngreso.ToString("dd/MM/yyyy")</td>
-                    <td>@producto.OrigininalEquipmentManufacture</td>
+                    <td>@producto.OriginalEquipmentManufacture</td>
+
                     <td>
                         <a asp-action="Edit" asp-route-id="@producto.Id" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> Editar</a>
                         <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="@producto.Id" data-nombre="@producto.Nombre">

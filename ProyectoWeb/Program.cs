@@ -1,25 +1,28 @@
-using Aplicacion.Application.ViewModels;
-using Aplicacion.Core.Models;
-using Aplicacion.Data;
-using Aplicacion.Models.Interfaces;
-using Aplicacion.Services;
+using DeluxeCars.DataAccess;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using DeluxeCars.DataAccess.Repositories.Implementations;
+using DeluxeCars.DataAccess.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+
+// Asegúrate que este ApplicationDbContext es el de DeluxeCars.DataAccess
+builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+    .AddEntityFrameworkStores<AppDbContext>();
+
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddScoped<IProductoService, ProductoService>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {

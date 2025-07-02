@@ -1,19 +1,12 @@
-﻿using DeluxeCarsDesktop.Interfaces;
-using DeluxeCarsEntities;
-using DeluxeCarsDesktop.Models.Search;
-using DeluxeCarsDesktop.Repositories;
+﻿using DeluxeCars.DataAccess.Repositories.Implementations.Search;
+using DeluxeCars.DataAccess.Repositories.Interfaces;
+using DeluxeCarsDesktop.Interfaces;
 using DeluxeCarsDesktop.Services;
 using DeluxeCarsDesktop.Utils;
 using DeluxeCarsDesktop.View;
-using Microsoft.Data.SqlClient;
-using System;
-using System.Collections.Generic;
+using DeluxeCarsEntities;
 using System.Collections.ObjectModel;
-using System.Configuration;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 

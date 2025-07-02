@@ -1,4 +1,4 @@
-using DeluxeCarsShared;
+using DeluxeCarsShared.Dtos;
 using DeluxeCarsWebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
