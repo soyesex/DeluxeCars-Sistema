@@ -13,26 +13,30 @@
     </div>
 
     <div class="container hero-content text-center">
-        <div class="editable-container" data-aos="fade-up" data-aos-delay="100">
-            <h1 data-key="Home_HeroTitle1" class="display-3 fw-bold text-white mb-4">@GetContent("Home_HeroTitle1")</h1>
-            @if (User.IsInRole("Administrador"))
-            {
-                <button class="btn-edit-content"><i class="bi bi-pencil-fill"></i></button>
-            }
-        </div>
-        <div class="editable-container" data-aos="fade-up" data-aos-delay="200">
-            <h1 data-key="Home_HeroTitle2" class="display-3 fw-bold text-white mb-4">@GetContent("Home_HeroTitle2")</h1>
-            @if (User.IsInRole("Administrador"))
-            {
-                <button class="btn-edit-content"><i class="bi bi-pencil-fill"></i></button>
-            }
-        </div>
-        <div class="editable-container" data-aos="fade-up" data-aos-delay="300">
-            <p data-key="Home_HeroSubtitle" class="lead text-white-50 mb-5">@GetContent("Home_HeroSubtitle")</p>
-            @if (User.IsInRole("Administrador"))
-            {
-                <button class="btn-edit-content"><i class="bi bi-pencil-fill"></i></button>
-            }
+        <div class="d-flex flex-column align-items-center">
+            <div class="editable-container" data-aos="fade-up" data-aos-delay="100">
+                <h1 data-key="Home_HeroTitle1" class="display-3 fw-bold text-white mb-4">@GetContent("Home_HeroTitle1")</h1>
+                @if (User.IsInRole("Administrador"))
+                {
+                    <button class="btn-edit-content"><i class="bi bi-pencil-fill"></i></button>
+                }
+            </div>
+
+            <div class="editable-container" data-aos="fade-up" data-aos-delay="200">
+                <h1 data-key="Home_HeroTitle2" class="display-3 fw-bold text-white mb-4">@GetContent("Home_HeroTitle2")</h1>
+                @if (User.IsInRole("Administrador"))
+                {
+                    <button class="btn-edit-content"><i class="bi bi-pencil-fill"></i></button>
+                }
+            </div>
+
+            <div class="editable-container" data-aos="fade-up" data-aos-delay="300">
+                <p data-key="Home_HeroSubtitle" class="lead text-white-50 mb-5">@GetContent("Home_HeroSubtitle")</p>
+                @if (User.IsInRole("Administrador"))
+                {
+                    <button class="btn-edit-content"><i class="bi bi-pencil-fill"></i></button>
+                }
+            </div>
         </div>
     </div>
 </section>

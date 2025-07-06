@@ -5,29 +5,73 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
              mc:Ignorable="d" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
-
              d:DesignHeight="550" d:DesignWidth="900">
     <Grid Margin="15">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="5,5,5,10">
+        <WrapPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+
             <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                     Style="{StaticResource SearchBoxStyle}" 
-                     Tag="Buscar por N° Factura o Cliente..." 
-                     Width="300"/>
+                     Style="{StaticResource SearchBoxStyle}"
+                     Tag="Buscar por N° Factura o Cliente..."
+                     MinWidth="300" MaxWidth="500" Width="350"
+                     Margin="5"/>
+
+            <ComboBox ItemsSource="{Binding ClientesDisponibles}"
+                      SelectedItem="{Binding ClienteFiltro}"
+                      DisplayMemberPath="Nombre"
+                      Style="{StaticResource StyleComboBoxDc}" 
+                      Tag="Filtrar por Cliente"
+                      Width="200" Margin="5"/>
+
+            <ComboBox ItemsSource="{Binding EstadosPago}"
+                      SelectedItem="{Binding EstadoPagoFiltro}"
+                      Style="{StaticResource StyleComboBoxDc}"
+                      Tag="Filtrar por Estado"
+                      Foreground="{StaticResource Text.Secondary}"
+                      Width="150" Margin="5"/>
+
+            <DatePicker SelectedDate="{Binding FechaInicio}"
+                Style="{StaticResource DarkDatePickerStyle}"
+                Tag="Fecha Inicio"
+                Width="140" Margin="5"/>
+
+            <DatePicker SelectedDate="{Binding FechaFin}"
+                Style="{StaticResource DarkDatePickerStyle}"
+                Tag="Fecha Fin"
+                Width="140" Margin="5"/>
+
+            <Button Content="Aplicar Filtros"
+            Command="{Binding AplicarFiltrosCommand}"
+            Style="{StaticResource MaterialDesignRaisedButton}"
+            Margin="15,5,5,5"/>
+
+            <Button Grid.Column="3" Command="{Binding LimpiarFiltrosCommand}"
+                    Margin="50 0"
+                    Style="{StaticResource controlButton}"
+                    Tag="{StaticResource color4}"
+                    ToolTip="Limpiar Filtros">
+                <fa:IconImage Icon="Eraser" Width="15" Height="15" Style="{StaticResource controlButtonIcon}"/>
+            </Button>
+
+
+
             <Button Content="Nueva Factura"
-                    Command="{Binding NuevaFacturaCommand}"
-                    Style="{StaticResource ElegantShadowGhostButton}"
-                    Tag="{StaticResource Brush.Menu.GreenForest}"
-                    Margin="20,0,10,0"/>
-        </StackPanel>
+            Command="{Binding NuevaFacturaCommand}"
+            Style="{StaticResource ElegantShadowGhostButton}"
+            Tag="{StaticResource Brush.Menu.GreenForest}"
+            Margin="15,5,5,5"/>
+
+        </WrapPanel>
 
         <Border Grid.Row="1" CornerRadius="10" Background="{StaticResource Brush.Brand.CharcoalLight}" 
- BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1.2">
+                BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1.2">
             <DataGrid ItemsSource="{Binding Facturas}" 
                       SelectedItem="{Binding FacturaSeleccionada}"
                       Style="{StaticResource AppDataGridStyle}"
@@ -90,5 +134,62 @@
                 </DataGrid.Columns>
             </DataGrid>
         </Border>
+        <!--<WrapPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+
+            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource SearchBoxStyle}"
+                     Tag="Buscar por N° Factura o Cliente..."
+                     MinWidth="300" MaxWidth="500" Width="310"
+                     Margin="5"/>
+
+            <ComboBox ItemsSource="{Binding ClientesDisponibles}"
+                      SelectedItem="{Binding ClienteFiltro}"
+                      DisplayMemberPath="Nombre"
+                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                      Foreground="{StaticResource Text.Secondary}"
+                      FontFamily="{StaticResource Font.SourceSans3}"
+                      FontWeight="Medium"
+                      FontSize="16"
+                      BorderBrush="{DynamicResource Background.Disabled}"
+                      materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource Brush.Menu.BlueCornflower}"
+                      Tag="Filtrar por Cliente"
+                      Width="200" Margin="5"/>
+
+            <ComboBox ItemsSource="{Binding EstadosPago}"
+              SelectedItem="{Binding EstadoPagoFiltro}"
+              Style="{StaticResource MaterialDesignOutlinedComboBox}"
+              Tag="Filtrar por Estado"
+              Width="150" Margin="5"/>
+
+            <DatePicker SelectedDate="{Binding FechaInicio}"
+                Style="{StaticResource MaterialDesignOutlinedDatePicker}"
+                Tag="Fecha Inicio"
+                Width="140" Margin="5"/>
+
+            <DatePicker SelectedDate="{Binding FechaFin}"
+                Style="{StaticResource MaterialDesignOutlinedDatePicker}"
+                Tag="Fecha Fin"
+                Width="140" Margin="5"/>
+
+            <Button Content="Aplicar Filtros"
+            Command="{Binding AplicarFiltrosCommand}"
+            Style="{StaticResource MaterialDesignRaisedButton}"
+            Margin="15,5,5,5"/>
+
+            <Button Command="{Binding LimpiarFiltrosCommand}"
+                    Style="{StaticResource MaterialDesignOutlinedButton}"
+                    ToolTip="Limpiar Filtros"
+                    Margin="5">
+                <fa:IconImage Icon="Broom" Style="{StaticResource ButtonIcon}" Margin="0"/>
+            </Button>
+
+            <Button Content="Nueva Factura"
+            Command="{Binding NuevaFacturaCommand}"
+            Style="{StaticResource ElegantShadowGhostButton}"
+            Tag="{StaticResource Brush.Menu.GreenForest}"
+            Margin="15,5,5,5"/>
+
+        </WrapPanel>-->
+
     </Grid>
 </UserControl>

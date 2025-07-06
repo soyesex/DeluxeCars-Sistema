@@ -5,6 +5,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
              mc:Ignorable="d" 
+             xmlns:converters="clr-namespace:DeluxeCarsDesktop.Converters"
+             xmlns:behaviors="clr-namespace:DeluxeCarsDesktop.Behaviors"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
              d:DesignHeight="600" d:DesignWidth="800"
              MaxWidth="800">
@@ -13,7 +16,6 @@
         <Border Padding="15" CornerRadius="5" BorderThickness="1" BorderBrush="{StaticResource Brush.Aggressive.DarkerBlue}">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
@@ -22,21 +24,21 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <Label Grid.Row="0" Grid.Column="0" Style="{StaticResource DarkLableForm}" Content="Nombre:" VerticalAlignment="Center"/>
                 <TextBox Grid.Row="0" Grid.Column="1"
-                         Style="{StaticResource DarkInputControlStyle}"
+                         Style="{StaticResource StandardFormTextBoxStyle}"
+                 materialDesign:HintAssist.Hint="Nombre de la Categoria"
                          Text="{Binding Nombre, UpdateSourceTrigger=PropertyChanged}"
                          Margin="5"/>
 
-                <Label Grid.Row="1" Grid.Column="0" Style="{StaticResource DarkLableForm}" Content="Descripción:" VerticalAlignment="Top" Margin="0,5,0,0"/>
                 <TextBox Grid.Row="1" Grid.Column="1" 
-                         Style="{StaticResource DarkInputControlStyle}"
+                         Style="{StaticResource StandardFormMultiLineTextBoxStyle}"
+                         materialDesign:HintAssist.Hint="Descripción"
                          Text="{Binding Descripcion, UpdateSourceTrigger=PropertyChanged}" 
                          Margin="5" Height="80" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
 
                 <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,5,0">
-                    <Button Content="Guardar" Style="{StaticResource DarkActionButtonStyle}" Command="{Binding GuardarCommand}" Width="120"/>
-                    <Button Content="Nuevo" Style="{StaticResource DarkActionButtonStyle}" Command="{Binding NuevoCommand}" Width="120" Margin="10,0,0,0" ToolTip="Limpia el formulario para crear una nueva categoría."/>
+                    <Button Content="Guardar" Style="{StaticResource ElegantShadowGhostButton}" Command="{Binding GuardarCommand}" Width="120"/>
+                    <Button Content="Nuevo" Style="{StaticResource ElegantShadowGhostButton}" Command="{Binding NuevoCommand}" Width="120" Margin="10,0,0,0" ToolTip="Limpia el formulario para crear una nueva categoría."/>
                 </StackPanel>
             </Grid>
         </Border>
@@ -51,6 +53,7 @@
 
             <DataGrid Grid.Column="0" x:Name="CategoriasDataGrid"
                       ItemsSource="{Binding ListaCategorias}"
+                      Foreground="White"
                       SelectedItem="{Binding CategoriaSeleccionada}"
                       Style="{StaticResource ElegantDataGridStyle}" 
                       IsReadOnly="True"
@@ -70,7 +73,7 @@
             </StackPanel>
         </Grid>
 
-        <Button Content="Cerrar" Style="{StaticResource DarkActionButtonStyle}" Command="{Binding CancelarCommand}" Width="120" Margin="0,30,0,0" HorizontalAlignment="Right"/>
+        <Button Content="Cerrar" Style="{StaticResource ElegantShadowGhostButton}" Command="{Binding CancelarCommand}" Width="120" Margin="0,30,0,0" HorizontalAlignment="Right"/>
 
     </StackPanel>
 </UserControl>

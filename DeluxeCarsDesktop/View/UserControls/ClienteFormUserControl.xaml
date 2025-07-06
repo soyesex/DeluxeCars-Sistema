@@ -5,12 +5,14 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
              mc:Ignorable="d" 
+             xmlns:converters="clr-namespace:DeluxeCarsDesktop.Converters"
+             xmlns:behaviors="clr-namespace:DeluxeCarsDesktop.Behaviors"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              d:DesignHeight="300" d:DesignWidth="600">
     <StackPanel Margin="20">
 
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
@@ -21,22 +23,24 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="0" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="Nombre Completo:" VerticalAlignment="Center"/>
-            <TextBox Grid.Row="0" Style="{StaticResource DarkInputControlStyle}" Grid.Column="1" Text="{Binding Nombre, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+            <TextBox Grid.Row="0" Style="{StaticResource StandardFormTextBoxStyle}"
+                 materialDesign:HintAssist.Hint="Nombre del Cliente" Grid.Column="1" Text="{Binding Nombre, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
 
-            <Label Grid.Row="1" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="Teléfono:" VerticalAlignment="Center"/>
-            <TextBox Grid.Row="1" Style="{StaticResource DarkInputControlStyle}" Grid.Column="1" Text="{Binding Telefono, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+            <TextBox Grid.Row="1" Style="{StaticResource StandardFormTextBoxStyle}"
+                 materialDesign:HintAssist.Hint="Telefono" Grid.Column="1" Text="{Binding Telefono, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
 
-            <Label Grid.Row="2" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="Email:" VerticalAlignment="Center"/>
-            <TextBox Grid.Row="2" Style="{StaticResource DarkInputControlStyle}" Grid.Column="1" Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+            <TextBox Grid.Row="2" Style="{StaticResource StandardFormTextBoxStyle}"
+                 materialDesign:HintAssist.Hint="Correo Electronico" Grid.Column="1" Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
 
             <Label Grid.Row="3" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="Activo:" VerticalAlignment="Center"/>
             <CheckBox Grid.Row="3"  Grid.Column="1" IsChecked="{Binding Estado}" VerticalAlignment="Center" Margin="5"/>
         </Grid>
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-            <Button Content="Guardar" Style="{StaticResource DarkActionButtonStyle}" Command="{Binding GuardarCommand}" Width="100"/>
-            <Button Content="Cancelar" Style="{StaticResource DarkActionButtonStyle}" Command="{Binding CancelarCommand}" Width="100" Margin="10,0,0,0"/>
+            <Button Content="Guardar" Style="{StaticResource ElegantShadowGhostButton}"
+                            Tag="{StaticResource Brush.Menu.YellowGold}" Command="{Binding GuardarCommand}" Width="100"/>
+            <Button Content="Cancelar" Style="{StaticResource ElegantShadowGhostButton}"
+                            Tag="{StaticResource Brush.Menu.YellowGold}"  Command="{Binding CancelarCommand}" Width="100" Margin="10,0,0,0"/>
         </StackPanel>
     </StackPanel>
 </UserControl>

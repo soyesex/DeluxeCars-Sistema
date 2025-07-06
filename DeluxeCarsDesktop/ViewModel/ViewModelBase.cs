@@ -23,7 +23,21 @@ namespace DeluxeCarsDesktop.ViewModel
             field = value;
             OnPropertyChanged(propertyName);
         }
+        /// <summary>
+        /// Asigna un valor a una propiedad y notifica el cambio, devolviendo 'true' si el valor cambió.
+        /// </summary>
+        /// <returns>True si el valor fue cambiado, de lo contrario False.</returns>
+        protected bool SetPropertyAndCheck<T>(ref T field, T value, [System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value))
+            {
+                return false; // No hubo cambio
+            }
 
+            field = value;
+            OnPropertyChanged(propertyName);
+            return true; // Sí hubo un cambio
+        }
         private string _errorMessage;
         public string ErrorMessage
         {

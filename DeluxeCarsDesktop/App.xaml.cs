@@ -8,6 +8,7 @@ using DeluxeCarsDesktop.Services;
 using DeluxeCarsDesktop.View;
 using DeluxeCarsDesktop.ViewModel;
 using DeluxeCarsShared.Interfaces;
+using LiveChartsCore.SkiaSharpView;
 using MaterialDesignThemes.Wpf;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,6 +33,19 @@ public partial class App : Application
     //Contructor de la clase App
     public App()
     {
+        LiveChartsCore.LiveCharts.Configure(config =>
+                        config
+                            // Selecciona el backend de renderizado (SkiaSharp es el estándar)
+                            .AddSkiaSharp()
+
+                            // Le dice a LiveCharts cómo mapear tus tipos de datos a puntos en el gráfico
+                            .AddDefaultMappers()
+
+                            // ¡AÑADIDO! Aplica un tema visual. Usamos el tema claro para que coincida con tu app.
+                            .AddLightTheme()
+                    );
+
+
         QuestPDF.Settings.License = LicenseType.Community;
 
         var services = new ServiceCollection();
@@ -111,6 +125,7 @@ public partial class App : Application
         services.AddTransient<RegistrarPagoClienteViewModel>();
         services.AddTransient<NotaDeCreditoViewModel>();
         services.AddTransient<ConfiguracionViewModel>();
+        services.AddTransient<AjusteInventarioViewModel>();
 
         services.AddSingleton<ISnackbarMessageQueue>(new SnackbarMessageQueue());
 

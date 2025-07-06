@@ -16,13 +16,23 @@ using System.Windows.Shapes;
 namespace DeluxeCarsDesktop.View.UserControls
 {
     /// <summary>
-    /// Lógica de interacción para DepartamentoUserControl.xaml
+    /// Lógica de interacción para AjusteInventarioUserControl.xaml
     /// </summary>
-    public partial class DepartamentoUserControl : UserControl
+    public partial class AjusteInventarioUserControl : UserControl
     {
-        public DepartamentoUserControl()
+        public AjusteInventarioUserControl()
         {
             InitializeComponent();
+        }
+
+        private void btnColumnas_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            if (button?.ContextMenu != null)
+            {
+                button.ContextMenu.PlacementTarget = button;
+                button.ContextMenu.IsOpen = true;
+            }
         }
     }
 }

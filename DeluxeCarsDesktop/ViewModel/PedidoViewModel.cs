@@ -1,20 +1,14 @@
-﻿using DeluxeCarsDesktop.Interfaces;
-using DeluxeCarsEntities;
+﻿using DeluxeCars.DataAccess.Repositories.Interfaces;
 using DeluxeCarsDesktop.Services;
 using DeluxeCarsDesktop.Services.PdfDocuments;
 using DeluxeCarsDesktop.Utils;
+using DeluxeCarsEntities;
 using Microsoft.Win32;
 using QuestPDF.Fluent;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using DeluxeCars.DataAccess.Repositories.Interfaces;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
@@ -22,24 +16,14 @@ namespace DeluxeCarsDesktop.ViewModel
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly INavigationService _navigationService;
+        private bool _isSearching = false;
 
         // --- Propiedades para el Binding y Filtros ---
         private ObservableCollection<Pedido> _pedidos;
         public ObservableCollection<Pedido> Pedidos { get => _pedidos; private set => SetProperty(ref _pedidos, value); }
 
         private Pedido _pedidoSeleccionado;
-        public Pedido PedidoSeleccionado
-        {
-            get => _pedidoSeleccionado;
-            set
-            {
-                SetProperty(ref _pedidoSeleccionado, value);
-                (VerDetallesCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
-                (RecepcionarPedidoCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
-                (GenerarPdfCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
-                (RegistrarPagoCommand as ViewModelCommand)?.RaiseCanExecuteChanged(); // --- NUEVO --- Notifica al nuevo comando
-            }
-        }
+        public Pedido PedidoSeleccionado { get => _pedidoSeleccionado; set { SetProperty(ref _pedidoSeleccionado, value); ActualizarEstadoComandos(); } }
 
         public ObservableCollection<Proveedor> Proveedores { get; private set; }
         private Proveedor _proveedorFiltro;
@@ -51,9 +35,21 @@ namespace DeluxeCarsDesktop.ViewModel
         private DateTime _fechaFin;
         public DateTime FechaFin { get => _fechaFin; set => SetProperty(ref _fechaFin, value); }
 
-        public ObservableCollection<EstadoPedido> EstadosFiltro { get; }
+        public ObservableCollection<EstadoPedido?> EstadosFiltro { get; }
         private EstadoPedido? _estadoFiltroSeleccionado;
         public EstadoPedido? EstadoFiltroSeleccionado { get => _estadoFiltroSeleccionado; set => SetProperty(ref _estadoFiltroSeleccionado, value); }
+
+        private string _searchText;
+        public string SearchText { get => _searchText; set => SetProperty(ref _searchText, value); }
+
+        // --- Paginación ---
+        private int _numeroDePagina = 1;
+        public int NumeroDePagina { get => _numeroDePagina; set { if (SetPropertyAndCheck(ref _numeroDePagina, value)) _ = AplicarFiltros(); } }
+        private int _tamañoDePagina = 15;
+        public int TamañoDePagina { get => _tamañoDePagina; set { if (SetPropertyAndCheck(ref _tamañoDePagina, value)) _ = AplicarFiltros(); } }
+        private int _totalItems;
+        public int TotalItems { get => _totalItems; private set => SetProperty(ref _totalItems, value); }
+        public int TotalPaginas => (TotalItems == 0) ? 1 : (int)Math.Ceiling((double)TotalItems / TamañoDePagina);
 
         // --- Comandos ---
         public ICommand NuevoPedidoCommand { get; }
@@ -62,6 +58,10 @@ namespace DeluxeCarsDesktop.ViewModel
         public ICommand RecepcionarPedidoCommand { get; }
         public ICommand GenerarPdfCommand { get; }
         public ICommand RegistrarPagoCommand { get; }
+        public ICommand AplicarFiltrosCommand { get; }
+        public ICommand LimpiarFiltrosCommand { get; }
+        public ICommand IrAPaginaSiguienteCommand { get; }
+        public ICommand IrAPaginaAnteriorCommand { get; }
         public PedidoViewModel(IUnitOfWork unitOfWork, INavigationService navigationService)
         {
             _unitOfWork = unitOfWork;
@@ -73,14 +73,26 @@ namespace DeluxeCarsDesktop.ViewModel
             // Valores por defecto para los filtros de fecha
             FechaFin = DateTime.Now;
             FechaInicio = DateTime.Now.AddMonths(-1);
-            EstadosFiltro = new ObservableCollection<EstadoPedido>(Enum.GetValues(typeof(EstadoPedido)).Cast<EstadoPedido>());
+            EstadosFiltro = new ObservableCollection<EstadoPedido?>
+            {
+                null, // Opción para "Todos"
+                EstadoPedido.Borrador,
+                EstadoPedido.Aprobado,
+                EstadoPedido.RecibidoParcialmente,
+                EstadoPedido.Recibido,
+                EstadoPedido.Cancelado
+            };
 
             NuevoPedidoCommand = new ViewModelCommand(ExecuteNuevoPedidoCommand);
             VerDetallesCommand = new ViewModelCommand(ExecuteVerDetallesCommand, _ => PedidoSeleccionado != null);
             FiltrarCommand = new ViewModelCommand(async p => await AplicarFiltros());
             RecepcionarPedidoCommand = new ViewModelCommand(ExecuteRecepcionarPedido, CanExecuteRecepcionarPedido);
             RegistrarPagoCommand = new ViewModelCommand(ExecuteRegistrarPago, CanExecuteRegistrarPago);
-            GenerarPdfCommand = new ViewModelCommand(ExecuteGenerarPdf, CanExecuteGenerarPdf);
+            GenerarPdfCommand = new ViewModelCommand(ExecuteGenerarPdf, CanExecuteGenerarPdf); 
+            AplicarFiltrosCommand = new ViewModelCommand(async _ => await AplicarFiltros());
+            LimpiarFiltrosCommand = new ViewModelCommand(async _ => await ExecuteLimpiarFiltros());
+            IrAPaginaSiguienteCommand = new ViewModelCommand(_ => NumeroDePagina++, _ => NumeroDePagina < TotalPaginas);
+            IrAPaginaAnteriorCommand = new ViewModelCommand(_ => NumeroDePagina--, _ => NumeroDePagina > 1);
         }
 
         public async Task LoadAsync()
@@ -110,24 +122,51 @@ namespace DeluxeCarsDesktop.ViewModel
 
         private async Task AplicarFiltros()
         {
+            if (_isSearching) return;
+            _isSearching = true;
             try
             {
-                int? proveedorId = (ProveedorFiltro != null && ProveedorFiltro.Id > 0) ? ProveedorFiltro.Id : (int?)null;
-                // --- LÍNEA MODIFICADA ---
-                // Ahora le pasamos el 'EstadoFiltroSeleccionado' al método del repositorio.
-                var pedidosFiltrados = await _unitOfWork.Pedidos.GetPedidosByCriteriaAsync(FechaInicio, FechaFin, proveedorId, EstadoFiltroSeleccionado);
+                var pagedResult = await _unitOfWork.Pedidos.SearchAsync(
+                    SearchText,
+                    FechaInicio,
+                    FechaFin,
+                    (ProveedorFiltro?.Id > 0) ? ProveedorFiltro.Id : null,
+                    EstadoFiltroSeleccionado,
+                    NumeroDePagina,
+                    TamañoDePagina);
 
-                // Lógica de actualización mejorada (ya la tienes)
                 Pedidos.Clear();
-                foreach (var pedido in pedidosFiltrados)
-                {
-                    Pedidos.Add(pedido);
-                }
+                foreach (var pedido in pagedResult.Items) { Pedidos.Add(pedido); }
+                TotalItems = pagedResult.TotalCount;
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ocurrió un error al filtrar los pedidos: {ex.Message}", "Error de Filtrado", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            catch (Exception ex) { MessageBox.Show($"Ocurrió un error al filtrar los pedidos: {ex.Message}", "Error"); }
+            finally { _isSearching = false; ActualizarEstadoComandos(); }
+        }
+        private void ActualizarEstadoComandos()
+        {
+            (VerDetallesCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+            (RecepcionarPedidoCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+            (RegistrarPagoCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+            (IrAPaginaAnteriorCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+            (IrAPaginaSiguienteCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+        }
+        private async Task ExecuteLimpiarFiltros()
+        {
+            _searchText = string.Empty;
+            _proveedorFiltro = Proveedores.FirstOrDefault();
+            _estadoFiltroSeleccionado = null;
+            _fechaFin = DateTime.Now;
+            _fechaInicio = DateTime.Now.AddMonths(-1);
+            _numeroDePagina = 1;
+
+            OnPropertyChanged(nameof(SearchText));
+            OnPropertyChanged(nameof(ProveedorFiltro));
+            OnPropertyChanged(nameof(EstadoFiltroSeleccionado));
+            OnPropertyChanged(nameof(FechaFin));
+            OnPropertyChanged(nameof(FechaInicio));
+            OnPropertyChanged(nameof(NumeroDePagina));
+
+            await AplicarFiltros();
         }
 
         private async void ExecuteNuevoPedidoCommand(object obj)

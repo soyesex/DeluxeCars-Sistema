@@ -15,10 +15,30 @@ namespace DeluxeCarsDesktop.ViewModel
     public class AjusteInventarioViewModel : ViewModelBase, ICloseable, IAsyncLoadable
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IStockAlertService _stockAlertService; 
+        private readonly IStockAlertService _stockAlertService;
 
-        // --- Propiedades para el Binding ---
-        public ObservableCollection<Producto> ProductosDisponibles { get; private set; }
+        // --- AÑADE ESTO ---
+        // Lista maestra que contiene TODOS los productos. No se modifica después de la carga inicial.
+        private List<Producto> _todosLosProductos;
+
+        // --- AÑADE ESTO ---
+        // Propiedad para el texto de búsqueda, bindeada al TextBox.
+        private string _textoDeBusqueda;
+        public string TextoDeBusqueda
+        {
+            get => _textoDeBusqueda;
+            set
+            {
+
+                SetProperty(ref _textoDeBusqueda, value);
+                // Cada vez que el texto cambia, filtramos la lista.
+                FiltrarProductos();
+            }
+        }
+
+        // --- RENOMBRA ESTO --- (Antes: ProductosDisponibles)
+        // Esta colección ahora solo contiene los productos filtrados para mostrar en la UI.
+        public ObservableCollection<Producto> ProductosFiltrados { get; private set; }
 
         private Producto _productoSeleccionado;
         public Producto ProductoSeleccionado { get => _productoSeleccionado; set { SetProperty(ref _productoSeleccionado, value); (GuardarAjusteCommand as ViewModelCommand)?.RaiseCanExecuteChanged(); } }
@@ -26,20 +46,17 @@ namespace DeluxeCarsDesktop.ViewModel
         private int _cantidad;
         public int Cantidad { get => _cantidad; set { SetProperty(ref _cantidad, value); (GuardarAjusteCommand as ViewModelCommand)?.RaiseCanExecuteChanged(); } }
 
-        private bool _esEntrada = true; // Por defecto, es un ajuste positivo
+        private bool _esEntrada = true;
         public bool EsEntrada { get => _esEntrada; set => SetProperty(ref _esEntrada, value); }
-        // --- AÑADE ESTA NUEVA PROPIEDAD ---
         public bool EsSalida
         {
             get => !_esEntrada;
-            // Cuando el usuario haga clic en este RadioButton, actualizará la propiedad principal
             set => EsEntrada = !value;
         }
 
         private string _motivo;
         public string Motivo { get => _motivo; set { SetProperty(ref _motivo, value); (GuardarAjusteCommand as ViewModelCommand)?.RaiseCanExecuteChanged(); } }
 
-        // --- Comandos ---
         public ICommand GuardarAjusteCommand { get; }
         public Action CloseAction { get; set; }
 
@@ -48,17 +65,54 @@ namespace DeluxeCarsDesktop.ViewModel
             _unitOfWork = unitOfWork;
             _stockAlertService = stockAlertService;
 
-            ProductosDisponibles = new ObservableCollection<Producto>();
+            _todosLosProductos = new List<Producto>();
+            // --- MODIFICA ESTO ---
+            ProductosFiltrados = new ObservableCollection<Producto>();
             GuardarAjusteCommand = new ViewModelCommand(async p => await ExecuteGuardarAjuste(), p => CanExecuteGuardar());
         }
 
+        // --- MODIFICA ESTO ---
+        // El método LoadAsync ahora carga la lista maestra y luego la filtra.
         public async Task LoadAsync()
         {
+
+            // 1. Obtenemos todos los productos y los guardamos en nuestra lista maestra.
             var productos = await _unitOfWork.Productos.GetAllAsync();
-            ProductosDisponibles.Clear();
-            foreach (var p in productos)
+            _todosLosProductos = new List<Producto>(productos);
+
+            // 2. Ejecutamos el filtro inicial para mostrar todos los productos al principio.
+            FiltrarProductos();
+        }
+
+        // --- AÑADE ESTO ---
+        // Nueva lógica centralizada para el filtrado de productos.
+        private void FiltrarProductos()
+        {
+
+            // Limpiamos la lista actual de la UI.
+            ProductosFiltrados.Clear();
+
+            // Verificamos si hay un texto de búsqueda.
+            if (string.IsNullOrWhiteSpace(TextoDeBusqueda))
             {
-                ProductosDisponibles.Add(p);
+                // Si no hay búsqueda, añadimos todos los productos de la lista maestra.
+                foreach (var producto in _todosLosProductos)
+                {
+                    ProductosFiltrados.Add(producto);
+                }
+            }
+            else
+            {
+                // Si hay búsqueda, filtramos la lista maestra y añadimos los resultados.
+                var productosCoincidentes = _todosLosProductos.Where(p =>
+                    p.Nombre.Contains(TextoDeBusqueda, StringComparison.OrdinalIgnoreCase) ||
+                    (p.OriginalEquipamentManufacture ?? "").Contains(TextoDeBusqueda, StringComparison.OrdinalIgnoreCase)
+                );
+
+                foreach (var producto in productosCoincidentes)
+                {
+                    ProductosFiltrados.Add(producto);
+                }
             }
         }
 
@@ -69,7 +123,7 @@ namespace DeluxeCarsDesktop.ViewModel
 
         private async Task ExecuteGuardarAjuste()
         {
-            // Determinamos el tipo de movimiento y la cantidad (positiva o negativa)
+            // Tu lógica de negocio original se mantiene intacta, ¡es perfecta!
             var tipo = EsEntrada ? "Ajuste Positivo" : "Ajuste Negativo";
             var cantidadAjuste = EsEntrada ? Math.Abs(Cantidad) : -Math.Abs(Cantidad);
 
@@ -90,12 +144,10 @@ namespace DeluxeCarsDesktop.ViewModel
                 {
                     try
                     {
-                        // Llamamos a nuestro servicio para que haga su magia.
                         await _stockAlertService.CheckAndCreateStockAlertAsync(ProductoSeleccionado.Id, _unitOfWork);
                     }
                     catch (Exception ex)
                     {
-                        // Si la alerta falla, no detenemos el flujo, solo lo registramos.
                         System.Diagnostics.Debug.WriteLine($"Error al verificar alertas de stock post-ajuste: {ex.Message}");
                     }
                 }
@@ -103,7 +155,6 @@ namespace DeluxeCarsDesktop.ViewModel
                 System.Windows.MessageBox.Show("Ajuste de inventario guardado exitosamente.", "Éxito");
                 CloseAction?.Invoke();
             }
-
             catch (Exception ex)
             {
                 System.Windows.MessageBox.Show($"Ocurrió un error al guardar el ajuste: {ex.Message}", "Error de Guardado");

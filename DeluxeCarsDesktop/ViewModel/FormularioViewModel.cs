@@ -1,5 +1,6 @@
-﻿using DeluxeCarsEntities;
+﻿using DeluxeCarsDesktop.Services;
 using DeluxeCarsDesktop.Utils;
+using DeluxeCarsEntities;
 using FontAwesome.Sharp;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -200,10 +201,24 @@ namespace DeluxeCarsDesktop.ViewModel
                     Icon = IconChar.HandHoldingUsd;
                     break;
 
+                case FormType.AjusteInventario:
+                    CurrentChildView = serviceProvider.GetService<AjusteInventarioViewModel>();
+                    Caption = "Ajustar Inventario de Producto"; // Título corregido
+                    Icon = IconChar.Calculator; // Ícono más apropiado
+                    break;
+
                 default:
                     Caption = "Formulario Desconocido";
                     Icon = IconChar.QuestionCircle;
                     break;
+
+            }
+            if (CurrentChildView is IAsyncLoadable loadableViewModel)
+            {
+                // Si lo hace, llama a su método LoadAsync().
+                // Usamos "_ =" para indicar que no necesitamos esperar a que termine (Fire-and-Forget),
+                // ya que no podemos usar 'await' en un constructor.
+                _ = loadableViewModel.LoadAsync();
             }
         }
     }

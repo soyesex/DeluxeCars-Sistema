@@ -7,10 +7,11 @@ namespace DeluxeCars.DataAccess.Repositories.Interfaces
     public interface IProductoRepository : IGenericRepository<Producto>
     {
         // Solo definimos los métodos que son únicos para este repositorio
+        Task<IEnumerable<Producto>> SearchActivosConStockAsync(string searchTerm);
         Task<Dictionary<int, int>> GetCurrentStocksAsync(IEnumerable<int> productIds);
         Task<int> GetCurrentStockAsync(int productoId);
         Task<Producto> GetByIdWithCategoriaAsync(int productoId);
-        Task<IEnumerable<Producto>> SearchAsync(ProductSearchCriteria criteria);
+        Task<PagedResult<ProductoStockDto>> SearchAsync(ProductSearchCriteria criteria);
         Task<IEnumerable<Producto>> GetAllWithCategoriaAsync();
         Task<IEnumerable<Producto>> GetLowStockProductsAsync();
         Task<int> CountLowStockProductsAsync();
@@ -20,5 +21,7 @@ namespace DeluxeCars.DataAccess.Repositories.Interfaces
         Task<IEnumerable<ProductoStockDto>> GetProductosConStockPositivoAsync();
         Task<int> CountAllAsync();
         Task<IEnumerable<ProductoStockDto>> SearchPublicCatalogAsync(string categoria, string orden);
+        Task<decimal> GetTotalInventoryValueAsync();
+        Task<int> CountOutOfStockProductsAsync();
     }
 }

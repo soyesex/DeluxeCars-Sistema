@@ -24,17 +24,17 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="0" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="Razón Social:" VerticalAlignment="Center"/>
-            <TextBox Grid.Row="0" Grid.Column="1" Style="{StaticResource DarkInputControlStyle}" Text="{Binding RazonSocial, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+            <TextBox Grid.Row="0" Grid.Column="1" Style="{StaticResource StandardFormTextBoxStyle}"
+                 materialDesign:HintAssist.Hint="Razón Social" Text="{Binding RazonSocial, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
 
-            <Label Grid.Row="1" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="Teléfono:" VerticalAlignment="Center"/>
-            <TextBox Grid.Row="1" Grid.Column="1" Style="{StaticResource DarkInputControlStyle}" Text="{Binding Telefono, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+            <TextBox Grid.Row="1" Grid.Column="1" Style="{StaticResource StandardFormTextBoxStyle}"
+                 materialDesign:HintAssist.Hint="Teléfono" Text="{Binding Telefono, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
 
-            <Label Grid.Row="2" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="Email:" VerticalAlignment="Center"/>
-            <TextBox Grid.Row="2" Grid.Column="1" Style="{StaticResource DarkInputControlStyle}" Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+            <TextBox Grid.Row="2" Grid.Column="1" Style="{StaticResource StandardFormTextBoxStyle}"
+                 materialDesign:HintAssist.Hint="Correo Electronico" Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
 
-            <Label Grid.Row="3" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="NIT:" VerticalAlignment="Center"/>
-            <TextBox Grid.Row="3" Grid.Column="1" Style="{StaticResource DarkInputControlStyle}" Text="{Binding NIT, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+            <TextBox Grid.Row="3" Grid.Column="1" Style="{StaticResource StandardFormTextBoxStyle}"
+                 materialDesign:HintAssist.Hint="NIT" Text="{Binding NIT, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
 
             <Label Grid.Row="4" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="Departamento:" VerticalAlignment="Center"/>
             <ComboBox Grid.Row="4" Grid.Column="1" Style="{DynamicResource MaterialDesignComboBox}"
@@ -67,8 +67,10 @@
         </Grid>
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-            <Button Content="Guardar" Style="{StaticResource DarkActionButtonStyle}" Command="{Binding GuardarCommand}" Width="100"/>
-            <Button Content="Cancelar" Style="{StaticResource DarkActionButtonStyle}" Command="{Binding CancelarCommand}" Width="100" Margin="10,0,0,0"/>
+            <Button Content="Guardar"  Style="{StaticResource ElegantShadowGhostButton}"
+                            Tag="{StaticResource Brush.Menu.YellowGold}" Command="{Binding GuardarCommand}" Width="100"/>
+            <Button Content="Cancelar"  Style="{StaticResource ElegantShadowGhostButton}"
+                            Tag="{StaticResource Brush.Menu.YellowGold}" Command="{Binding CancelarCommand}" Width="100" Margin="10,0,0,0"/>
         </StackPanel>
     </StackPanel>
 </UserControl>

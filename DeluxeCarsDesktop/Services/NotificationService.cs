@@ -1,18 +1,11 @@
-﻿using DeluxeCarsDesktop.Interfaces;
-using DeluxeCarsEntities;
+﻿using DeluxeCars.DataAccess.Repositories.Interfaces;
 using DeluxeCarsDesktop.Models.Notifications;
+using DeluxeCarsEntities;
+using DeluxeCarsShared.Interfaces;
 using Notifications.Wpf.Core;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
-using DeluxeCars.DataAccess.Repositories.Interfaces;
-using DeluxeCarsShared.Interfaces;
 
 namespace DeluxeCarsDesktop.Services
 {

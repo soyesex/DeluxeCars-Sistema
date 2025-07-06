@@ -1,48 +1,37 @@
-﻿using DeluxeCarsDesktop.Interfaces;
-using DeluxeCarsEntities;
+﻿using DeluxeCars.DataAccess.Repositories.Interfaces;
 using DeluxeCarsDesktop.Services;
-using System;
-using System.Collections.Generic;
+using DeluxeCarsDesktop.Utils;
+using DeluxeCarsEntities;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
-using DeluxeCars.DataAccess.Repositories.Interfaces;
-using DeluxeCarsShared.Interfaces;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
-    public class ClientesViewModel : ViewModelBase
+    public class ClientesViewModel : ViewModelBase, IAsyncLoadable
     {
         // --- Dependencias ---
         private readonly IUnitOfWork _unitOfWork;
         private readonly INavigationService _navigationService;
-        private readonly ICurrentUserService _currentUserService;
-
-        // --- Estado Interno ---
-        private List<Cliente> _todosLosClientes;
-
-        // --- Propiedades Públicas para Binding ---
+        private bool _isSearching = false;
+        private CancellationTokenSource _debounceCts;
+        // --- Propiedades para Binding ---
         private string _searchText;
         public string SearchText
         {
             get => _searchText;
             set
             {
-                // Usando el helper que acabamos de explicar
-                SetProperty(ref _searchText, value);
-                FiltrarClientes();
+                // Usamos el método que devuelve un bool para que el if funcione
+                if (SetPropertyAndCheck(ref _searchText, value))
+                {
+                    _ = TriggerDebouncedSearch();
+                }
             }
         }
 
-        private ObservableCollection<Cliente> _clientes;
-        public ObservableCollection<Cliente> Clientes
-        {
-            get => _clientes;
-            private set => SetProperty(ref _clientes, value);
-        }
+        public ObservableCollection<Cliente> Clientes { get; private set; }
 
         private Cliente _clienteSeleccionado;
         public Cliente ClienteSeleccionado
@@ -51,113 +40,245 @@ namespace DeluxeCarsDesktop.ViewModel
             set
             {
                 SetProperty(ref _clienteSeleccionado, value);
-                // Actualizamos el estado de los comandos cuando cambia la selección
                 (EditarClienteCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+                (ToggleEstadoCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+                (CrearFacturaCommand as ViewModelCommand)?.RaiseCanExecuteChanged(); // --- AÑADIDO ---
             }
         }
+
+        // --- Propiedades para KPIs (NUEVO) ---
+        private int _clientesActivos;
+        public int ClientesActivos { get => _clientesActivos; private set => SetProperty(ref _clientesActivos, value); }
+
+        private int _nuevosClientesMes;
+        public int NuevosClientesMes { get => _nuevosClientesMes; private set => SetProperty(ref _nuevosClientesMes, value); }
+
+
+        // --- Propiedades de Paginación ---
+        private int _numeroDePagina = 1;
+        public int NumeroDePagina
+        {
+            get => _numeroDePagina;
+            set { SetProperty(ref _numeroDePagina, value); _ = FiltrarClientes(); }
+        }
+
+        private int _tamañoDePagina = 15;
+        public int TamañoDePagina
+        {
+            get => _tamañoDePagina;
+            set { SetProperty(ref _tamañoDePagina, value); _ = FiltrarClientes(); }
+        }
+
+        private int _totalItems;
+        public int TotalItems
+        {
+            get => _totalItems;
+            private set { SetProperty(ref _totalItems, value); OnPropertyChanged(nameof(TotalPaginas)); }
+        }
+
+        public int TotalPaginas => (int)Math.Ceiling((double)TotalItems / TamañoDePagina);
+
+        public ObservableCollection<string> TiposCliente { get; private set; }
+        public ObservableCollection<Municipio> CiudadesDisponibles { get; private set; }
+
+        private string _tipoClienteSeleccionado;
+        public string TipoClienteSeleccionado
+        {
+            get => _tipoClienteSeleccionado;
+            set
+            {
+                // TAMBIÉN usa el debouncer
+                if (SetPropertyAndCheck(ref _tipoClienteSeleccionado, value))
+                {
+                    _ = TriggerDebouncedSearch();
+                }
+            }
+        }
+
+        private Municipio _ciudadSeleccionada;
+        public Municipio CiudadSeleccionada
+        {
+            get => _ciudadSeleccionada;
+            set
+            {
+                // Y TAMBIÉN usa el debouncer
+                if (SetPropertyAndCheck(ref _ciudadSeleccionada, value))
+                {
+                    _ = TriggerDebouncedSearch();
+                }
+            }
+        }
+
+
         // --- Comandos ---
         public ICommand NuevoClienteCommand { get; }
         public ICommand EditarClienteCommand { get; }
         public ICommand ToggleEstadoCommand { get; }
-        // public ICommand VerHistorialCommand { get; } // Para el futuro
+        public ICommand CrearFacturaCommand { get; }
+        public ICommand LimpiarFiltrosCommand { get; }
+        public ICommand IrAPaginaSiguienteCommand { get; }
+        public ICommand IrAPaginaAnteriorCommand { get; }
+        public ICommand AplicarFiltrosCommand { get; }
 
-
-        // --- Constructor ---
-        public ClientesViewModel(IUnitOfWork unitOfWork, ICurrentUserService currentUserService, INavigationService navigationService)
+        public ClientesViewModel(IUnitOfWork unitOfWork, INavigationService navigationService)
         {
             _unitOfWork = unitOfWork;
             _navigationService = navigationService;
-            _currentUserService = currentUserService;
 
-            _todosLosClientes = new List<Cliente>();
             Clientes = new ObservableCollection<Cliente>();
 
-            // El comando de desactivar ahora también depende del rol del usuario
-            ToggleEstadoCommand = new ViewModelCommand(
-                async p => await ExecuteToggleEstadoCommand(),
-                p => CanExecuteActions());
+            TiposCliente = new ObservableCollection<string> { "Todos", "Taller", "Persona Natural" };
+            CiudadesDisponibles = new ObservableCollection<Municipio>();
+            
+            AplicarFiltrosCommand = new ViewModelCommand(async _ => await FiltrarClientes()); // <-- AÑADE ESTO
 
-            NuevoClienteCommand = new ViewModelCommand(ExecuteNuevoClienteCommand);
-            EditarClienteCommand = new ViewModelCommand(ExecuteEditarClienteCommand, CanExecuteEditDelete);
-            ToggleEstadoCommand = new ViewModelCommand(async p => await ExecuteToggleEstadoCommand(), p => CanExecuteActions());
-
-            LoadClientesAsync();
-        }
-        private bool CanExecuteActions()
-        {
-            // El botón solo está activo si hay un cliente seleccionado Y el usuario es admin.
-            return ClienteSeleccionado != null && _currentUserService.IsAdmin;
+            NuevoClienteCommand = new ViewModelCommand(async _ => await ExecuteNuevoCliente());
+            EditarClienteCommand = new ViewModelCommand(async _ => await ExecuteEditarCliente(), _ => CanExecuteEditToggle());
+            ToggleEstadoCommand = new ViewModelCommand(async _ => await ExecuteToggleEstado(), _ => CanExecuteEditToggle());
+            CrearFacturaCommand = new ViewModelCommand(async _ => await ExecuteCrearFactura(), _ => CanExecuteEditToggle());
+            LimpiarFiltrosCommand = new ViewModelCommand(async _ => await ExecuteLimpiarFiltros());
+            // DESPUÉS
+            IrAPaginaSiguienteCommand = new ViewModelCommand(async _ => { if (NumeroDePagina < TotalPaginas) { NumeroDePagina++; await FiltrarClientes(); } });
+            IrAPaginaAnteriorCommand = new ViewModelCommand(async _ => { if (NumeroDePagina > 1) { NumeroDePagina--; await FiltrarClientes(); } });
         }
 
-        // --- Métodos de Lógica ---
-        private async Task LoadClientesAsync()
+        public async Task LoadAsync()
         {
+            await LoadFiltrosAsync();
+            await ExecuteLimpiarFiltros();
+            await LoadKpisAsync();
+        }
+        private async Task LoadFiltrosAsync()
+        {
+            CiudadesDisponibles.Clear();
+            CiudadesDisponibles.Add(new Municipio { Id = 0, Nombre = "Todas las Ciudades" });
+            var ciudadesRepo = await _unitOfWork.Municipios.GetAllAsync();
+            foreach (var ciudad in ciudadesRepo.OrderBy(c => c.Nombre))
+            {
+                CiudadesDisponibles.Add(ciudad);
+            }
+        }
+        private async Task FiltrarClientes()
+        {
+            if (_isSearching) return;
+            _isSearching = true;
+
             try
             {
-                var clientesDesdeRepo = await _unitOfWork.Clientes.GetAllAsync();
-                _todosLosClientes = clientesDesdeRepo.ToList();
-                FiltrarClientes();
+                // NOTA: Necesitaremos crear el método SearchAsync en el IClienteRepository
+                var pagedResult = await _unitOfWork.Clientes.SearchAsync(
+                SearchText,
+                TipoClienteSeleccionado,
+                CiudadSeleccionada?.Id, // Usamos el Id de la ciudad seleccionada
+                NumeroDePagina,
+                TamañoDePagina);
+
+                TotalItems = pagedResult.TotalCount;
+                Clientes.Clear();
+                foreach (var cliente in pagedResult.Items)
+                {
+                    Clientes.Add(cliente);
+                }
+
+                (IrAPaginaSiguienteCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+                (IrAPaginaAnteriorCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"No se pudieron cargar los clientes: {ex.Message}", "Error de Carga", MessageBoxButton.OK, MessageBoxImage.Error);
+                Debug.WriteLine($"Error al filtrar clientes: {ex.Message}");
+                MessageBox.Show("Ocurrió un error al cargar los clientes.", "Error");
             }
-        }
-        private void FiltrarClientes()
-        {
-            IEnumerable<Cliente> itemsFiltrados = _todosLosClientes;
-
-            if (!string.IsNullOrWhiteSpace(SearchText))
+            finally
             {
-                string lowerSearchText = SearchText.ToLower();
-                itemsFiltrados = itemsFiltrados.Where(c =>
-                    c.Nombre.ToLower().Contains(lowerSearchText) ||
-                    c.Email.ToLower().Contains(lowerSearchText) ||
-                    (c.Telefono != null && c.Telefono.Contains(SearchText)) // Teléfono no necesita ToLower
-                );
+                _isSearching = false;
             }
-
-            Clientes = new ObservableCollection<Cliente>(itemsFiltrados.OrderBy(c => c.Nombre));
         }
-        private bool CanExecuteEditDelete(object obj)
+        private async Task LoadKpisAsync()
         {
-            return ClienteSeleccionado != null;
-        }
-        private async void ExecuteNuevoClienteCommand(object parameter)
-        {
-            // La lógica para refrescar la lista después de crear se puede mejorar en el futuro
-            await _navigationService.OpenFormWindow(Utils.FormType.Cliente, 0);
-            await LoadClientesAsync();
-        }
-        private async void ExecuteEditarClienteCommand(object obj)
-        {
-            // 1. Llama al servicio de navegación para abrir el formulario en modo "Edición",
-            //    pasando el ID de la categoría seleccionada.
-            await _navigationService.OpenFormWindow(Utils.FormType.Cliente, ClienteSeleccionado.Id);
-
-            // 2. Al igual que antes, esta línea espera a que el formulario se cierre para refrescar la lista.
-            await LoadClientesAsync();
-        }
-
-        private async Task ExecuteToggleEstadoCommand()
-        {
-            var cliente = ClienteSeleccionado;
-            string accion = cliente.Estado ? "desactivar" : "activar";
-            var result = MessageBox.Show($"¿Estás seguro de que deseas {accion} al cliente '{cliente.Nombre}'?", "Confirmar", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (result == MessageBoxResult.No) return;
-
             try
             {
-                cliente.Estado = !cliente.Estado;
-                await _unitOfWork.Clientes.UpdateAsync(cliente);
+                ClientesActivos = await _unitOfWork.Clientes.CountActiveAsync();
+                NuevosClientesMes = await _unitOfWork.Clientes.CountNewThisMonthAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error al cargar KPIs de clientes: {ex.Message}");
+            }
+        }
+        private async Task ExecuteCrearFactura()
+        {
+            // Navega a la vista de facturación pasándole el ID del cliente seleccionado
+            await _navigationService.OpenFormWindow(FormType.Factura, ClienteSeleccionado.Id);
+        }
+        private async Task ExecuteLimpiarFiltros()
+        {
+            // 1. Asignamos el valor directamente a los campos privados para
+            //    EVITAR disparar los setters y las múltiples llamadas a FiltrarClientes().
+            _searchText = string.Empty;
+            _tipoClienteSeleccionado = TiposCliente.FirstOrDefault();
+            _ciudadSeleccionada = CiudadesDisponibles.FirstOrDefault();
+            _numeroDePagina = 1; // ¡Importante! También resetea la página a la primera.
+
+            // 2. Notificamos a la UI que todas estas propiedades han cambiado
+            //    para que los ComboBox y el TextBox se limpien visualmente.
+            OnPropertyChanged(nameof(SearchText));
+            OnPropertyChanged(nameof(TipoClienteSeleccionado));
+            OnPropertyChanged(nameof(CiudadSeleccionada));
+            OnPropertyChanged(nameof(NumeroDePagina));
+
+            // 3. Ahora, llamamos a FiltrarClientes UNA SOLA VEZ con todos los filtros ya reseteados.
+            await FiltrarClientes();
+        }
+
+        private bool CanExecuteEditToggle() => ClienteSeleccionado != null;
+
+        private async Task ExecuteNuevoCliente()
+        {
+            await _navigationService.OpenFormWindow(FormType.Cliente, 0);
+            await FiltrarClientes();
+        }
+
+        private async Task ExecuteEditarCliente()
+        {
+            await _navigationService.OpenFormWindow(FormType.Cliente, ClienteSeleccionado.Id);
+            await FiltrarClientes();
+        }
+
+        private async Task ExecuteToggleEstado()
+        {
+            string accion = ClienteSeleccionado.Estado ? "desactivar" : "activar";
+            var result = MessageBox.Show($"¿Seguro que deseas {accion} al cliente '{ClienteSeleccionado.Nombre}'?", "Confirmar", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                var clienteEnDB = await _unitOfWork.Clientes.GetByIdAsync(ClienteSeleccionado.Id);
+                clienteEnDB.Estado = !clienteEnDB.Estado;
                 await _unitOfWork.CompleteAsync();
-                await LoadClientesAsync(); // Recargamos para que se refleje el cambio
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al cambiar el estado del cliente: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                cliente.Estado = !cliente.Estado; // Revertimos el cambio en la UI
+                await FiltrarClientes();
             }
         }
+
+        private async Task TriggerDebouncedSearch()
+        {
+            try
+            {
+                // Cancela cualquier búsqueda anterior que estuviera esperando en el retardo
+                _debounceCts?.Cancel();
+                _debounceCts = new CancellationTokenSource();
+
+                // Espera 500ms. Si el usuario escribe otra letra, este delay se cancelará.
+                // Puedes ajustar este tiempo (300-800ms es lo usual).
+                await Task.Delay(500, _debounceCts.Token);
+
+                // Si el retardo no fue cancelado, ejecuta el filtro.
+                await FiltrarClientes();
+            }
+            catch (TaskCanceledException)
+            {
+                // Esto es normal y esperado, no hagas nada.
+                // Simplemente significa que el usuario siguió escribiendo.
+            }
+        }
+
     }
 }

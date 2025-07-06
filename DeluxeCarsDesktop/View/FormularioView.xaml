@@ -10,19 +10,30 @@
         Title="Formulario"
         WindowStyle="None"
         ResizeMode="NoResize"
-        Height="720" Width="1280"
-        MinHeight="300" MinWidth="800"
-        MaxHeight="1080" MaxWidth="1920"
-        SizeToContent="WidthAndHeight"
+        Width="1100" 
+        FontFamily="{DynamicResource Font.SourceSans3}"
+        Height="700"
         WindowStartupLocation="CenterScreen"
         Background="Transparent"
         AllowsTransparency="True" 
         xmlns:viewModel="clr-namespace:DeluxeCarsDesktop.ViewModel"
         xmlns:userControl="clr-namespace:DeluxeCarsDesktop.View.UserControls">
+
+    <!--<DataTemplate DataType="{x:Type viewModel:AjusteInventarioViewModel}">
+       <userControl:NotaDeCreditoUserControl/>
+   </DataTemplate>-->
     
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibility"/>
 
+        <DataTemplate DataType="{x:Type viewModel:FacturacionViewModel}">
+            <userControl:FacturacionUserControl/>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type viewModel:AjusteInventarioViewModel}">
+            <userControl:AjusteInventarioUserControl/>
+        </DataTemplate>
+        
         <DataTemplate DataType="{x:Type viewModel:NotaDeCreditoViewModel}">
             <userControl:NotaDeCreditoUserControl/>
         </DataTemplate>
@@ -59,28 +70,8 @@
             <userControl:ProveedorFormUserControl />
         </DataTemplate>
 
-        <DataTemplate DataType="{x:Type viewModel:DepartamentoFormViewModel}">
-            <userControl:DepartamentoFormUserControl />
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type viewModel:MunicipioFormViewModel}">
-            <userControl:MunicipioFormUserControl />
-        </DataTemplate>
-
         <DataTemplate DataType="{x:Type viewModel:PedidoFormViewModel}">
             <userControl:PedidoFormUserControl />
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type viewModel:ServicioFormViewModel}">
-            <userControl:ServicioFormUserControl />
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type viewModel:MetodoPagoFormViewModel}">
-            <userControl:MetodoPagoFormUserControl />
-        </DataTemplate>
-
-        <DataTemplate DataType="{x:Type viewModel:DetalleFacturaFormViewModel}">
-            <userControl:DetalleFacturaFormUserControl />
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type viewModel:RolFormViewModel}">
@@ -133,82 +124,82 @@
                         </RadialGradientBrush>
                     </Border.Background>
 
-                    <Grid>
+                <Grid>
 
-                    <Grid.RowDefinitions>
-                        <!--Control bar-->
-                        <RowDefinition Height="25"/>
-                        <!--Header / Caption-->
-                        <RowDefinition Height="40"/>
-                        <!--Content section / Child views-->
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-
-                    <StackPanel x:Name="pnlControlBar"
-                    Grid.Row="0"
-                    Orientation="Horizontal"
-                    FlowDirection="RightToLeft"
-                    Background="Transparent"
-                    Margin="0,0,5,0"
-                    MouseLeftButtonDown="pnlControlBar_MouseLeftButtonDown"
-                    MouseEnter="pnlControlBar_MouseEnter">
-                        <Button x:Name="btnClose"
-                    Style="{StaticResource controlButton}"
-                    Tag="{StaticResource color4}"
-                    Click="btnClose_Click">
-                            <fa:IconImage Icon="Xmark" Style="{StaticResource controlButtonIcon}"/>
-
-                        </Button>
-
-                        <Button x:Name="btnMaximize"
-                    Style="{StaticResource controlButton}"
-                    Tag="{StaticResource color6}"
-                    Click="btnMaximize_Click">
-                            <fa:IconImage Icon="Square" Style="{StaticResource controlButtonIcon}"/>
-
-                        </Button>
-
-                        <Button x:Name="btnMinimize"
-                    Style="{StaticResource controlButton}"
-                    Tag="{StaticResource color4}"
-                    Click="btnMinimize_Click">
-                            <fa:IconImage Icon="WindowMinimize" Width="12" Style="{StaticResource controlButtonIcon}"/>
-
-                        </Button>
-
-                    </StackPanel>
-
+                <Grid.RowDefinitions>
+                    <!--Control bar-->
+                    <RowDefinition Height="25"/>
                     <!--Header / Caption-->
-                    <Grid Grid.Row="1">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
-
-                        <!--Caption-->
-                        <StackPanel Grid.Column="0"
-                        Orientation="Horizontal"
-                        VerticalAlignment="Center">
-                            <fa:IconImage Icon="{Binding Icon}"
-                              Height="20"
-                              Width="20"
-                              Foreground="{StaticResource titleColor2}"
-                              Margin="35,0,10,0"/>
-
-                            <TextBlock Text="{Binding Caption}"
-                           Foreground="{StaticResource titleColor2}"
-                           FontSize="16"
-                           FontFamily="Montserrat"
-                           FontWeight="Medium"
-                           VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Grid>
-
+                    <RowDefinition Height="40"/>
                     <!--Content section / Child views-->
-                    <ContentControl x:Name="FormContentControl" 
-                        Content="{Binding CurrentChildView}"
-                        Grid.Row="2"
-                        Margin="25 10"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel x:Name="pnlControlBar"
+                Grid.Row="0"
+                Orientation="Horizontal"
+                FlowDirection="RightToLeft"
+                Background="Transparent"
+                Margin="0,0,5,0"
+                MouseLeftButtonDown="pnlControlBar_MouseLeftButtonDown"
+                MouseEnter="pnlControlBar_MouseEnter">
+                    <Button x:Name="btnClose"
+                Style="{StaticResource controlButton}"
+                Tag="{StaticResource color4}"
+                Click="btnClose_Click">
+                        <fa:IconImage Icon="Xmark" Style="{StaticResource controlButtonIcon}"/>
+
+                    </Button>
+
+                    <Button x:Name="btnMaximize"
+                Style="{StaticResource controlButton}"
+                Tag="{StaticResource color6}"
+                Click="btnMaximize_Click">
+                        <fa:IconImage Icon="Square" Style="{StaticResource controlButtonIcon}"/>
+
+                    </Button>
+
+                    <Button x:Name="btnMinimize"
+                Style="{StaticResource controlButton}"
+                Tag="{StaticResource color4}"
+                Click="btnMinimize_Click">
+                        <fa:IconImage Icon="WindowMinimize" Width="12" Style="{StaticResource controlButtonIcon}"/>
+
+                    </Button>
+
+                </StackPanel>
+
+                <!--Header / Caption-->
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+
+                    <!--Caption-->
+                    <StackPanel Grid.Column="0"
+                    Orientation="Horizontal"
+                    VerticalAlignment="Center">
+                        <fa:IconImage Icon="{Binding Icon}"
+                            Height="20"
+                            Width="20"
+                            Foreground="{StaticResource titleColor2}"
+                            Margin="35,0,10,0"/>
+
+                        <TextBlock Text="{Binding Caption}"
+                        Foreground="{StaticResource titleColor2}"
+                        FontSize="16"
+                        FontFamily="Montserrat"
+                        FontWeight="Medium"
+                        VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+
+                <!--Content section / Child views-->
+                <ContentControl x:Name="FormContentControl" 
+                    Content="{Binding CurrentChildView}"
+                    Grid.Row="2"
+                    Margin="25 10"/>
                 </Grid>
             </Border>
         </Border>

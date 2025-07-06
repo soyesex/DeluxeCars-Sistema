@@ -15,6 +15,67 @@ namespace DeluxeCars.DataAccess.Repositories.Implementations
         {
             return await _context.Productos.CountAsync();
         }
+        public async Task<IEnumerable<Producto>> SearchActivosConStockAsync(string searchTerm)
+        {
+            // 1. Buscamos productos activos que coincidan por nombre u OEM.
+            //    Limitamos la búsqueda a 20 para no sobrecargar la lista de resultados.
+            var productosCoincidentes = await _dbSet
+                .Where(p => p.Estado == true &&
+                            (p.Nombre.Contains(searchTerm) || p.OriginalEquipamentManufacture.Contains(searchTerm)))
+                .Take(20)
+                .AsNoTracking()
+                .ToListAsync();
+
+            if (!productosCoincidentes.Any())
+            {
+                return Enumerable.Empty<Producto>(); // Devuelve una lista vacía si no hay coincidencias
+            }
+
+            // 2. Obtenemos el stock actual SOLO para los productos que encontramos.
+            var ids = productosCoincidentes.Select(p => p.Id);
+            var stocks = await GetCurrentStocksAsync(ids);
+
+            // 3. Devolvemos únicamente los productos cuyo stock es mayor a cero.
+            return productosCoincidentes.Where(p => stocks.GetValueOrDefault(p.Id, 0) > 0);
+        }
+        private async Task<Dictionary<int, int>> GetAllProductStocksAsync()
+        {
+            // Esta consulta va a la tabla de movimientos UNA SOLA VEZ, agrupa por producto y suma.
+            return await _context.MovimientosInventario
+                .GroupBy(m => m.IdProducto)
+                .Select(g => new
+                {
+                    ProductoId = g.Key,
+                    Stock = g.Sum(m => m.TipoMovimiento == "Entrada por Compra" ? m.Cantidad : -m.Cantidad)
+                })
+                .ToDictionaryAsync(r => r.ProductoId, r => r.Stock);
+        }
+        public async Task<decimal> GetTotalInventoryValueAsync()
+        {
+            // 1. Obtenemos todos los productos y todos los stocks en dos consultas simples.
+            var todosLosProductos = await _context.Productos.AsNoTracking().ToListAsync();
+            var todosLosStocks = await GetAllProductStocksAsync();
+
+            // 2. Calculamos el valor total en la memoria de la aplicación.
+            return todosLosProductos.Sum(p => p.Precio * todosLosStocks.GetValueOrDefault(p.Id, 0));
+        }
+
+        public async Task<int> CountOutOfStockProductsAsync()
+        {
+            var todosLosProductos = await _context.Productos.Select(p => p.Id).ToListAsync();
+            var todosLosStocks = await GetAllProductStocksAsync();
+
+            // Contamos en memoria.
+            int count = 0;
+            foreach (var id in todosLosProductos)
+            {
+                if (todosLosStocks.GetValueOrDefault(id, 0) == 0)
+                {
+                    count++;
+                }
+            }
+            return count;
+        }
         private IQueryable<ProductoStockDto> GetProductosConStockCalculado()
         {
             return _dbSet.Select(p => new ProductoStockDto
@@ -63,25 +124,42 @@ namespace DeluxeCars.DataAccess.Repositories.Implementations
         }
         public async Task<int> CountLowStockProductsAsync()
         {
-            return await _context.Productos
-                .CountAsync(p => p.StockMinimo.HasValue && p.StockMinimo > 0 &&
-                    (_context.MovimientosInventario
-                           .Where(m => m.IdProducto == p.Id)
-                           .Sum(m => m.TipoMovimiento == "Entrada por Compra" ? m.Cantidad : -m.Cantidad) < p.StockMinimo.Value));
+            var productosConStockMinimo = await _context.Productos
+                .Where(p => p.StockMinimo.HasValue && p.StockMinimo > 0)
+                .Select(p => new { p.Id, p.StockMinimo })
+                .ToListAsync();
+
+            if (!productosConStockMinimo.Any()) return 0;
+
+            var ids = productosConStockMinimo.Select(p => p.Id);
+            var stocksActuales = await GetCurrentStocksAsync(ids);
+
+            // Contamos en memoria.
+            return productosConStockMinimo.Count(p => stocksActuales.GetValueOrDefault(p.Id, 0) < p.StockMinimo.Value);
         }
         public async Task<Dictionary<int, int>> GetCurrentStocksAsync(IEnumerable<int> productIds)
         {
-            // Esta consulta va a la tabla de movimientos una sola vez
             return await _context.MovimientosInventario
-                // Filtra solo por los IDs de los productos que nos interesan
-                .Where(m => productIds.Contains(m.IdProducto))
-                // Agrupa por IdProducto
-                .GroupBy(m => m.IdProducto)
-                // Para cada grupo, crea un par clave-valor: (IdProducto, Suma de Cantidades)
-                .Select(g => new { ProductId = g.Key, Stock = g.Sum(m => m.Cantidad) })
-                // Convierte el resultado final a un diccionario para un acceso súper rápido.
-                .ToDictionaryAsync(r => r.ProductId, r => r.Stock);
+               .Where(m => productIds.Contains(m.IdProducto))
+               .GroupBy(m => m.IdProducto)
+               .Select(g => new { ProductId = g.Key, Stock = g.Sum(m => m.TipoMovimiento == "Entrada por Compra" ? m.Cantidad : -m.Cantidad) })
+               .ToDictionaryAsync(r => r.ProductId, r => r.Stock);
         }
+
+        private async Task<Dictionary<int, string>> GetPrimaryProvidersAsync(IEnumerable<int> productIds)
+        {
+            return await _context.ProductoProveedores
+                .Where(pp => productIds.Contains(pp.IdProducto))
+                .Include(pp => pp.Proveedor)
+                .GroupBy(pp => pp.IdProducto)
+                .Select(g => new
+                {
+                    ProductId = g.Key,
+                    ProviderName = g.Select(x => x.Proveedor.RazonSocial).FirstOrDefault()
+                })
+                .ToDictionaryAsync(r => r.ProductId, r => r.ProviderName);
+        }
+
         public async Task<int> GetCurrentStockAsync(int productoId)
         {
             return await _context.MovimientosInventario
@@ -95,66 +173,77 @@ namespace DeluxeCars.DataAccess.Repositories.Implementations
                                  .FirstOrDefaultAsync(p => p.Id == productoId);
         }
 
-        public async Task<IEnumerable<Producto>> SearchAsync(ProductSearchCriteria criteria)
+        public async Task<PagedResult<ProductoStockDto>> SearchAsync(ProductSearchCriteria criteria)
         {
-            // 1. Empezamos con una consulta base que trae todos los productos
-            //    Usamos AsQueryable() para poder añadirle filtros dinámicamente.
-            var query = _context.Productos
-                                .Include(p => p.Categoria) // Incluimos la categoría para mostrar su nombre
-                                .AsQueryable();
+            var query = _context.Productos.AsQueryable();
 
-            // 2. Aplicamos cada filtro solo si tiene un valor
-
-            // --- Filtro por Categoría ---
+            // --- Aplicamos filtros que sí se pueden traducir bien a SQL ---
             if (criteria.CategoryId.HasValue && criteria.CategoryId.Value != 0)
             {
                 query = query.Where(p => p.IdCategoria == criteria.CategoryId.Value);
             }
 
-            // --- Filtro por Estado de Stock ---
-            if (!string.IsNullOrWhiteSpace(criteria.StockStatus))
+            if (!string.IsNullOrWhiteSpace(criteria.UniversalSearchText))
             {
+                string searchText = criteria.UniversalSearchText;
+                query = query.Where(p => p.Nombre.Contains(searchText) || p.OriginalEquipamentManufacture.Contains(searchText));
+            }
 
+            // --- La paginación se hace sobre esta consulta base ---
+            var totalCount = await query.CountAsync();
+
+            var productosDePagina = await query
+                .OrderBy(p => p.Id)
+                .Skip((criteria.PageNumber - 1) * criteria.PageSize)
+                .Take(criteria.PageSize)
+                .Include(p => p.Categoria) // Incluimos la categoría para tener el nombre
+                .AsNoTracking()
+                .ToListAsync();
+
+            var productIds = productosDePagina.Select(p => p.Id).ToList();
+
+            // --- Obtenemos datos relacionados (stock, proveedor) en consultas separadas y eficientes ---
+            var stocks = await GetCurrentStocksAsync(productIds);
+            var proveedores = await GetPrimaryProvidersAsync(productIds);
+
+            // --- Construimos el DTO final en memoria ---
+            var items = productosDePagina.Select(p => new ProductoStockDto
+            {
+                Id = p.Id,
+                Nombre = p.Nombre,
+                OEM = p.OriginalEquipamentManufacture,
+                NombreCategoria = p.Categoria?.Nombre,
+                Precio = p.Precio,
+                Estado = p.Estado,
+                StockMinimo = p.StockMinimo,
+                Descripcion = p.Descripcion,
+                ImagenUrl = p.ImagenUrl,
+                StockActual = stocks.GetValueOrDefault(p.Id, 0),
+                NombreProveedorPrincipal = proveedores.GetValueOrDefault(p.Id)
+            }).ToList();
+
+            // --- Filtro por estado de stock (se aplica en memoria después de obtener los datos) ---
+            if (!string.IsNullOrWhiteSpace(criteria.StockStatus) && criteria.StockStatus != "Todos")
+            {
                 switch (criteria.StockStatus)
                 {
                     case "En Stock":
-                        // Un producto está "En Stock" si la suma de sus movimientos es > 0
-                        query = query.Where(p => _context.MovimientosInventario
-                                                       .Where(m => m.IdProducto == p.Id)
-                                                       .Sum(m => (int?)m.Cantidad) > 0);
+                        items = items.Where(p => p.StockActual > 0).ToList();
                         break;
                     case "Agotado":
-                        // Un producto está "Agotado" si la suma es 0 o no tiene movimientos
-                        query = query.Where(p => (_context.MovimientosInventario
-                                                      .Where(m => m.IdProducto == p.Id)
-                                                      .Sum(m => (int?)m.Cantidad) ?? 0) == 0);
+                        items = items.Where(p => p.StockActual == 0).ToList();
                         break;
                     case "Bajo Stock":
-                        // "Bajo Stock" si la suma es > 0 Y es menor que su StockMinimo configurado
-                        query = query.Where(p => p.StockMinimo.HasValue && p.StockMinimo > 0 &&
-                                                 (_context.MovimientosInventario
-                                                        .Where(m => m.IdProducto == p.Id)
-                                                        .Sum(m => (int?)m.Cantidad) ?? 0) < p.StockMinimo);
+                        items = items.Where(p => p.StockMinimo.HasValue && p.StockMinimo > 0 && p.StockActual < p.StockMinimo.Value).ToList();
                         break;
                 }
             }
 
-            // --- Filtro de Texto Universal ---
-            if (!string.IsNullOrWhiteSpace(criteria.UniversalSearchText))
+            return new PagedResult<ProductoStockDto>
             {
-                string searchText = criteria.UniversalSearchText;
-
-                // NOTA: No usamos .ToLower() aquí porque ya configuramos la base de datos
-                // para que sea case-insensitive (CI). La BD lo hará más rápido.
-                query = query.Where(p =>
-                    p.Nombre.Contains(searchText) ||
-                    p.OriginalEquipamentManufacture.Contains(searchText) ||
-                    p.Descripcion.Contains(searchText)
-                );
-            }
-
-            // 3. Finalmente, ejecutamos la consulta en la base de datos
-            return await query.AsNoTracking().ToListAsync();
+                Items = items,
+                TotalCount = totalCount
+            };
         }
 
         public async Task<IEnumerable<Producto>> GetAssociatedProductsAsync(int proveedorId)

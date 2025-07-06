@@ -137,9 +137,52 @@ namespace DeluxeCars.DataAccess
             // --- INICIO DEL CÓDIGO A PEGAR ---
 
             modelBuilder.Entity<Cliente>().HasData(
-                new Cliente { Id = 2, Nombre = "Taller \"El Rápido\"", Telefono = "3009988776", Email = "compras@tallerrapido.com", Estado = true },
-                new Cliente { Id = 3, Nombre = "Lucía Fernandez", Telefono = "3215554433", Email = "lucia.f@email.com", Estado = true }
-            );
+                 new Cliente
+                 {
+                     Id = 1,
+                     Nombre = "Consumidor Final",
+                     Telefono = "N/A",
+                     Email = "consumidor@final.com",
+                     Estado = true,
+                     Identificacion = "999999999",
+                     Direccion = "N/A",
+                     TipoIdentificacion = "N/A", // Añadido para que no sea nulo
+                     IdCiudad = null,
+                     // --- VALORES AÑADIDOS ---
+                     TipoCliente = "Persona Natural",
+                     FechaCreacion = new DateTime(2024, 1, 1) // Usamos una fecha fija para datos iniciales
+                 },
+                 new Cliente
+                 {
+                     Id = 2,
+                     Nombre = "Taller \"El Rápido\"",
+                     Telefono = "3009988776",
+                     Email = "compras@tallerrapido.com",
+                     Estado = true,
+                     Identificacion = "900123456-7",
+                     Direccion = "Calle Falsa 123",
+                     TipoIdentificacion = "NIT",
+                     IdCiudad = null,
+                     // --- VALORES AÑADIDOS ---
+                     TipoCliente = "Taller",
+                     FechaCreacion = new DateTime(2024, 1, 1)
+                 },
+                 new Cliente
+                 {
+                     Id = 3,
+                     Nombre = "Lucía Fernandez",
+                     Telefono = "3215554433",
+                     Email = "lucia.f@email.com",
+                     Estado = true,
+                     Identificacion = "1098765432",
+                     Direccion = "Avenida Siempre Viva 45",
+                     TipoIdentificacion = "CC",
+                     IdCiudad = null,
+                     // --- VALORES AÑADIDOS ---
+                     TipoCliente = "Persona Natural",
+                     FechaCreacion = new DateTime(2024, 1, 1)
+                 }
+             );
 
             modelBuilder.Entity<Proveedor>().HasData(
                 new Proveedor { Id = 1, RazonSocial = "AutoPartes El Frenazo S.A.S.", NIT = "900.123.456-7", Telefono = "3101234567", Email = "compras@elfrenazo.com", IdMunicipio = 7, Estado = true },
@@ -153,6 +196,170 @@ namespace DeluxeCars.DataAccess
                 new Producto { Id = 8, IdCategoria = 3, Nombre = "Bujía de Iridio", OriginalEquipamentManufacture = "IR-7700", Precio = 45000, Descripcion = "Bujía de alto rendimiento NGK para una mejor combustión.", Estado = true, UnidadMedida = "Unidad", StockMinimo = 20, UltimoPrecioCompra = 25000 },
                 new Producto { Id = 9, IdCategoria = 5, Nombre = "Batería 12V 850A", OriginalEquipamentManufacture = "BAT-12850", Precio = 550000, Descripcion = "Batería sellada MAC Gold Plus, libre de mantenimiento.", Estado = true, UnidadMedida = "Unidad", StockMinimo = 5, UltimoPrecioCompra = 390000 },
                 new Producto { Id = 10, IdCategoria = 6, Nombre = "Kit de Embrague", OriginalEquipamentManufacture = "ACK-2105", Precio = 750000, Descripcion = "Kit de clutch completo LUK para Chevrolet Spark GT.", Estado = true, UnidadMedida = "Kit", StockMinimo = 4, UltimoPrecioCompra = 550000 }
+            );
+
+            // En AppDbContext.cs, dentro de OnModelCreating
+
+            modelBuilder.Entity<Producto>().HasData(
+                // ... tus 10 productos existentes ...
+
+                // --- AÑADE ESTOS NUEVOS PRODUCTOS ---
+                new Producto
+                {
+                    Id = 11,
+                    IdCategoria = 4,
+                    Nombre = "Filtro de Combustible",
+                    OriginalEquipamentManufacture = "FC-5501",
+                    Precio = 65000,
+                    Descripcion = "Filtro de gasolina para Chevrolet Sail, Onix.",
+                    Estado = true,
+                    UnidadMedida = "Unidad",
+                    StockMinimo = 20,
+                    UltimoPrecioCompra = 38000
+                },
+                new Producto
+                {
+                    Id = 12,
+                    IdCategoria = 2,
+                    Nombre = "Terminal de Dirección",
+                    OriginalEquipamentManufacture = "TR-3320",
+                    Precio = 95000,
+                    Descripcion = "Terminal axial para Kia Rio, Hyundai Accent.",
+                    Estado = true,
+                    UnidadMedida = "Unidad",
+                    StockMinimo = 10,
+                    UltimoPrecioCompra = 55000
+                },
+                new Producto
+                {
+                    Id = 13,
+                    IdCategoria = 5,
+                    Nombre = "Alternador 12V 90A",
+                    OriginalEquipamentManufacture = "ALT-9001",
+                    Precio = 850000,
+                    Descripcion = "Alternador genérico de alta capacidad para varios modelos.",
+                    Estado = true,
+                    UnidadMedida = "Unidad",
+                    StockMinimo = 3,
+                    UltimoPrecioCompra = 600000
+                },
+                new Producto
+                {
+                    Id = 14,
+                    IdCategoria = 3,
+                    Nombre = "Bomba de Agua",
+                    OriginalEquipamentManufacture = "BMA-205B",
+                    Precio = 280000,
+                    Descripcion = "Bomba de agua con empaque para Ford Fiesta y Ecosport.",
+                    Estado = true,
+                    UnidadMedida = "Unidad",
+                    StockMinimo = 5,
+                    UltimoPrecioCompra = 180000
+                },
+                new Producto
+                {
+                    Id = 15,
+                    IdCategoria = 1,
+                    Nombre = "Líquido de Frenos DOT 4",
+                    OriginalEquipamentManufacture = "LF-DOT4-500",
+                    Precio = 38000,
+                    Descripcion = "Botella de 500ml de líquido de frenos sintético.",
+                    Estado = true,
+                    UnidadMedida = "Botella",
+                    StockMinimo = 30,
+                    UltimoPrecioCompra = 22000
+                },
+                new Producto
+                {
+                    Id = 16,
+                    IdCategoria = 6,
+                    Nombre = "Aceite para Transmisión 75W-90",
+                    OriginalEquipamentManufacture = "OIL-75W90",
+                    Precio = 90000,
+                    Descripcion = "Aceite sintético para caja de cambios manual.",
+                    Estado = true,
+                    UnidadMedida = "Litro",
+                    StockMinimo = 12,
+                    UltimoPrecioCompra = 65000
+                },
+                new Producto
+                {
+                    Id = 17,
+                    IdCategoria = 4,
+                    Nombre = "Filtro de Cabina Carbón Activado",
+                    OriginalEquipamentManufacture = "FC-C220",
+                    Precio = 55000,
+                    Descripcion = "Filtro de aire para cabina con carbón activado anti-olores.",
+                    Estado = true,
+                    UnidadMedida = "Unidad",
+                    StockMinimo = 15,
+                    UltimoPrecioCompra = 30000
+                },
+                new Producto
+                {
+                    Id = 18,
+                    IdCategoria = 2,
+                    Nombre = "Bieleta de Suspensión Delantera",
+                    OriginalEquipamentManufacture = "BIE-1090",
+                    Precio = 60000,
+                    Descripcion = "Bieleta o 'lápiz' de barra estabilizadora para Mazda 2.",
+                    Estado = true,
+                    UnidadMedida = "Unidad",
+                    StockMinimo = 20,
+                    UltimoPrecioCompra = 35000
+                },
+                new Producto
+                {
+                    Id = 19,
+                    IdCategoria = 3,
+                    Nombre = "Empaque de Culata",
+                    OriginalEquipamentManufacture = "EMP-C16",
+                    Precio = 120000,
+                    Descripcion = "Empaque de culata multilámina para Renault Logan/Sandero 1.6L 8V.",
+                    Estado = true,
+                    UnidadMedida = "Unidad",
+                    StockMinimo = 5,
+                    UltimoPrecioCompra = 75000
+                },
+                new Producto
+                {
+                    Id = 20,
+                    IdCategoria = 5,
+                    Nombre = "Sensor de Oxígeno (Sonda Lambda)",
+                    OriginalEquipamentManufacture = "O2S-4P",
+                    Precio = 250000,
+                    Descripcion = "Sensor de oxígeno de 4 pines, conector universal.",
+                    Estado = true,
+                    UnidadMedida = "Unidad",
+                    StockMinimo = 8,
+                    UltimoPrecioCompra = 160000
+                },
+                new Producto
+                {
+                    Id = 21,
+                    IdCategoria = 1,
+                    Nombre = "Cilindro Maestro de Freno",
+                    OriginalEquipamentManufacture = "CMF-88A",
+                    Precio = 310000,
+                    Descripcion = "Bomba de freno principal para Nissan March / Versa.",
+                    Estado = true,
+                    UnidadMedida = "Unidad",
+                    StockMinimo = 4,
+                    UltimoPrecioCompra = 220000
+                },
+                new Producto
+                {
+                    Id = 22,
+                    IdCategoria = 6,
+                    Nombre = "Sincronizador de 3ra y 4ta",
+                    OriginalEquipamentManufacture = "SYNC-34-RN",
+                    Precio = 380000,
+                    Descripcion = "Anillos sincronizadores para caja de Renault Twingo.",
+                    Estado = true,
+                    UnidadMedida = "Juego",
+                    StockMinimo = 3,
+                    UltimoPrecioCompra = 250000
+                }
             );
 
             // --- CONFIGURACIÓN DE ENTIDADES ---
@@ -181,6 +388,7 @@ namespace DeluxeCars.DataAccess
             modelBuilder.Entity<Producto>(entity =>
             {
                 entity.Property(p => p.Precio).HasColumnType("decimal(18, 2)");
+                entity.Property(p => p.UltimoPrecioCompra).HasColumnType("decimal(18, 2)");
                 entity.HasOne(p => p.Categoria)
                       .WithMany(c => c.Productos)
                       .HasForeignKey(p => p.IdCategoria)
@@ -211,7 +419,7 @@ namespace DeluxeCars.DataAccess
                 entity.Property(dp => dp.PrecioUnitario).HasColumnType("decimal(18, 2)");
                 entity.Property(dp => dp.Descuento).HasColumnType("decimal(18, 2)");
                 entity.Property(dp => dp.IVA).HasColumnType("decimal(18, 2)");
-                entity.Property(dp => dp.Total).HasComputedColumnSql("((Cantidad * PrecioUnitario - ISNULL(Descuento, 0)) * (1 + ISNULL(IVA, 0)/100))", stored: true);
+                entity.Property(dp => dp.Total).HasColumnType("decimal(18, 2)");
                 entity.HasOne(dp => dp.Pedido)
                       .WithMany(p => p.DetallesPedidos)
                       .HasForeignKey(dp => dp.IdPedido)
@@ -238,6 +446,9 @@ namespace DeluxeCars.DataAccess
                       .WithMany(mp => mp.Facturas)
                       .HasForeignKey(f => f.IdMetodoPago)
                       .OnDelete(DeleteBehavior.NoAction);
+                entity.Property(f => f.SubTotal).HasColumnType("decimal(18, 2)");
+                entity.Property(f => f.TotalIVA).HasColumnType("decimal(18, 2)");
+                entity.Property(f => f.Total).HasColumnType("decimal(18, 2)");
             });
 
             // DetalleFactura
@@ -246,8 +457,10 @@ namespace DeluxeCars.DataAccess
                 entity.Property(df => df.PrecioUnitario).HasColumnType("decimal(18, 2)");
                 entity.Property(df => df.Descuento).HasColumnType("decimal(18, 2)");
                 entity.Property(df => df.IVA).HasColumnType("decimal(18, 2)");
-                entity.Property(df => df.SubTotalLinea).HasComputedColumnSql("(Cantidad * PrecioUnitario - ISNULL(Descuento, 0))", stored: true);
-                entity.Property(df => df.Total).HasComputedColumnSql("((Cantidad * PrecioUnitario - ISNULL(Descuento, 0)) * (1 + ISNULL(IVA, 0)/100))", stored: true);
+                //entity.Property(df => df.SubTotalLinea).HasComputedColumnSql("(Cantidad * PrecioUnitario - ISNULL(Descuento, 0))", stored: true);
+                //entity.Property(df => df.Total).HasComputedColumnSql("((Cantidad * PrecioUnitario - ISNULL(Descuento, 0)) * (1 + ISNULL(IVA, 0)/100))", stored: true);
+                entity.Property(df => df.SubTotalLinea).HasColumnType("decimal(18, 2)");
+                entity.Property(df => df.Total).HasColumnType("decimal(18, 2)");
                 entity.HasOne(df => df.Factura)
                       .WithMany(f => f.DetallesFactura)
                       .HasForeignKey(df => df.IdFactura)
@@ -318,6 +531,26 @@ namespace DeluxeCars.DataAccess
                 entity.HasKey(pf => new { pf.IdPagoCliente, pf.IdFactura });
                 entity.HasOne(pf => pf.Factura).WithMany(f => f.PagosRecibidos).HasForeignKey(pf => pf.IdFactura);
                 entity.HasOne(pf => pf.PagoCliente).WithMany(p => p.FacturasCubiertas).HasForeignKey(pf => pf.IdPagoCliente);
+            });
+
+            modelBuilder.Entity<MetodoPago>(entity =>
+            {
+                entity.Property(mp => mp.ComisionPorcentaje).HasColumnType("decimal(5, 2)"); // ej: 5 dígitos, 2 decimales para porcentajes
+            });
+
+            modelBuilder.Entity<MovimientoInventario>(entity =>
+            {
+                entity.Property(mi => mi.CostoUnitario).HasColumnType("decimal(18, 2)");
+            });
+
+            modelBuilder.Entity<Orden>(entity =>
+            {
+                entity.Property(o => o.TotalOrden).HasColumnType("decimal(18, 2)");
+            });
+
+            modelBuilder.Entity<OrdenDetalle>(entity =>
+            {
+                entity.Property(od => od.PrecioUnitario).HasColumnType("decimal(18, 2)");
             });
 
             // Otros modelos

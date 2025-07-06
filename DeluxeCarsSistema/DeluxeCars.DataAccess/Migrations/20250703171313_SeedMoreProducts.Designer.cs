@@ -4,6 +4,7 @@ using DeluxeCars.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DeluxeCars.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250703171313_SeedMoreProducts")]
+    partial class SeedMoreProducts
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -97,11 +100,6 @@ namespace DeluxeCars.DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Direccion")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(80)
@@ -109,17 +107,6 @@ namespace DeluxeCars.DataAccess.Migrations
 
                     b.Property<bool>("Estado")
                         .HasColumnType("bit");
-
-                    b.Property<DateTime>("FechaCreacion")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("IdCiudad")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Identificacion")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
@@ -131,16 +118,6 @@ namespace DeluxeCars.DataAccess.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<string>("TipoCliente")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("TipoIdentificacion")
-                        .IsRequired()
-                        .HasMaxLength(3)
-                        .HasColumnType("nvarchar(3)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("Email")
@@ -151,42 +128,19 @@ namespace DeluxeCars.DataAccess.Migrations
                     b.HasData(
                         new
                         {
-                            Id = 1,
-                            Direccion = "N/A",
-                            Email = "consumidor@final.com",
-                            Estado = true,
-                            FechaCreacion = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Identificacion = "999999999",
-                            Nombre = "Consumidor Final",
-                            Telefono = "N/A",
-                            TipoCliente = "Persona Natural",
-                            TipoIdentificacion = "N/A"
-                        },
-                        new
-                        {
                             Id = 2,
-                            Direccion = "Calle Falsa 123",
                             Email = "compras@tallerrapido.com",
                             Estado = true,
-                            FechaCreacion = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Identificacion = "900123456-7",
                             Nombre = "Taller \"El Rápido\"",
-                            Telefono = "3009988776",
-                            TipoCliente = "Taller",
-                            TipoIdentificacion = "NIT"
+                            Telefono = "3009988776"
                         },
                         new
                         {
                             Id = 3,
-                            Direccion = "Avenida Siempre Viva 45",
                             Email = "lucia.f@email.com",
                             Estado = true,
-                            FechaCreacion = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Identificacion = "1098765432",
                             Nombre = "Lucía Fernandez",
-                            Telefono = "3215554433",
-                            TipoCliente = "Persona Natural",
-                            TipoIdentificacion = "CC"
+                            Telefono = "3215554433"
                         });
                 });
 
@@ -335,14 +289,18 @@ namespace DeluxeCars.DataAccess.Migrations
                         .HasColumnType("decimal(18, 2)");
 
                     b.Property<decimal>("SubTotalLinea")
-                        .HasColumnType("decimal(18, 2)");
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("decimal(18,2)")
+                        .HasComputedColumnSql("(Cantidad * PrecioUnitario - ISNULL(Descuento, 0))", true);
 
                     b.Property<string>("TipoDetalle")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Total")
-                        .HasColumnType("decimal(18, 2)");
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("decimal(18,2)")
+                        .HasComputedColumnSql("((Cantidad * PrecioUnitario - ISNULL(Descuento, 0)) * (1 + ISNULL(IVA, 0)/100))", true);
 
                     b.Property<string>("UnidadMedida")
                         .IsRequired()
@@ -431,7 +389,9 @@ namespace DeluxeCars.DataAccess.Migrations
                         .HasColumnType("decimal(18, 2)");
 
                     b.Property<decimal>("Total")
-                        .HasColumnType("decimal(18, 2)");
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("decimal(18,2)")
+                        .HasComputedColumnSql("((Cantidad * PrecioUnitario - ISNULL(Descuento, 0)) * (1 + ISNULL(IVA, 0)/100))", true);
 
                     b.Property<string>("UnidadMedida")
                         .IsRequired()
@@ -493,15 +453,6 @@ namespace DeluxeCars.DataAccess.Migrations
 
                     b.Property<string>("Observaciones")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("SubTotal")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<decimal>("Total")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<decimal>("TotalIVA")
-                        .HasColumnType("decimal(18, 2)");
 
                     b.HasKey("Id");
 
@@ -607,7 +558,7 @@ namespace DeluxeCars.DataAccess.Migrations
                         .HasColumnType("nvarchar(5)");
 
                     b.Property<decimal?>("ComisionPorcentaje")
-                        .HasColumnType("decimal(5, 2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Descripcion")
                         .IsRequired()
@@ -664,7 +615,7 @@ namespace DeluxeCars.DataAccess.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("CostoUnitario")
-                        .HasColumnType("decimal(18, 2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("Fecha")
                         .HasColumnType("datetime2");
@@ -972,7 +923,7 @@ namespace DeluxeCars.DataAccess.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("TotalOrden")
-                        .HasColumnType("decimal(18, 2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -994,7 +945,7 @@ namespace DeluxeCars.DataAccess.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("PrecioUnitario")
-                        .HasColumnType("decimal(18, 2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("ProductoId")
                         .HasColumnType("int");
@@ -1240,7 +1191,7 @@ namespace DeluxeCars.DataAccess.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal?>("UltimoPrecioCompra")
-                        .HasColumnType("decimal(18, 2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("UnidadMedida")
                         .HasMaxLength(20)

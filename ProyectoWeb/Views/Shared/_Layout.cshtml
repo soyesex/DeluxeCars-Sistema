@@ -53,6 +53,8 @@
                 opacity: 1;
                 transform: translateY(0);
             }
+
+
     </style>
 
     @RenderSection("Styles", required: false)
@@ -74,49 +76,61 @@
 
                     <div class="ms-auto d-flex align-items-center">
 
-                        <!-- Links de Navegación -->
-                        <ul class="navbar-nav flex-grow-1">
-                            <li class="nav-item">
+                        <ul class="navbar-nav">
+                            <li class="nav-item mx-2">
                                 <a class="nav-link text-light" asp-controller="Home" asp-action="Index">Inicio</a>
                             </li>
-                            <li class="nav-item">
+                            <li class="nav-item mx-2">
                                 <a class="nav-link text-light" asp-controller="Catalogo" asp-action="Index">Tienda</a>
                             </li>
-                            <li class="nav-item">
+                            <li class="nav-item mx-2">
                                 <a class="nav-link text-light" asp-controller="Home" asp-action="SobreNosotros">Sobre Nosotros</a>
                             </li>
-                            <li class="nav-item">
+                            <li class="nav-item mx-2">
                                 <a class="nav-link text-light" asp-controller="Home" asp-action="Contactanos">Contáctanos</a>
                             </li>
+                        </ul>
 
+                        <ul class="navbar-nav ms-lg-4">
                             @if (User.Identity.IsAuthenticated)
                             {
                                 @if (User.IsInRole("Administrador"))
                                 {
-                                    <li class="nav-item">
+                                    <li class="nav-item mx-2">
                                         <a class="nav-link text-light" asp-controller="Admin" asp-action="Index">Panel de Admin</a>
                                     </li>
                                 }
                                 <li class="nav-item">
-                                    <form class="nav-link text-light" asp-controller="Account" asp-action="Logout" method="post">
-                                        <button type="submit" class="btn btn-link nav-link text-light p-0" style="border: none;">Cerrar Sesión</button>
+                                    <form asp-controller="Account" asp-action="Register" method="post">
+                                        <button type="submit" class="btn btn-outline-light">Regístrate</button>
+                                    </form>
+                                </li>
+
+                                <li class="nav-item">
+                                    <form asp-controller="Account" asp-action="Logout" method="post">
+                                        <button type="submit" class="btn btn-outline-light">Logout</button>
                                     </form>
                                 </li>
                             }
                             else
                             {
-                                <li class="nav-item">
+                                <li class="nav-item mx-2">
                                     <a class="nav-link text-light" asp-controller="Account" asp-action="Login">Iniciar Sesión</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="btn btn-danger" asp-controller="Account" asp-action="Register">Regístrate</a>
                                 </li>
                             }
                         </ul>
-                        <!-- Icono del Carrito con contador -->
-                        <a href="/Carrito" class="position-relative nav-link text-light ms-3" title="Ver mi carrito">
-                            <i class="bi bi-cart" style="font-size: 1.5rem;"></i>
-                            <span id="cart-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                0
-                            </span>
-                        </a>
+
+                        @*
+        <a href="/Carrito" class="position-relative nav-link text-light ms-3" title="Ver mi carrito">
+            <i class="bi bi-cart" style="font-size: 1.5rem;"></i>
+            <span id="cart-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                0
+            </span>
+        </a>
+        *@
 
                     </div>
                 </div>

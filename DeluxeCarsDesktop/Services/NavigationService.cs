@@ -95,7 +95,7 @@ namespace DeluxeCarsDesktop.Services
 
             // 5. Asignamos el DataContext y mostramos la ventana.
             formWindow.DataContext = formViewModel;
-            formWindow.ShowDialog();
+            formWindow.Show();
         }
     }
 }

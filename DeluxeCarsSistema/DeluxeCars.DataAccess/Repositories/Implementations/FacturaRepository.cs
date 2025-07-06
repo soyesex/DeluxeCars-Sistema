@@ -10,6 +10,69 @@ namespace DeluxeCars.DataAccess.Repositories.Implementations
         public FacturaRepository(AppDbContext context) : base(context)
         {
         }
+        public async Task<PagedResult<Factura>> SearchAsync(FacturaSearchCriteria criteria)
+        {
+            var query = _dbSet.AsQueryable();
+
+            // --- Aplicar filtros que se pueden traducir a SQL ---
+            if (!string.IsNullOrWhiteSpace(criteria.SearchText))
+            {
+                query = query.Where(f => f.NumeroFactura.Contains(criteria.SearchText) ||
+                                         f.Cliente.Nombre.Contains(criteria.SearchText));
+            }
+
+            if (criteria.FechaInicio.HasValue)
+            {
+                query = query.Where(f => f.FechaEmision >= criteria.FechaInicio.Value.Date);
+            }
+
+            if (criteria.FechaFin.HasValue)
+            {
+                var fechaFinSiguiente = criteria.FechaFin.Value.Date.AddDays(1);
+                query = query.Where(f => f.FechaEmision < fechaFinSiguiente);
+            }
+
+            if (criteria.ClienteId.HasValue && criteria.ClienteId.Value > 0)
+            {
+                query = query.Where(f => f.IdCliente == criteria.ClienteId.Value);
+            }
+
+            // --- Filtro por Estado de Pago (Lógica replicada para SQL) ---
+            if (criteria.EstadoPago.HasValue)
+            {
+                switch (criteria.EstadoPago.Value)
+                {
+                    case EstadoPagoFactura.Pagada:
+                        // El total de los pagos es mayor o igual al total de la factura.
+                        query = query.Where(f => f.PagosRecibidos.Sum(p => p.PagoCliente.MontoRecibido) >= f.Total);
+                        break;
+                    case EstadoPagoFactura.Abonada:
+                        // Hay pagos, pero no cubren el total.
+                        query = query.Where(f => f.PagosRecibidos.Any() && f.PagosRecibidos.Sum(p => p.PagoCliente.MontoRecibido) < f.Total);
+                        break;
+                    case EstadoPagoFactura.Pendiente:
+                        // No tiene ningún pago asociado.
+                        query = query.Where(f => !f.PagosRecibidos.Any());
+                        break;
+                }
+            }
+
+            // --- Conteo total de resultados (se ejecuta en la BD) ---
+            var totalCount = await query.CountAsync();
+
+            // --- Aplicar ordenamiento y paginación (se ejecuta en la BD) ---
+            var items = await query
+                .Include(f => f.Cliente)
+                .Include(f => f.MetodoPago)
+                .Include(f => f.PagosRecibidos)
+                    .ThenInclude(pr => pr.PagoCliente)
+                .OrderByDescending(f => f.FechaEmision)
+                .Skip((criteria.PageNumber - 1) * criteria.PageSize)
+                .Take(criteria.PageSize)
+                .ToListAsync();
+
+            return new PagedResult<Factura> { Items = items, TotalCount = totalCount };
+        }
         public async Task<IEnumerable<TopProductoDto>> GetTopProductosVendidosAsync(DateTime startDate, DateTime endDate, int topN = 5)
         {
             var effectiveEndDate = endDate.Date.AddDays(1);

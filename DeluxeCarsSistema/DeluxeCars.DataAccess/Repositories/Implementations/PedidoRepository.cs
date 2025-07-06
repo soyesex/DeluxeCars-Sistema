@@ -1,5 +1,6 @@
 ﻿using DeluxeCars.DataAccess.Repositories.Interfaces;
 using DeluxeCarsEntities;
+using DeluxeCarsShared.Dtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace DeluxeCars.DataAccess.Repositories.Implementations
@@ -8,6 +9,50 @@ namespace DeluxeCars.DataAccess.Repositories.Implementations
     {
         public PedidoRepository(AppDbContext context) : base(context)
         { }
+        public async Task<PagedResult<Pedido>> SearchAsync(string searchText, DateTime fechaInicio, DateTime fechaFin, int? proveedorId, EstadoPedido? estado, int pageNumber, int pageSize)
+        {
+            var query = _context.Pedidos
+                .Include(p => p.Proveedor) // Incluimos para poder buscar y mostrar el nombre
+                .AsQueryable();
+
+            // Filtro por texto universal (N° de Pedido o Proveedor)
+            if (!string.IsNullOrWhiteSpace(searchText))
+            {
+                query = query.Where(p => p.NumeroPedido.Contains(searchText) ||
+                                         (p.Proveedor != null && p.Proveedor.RazonSocial.Contains(searchText)));
+            }
+
+            // Filtro por fechas
+            query = query.Where(p => p.FechaEmision >= fechaInicio.Date && p.FechaEmision < fechaFin.Date.AddDays(1));
+
+            // Filtro por Proveedor ID
+            if (proveedorId.HasValue && proveedorId.Value > 0)
+            {
+                query = query.Where(p => p.IdProveedor == proveedorId.Value);
+            }
+
+            // Filtro por Estado
+            if (estado.HasValue)
+            {
+                query = query.Where(p => p.Estado == estado.Value);
+            }
+
+            // Conteo total ANTES de paginar
+            var totalCount = await query.CountAsync();
+
+            // Aplicamos orden y paginación, e incluimos datos relacionados para las columnas calculadas
+            var items = await query.OrderByDescending(p => p.FechaEmision)
+                                   .Skip((pageNumber - 1) * pageSize)
+                                   .Take(pageSize)
+                                   .Include(p => p.DetallesPedidos)
+                                   .Include(p => p.PagosAplicados)
+                                        .ThenInclude(pa => pa.PagoProveedor)
+                                   .AsNoTracking()
+                                   .ToListAsync();
+
+            return new PagedResult<Pedido> { Items = items, TotalCount = totalCount };
+        }
+
         // --- IMPLEMENTACIÓN DEL NUEVO MÉTODO ---
         public async Task<IEnumerable<Pedido>> GetPendingOrdersWithDetailsAsync(DateTime forDate)
         {

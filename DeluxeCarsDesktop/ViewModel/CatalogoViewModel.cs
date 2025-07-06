@@ -4,9 +4,14 @@ using DeluxeCarsDesktop.Interfaces;
 using DeluxeCarsDesktop.Services;
 using DeluxeCarsDesktop.Utils;
 using DeluxeCarsDesktop.View;
+using DeluxeCarsDesktop.ViewModel.ColumnView;
 using DeluxeCarsEntities;
+using Microsoft.Win32;
+using OfficeOpenXml;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Input;
 
@@ -18,6 +23,7 @@ namespace DeluxeCarsDesktop.ViewModel
         private readonly IUnitOfWork _unitOfWork;
         private readonly INavigationService _navigationService;
         private readonly IStockAlertService _stockAlertService;
+        private readonly INotificationService _notificationService; 
         private bool _isSearching = false;
 
         // --- Propiedades Públicas para Binding ---
@@ -31,7 +37,7 @@ namespace DeluxeCarsDesktop.ViewModel
                 FiltrarProductos();
             }
         }
-        private string _cambiarEstadoButtonText = "Activar/Desactivar";
+        private string _cambiarEstadoButtonText = "Desactivar";
         public string CambiarEstadoButtonText
         {
             get => _cambiarEstadoButtonText;
@@ -55,6 +61,7 @@ namespace DeluxeCarsDesktop.ViewModel
         // --- Propiedades para el DataGrid y la Selección ---
         public ObservableCollection<ProductoDisplayViewModel> Productos { get; private set; }
         public ObservableCollection<Categoria> CategoriasDisponibles { get; private set; }
+        public ObservableCollection<ColumnViewModel> Columns { get; }
 
         private ProductoDisplayViewModel _productoSeleccionado;
         public ProductoDisplayViewModel ProductoSeleccionado
@@ -70,15 +77,61 @@ namespace DeluxeCarsDesktop.ViewModel
                 if (value != null)
                 {
                     // Si el producto está activo, el botón dirá "Desactivar", si no, "Activar"
-                    CambiarEstadoButtonText = value.Producto.Estado ? "Desactivar" : "Activar";
+                    CambiarEstadoButtonText = value.Estado ? "Desactivar" : "Activar";
                 }
                 else
                 {
                     // Texto por defecto si no hay nada seleccionado
-                    CambiarEstadoButtonText = "Activar/Desactivar";
+                    CambiarEstadoButtonText = "Desactivar";
                 }
             }
         }
+
+        private int _numeroDePagina = 1;
+        public int NumeroDePagina
+        {
+            get => _numeroDePagina;
+            set { SetProperty(ref _numeroDePagina, value); FiltrarProductos(); }
+        }
+
+        private int _tamañoDePagina = 15; // Mostrar 15 items por página
+        public int TamañoDePagina
+        {
+            get => _tamañoDePagina;
+            set { SetProperty(ref _tamañoDePagina, value); FiltrarProductos(); }
+        }
+
+        private int _totalItems;
+        public int TotalItems
+        {
+            get => _totalItems;
+            private set { SetProperty(ref _totalItems, value); OnPropertyChanged(nameof(TotalPaginas)); }
+        }
+
+        public int TotalPaginas => (int)Math.Ceiling((double)TotalItems / TamañoDePagina);
+
+        private decimal _valorTotalInventario;
+        public decimal ValorTotalInventario
+        {
+            get => _valorTotalInventario;
+            set => SetProperty(ref _valorTotalInventario, value);
+        }
+
+        private int _productosAgotados;
+        public int ProductosAgotados
+        {
+            get => _productosAgotados;
+            set => SetProperty(ref _productosAgotados, value);
+        }
+
+        private int _productosBajoStock;
+        public int ProductosBajoStock
+        {
+            get => _productosBajoStock;
+            set => SetProperty(ref _productosBajoStock, value);
+        }
+
+        public ICommand ExportarExcelCommand { get; }
 
         // --- Comandos ---
         public ICommand NuevoProductoCommand { get; }
@@ -86,15 +139,18 @@ namespace DeluxeCarsDesktop.ViewModel
         public ICommand CambiarEstadoProductoCommand { get; }
         public ICommand LimpiarFiltrosCommand { get; }
         public ICommand AjusteManualCommand { get; }
+        public ICommand IrAPaginaSiguienteCommand { get; }
+        public ICommand IrAPaginaAnteriorCommand { get; }
 
         // --- Constructor ---
-        public CatalogoViewModel(IUnitOfWork unitOfWork, INavigationService navigationService, IStockAlertService stockAlertService)
-    {
+        public CatalogoViewModel(IUnitOfWork unitOfWork, INavigationService navigationService, IStockAlertService stockAlertService, INotificationService notificationService)
+        {
             _unitOfWork = unitOfWork;
             _navigationService = navigationService;
             _stockAlertService = stockAlertService;
+            _notificationService = notificationService;
 
-        Productos = new ObservableCollection<ProductoDisplayViewModel>();
+            Productos = new ObservableCollection<ProductoDisplayViewModel>();
             CategoriasDisponibles = new ObservableCollection<Categoria>();
 
             // Opciones para el filtro de Stock
@@ -104,7 +160,23 @@ namespace DeluxeCarsDesktop.ViewModel
             EditarProductoCommand = new ViewModelCommand(async p => await ExecuteEditarProductoCommand(), p => CanExecuteEditDelete());
             CambiarEstadoProductoCommand = new ViewModelCommand(async p => await ExecuteCambiarEstadoProductoCommand(), p => CanExecuteEditDelete());
             LimpiarFiltrosCommand = new ViewModelCommand(ExecuteLimpiarFiltros);
-            AjusteManualCommand = new ViewModelCommand(ExecuteAjusteManual);
+            AjusteManualCommand = new ViewModelCommand(async p => await ExecuteAjusteManualCommand());
+            IrAPaginaSiguienteCommand = new ViewModelCommand(p => NumeroDePagina++, p => NumeroDePagina < TotalPaginas);
+            IrAPaginaAnteriorCommand = new ViewModelCommand(p => NumeroDePagina--, p => NumeroDePagina > 1);
+            ExportarExcelCommand = new ViewModelCommand(async p => await ExecuteExportarExcelCommand()); // ✅ INICIALIZACIÓN
+            _notificationService = notificationService;
+
+            Columns = new ObservableCollection<ColumnViewModel>
+            {
+                new ColumnViewModel { Header = "ID" },
+                new ColumnViewModel { Header = "Nombre" },
+                new ColumnViewModel { Header = "OEM" },
+                new ColumnViewModel { Header = "Categoría" },
+                new ColumnViewModel { Header = "Precio" },
+                new ColumnViewModel { Header = "Proveedor" },
+                new ColumnViewModel { Header = "Stock" },
+                new ColumnViewModel { Header = "Activo" }
+            };
         }
 
         // --- Lógica Principal ---
@@ -112,6 +184,7 @@ namespace DeluxeCarsDesktop.ViewModel
         public async Task LoadAsync()
         {
             await LoadCategoriasAsync();
+            await LoadDashboardDataAsync();
             ExecuteLimpiarFiltros(null); // Limpia los filtros y carga los productos iniciales
         }
 
@@ -133,6 +206,102 @@ namespace DeluxeCarsDesktop.ViewModel
                 MessageBox.Show("Ocurrió un error al cargar las categorías.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+        private async Task LoadDashboardDataAsync()
+        {
+            try
+            {
+                // Usamos los métodos que acabamos de crear en el repositorio.
+                ValorTotalInventario = await _unitOfWork.Productos.GetTotalInventoryValueAsync();
+                ProductosAgotados = await _unitOfWork.Productos.CountOutOfStockProductsAsync();
+                // ¡Este método ya lo tenías! Lo reutilizamos.
+                ProductosBajoStock = await _unitOfWork.Productos.CountLowStockProductsAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"!!! ERROR AL CARGAR DATOS DEL DASHBOARD: {ex.Message}");
+                // No mostramos un MessageBox aquí para no ser intrusivos.
+            }
+        }
+
+        private async Task ExecuteExportarExcelCommand()
+        {
+            // 1. Obtenemos TODOS los productos que coinciden con los filtros actuales, ignorando la paginación.
+            var exportCriteria = new ProductSearchCriteria
+            {
+                UniversalSearchText = this.SearchText,
+                CategoryId = this.CategoriaFiltroSeleccionada?.Id,
+                StockStatus = this.StockStatusFiltroSeleccionado,
+                PageNumber = 1,
+                PageSize = int.MaxValue // Truco para obtener todos los registros
+            };
+
+            var pagedResult = await _unitOfWork.Productos.SearchAsync(exportCriteria);
+            var productosAExportar = pagedResult.Items;
+
+            if (!productosAExportar.Any())
+            {
+                MessageBox.Show("No hay productos para exportar con los filtros actuales.", "Información");
+                return;
+            }
+
+            // 2. Usar EPPlus para crear el archivo Excel
+            ExcelPackage.License.SetNonCommercialPersonal("Deluxe Cars Desktop App"); 
+
+            using (var package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Inventario");
+
+                // Encabezados
+                worksheet.Cells[1, 1].Value = "ID";
+                worksheet.Cells[1, 2].Value = "Nombre";
+                worksheet.Cells[1, 3].Value = "OEM";
+                worksheet.Cells[1, 4].Value = "Categoría";
+                worksheet.Cells[1, 5].Value = "Proveedor";
+                worksheet.Cells[1, 6].Value = "Precio";
+                worksheet.Cells[1, 7].Value = "Stock";
+                worksheet.Cells[1, 8].Value = "Activo";
+
+                // Datos
+                int row = 2;
+                foreach (var producto in productosAExportar)
+                {
+                    worksheet.Cells[row, 1].Value = producto.Id;
+                    worksheet.Cells[row, 2].Value = producto.Nombre;
+                    worksheet.Cells[row, 3].Value = producto.OEM;
+                    worksheet.Cells[row, 4].Value = producto.NombreCategoria;
+                    worksheet.Cells[row, 5].Value = producto.NombreProveedorPrincipal;
+                    worksheet.Cells[row, 6].Value = producto.Precio;
+                    worksheet.Cells[row, 7].Value = producto.StockActual;
+                    worksheet.Cells[row, 8].Value = producto.Estado ? "Sí" : "No";
+                    row++;
+                }
+
+                // Formato y auto-ajuste de columnas
+                worksheet.Cells["A1:H1"].Style.Font.Bold = true;
+                worksheet.Cells["F:F"].Style.Numberformat.Format = "$#,##0.00"; // Formato de moneda
+                worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
+
+                // 3. Guardar el archivo
+                var saveFileDialog = new SaveFileDialog
+                {
+                    FileName = $"Inventario_DeluxeCars_{DateTime.Now:yyyyMMdd}.xlsx",
+                    Filter = "Archivos de Excel (*.xlsx)|*.xlsx"
+                };
+
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    try
+                    {
+                        await package.SaveAsAsync(new FileInfo(saveFileDialog.FileName));
+                        MessageBox.Show("Exportación a Excel completada exitosamente.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Ocurrió un error al guardar el archivo: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+        }
         private async void FiltrarProductos()
         {
             if (_isSearching) return;
@@ -144,39 +313,34 @@ namespace DeluxeCarsDesktop.ViewModel
                 {
                     UniversalSearchText = this.SearchText,
                     CategoryId = this.CategoriaFiltroSeleccionada?.Id,
-                    StockStatus = this.StockStatusFiltroSeleccionado
+                    StockStatus = this.StockStatusFiltroSeleccionado,
+                    PageNumber = this.NumeroDePagina,
+                    PageSize = this.TamañoDePagina
                 };
 
-                // 1. PRIMER VIAJE A LA BD: Obtenemos la lista de productos.
-                var productosDesdeRepo = await _unitOfWork.Productos.SearchAsync(criteria);
+                // 1. Llamamos al nuevo y potente SearchAsync. Devuelve todo lo que necesitamos.
+                var pagedResult = await _unitOfWork.Productos.SearchAsync(criteria);
 
-                // Extraemos solo los IDs de los productos encontrados.
-                var productIds = productosDesdeRepo.Select(p => p.Id).ToList();
+                // 2. Actualizamos el conteo total para que los controles de paginación funcionen.
+                TotalItems = pagedResult.TotalCount;
 
-                // Creamos un diccionario vacío para los stocks por si no hay productos.
-                var stockDictionary = new Dictionary<int, int>();
-
-                if (productIds.Any())
-                {
-                    // 2. SEGUNDO VIAJE A LA BD: Obtenemos el stock para TODOS esos productos a la vez.
-                    stockDictionary = await _unitOfWork.Productos.GetCurrentStocksAsync(productIds);
-                }
-
+                // 3. Limpiamos la lista de la UI y la llenamos con los items de la página actual.
+                //    Los DTOs ya vienen con el stock calculado, ¡no hay que hacer nada más!
                 Productos.Clear();
-                foreach (var prod in productosDesdeRepo)
+                foreach (var dto in pagedResult.Items)
                 {
-                    var displayVM = new ProductoDisplayViewModel(prod);
-
-                    // Buscamos el stock en nuestro diccionario (operación en memoria, instantánea).
-                    // Si un producto no tiene movimientos, su stock es 0.
-                    displayVM.StockCalculado = stockDictionary.GetValueOrDefault(prod.Id, 0);
-
-                    Productos.Add(displayVM);
+                    // Creamos el ProductoDisplayViewModel directamente desde el DTO
+                    Productos.Add(new ProductoDisplayViewModel(dto));
                 }
+
+                // 4. Actualizamos el estado de los botones de paginación.
+                (IrAPaginaSiguienteCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+                (IrAPaginaAnteriorCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"!!! ERROR AL FILTRAR PRODUCTOS: {ex.Message}");
+                MessageBox.Show("Ocurrió un error al cargar los productos.", "Error");
             }
             finally
             {
@@ -185,27 +349,26 @@ namespace DeluxeCarsDesktop.ViewModel
         }
         private void ExecuteLimpiarFiltros(object obj)
         {
-            // Reseteamos todos los filtros a su estado inicial
-            SearchText = string.Empty;
+            // 1. Desactivamos temporalmente el filtrado automático de los setters
+            //    para evitar múltiples llamadas innecesarias.
+            _isSearching = true;
+
+            // 2. Reseteamos todos los filtros a su estado inicial.
+            //    Al usar el campo privado `_searchText`, evitamos disparar el setter y el filtro.
+            _searchText = string.Empty;
+            OnPropertyChanged(nameof(SearchText)); // Notificamos a la UI que el texto cambió.
+
             CategoriaFiltroSeleccionada = CategoriasDisponibles.FirstOrDefault();
             StockStatusFiltroSeleccionado = StockStatusOptions.FirstOrDefault();
 
-            // Notificamos a la UI para que los campos se limpien
-            OnPropertyChanged(string.Empty);
-
-            // La llamada a FiltrarProductos() se dispara automáticamente por los setters,
-            // cargando la lista completa de productos.
+            // 3. Reactivamos el filtrado y ejecutamos el filtro UNA SOLA VEZ.
+            _isSearching = false;
+            FiltrarProductos();
         }
 
-        private void ExecuteAjusteManual(object obj)
+        private async Task ExecuteAjusteManualCommand()
         {
-        // Este código es conceptual. Necesitarás una forma de crear y mostrar la ventana.
-        // Podrías expandir tu NavigationService para que maneje diálogos como este.
-        var vm = new AjusteInventarioViewModel(_unitOfWork, _stockAlertService);
-        var view = new AjusteInventarioView { DataContext = vm };
-            vm.CloseAction = view.Close;
-            view.ShowDialog();
-
+            await _navigationService.OpenFormWindow(FormType.AjusteInventario, 0);
             // Refrescamos la lista principal después de cerrar el diálogo
             FiltrarProductos();
         }
@@ -220,7 +383,8 @@ namespace DeluxeCarsDesktop.ViewModel
 
         private async Task ExecuteEditarProductoCommand()
         {
-            await _navigationService.OpenFormWindow(FormType.Producto, ProductoSeleccionado.Producto.Id);
+            // CORRECCIÓN: Usar el Id directamente del ViewModel seleccionado
+            await _navigationService.OpenFormWindow(FormType.Producto, ProductoSeleccionado.Id);
             FiltrarProductos();
         }
 
@@ -230,11 +394,19 @@ namespace DeluxeCarsDesktop.ViewModel
             if (productoSeleccionado == null) return;
 
             // Lógica para determinar la acción y el mensaje
-            var producto = productoSeleccionado.Producto;
-            string accion = producto.Estado ? "desactivar" : "activar";
-            string accionPasado = producto.Estado ? "desactivado" : "activado";
+            var productoId = productoSeleccionado.Id;
+            var productoEnDB = await _unitOfWork.Productos.GetByIdAsync(productoId);
 
-            var result = MessageBox.Show($"¿Estás seguro de que deseas {accion} el producto '{producto.Nombre}'?",
+            if (productoEnDB == null)
+            {
+                MessageBox.Show("El producto no se encontró en la base de datos. Puede que haya sido eliminado.", "Error");
+                return;
+            }
+
+            string accion = productoEnDB.Estado ? "desactivar" : "activar";
+            string accionPasado = productoEnDB.Estado ? "desactivado" : "activado";
+
+            var result = MessageBox.Show($"¿Estás seguro de que deseas {accion} el producto '{productoEnDB.Nombre}'?",
                                          $"Confirmar {char.ToUpper(accion[0]) + accion.Substring(1)}",
                                          MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
@@ -243,23 +415,23 @@ namespace DeluxeCarsDesktop.ViewModel
             try
             {
                 // La nueva lógica: invierte el estado actual
-                producto.Estado = !producto.Estado;
-
+                productoEnDB.Estado = !productoEnDB.Estado;
                 await _unitOfWork.CompleteAsync();
 
                 // Refrescar la vista para que el cambio se vea reflejado
                 FiltrarProductos();
 
-                MessageBox.Show($"Producto {accionPasado} exitosamente.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
+                _notificationService.ShowSuccess($"Producto {accionPasado} exitosamente.");
             }
             catch (Exception ex)
             {
+                _notificationService.ShowError($"Ocurrió un error al {accion} el producto.");
                 MessageBox.Show($"Ocurrió un error al {accion} el producto.\n\nError: {ex.Message}",
                                 $"Error de {char.ToUpper(accion[0]) + accion.Substring(1)}",
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Error);
                 // Revertir el cambio en el objeto si falla el guardado
-                producto.Estado = !producto.Estado;
+                productoEnDB.Estado = !productoEnDB.Estado;
             }
         }
     }

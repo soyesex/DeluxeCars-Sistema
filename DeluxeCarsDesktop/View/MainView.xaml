@@ -9,6 +9,8 @@
         xmlns:notification="clr-namespace:Notifications.Wpf.Core.Controls;assembly=Notifications.Wpf.Core"
         xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
         mc:Ignorable="d" 
+        xmlns:behaviors="clr-namespace:DeluxeCarsDesktop.Behaviors"
+        behaviors:DeselectOnOutsideClickBehavior.IsEnabled="True"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         UseLayoutRounding="True"
         xmlns:converters="clr-namespace:DeluxeCarsDesktop.Converters"

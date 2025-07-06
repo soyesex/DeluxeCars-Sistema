@@ -24,5 +24,15 @@ namespace DeluxeCarsDesktop.View.UserControls
         {
             InitializeComponent();
         }
+
+        private void btnColumnas_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            if (button?.ContextMenu != null)
+            {
+                button.ContextMenu.PlacementTarget = button;
+                button.ContextMenu.IsOpen = true;
+            }
+        }
     }
 }

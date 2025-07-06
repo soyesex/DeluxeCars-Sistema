@@ -16,5 +16,7 @@ namespace DeluxeCars.DataAccess.Repositories.Implementations.Search
 
         // Para el ComboBox de Estado de Stock
         public string? StockStatus { get; set; } // Ej: "InStock", "LowStock", "OutOfStock"
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 15;
     }
 }

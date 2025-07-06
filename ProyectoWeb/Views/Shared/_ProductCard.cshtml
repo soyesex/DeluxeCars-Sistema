@@ -2,8 +2,15 @@
 
 <div class="product-card">
     <div class="product-card-image-container">
-        <a asp-controller="Producto" asp-action="Detalles" asp-route-id="@Model.Id">
-            <img src="@Model.ImagenUrl" alt="@Model.Nombre">
+        <a asp-action="Detalles" asp-controller="Producto" asp-route-id="@Model.Id" class="product-image-link">
+            @if (!string.IsNullOrEmpty(Model.ImagenUrl))
+            {
+                <img src="@Model.ImagenUrl" class="card-img-top" alt="@Model.Nombre">
+            }
+            else
+            {
+                <img src="~/images/placeholder-product.png" class="card-img-top" alt="Imagen no disponible">
+            }
         </a>
     </div>
     <div class="product-card-body">

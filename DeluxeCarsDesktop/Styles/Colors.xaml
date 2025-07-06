@@ -1,6 +1,9 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <SolidColorBrush x:Key="Brush.Accent.VibrantBlue.Transparent" Color="#4D0078D7"/>
+
+    <SolidColorBrush x:Key="Brush.Accent.DestructiveRed.Transparent" Color="#4DD72638"/>
 
     <Color x:Key="Color.Brand.NavyDark">#061229</Color>
     <Color x:Key="Color.Brand.NavyDeep">#0D2149</Color>
@@ -18,6 +21,7 @@
     <Color x:Key="Color.Neutral.WhiteMuted">#C8C8C8</Color>
     <Color x:Key="Color.Neutral.WhiteSilver">#A9A9A9</Color>
 
+    <Color x:Key="Color.Accent.VibrantBlue">#0078D7</Color>
     <Color x:Key="Color.Accent.ElectricBlue">#28AEED</Color>
     <Color x:Key="Color.Accent.DeepSkyBlue">#00BFFF</Color>
     <Color x:Key="Color.Accent.ActionPurple">#512bd4</Color>
@@ -36,6 +40,14 @@
     <Color x:Key="Color.Menu.Cyan">#66CCCC</Color>
     <Color x:Key="Color.Menu.PurpleRoyal">#9966CC</Color>
     <Color x:Key="Color.Menu.Magenta">#CC6699</Color>
+
+    <Color x:Key="Color.Menu.GreenDeep">#2E4D3E</Color>
+    
+    <Color x:Key="Color.Accent.ActionPurpleDeep">#361D9E</Color>
+
+    <SolidColorBrush x:Key="Brush.Accent.ActionPurpleDeep" Color="{StaticResource Color.Accent.ActionPurpleDeep}"/>
+
+    <SolidColorBrush x:Key="Brush.Menu.GreenDeep" Color="{StaticResource Color.Menu.GreenDeep}"/>
 
     <SolidColorBrush x:Key="Brush.Brand.NavyDark" Color="{StaticResource Color.Brand.NavyDark}"/>
     <SolidColorBrush x:Key="Brush.Brand.NavyDeep" Color="{StaticResource Color.Brand.NavyDeep}"/>
