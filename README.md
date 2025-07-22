@@ -15,20 +15,20 @@ Este repositorio contiene la aplicación de escritorio del sistema de gestión p
 ## 📖 Sobre el Proyecto
 
 ### El Problema
-[cite_start]La empresa "Deluxe Cars", dedicada a la venta de autopartes, enfrentaba serios desafíos operativos debido a su dependencia de procesos manuales[cite: 564, 576]. [cite_start]Su gestión de inventario se basaba en conteos físicos diarios, propensos a errores [cite: 566, 567][cite_start], y la facturación se realizaba en papel, causando inconsistencias y pérdidas de documentos[cite: 570]. [cite_start]Esta situación limitaba su eficiencia y potencial de crecimiento[cite: 564].
+La empresa "Deluxe Cars", dedicada a la venta de autopartes, enfrentaba serios desafíos operativos debido a su dependencia de procesos manuales. Su gestión de inventario se basaba en conteos físicos diarios, propensos a errores, y la facturación se realizaba en papel, causando inconsistencias y pérdidas de documentos. Esta situación limitaba su eficiencia y potencial de crecimiento.
 
 ### La Solución
-[cite_start]Para resolver esta problemática, se diseñó y desarrolló un sistema de información híbrido[cite: 848]. [cite_start]La solución se compone de dos aplicativos[cite: 573, 686, 848]:
+Para resolver esta problemática, se diseñó y desarrolló un sistema de información híbrido. La solución se compone de dos aplicativos:
 
-1.  [cite_start]**Una Aplicación de Escritorio (WPF):** El núcleo administrativo para la gestión interna de inventario, compras, proveedores, ventas y facturación[cite: 587, 688, 690]. **Este es el software que se encuentra en este repositorio.**
-2.  [cite_start]**Una Aplicación Web (.NET MVC):** Una vitrina digital para que los clientes puedan ver el catálogo de productos y realizar pedidos vía WhatsApp[cite: 587, 691, 718].
+1.  **Una Aplicación de Escritorio (WPF):** El núcleo administrativo para la gestión interna de inventario, compras, proveedores, ventas y facturación. **Este es el software que se encuentra en este repositorio.**
+2.  **Una Aplicación Web (.NET MVC):** Una vitrina digital para que los clientes puedan ver el catálogo de productos y realizar pedidos vía WhatsApp.
 
 ### Mi Rol en el Proyecto
-[cite_start]Como parte del equipo de desarrollo, mi rol principal fue el de **Desarrollador de la Aplicación de Escritorio y Analista**[cite: 844]. Mis responsabilidades incluyeron:
-- [cite_start]Diseño de la arquitectura de la aplicación de escritorio y la base de datos[cite: 844].
-- [cite_start]Desarrollo completo de todos los módulos de la aplicación en **WPF y C#**[cite: 844].
-- [cite_start]Colaboración en el levantamiento de requerimientos y la creación de los casos de uso del sistema[cite: 844].
-- [cite_start]Realización de las pruebas funcionales y de integración del componente de escritorio[cite: 844].
+Como parte del equipo de desarrollo, mi rol principal fue el de **Desarrollador de la Aplicación de Escritorio y Analista**. Mis responsabilidades incluyeron:
+- Diseño de la arquitectura de la aplicación de escritorio y la base de datos.
+- Desarrollo completo de todos los módulos de la aplicación en **WPF y C#**.
+- Colaboración en el levantamiento de requerimientos y la creación de los casos de uso del sistema.
+- Realización de las pruebas funcionales y de integración del componente de escritorio.
 
 ---
 
@@ -37,31 +37,31 @@ Este repositorio contiene la aplicación de escritorio del sistema de gestión p
 Este software de escritorio ofrece una solución completa para la administración del negocio, incluyendo los siguientes módulos:
 
 * **🔐 Gestión de Usuarios y Seguridad:**
-    * [cite_start]Autenticación por correo y contraseña[cite: 698].
-    * [cite_start]Sistema basado en roles (Administrador y Empleado) con diferentes niveles de permisos[cite: 593, 699].
-    * [cite_start]El administrador puede crear[cite: 700], editar y eliminar cuentas de usuario.
+    * Autenticación por correo y contraseña.
+    * Sistema basado en roles (Administrador y Empleado) con diferentes niveles de permisos.
+    * El administrador puede crear, editar y eliminar cuentas de usuario.
 
 * **📦 Módulo de Inventario:**
-    * [cite_start]Registro y edición de productos con detalles completos (código, categoría, precios, etc.)[cite: 599, 702, 81].
-    * [cite_start]Control de stock en tiempo real, actualizado automáticamente con cada venta o compra[cite: 600, 703].
-    * [cite_start]Alertas de stock mínimo para prevenir la escasez de productos[cite: 602, 704].
-    * [cite_start]Ajuste manual de stock para corregir discrepancias[cite: 95].
+    * Registro y edición de productos con detalles completos (código, categoría, precios, etc.).
+    * Control de stock en tiempo real, actualizado automáticamente con cada venta o compra.
+    * Alertas de stock mínimo para prevenir la escasez de productos.
+    * Ajuste manual de stock para corregir discrepancias.
 
 * **🚚 Gestión de Compras y Proveedores:**
-    * [cite_start]Directorio centralizado para registrar y gestionar proveedores[cite: 610, 712].
-    * [cite_start]Creación y seguimiento de órdenes de compra por estado (Borrador, Aprobado, Recibido)[cite: 617, 619, 713].
-    * [cite_start]Recepción de mercancía que actualiza el inventario automáticamente[cite: 621, 714, 286].
-    * [cite_start]Gestión de pagos a proveedores para llevar un control de las cuentas por pagar[cite: 328, 623].
+    * Directorio centralizado para registrar y gestionar proveedores.
+    * Creación y seguimiento de órdenes de compra por estado (Borrador, Aprobado, Recibido).
+    * Recepción de mercancía que actualiza el inventario automáticamente.
+    * Gestión de pagos a proveedores para llevar un control de las cuentas por pagar.
 
 * **💰 Módulo de Facturación y Ventas:**
-    * [cite_start]Generación ágil de facturas de venta, asociadas a un cliente[cite: 626, 707].
-    * [cite_start]Cálculo automático de totales, validando la disponibilidad de stock[cite: 627].
-    * [cite_start]Historial de ventas detallado, con filtros por cliente, fecha y estado de pago[cite: 628, 709].
-    * [cite_start]Gestión de cuentas por cobrar, registrando los abonos de los clientes[cite: 401, 630].
+    * Generación ágil de facturas de venta, asociadas a un cliente.
+    * Cálculo automático de totales, validando la disponibilidad de stock.
+    * Historial de ventas detallado, con filtros por cliente, fecha y estado de pago.
+    * Gestión de cuentas por cobrar, registrando los abonos de los clientes.
 
 * **📊 Reportes y Exportación:**
-    * [cite_start]Generación de reportes de ventas, productos más vendidos y estado del inventario[cite: 677, 720, 721].
-    * [cite_start]Funcionalidad para exportar el inventario completo y otros reportes a **Excel** y **PDF**[cite: 107, 311, 722].
+    * Generación de reportes de ventas, productos más vendidos y estado del inventario.
+    * Funcionalidad para exportar el inventario completo y otros reportes a **Excel** y **PDF**.
 
 ---
 
@@ -84,8 +84,8 @@ Este software de escritorio ofrece una solución completa para la administració
 
 ## 🛠️ Stack Tecnológico
 
-* [cite_start]**Lenguaje de Programación:** C# [cite: 846]
-* [cite_start]**Framework de Escritorio:** WPF (Windows Presentation Foundation) sobre .NET [cite: 688, 846, 848]
-* [cite_start]**Base de Datos:** Microsoft SQL Server [cite: 830]
+* **Lenguaje de Programación:** C# 
+* **Framework de Escritorio:** WPF (Windows Presentation Foundation) sobre .NET
+* **Base de Datos:** Microsoft SQL Server
 * **Arquitectura:** Modelo-Vista-VistaModelo (MVVM)
 * **Herramientas de Desarrollo:** Visual Studio
