@@ -7,7 +7,7 @@
 
 Este repositorio contiene la aplicación de escritorio del sistema de gestión para "Deluxe Cars", desarrollada como parte de nuestro proyecto final para el programa Tecnólogo en Análisis y Desarrollo de Software del SENA.
 
-![Dashboard Deluxe Cars]<img width="1918" height="1013" alt="Image" src="https://github.com/user-attachments/assets/76017df3-9c48-4c94-8731-22208251b81f" />
+<img width="1918" height="1013" alt="Image" src="https://github.com/user-attachments/assets/76017df3-9c48-4c94-8731-22208251b81f" />
 
 ---
 
@@ -72,11 +72,11 @@ Este software de escritorio ofrece una solución completa para la administració
 
 | Inicio de Sesión | Módulo de Inventario |
 | :---: | :---: |
-| ![Login](URL_DE_LA_IMAGEN_DEL_LOGIN) | ![Inventario](URL_DE_LA_IMAGEN_DEL_INVENTARIO) |
+| <img width="1918" height="1054" alt="Image" src="https://github.com/user-attachments/assets/12c75a67-500b-493f-b8aa-840bd949ddfe" /> | <img width="1918" height="1015" alt="Image" src="https://github.com/user-attachments/assets/c61caabf-0b30-41be-8bf3-c388d0e347cc" /> |
 
-| Ventana de Venta | Reporte en PDF |
+| Ventana de Venta | Catalogo Web |
 | :---: | :---: |
-| ![Facturación](URL_DE_LA_IMAGEN_DE_FACTURACION) | ![Reporte](URL_DE_LA_IMAGEN_DEL_REPORTE) |
+| <img width="1918" height="1013" alt="Image" src="https://github.com/user-attachments/assets/3760135b-40b7-417f-9a1a-2b985fd7ce37" /> | <img width="1826" height="923" alt="Image" src="https://github.com/user-attachments/assets/3c2f01c1-fbbb-40b0-a333-d926b0e46434" /> |
 
 
 ---
