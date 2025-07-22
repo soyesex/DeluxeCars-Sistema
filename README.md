@@ -7,8 +7,7 @@
 
 Este repositorio contiene la aplicación de escritorio del sistema de gestión para "Deluxe Cars", desarrollada como parte de nuestro proyecto final para el programa Tecnólogo en Análisis y Desarrollo de Software del SENA.
 
-**(Aquí te recomiendo poner una captura de pantalla principal y atractiva de tu programa, como el Dashboard o la ventana de inventario)**
-![Dashboard Deluxe Cars](URL_DE_LA_IMAGEN_PRINCIPAL)
+![Dashboard Deluxe Cars]<img width="1918" height="1013" alt="Image" src="https://github.com/user-attachments/assets/76017df3-9c48-4c94-8731-22208251b81f" />
 
 ---
 
