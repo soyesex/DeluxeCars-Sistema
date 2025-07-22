@@ -9,6 +9,8 @@
         xmlns:notification="clr-namespace:Notifications.Wpf.Core.Controls;assembly=Notifications.Wpf.Core"
         xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
         mc:Ignorable="d" 
+        xmlns:behaviors="clr-namespace:DeluxeCarsDesktop.Behaviors"
+        behaviors:DeselectOnOutsideClickBehavior.IsEnabled="True"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         UseLayoutRounding="True"
         xmlns:converters="clr-namespace:DeluxeCarsDesktop.Converters"
@@ -115,14 +117,16 @@
                                 Orientation="Horizontal"
                                 Height="35"
                                 Margin="15,25,0,40">
-                        <Image Source="/Images/deluxeCarsLogo.jpg " Height="30"/>
+                        <Grid Width="35" Height="35" Margin="5,5,10,0">
+                            <Image Source="/icono3.ico" Stretch="UniformToFill"/>
+                        </Grid>
                         <TextBlock Text="Deluxe Cars"
                                    Foreground="{StaticResource titleColor2}"
-                                   FontSize="21"
+                                   FontSize="26"
                                    FontWeight="SemiBold"
                                    FontFamily="{StaticResource Font.Poppins}" 
                                    VerticalAlignment="Center"
-                                   Margin="10,0,0,0"/>
+                                   Margin="0,5,0,0"/>
 
                     </StackPanel>
 
@@ -230,7 +234,7 @@
                                 </StackPanel>
                             </RadioButton>
 
-                            <RadioButton Style="{StaticResource menuButton1}"
+                            <!--<RadioButton Style="{StaticResource menuButton1}"
                                  Tag="{StaticResource color9}"
                                  Command="{Binding ShowReportesViewCommand}"
                                  Margin="0,0,0,10"
@@ -243,9 +247,9 @@
                                     <fa:IconImage Icon="ChartColumn" Style="{StaticResource menuButtonIcon}"/>
                                     <TextBlock Text="Reportes" Style="{StaticResource menuButtonText}"/>
                                 </StackPanel>
-                            </RadioButton>
+                            </RadioButton>-->
                             
-                            <RadioButton Style="{StaticResource menuButton1}"
+                            <!--<RadioButton Style="{StaticResource menuButton1}"
                                          Tag="{StaticResource color13}"
                                          Command="{Binding ShowRolViewCommand}"
                                          Margin="0,0,0,5"
@@ -273,7 +277,7 @@
                                     <fa:IconImage Icon="UserGear" Style="{StaticResource menuButtonIcon}"/>
                                     <TextBlock Text="Usuarios" Style="{StaticResource menuButtonText}"/>
                                 </StackPanel>
-                            </RadioButton>
+                            </RadioButton>-->
 
                             <RadioButton Style="{StaticResource menuButton1}"
                                          Tag="{StaticResource color12}"
@@ -299,8 +303,8 @@
                     Grid.Column="1">
                 <Border.Background>
                     <RadialGradientBrush GradientOrigin="0,0" Center="0,0" RadiusX="1.2" RadiusY="1.2">
-                        <GradientStop Color="{StaticResource Color.Brand.CharcoalLight}" Offset="0.1"/>
-                        <GradientStop Color="{StaticResource Color.Brand.NavyDeep}" Offset="0.9"/>
+                        <GradientStop Color="{StaticResource Color.Brand.NavyDeep}" Offset="0.1"/>
+                        <GradientStop Color="{StaticResource Color.PrimaryBack2}" Offset="0.9"/>
                     </RadialGradientBrush>
                 </Border.Background>
 
@@ -502,7 +506,7 @@
                                 <fa:IconImage Icon="Plus" Style="{StaticResource iconButtonIcon}"/>
 
                                 <Button.ContextMenu>
-                                    <ContextMenu FlowDirection="LeftToRight" Margin="0 5 523 0">
+                                    <ContextMenu FlowDirection="LeftToRight" Margin="0 0 513 0">
                                         <MenuItem Header="Nuevo Producto" 
                                                   Foreground="{DynamicResource Brush.Menu.BlueCornflower}"
                                                   Style="{StaticResource AppMenuItemStyle}" Command="{Binding ShowNewProductCommand}">

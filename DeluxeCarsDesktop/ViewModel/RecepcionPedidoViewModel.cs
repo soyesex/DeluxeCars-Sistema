@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using DeluxeCars.DataAccess.Repositories.Interfaces;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
@@ -18,6 +19,7 @@ namespace DeluxeCarsDesktop.ViewModel
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMessengerService _messengerService;
         private readonly INotificationService _notificationService;
+        private readonly IEmailService _emailService;
         private Pedido _pedidoActual;
 
         public string Titulo => $"Recepcionar Pedido N° {_pedidoActual?.NumeroPedido}";
@@ -26,11 +28,13 @@ namespace DeluxeCarsDesktop.ViewModel
         public ICommand ConfirmarRecepcionCommand { get; }
         public Action CloseAction { get; set; }
 
-        public RecepcionPedidoViewModel(IUnitOfWork unitOfWork, IMessengerService messengerService, INotificationService notificationService)
+        public RecepcionPedidoViewModel(IUnitOfWork unitOfWork, IMessengerService messengerService, INotificationService notificationService,
+                                    IEmailService emailService)
         {
             _unitOfWork = unitOfWork;
             _messengerService = messengerService;
             _notificationService = notificationService;
+            _emailService = emailService;
 
             ItemsARecepcionar = new ObservableCollection<RecepcionPedidoItemViewModel>();
             ConfirmarRecepcionCommand = new ViewModelCommand(async (p) => await ExecuteConfirmarRecepcion());
@@ -105,6 +109,21 @@ namespace DeluxeCarsDesktop.ViewModel
 
                 // Guardamos TODOS los cambios en una única transacción atómica.
                 await _unitOfWork.CompleteAsync();
+
+                try
+                {
+                    // Solo si el pedido está Recibido o Parcialmente, notificamos.
+                    if (_pedidoActual.Estado == EstadoPedido.Recibido || _pedidoActual.Estado == EstadoPedido.RecibidoParcialmente)
+                    {
+                        await _emailService.EnviarEmailPedidoRecibido(_pedidoActual);
+                    }
+                    _notificationService.ShowSuccess("¡Mercancía recepcionada y notificación enviada!");
+                }
+                catch (Exception ex)
+                {
+                    // El inventario se actualizó, pero el correo falló.
+                    _notificationService.ShowWarning($"Recepción guardada, pero falló el envío del correo: {ex.Message}");
+                }
 
                 _messengerService.Publish(new InventarioCambiadoMessage());
                 _notificationService.ShowSuccess("¡Mercancía recepcionada! El inventario ha sido actualizado.");

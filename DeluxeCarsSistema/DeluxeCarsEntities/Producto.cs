@@ -1,11 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DeluxeCarsEntities
 {
     public class Producto
     {
-        // Se usan auto-propiedades, que es el estándar para modelos de EF.
-        // La lógica de notificación (SetProperty) pertenece a los ViewModels, no aquí.
         [Key]
         public int Id { get; set; }
 
@@ -24,8 +23,6 @@ namespace DeluxeCarsEntities
         public bool Estado { get; set; }
 
         public string? ImagenUrl { get; set; }
-
-        // --- Nuevas Columnas de la Fase 1 ---
         public int? StockMinimo { get; set; }
 
         public int? StockMaximo { get; set; }
@@ -34,7 +31,8 @@ namespace DeluxeCarsEntities
 
         [StringLength(20)]
         public string? UnidadMedida { get; set; }
-
+        [NotMapped]
+        public int StockCalculado { get; set; }
 
         // --- Propiedades de Navegación ---
         public virtual Categoria Categoria { get; set; }

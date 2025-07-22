@@ -1,3 +1,209 @@
-﻿<div class="col-6 py-5">
-    <a asp-action="Config" class="btn btn-dark">Configuración</a>
+﻿@model Aplicacion.Application.ViewModels.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Panel de Administración";
+}
+
+<div class="container mt-4">
+    <h1 class="h2 mb-4">Dashboard</h1>
+
+    <div class="row g-4 mb-5 justify-content-center">
+        <div class="col-lg-3 col-md-6">
+            <div class="kpi-card productos">
+                <div class="kpi-icon"><i class="bi bi-box-seam"></i></div> <div> <div class="kpi-value">@Model.TotalProductos</div> <div class="kpi-label">Total de Productos</div> </div> </div> </div>
+        <div class="col-lg-3 col-md-6">
+            <a asp-controller="Categoria" asp-action="Index" class="text-decoration-none">
+                <div class="kpi-card categorias">
+                    <div class="kpi-icon"><i class="bi bi-tags"></i></div>
+                    <div>
+                        <div class="kpi-value">5</div>
+                        <div class="kpi-label">Total de Categorías</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="kpi-card stock">
+                <div class="kpi-icon"><i class="bi bi-exclamation-triangle"></i></div> <div> <div class="kpi-value">@Model.ProductosBajoStock</div> <div class="kpi-label">Productos con Bajo Stock</div> </div> </div> </div>
+    </div>
+
+    <div class="row g-4 mb-5 justify-content-center">
+        <div class="col-md-6 col-lg-3 d-flex">
+            <a asp-controller="Producto" asp-action="Index" class="quick-action-card">
+                <i class="bi bi-boxes"></i>
+                <h4>Gestionar Productos</h4>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3 d-flex">
+            <a asp-controller="Categoria" asp-action="Index" class="quick-action-card">
+                <i class="bi bi-tags"></i>
+                <h4>Administrar Categorías</h4>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3 d-flex">
+            <a asp-controller="Usuario" asp-action="Index" class="quick-action-card">
+                <i class="bi bi-people"></i>
+                <h4>Gestionar Usuarios</h4>
+            </a>
+        </div>
+    </div>
 </div>
+
+<style>
+    /* VARIABLES GLOBALES */
+    :root {
+        --color-fondo: #121212;
+        --color-superficie-oscura: #1E1E1E;
+        --color-borde-oscuro: #2F2F2F;
+        --color-primario: #E53559;
+        --color-texto-principal: #EAEAEA;
+        --color-texto-secundario: #A0A0A0;
+        --color-verde: #30d158;
+        --color-azul: #3d9eff;
+        --color-amarillo: #ffc400;
+        --color-naranja: #ff9500;
+        --color-morado: #af52de;
+    }
+
+    /* ESTILOS TARJETAS KPI (Sin cambios) */
+    .kpi-card {
+        background: radial-gradient(circle, rgba(40,40,42,1) 0%, var(--color-superficie-oscura) 100%);
+        border: 1px solid var(--color-borde-oscuro);
+        border-radius: 1rem;
+        color: var(--color-texto-principal);
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+        .kpi-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+    .kpi-icon {
+        font-size: 2rem;
+        margin-right: 1.5rem;
+        width: 60px;
+        height: 60px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.03);
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .kpi-card.productos .kpi-icon {
+        color: var(--color-azul);
+    }
+
+    .kpi-card.ventas .kpi-icon {
+        color: var(--color-verde);
+    }
+
+    .kpi-card.stock .kpi-icon {
+        color: var(--color-primario);
+    }
+
+    .kpi-card:hover .kpi-icon {
+        background-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .kpi-value {
+        font-size: 2.2rem;
+        font-weight: 600;
+        line-height: 1;
+        color: var(--color-texto-principal);
+    }
+
+    .kpi-label {
+        font-size: 0.9rem;
+        color: var(--color-texto-secundario);
+        font-weight: 400;
+    }
+
+    /* ESTILOS TARJETAS DE ACCIÓN (Sin cambios) */
+    .quick-action-card {
+        background: var(--color-superficie-oscura);
+        border-radius: 1rem;
+        padding: 2rem;
+        text-align: center;
+        color: var(--color-texto-principal);
+        text-decoration: none;
+        display: block;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.3s ease-in-out;
+        border: 1px solid var(--color-borde-oscuro);
+        height: 100%;
+    }
+
+        .quick-action-card:hover {
+            transform: translateY(-8px);
+            color: #fff;
+        }
+
+        .quick-action-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 1rem;
+            border: 2px solid transparent;
+            background: conic-gradient(from var(--angle), var(--color-primario), var(--color-azul), var(--color-verde), var(--color-primario)) border-box;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            -webkit-mask-composite: destination-out;
+            animation: rotate 4s linear infinite;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .quick-action-card:hover::before {
+            opacity: 1;
+        }
+
+        .quick-action-card i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+            color: var(--color-texto-secundario);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
+        }
+
+        .quick-action-card h4 {
+            position: relative;
+            z-index: 2;
+        }
+
+        .quick-action-card:hover i {
+            transform: scale(1.1);
+        }
+
+        .quick-action-card:hover [class*="bi-boxes"] {
+            color: var(--color-azul);
+        }
+
+        .quick-action-card:hover [class*="bi-tags"] {
+            color: var(--color-verde);
+        }
+
+        .quick-action-card:hover [class*="bi-people"] {
+            color: var(--color-primario);
+        }
+
+    /* ESTILO PARA EL CONTENEDOR DEL GRÁFICO */
+    .chart-container {
+        background-color: var(--color-superficie-oscura);
+        padding: 2rem;
+        border-radius: 1rem;
+        border: 1px solid var(--color-borde-oscuro);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+</style>

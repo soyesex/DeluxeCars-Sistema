@@ -1,0 +1,23 @@
+﻿@model Aplicacion.Application.ViewModels.CategoriaViewModel
+@{
+    ViewData["Title"] = "Eliminar Categoría";
+}
+
+<h1 class="h2 text-danger">@ViewData["Title"]</h1>
+<h3>¿Estás seguro de que quieres eliminar permanentemente esta categoría?</h3>
+<p class="text-warning">Esta acción no se puede deshacer y podría afectar a los productos asociados.</p>
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">Nombre</dt>
+        <dd class="col-sm-9">@Model.Nombre</dd>
+        <dt class="col-sm-3">Descripción</dt>
+        <dd class="col-sm-9">@Model.Descripcion</dd>
+    </dl>
+
+    <form asp-action="Eliminar">
+        <input type="hidden" asp-for="Id" />
+        <input type="submit" value="Sí, Eliminar" class="btn btn-danger" />
+        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>

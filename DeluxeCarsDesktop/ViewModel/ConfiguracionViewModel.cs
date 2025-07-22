@@ -1,13 +1,11 @@
-﻿using DeluxeCarsDesktop.Interfaces;
+﻿using DeluxeCars.DataAccess.Repositories.Interfaces;
 using DeluxeCarsDesktop.Services;
 using DeluxeCarsDesktop.Utils;
 using DeluxeCarsDesktop.View.UserControls;
+using DeluxeCarsEntities;
 using MaterialDesignThemes.Wpf;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using System.Windows;
 using System.Windows.Input;
 
 namespace DeluxeCarsDesktop.ViewModel
@@ -16,78 +14,85 @@ namespace DeluxeCarsDesktop.ViewModel
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ISnackbarMessageQueue _messageQueue;
+        private Configuracion _configuracion;
 
-        // --- Propiedades para el Diálogo ---
-        private bool _isPinDialogOpen;
-        public bool IsPinDialogOpen
-        {
-            get => _isPinDialogOpen;
-            set => SetProperty(ref _isPinDialogOpen, value);
-        }
-
-        private object _dialogContent;
-        public object DialogContent
-        {
-            get => _dialogContent;
-            set => SetProperty(ref _dialogContent, value);
-        }
-
-        // --- Propiedades para la Vista ---
+        // --- Propiedades para la Vista (CORREGIDAS CON SetProperty) ---
         private string _nombreTienda;
-        public string NombreTienda
-        {
-            get => _nombreTienda;
-            set => SetProperty(ref _nombreTienda, value);
-        }
+        public string NombreTienda { get => _nombreTienda; set => SetProperty(ref _nombreTienda, value); }
 
         private string _direccion;
-        public string Direccion
-        {
-            get => _direccion;
-            set => SetProperty(ref _direccion, value);
-        }
+        public string Direccion { get => _direccion; set => SetProperty(ref _direccion, value); }
 
         private string _telefono;
-        public string Telefono
-        {
-            get => _telefono;
-            set => SetProperty(ref _telefono, value);
-        }
+        public string Telefono { get => _telefono; set => SetProperty(ref _telefono, value); }
 
         private string _email;
-        public string Email
-        {
-            get => _email;
-            set => SetProperty(ref _email, value);
-        }
+        public string Email { get => _email; set => SetProperty(ref _email, value); }
 
         private string _horarioAtencion;
-        public string HorarioAtencion
-        {
-            get => _horarioAtencion;
-            set => SetProperty(ref _horarioAtencion, value);
-        }
+        public string HorarioAtencion { get => _horarioAtencion; set => SetProperty(ref _horarioAtencion, value); }
 
         private decimal _porcentajeIVA;
-        public decimal PorcentajeIVA
+        public decimal PorcentajeIVA { get => _porcentajeIVA; set => SetProperty(ref _porcentajeIVA, value); }
+
+        // --- Propiedades para Email (CORREGIDAS) ---
+        private string _smtpHost;
+        public string SmtpHost { get => _smtpHost; set => SetProperty(ref _smtpHost, value); }
+
+        private int _smtpPort;
+        public int SmtpPort { get => _smtpPort; set => SetProperty(ref _smtpPort, value); }
+
+        private string _emailEmisor;
+        public string EmailEmisor
         {
-            get => _porcentajeIVA;
-            set => SetProperty(ref _porcentajeIVA, value);
+            get => _emailEmisor;
+            set
+            {
+                if (SetPropertyAndCheck(ref _emailEmisor, value))
+                {
+                    if (!UsarConfiguracionManual) { AutoDetectarConfiguracion(); }
+                }
+            }
         }
 
+        private bool _enableSsl;
+        public bool EnableSsl { get => _enableSsl; set => SetProperty(ref _enableSsl, value); }
+
+        private bool _usarConfiguracionManual;
+        public bool UsarConfiguracionManual
+        {
+            get => _usarConfiguracionManual;
+            set
+            {
+                if (SetPropertyAndCheck(ref _usarConfiguracionManual, value) && !value)
+                {
+                    AutoDetectarConfiguracion();
+                }
+            }
+        }
+
+        private string _smtpPassword;
+        public string SmtpPassword { get => _smtpPassword; set => SetProperty(ref _smtpPassword, value); }
+        public bool NotificacionesActivas { get; set; }
+
+        // ... (Otras propiedades como IsPinDialogOpen, etc. sin cambios) ...
+        private bool _isPinDialogOpen;
+        public bool IsPinDialogOpen { get => _isPinDialogOpen; set => SetProperty(ref _isPinDialogOpen, value); }
+        private object _dialogContent;
+        public object DialogContent { get => _dialogContent; set => SetProperty(ref _dialogContent, value); }
         // --- Comandos ---
         public ICommand GuardarCambiosCommand { get; }
         public ICommand CambiarPinCommand { get; }
         public ICommand CambiarLogoCommand { get; }
         public ICommand CambiarBannerCommand { get; }
 
-        public ConfiguracionViewModel(IUnitOfWork unitOfWork)
+        public ConfiguracionViewModel(IUnitOfWork unitOfWork, ISnackbarMessageQueue messageQueue)
         {
             _unitOfWork = unitOfWork;
+            _messageQueue = messageQueue; // Asignamos la dependencia faltante
+
             GuardarCambiosCommand = new ViewModelCommand(async _ => await ExecuteGuardarCambios());
-
             CambiarPinCommand = new ViewModelCommand(ExecuteCambiarPin);
-
             CambiarLogoCommand = new ViewModelCommand(p => { /* Lógica futura */ });
             CambiarBannerCommand = new ViewModelCommand(p => { /* Lógica futura */ });
         }
@@ -95,50 +100,107 @@ namespace DeluxeCarsDesktop.ViewModel
         // Método de inicialización asíncrona para cargar los datos
         public async Task LoadAsync()
         {
-            // Buscamos la única fila de configuración (la que tiene Id = 1)
-            var config = await _unitOfWork.Configuraciones.GetByIdAsync(1);
-            if (config != null)
+            _configuracion = await _unitOfWork.Configuraciones.GetFirstAsync();
+            if (_configuracion == null)
             {
-                NombreTienda = config.NombreTienda;
-                Direccion = config.Direccion;
-                Telefono = config.Telefono;
-                Email = config.Email;
-                HorarioAtencion = config.HorarioAtencion;
-                PorcentajeIVA = config.PorcentajeIVA;
+                _configuracion = new Configuracion();
             }
-            else
-            {
-                // Manejar el caso de que la fila no exista (aunque el Seeding debería prevenirlo)
-                // Podríamos mostrar un error o usar valores por defecto.
-                ShowTemporaryErrorMessage("No se encontró la configuración de la empresa.", 10);
-            }
+
+            // Poblamos las propiedades. Como ahora usan SetProperty, la UI se actualizará sola.
+            NombreTienda = _configuracion.NombreTienda;
+            Direccion = _configuracion.Direccion;
+            Telefono = _configuracion.Telefono;
+            Email = _configuracion.Email;
+            HorarioAtencion = _configuracion.HorarioAtencion;
+            PorcentajeIVA = _configuracion.PorcentajeIVA;
+            SmtpHost = _configuracion.SmtpHost;
+            SmtpPort = _configuracion.SmtpPort;
+            EmailEmisor = _configuracion.EmailEmisor;
+            EnableSsl = _configuracion.EnableSsl;
+            SmtpPassword = EncryptionHelper.Decrypt(_configuracion.PasswordEmailEmisor);
+            UsarConfiguracionManual = !string.IsNullOrEmpty(_configuracion.SmtpHost);
+            NotificacionesActivas = _configuracion.NotificacionesActivas;
+            OnPropertyChanged(nameof(NotificacionesActivas));
+            OnPropertyChanged(nameof(SmtpPassword));
         }
 
         private async Task ExecuteGuardarCambios()
         {
-            var config = await _unitOfWork.Configuraciones.GetByIdAsync(1);
-            if (config != null)
-            {
-                // Actualizamos el objeto de la entidad con los valores de las propiedades del ViewModel
-                config.NombreTienda = this.NombreTienda;
-                config.Direccion = this.Direccion;
-                config.Telefono = this.Telefono;
-                config.Email = this.Email;
-                config.HorarioAtencion = this.HorarioAtencion;
-                config.PorcentajeIVA = this.PorcentajeIVA;
+            // Actualizamos la entidad con los valores del ViewModel
+            _configuracion.NombreTienda = this.NombreTienda;
+            _configuracion.Direccion = this.Direccion;
+            _configuracion.Telefono = this.Telefono;
+            _configuracion.Email = this.Email;
+            _configuracion.HorarioAtencion = this.HorarioAtencion;
+            _configuracion.PorcentajeIVA = this.PorcentajeIVA;
+            _configuracion.SmtpHost = this.SmtpHost;
+            _configuracion.SmtpPort = this.SmtpPort;
+            _configuracion.EmailEmisor = this.EmailEmisor;
+            _configuracion.EnableSsl = this.EnableSsl;
+            _configuracion.NotificacionesActivas = this.NotificacionesActivas;
 
-                // Guardamos los cambios en la base de datos
+            if (!string.IsNullOrEmpty(SmtpPassword))
+            {
+                _configuracion.PasswordEmailEmisor = EncryptionHelper.Encrypt(SmtpPassword);
+            }
+            else if (_configuracion.PasswordEmailEmisor == null) // Solo borra si no había nada antes y sigue vacío
+            {
+                _configuracion.PasswordEmailEmisor = null;
+            }
+
+
+            try
+            {
+                if (_configuracion.Id == 0) // Si es un registro nuevo
+                {
+                    await _unitOfWork.Configuraciones.AddAsync(_configuracion);
+                }
+                else // Si es un registro existente que estamos actualizando
+                {
+                    // --- ESTA ES LA LÍNEA CLAVE QUE FALTABA ---
+                    // Le decimos explícitamente a Entity Framework que la entidad ha sido modificada.
+                    _unitOfWork.Context.Entry(_configuracion).State = EntityState.Modified;
+                }
+
+                // Ahora, al llamar a CompleteAsync, EF generará el comando UPDATE correctamente.
                 await _unitOfWork.CompleteAsync();
 
-                // Notificamos al usuario que todo salió bien
-                ShowTemporaryErrorMessage("✅ Configuración guardada exitosamente.", 5);
+                MessageBox.Show("Configuración guardada exitosamente.", "Éxito");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ocurrió un error al guardar la configuración: {ex.Message}", "Error");
+            }
+        }
+        private void AutoDetectarConfiguracion()
+        {
+            if (string.IsNullOrEmpty(EmailEmisor)) return;
+
+            if (EmailEmisor.Contains("@gmail.com"))
+            {
+                SmtpHost = "smtp.gmail.com";
+                SmtpPort = 587;
+                EnableSsl = true;
+            }
+            else if (EmailEmisor.Contains("@outlook.com") || EmailEmisor.Contains("@hotmail.com"))
+            {
+                SmtpHost = "smtp.office365.com";
+                SmtpPort = 587;
+                EnableSsl = true;
             }
             else
             {
-                ShowTemporaryErrorMessage("Error: No se encontró la configuración para guardar.", 10);
+                // Si no es un proveedor conocido, no hacemos nada y dejamos que el usuario lo ponga manual.
+                // Opcional: podrías limpiar los campos si quieres.
+                SmtpHost = "";
+                SmtpPort = 0;
             }
-        }
 
+            // Notificamos a la UI que estas propiedades han cambiado
+            OnPropertyChanged(nameof(SmtpHost));
+            OnPropertyChanged(nameof(SmtpPort));
+            OnPropertyChanged(nameof(EnableSsl));
+        }
         // AÑADIR ESTE NUEVO MÉTODO
         private void ExecuteCambiarPin(object parameter)
         {

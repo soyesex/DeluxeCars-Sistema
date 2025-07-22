@@ -5,8 +5,6 @@ namespace DeluxeCarsEntities
 {
     public class Usuario
     {
-        // Para los modelos de EF, es más simple y estándar usar auto-propiedades.
-        // La notificación de cambios se manejará en el ViewModel, no en el modelo.
         [Key]
         public int Id { get; set; }
 

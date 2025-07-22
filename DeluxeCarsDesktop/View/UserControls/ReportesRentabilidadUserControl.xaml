@@ -21,7 +21,7 @@
                 <Button Content="Generar Reporte" Command="{Binding CargarReporteCommand}" Style="{StaticResource DarkActionButtonStyle}" Margin="15,0,0,0"/>
             </StackPanel>
 
-            <Border Grid.Row="1" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
+            <Border Grid.Row="1" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1.2">
                 <DataGrid ItemsSource="{Binding Resultados}" Style="{StaticResource ElegantDataGridStyle}" CanUserAddRows="False" AutoGenerateColumns="False" IsReadOnly="True">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="N° Factura" Binding="{Binding NumeroFactura}" Width="*"/>

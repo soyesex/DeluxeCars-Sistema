@@ -1,0 +1,402 @@
+﻿@model Aplicacion.Application.ViewModels.CarritoViewModel
+@{
+    ViewData["Title"] = "Mi Carrito de Compras";
+}
+
+<div class="container my-5 pt-5">
+    <div class="header-section text-center mb-5" data-aos="fade-up">
+        <h1 class="display-5 fw-bold">Mi Carrito de Compras</h1>
+    </div>
+    @Html.AntiForgeryToken()
+
+    @if (Model != null && Model.Items.Any())
+    {
+        <div class="row" id="cart-container">
+            <div class="col-lg-8" data-aos="fade-up">
+                <div class="cart-items-table">
+                    @foreach (var item in Model.Items)
+                    {
+                        <div class="cart-item-row" id="cart-row-@item.ProductoId">
+                            <div class="cart-item-image">
+                                <img src="@item.ImagenUrl" alt="@item.NombreProducto">
+                            </div>
+                            <div class="cart-item-details">
+                                <h5 class="product-name">@item.NombreProducto</h5>
+                                <p class="product-price">@item.Precio.ToString("C0")</p>
+                            </div>
+                            <div class="cart-item-quantity">
+                                <label>Cant:</label>
+                                <input type="number" class="form-control quantity-input" value="@item.Cantidad" min="1">
+                            </div>
+                            <div class="cart-item-subtotal">
+                                <p>@item.Subtotal.ToString("C0")</p>
+                            </div>
+                            <div class="cart-item-remove">
+                                <button class="btn btn-remove" data-product-id="@item.ProductoId" title="Eliminar producto">
+                                    <i class="bi bi-trash3-fill"></i>
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="col-lg-4" data-aos="fade-left" data-aos-delay="100">
+                <div class="order-summary-card">
+                    <h4 class="card-title">Resumen de la Orden</h4>
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span id="summary-subtotal">@Model.Total.ToString("C0")</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Envío</span>
+                        <span>Por calcular</span>
+                    </div>
+                    <div class="summary-total">
+                        <span>Total</span>
+                        <span id="summary-total">@Model.Total.ToString("C0")</span>
+                    </div>
+                    <div class="d-grid mt-4">
+                        <a asp-controller="Checkout" asp-action="Index" class="btn btn-brand-accent btn-lg">Proceder al Pago</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div id="empty-cart-message" class="text-center p-5 bg-light rounded @(Model != null && Model.Items.Any() ? "d-none" : "")" data-aos="zoom-in">
+        <i class="bi bi-cart-x" style="font-size: 4rem; color: var(--color-secundario);"></i>
+        <h3 class="mt-4 fw-bold">Tu carrito está vacío</h3>
+        <p class="lead text-muted mt-2">Parece que aún no has añadido ningún producto. ¡Explora nuestro catálogo!</p>
+        <a asp-controller="Catalogo" asp-action="Index" class="btn btn-brand-accent mt-3">Volver a la Tienda</a>
+    </div>
+</div>
+
+<div id="modal-confirmacion" class="modal-oculto">
+    <div class="modal-contenido">
+        <p id="modal-mensaje">¿Estás seguro de que quieres eliminar este producto?</p>
+        <div class="modal-botones">
+            <button id="btn-confirmar" class="btn btn-danger">Sí, eliminar</button>
+            <button id="btn-cancelar" class="btn btn-secondary">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            const modal = document.getElementById('modal-confirmacion');
+            const mensaje = document.getElementById('modal-mensaje');
+            const btnConfirmar = document.getElementById('btn-confirmar');
+            const btnCancelar = document.getElementById('btn-cancelar');
+
+            let accionConfirmada = null;
+
+            function mostrarModalConfirmacion(texto, callback) {
+                mensaje.textContent = texto;
+                accionConfirmada = callback;
+                modal.classList.add('mostrar');
+            }
+
+            btnConfirmar.addEventListener('click', () => {
+                modal.classList.remove('mostrar');
+                if (accionConfirmada) accionConfirmada();
+            });
+
+            btnCancelar.addEventListener('click', () => {
+                modal.classList.remove('mostrar');
+            });
+
+            document.querySelectorAll('.btn-remove').forEach(button => {
+                button.addEventListener('click', function () {
+                    const productoId = this.dataset.productId;
+
+                    mostrarModalConfirmacion("¿Estás seguro de que quieres eliminar este producto?", () => {
+                        fetch('/Carrito/RemoveFromCart', {
+                            method: 'POST',
+                            headers: {
+                                'RequestVerificationToken': token,
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: 'productoId=' + productoId
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    const row = document.getElementById('cart-row-' + productoId);
+                                    row.style.transition = 'all 0.5s ease';
+                                    row.style.opacity = '0';
+                                    row.style.transform = 'translateX(50px)';
+                                    setTimeout(() => row.remove(), 500);
+
+                                    document.getElementById('summary-subtotal').textContent = data.newTotal;
+                                    document.getElementById('summary-total').textContent = data.newTotal;
+
+                                    window.updateCartCount?.();
+
+                                    if (data.cartIsEmpty) {
+                                        document.getElementById('cart-container').style.display = 'none';
+                                        document.getElementById('empty-cart-message').classList.remove('d-none');
+                                    }
+                                } else {
+                                    alert(data.message);
+                                }
+                            });
+                    });
+                });
+            });
+        });
+    </script>
+
+}
+<style>
+    /* --- VARIABLES DE COLOR (Asegúrate que coincidan con tu paleta) --- */
+    :root {
+        --color-fondo-oscuro: #121212;
+        --color-superficie-oscura: #1E1E1E;
+        --color-borde-oscuro: #2F2F2F;
+        --color-primario: #E53559; /* Color de acento principal */
+        --color-texto-principal: #EAEAEA;
+        --color-texto-secundario: #A0A0A0;
+    }
+
+    /* --- ESTILO GENERAL DE LA PÁGINA --- */
+    .page-main-title {
+        color: var(--color-texto-principal);
+        font-weight: 700;
+        margin-bottom: 3rem;
+    }
+
+    /* --- TARJETA DE CADA ITEM EN EL CARRITO --- */
+    .cart-item-row {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        background-color: var(--color-superficie-oscura);
+        border: 1px solid var(--color-borde-oscuro);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+        .cart-item-row:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border-color: var(--color-primario);
+        }
+
+    .cart-item-image {
+        width: 90px;
+        height: 90px;
+        flex-shrink: 0;
+        background-color: #FFFFFF;
+        border-radius: 8px;
+        padding: 8px;
+        display: grid;
+        place-items: center;
+    }
+
+        .cart-item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+    .cart-item-details {
+        flex-grow: 1;
+    }
+
+        .cart-item-details .product-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--color-texto-principal);
+            margin-bottom: 0.3rem;
+        }
+
+        .cart-item-details .product-price {
+            color: var(--color-texto-secundario);
+            font-size: 1rem;
+            margin: 0;
+        }
+
+    /* --- INPUT DE CANTIDAD PERSONALIZADO --- */
+    .cart-item-quantity {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .cart-item-quantity label {
+            color: var(--color-texto-secundario);
+            font-size: 0.9rem;
+        }
+
+        .cart-item-quantity .quantity-input {
+            width: 60px;
+            text-align: center;
+            font-weight: 600;
+            background-color: rgba(255,255,255,0.05);
+            border: 1px solid var(--color-borde-oscuro);
+            color: var(--color-texto-principal);
+            border-radius: 6px;
+            padding: 0.5rem;
+        }
+    /* Ocultar las flechas por defecto del input number */
+    .quantity-input::-webkit-outer-spin-button,
+    .quantity-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .quantity-input[type=number] {
+        -moz-appearance: textfield;
+    }
+
+
+    .cart-item-subtotal {
+        width: 130px;
+        text-align: right;
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: var(--color-texto-principal);
+    }
+
+    .cart-item-remove .btn-remove {
+        color: var(--color-texto-secundario);
+        background: transparent;
+        border: none;
+        font-size: 1.5rem;
+        transition: all 0.2s ease;
+    }
+
+        .cart-item-remove .btn-remove:hover {
+            color: var(--color-primario);
+            transform: scale(1.1);
+        }
+
+    /* --- TARJETA DE RESUMEN DE LA ORDEN --- */
+    .order-summary-card {
+        background-color: var(--color-superficie-oscura);
+        border: 1px solid var(--color-borde-oscuro);
+        border-radius: 12px;
+        padding: 2rem;
+        position: sticky; /* Para que se mantenga visible al hacer scroll */
+        top: 2rem;
+    }
+
+        .order-summary-card .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-texto-principal);
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--color-borde-oscuro);
+        }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        font-size: 1rem;
+        color: var(--color-texto-secundario);
+    }
+
+    .summary-total {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--color-borde-oscuro);
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--color-texto-principal);
+    }
+
+    /* --- BOTÓN DE PAGO (CALL TO ACTION) --- */
+    .btn-brand-accent {
+        background-color: var(--color-primario);
+        color: #FFFFFF;
+        font-weight: 600;
+        padding: 0.8rem 1rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+        .btn-brand-accent:hover {
+            background-color: var(--color-primario);
+            filter: brightness(1.2);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+    /* --- MENSAJE DE CARRITO VACÍO --- */
+    #empty-cart-message {
+        background-color: var(--color-superficie-oscura) !important;
+        border: 1px dashed var(--color-borde-oscuro);
+        color: var(--color-texto-secundario) !important;
+    }
+
+        #empty-cart-message h3 {
+            color: var(--color-texto-principal) !important;
+        }
+
+    #modal-confirmacion {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        background-color: rgba(0,0,0,0.6);
+        z-index: 9999;
+    }
+
+        #modal-confirmacion.mostrar {
+            display: flex;
+        }
+
+    .modal-contenido {
+        background: var(--color-superficie-oscura);
+        padding: 2rem;
+        border-radius: 12px;
+        max-width: 400px;
+        width: 100%;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+        color: var(--color-texto-principal);
+        text-align: center;
+    }
+
+    .modal-botones {
+        margin-top: 1.5rem;
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+        .modal-botones .btn {
+            padding: 0.6rem 1.4rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+    .btn-danger {
+        background-color: #e74c3c;
+        color: white;
+        border: none;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+    }
+
+</style>

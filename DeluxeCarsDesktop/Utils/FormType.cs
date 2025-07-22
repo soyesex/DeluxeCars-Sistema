@@ -28,5 +28,7 @@ namespace DeluxeCarsDesktop.Utils
         RegistrarPagoProveedor,
         RegistrarPagoCliente,
         NotaDeCredito,
+        AjusteInventario,
+        FacturaDetalles
     }
 }

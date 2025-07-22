@@ -5,12 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DeluxeCarsDesktop.View"
         mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
         UseLayoutRounding="True"
-        Title="Sugerencias Compra" Height="450" MaxWidth="1200"
+        Title="Sugerencias Compra" Height="600" Width="1000" MinHeight="600" MinWidth="800"
+        MaxHeight="900" MaxWidth="1200"
         WindowStyle="None"
         ResizeMode="NoResize"
         SizeToContent="WidthAndHeight"
-        WindowStartupLocation="CenterScreen"
+        
         Background="Transparent"
         AllowsTransparency="True" 
         xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp">
@@ -55,8 +57,6 @@
                     <Grid.RowDefinitions>
                         <!--Control bar-->
                         <RowDefinition Height="25"/>
-                        <!--Header / Caption-->
-                        <RowDefinition Height="40"/>
                         <!--Content section / Child views-->
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
@@ -119,55 +119,29 @@
                        FontWeight="Medium"
                        VerticalAlignment="Center"/>
                         </StackPanel>
-                        <!--User options-->
-                        <StackPanel Grid.Column="1"
-                    Orientation="Horizontal"
-                    FlowDirection="RightToLeft"
-                    VerticalAlignment="Center"
-                    Margin="0,0,10,0">
-
-                            <TextBlock Text="{Binding CurrentUserAccount.DisplayName}"
-                       Foreground="{StaticResource titleColor2}"
-                       FontFamily="Montserrat"
-                       FontSize="12"
-                       VerticalAlignment="Center"/>
-
-                            <Button Style="{StaticResource iconButton}"
-                    Tag="{StaticResource color3}">
-                                <fa:IconImage Icon="Clock" Style="{StaticResource iconButtonIcon}"/>
-                            </Button>
-
-                            <Button Style="{StaticResource iconButton}"
-                    Tag="{StaticResource color4}">
-                                <fa:IconImage Icon="Envelope" Style="{StaticResource iconButtonIcon}"/>
-                            </Button>
-
-                            <Button Style="{StaticResource iconButton}"
-                    Tag="{StaticResource color5}">
-                                <fa:IconImage Icon="Bell" Style="{StaticResource iconButtonIcon}"/>
-                            </Button>
-                        </StackPanel>
                     </Grid>
-                    <Grid Margin="15" Grid.Row="2">
-                        <Border CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" 
-            BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
+                    <Grid Margin="50" Grid.Row="2">
+                        <Border Grid.Row="3" CornerRadius="10" 
+        Background="{StaticResource Brush.Brand.CharcoalLight}" 
+         BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1.2">
                             <DataGrid ItemsSource="{Binding Sugerencias}" 
-                                      Style="{StaticResource ElegantDataGridStyle}"
+                                      Style="{StaticResource AppDataGridStyle}"
                   AutoGenerateColumns="False" IsReadOnly="False">
                                 <DataGrid.Columns>
                                     <DataGridCheckBoxColumn Header="Seleccionar" Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
 
-                                    <DataGridTextColumn Header="Producto" Binding="{Binding Nombre}" IsReadOnly="True" Width="*"/>
-                                    <DataGridTextColumn Header="Stock Actual" Binding="{Binding StockActual}" IsReadOnly="True" Width="Auto"/>
-                                    <DataGridTextColumn Header="Stock Mínimo" Binding="{Binding StockMinimo}" IsReadOnly="True" Width="Auto"/>
-                                    <DataGridTextColumn Header="Cantidad Sugerida" Binding="{Binding CantidadSugerida}" IsReadOnly="True" Width="Auto"/>
-                                    <DataGridTextColumn Header="Proveedor Principal" Binding="{Binding ProveedorPrincipal}" IsReadOnly="True" Width="*"/>
+                                    <DataGridTextColumn Header="Producto" Binding="{Binding Nombre}" IsReadOnly="True" Width="2*"/>
+                                    <DataGridTextColumn Header="Stock Actual" Binding="{Binding StockActual}" IsReadOnly="True" Width="*"/>
+                                    <DataGridTextColumn Header="Stock Mínimo" Binding="{Binding StockMinimo}" IsReadOnly="True" Width="*"/>
+                                    <DataGridTextColumn Header="Cantidad Sugerida" Binding="{Binding CantidadSugerida}" IsReadOnly="True" Width="* "/>
+                                    <DataGridTextColumn Header="Proveedor Principal" Binding="{Binding ProveedorPrincipal}" IsReadOnly="True" Width="2*"/>
                                 </DataGrid.Columns>
                             </DataGrid>
                         </Border>
 
                         <Button Content="Generar Borradores de Orden de Compra" 
-            Style="{StaticResource DarkActionButtonStyle}"
+             Style="{StaticResource ElegantShadowGhostButton}"
+            Tag="{StaticResource Brush.Menu.YellowGold}"
             Command="{Binding GenerarBorradorOrdenCommand}"
             HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10"/>
                     </Grid>

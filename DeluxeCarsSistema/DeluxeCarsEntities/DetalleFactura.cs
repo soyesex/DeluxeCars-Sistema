@@ -11,19 +11,19 @@ namespace DeluxeCarsEntities
     {
         public int Id { get; set; }
         public int IdFactura { get; set; }
-        public string TipoDetalle { get; set; } // "Producto" o "Servicio"
-        public int IdItem { get; set; } // Corresponde a Producto.Id o Servicio.Id
+        public string TipoDetalle { get; set; }
+        public int IdItem { get; set; }
         public string Descripcion { get; set; }
         public int Cantidad { get; set; }
         public string UnidadMedida { get; set; }
         public decimal PrecioUnitario { get; set; }
-        public decimal? Descuento { get; set; } // Nullable
-        public decimal? IVA { get; set; } // Nullable
-        [NotMapped]
-        public decimal SubTotalLinea { get; set; } // Columna calculada
-        [NotMapped] // <-- Le dice a EF que no la guarde en la base de datos
-        public decimal SubtotalCalculado => Cantidad * PrecioUnitario;
-        public decimal Total { get; set; } // Columna calculada
+        public decimal? Descuento { get; set; }
+        public decimal? IVA { get; set; }
+
+        // --- PROPIEDADES CORREGIDAS ---
+        // Ahora son propiedades simples. El ViewModel se encargará de calcular y asignar sus valores.
+        public decimal SubTotalLinea { get; set; }
+        public decimal Total { get; set; }
 
         // Navigation Property
         public virtual Factura Factura { get; set; }

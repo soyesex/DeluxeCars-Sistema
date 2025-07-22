@@ -1,25 +1,58 @@
-using Aplicacion.Application.ViewModels;
-using Aplicacion.Core.Models;
-using Aplicacion.Data;
-using Aplicacion.Models.Interfaces;
-using Aplicacion.Services;
+using Aplicacion.Application.Services;
+using Aplicacion.Core.Configuration;
+using Aplicacion.Core.Interfaces;
+using DeluxeCars.DataAccess;
+using DeluxeCars.DataAccess.Repositories.Implementations;
+using DeluxeCars.DataAccess.Repositories.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// --- CONFIGURACIÓN DE LA NUEVA ARQUITECTURA ---
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+
+// 1. Usamos el AppDbContext centralizado de DeluxeCars.DataAccess
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(connectionString, sqlOptions => sqlOptions.EnableRetryOnFailure()));
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+// 2. Usamos IUnitOfWork como la forma de acceder a los datos.
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+// --- FUNCIONALIDADES DEL ARCHIVO VIEJO ---
+
+// <-- AÑADIDO: Configuración para el envío de correos desde secrets.json. -->
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddTransient<IEmailSender, EmailSender>();
+
+// <-- AÑADIDO: Servicio para el carrito de compras. -->
+// Nota: Asegúrate que la clase CarritoService no dependa de los servicios viejos, sino que pueda funcionar con la nueva arquitectura.
+builder.Services.AddScoped<ICarritoService, CarritoService>();
+
+builder.Services.AddScoped<IContentService, ContentService>();
+
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+
+// <-- AÑADIDO: Configuración para la sesión de usuario, necesaria para el carrito. -->
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
+// --- CONFIGURACIÓN DE IDENTITY Y COOKIES (Común a ambos archivos) ---
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+    .AddEntityFrameworkStores<AppDbContext>();
+
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddScoped<IProductoService, ProductoService>();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
@@ -53,7 +86,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// --- CONFIGURACIÓN DEL PIPELINE HTTP ---
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
@@ -61,7 +94,6 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -69,6 +101,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseSession();
 
 app.UseAuthentication();
 app.UseAuthorization();

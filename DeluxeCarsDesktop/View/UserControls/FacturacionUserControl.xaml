@@ -3,156 +3,283 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
              mc:Ignorable="d" 
-             d:DesignHeight="700" d:DesignWidth="1000">
-    <Grid Margin="15">
+             xmlns:converters="clr-namespace:DeluxeCarsDesktop.Converters"
+             d:DesignHeight="700" d:DesignWidth="900">
+
+    <UserControl.Resources>
+        <converters:ImagePathConverter x:Key="ImagePathConverter"/>
+        <Style x:Key="WhiteHeaderStyle" TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+            <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        </Style>
+
+        <Style x:Key="CustomDataGridCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource Brush.Brand.NavyDeep}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+    </UserControl.Resources>
+    <Grid Margin="20">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" BorderBrush="#4D5B7C" BorderThickness="0,0,0,1" Padding="5" Margin="0,0,0,10">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="250"/>
-                </Grid.ColumnDefinitions>
-                <Label Content="Cliente:" Style="{StaticResource DarkLableForm}"/>
-                
-                <Grid Grid.Column="1">
-                    <TextBox x:Name="ClientSearchTextBox" 
-             Text="{Binding TextoBusquedaCliente, UpdateSourceTrigger=PropertyChanged}"
-             Style="{StaticResource DarkInputControlStyle}" />
-
-                    <Popup IsOpen="{Binding IsClientPopupOpen, Mode=TwoWay}" 
-           PlacementTarget="{Binding ElementName=ClientSearchTextBox}"
-           StaysOpen="False">
-                        <Border Background="#2D3748" BorderBrush="#4A5568" BorderThickness="1" CornerRadius="5">
-                            <ListBox ItemsSource="{Binding ResultadosBusquedaCliente}"
-                     SelectedItem="{Binding ClienteSeleccionado, Mode=TwoWay}"
-                     DisplayMemberPath="Nombre"
-                     MaxHeight="200"
-                     BorderThickness="0">
-                                <ListBox.ItemContainerStyle>
-                                    <Style TargetType="ListBoxItem">
-                                        <Setter Property="Padding" Value="5"/>
-                                        <Setter Property="Foreground" Value="White"/>
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="ListBoxItem">
-                                                    <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter />
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsSelected" Value="True">
-                                                            <Setter Property="Background" Value="#4A5568"/>
-                                                        </Trigger>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="#4A5568"/>
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </ListBox.ItemContainerStyle>
-                            </ListBox>
-                        </Border>
-                    </Popup>
-                </Grid>
-                <Label Grid.Column="2" Content="Método de Pago:" Style="{StaticResource DarkLableForm}" Margin="10,0,0,0"/>
-                <ComboBox Grid.Column="3" ItemsSource="{Binding MetodosDePago}"
-                          SelectedItem="{Binding MetodoPagoSeleccionado}"
-                          DisplayMemberPath="Descripcion" Style="{StaticResource DarkComboBoxStyle}"/>
-            </Grid>
-        </Border>
-
-        <Grid Grid.Row="1" Margin="5,10">
+        <Grid Grid.Row="0" Margin="0,0,0,20">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="80"/>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="2*"/>
             </Grid.ColumnDefinitions>
-            <Label Grid.Column="0" Content="Buscar Producto/Servicio:" Style="{StaticResource DarkLableForm}"/>
-            <Grid Grid.Column="1">
-                <TextBox x:Name="ProductSearchTextBox" 
-             Text="{Binding TextoBusquedaItem, UpdateSourceTrigger=PropertyChanged}"
-             Style="{StaticResource DarkInputControlStyle}" />
 
-                <Popup IsOpen="{Binding IsProductPopupOpen, Mode=TwoWay}" 
-           PlacementTarget="{Binding ElementName=ProductSearchTextBox}"
-           StaysOpen="False">
-                    <Border Background="#2D3748" BorderBrush="#4A5568" BorderThickness="1" CornerRadius="5">
-                        <ListBox ItemsSource="{Binding ResultadosBusquedaItem}"
-                     SelectedItem="{Binding ItemSeleccionado, Mode=TwoWay}"
-                     DisplayMemberPath="Nombre"
-                     MaxHeight="200"
-                     BorderThickness="0">
-                            <ListBox.ItemContainerStyle>
-                                <Style TargetType="ListBoxItem">
-                                    <Setter Property="Padding" Value="5"/>
-                                    <Setter Property="Foreground" Value="White"/>
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="ListBoxItem">
-                                                <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
-                                                    <ContentPresenter />
-                                                </Border>
-                                                <ControlTemplate.Triggers>
+            <Border Grid.Column="0" Margin="0,0,10,0"
+                    Background="{StaticResource Background.Surface}"
+                    BorderBrush="{StaticResource Border.Default}"
+                    BorderThickness="1" CornerRadius="8" Padding="15">
+                <StackPanel>
+                    <TextBlock Text="Añadir Ítem a la Venta" FontSize="18" FontFamily="{StaticResource Font.Poppins}" FontWeight="Black" Foreground="{StaticResource Text.Primary}" Margin="0,0,0,15"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Column="0" Grid.Row="0" Margin="0,0,15,0">
+                            <TextBox x:Name="ItemSearchTextBox" Margin="0 0 0 0"
+                                     FontFamily="{StaticResource Font.Poppins}"
+                                     Text="{Binding TextoBusquedaItem, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource SearchBoxStyle}"
+                                     Tag="Buscar Producto o Servicio..."/>
+                            <Popup IsOpen="{Binding IsProductPopupOpen}" PlacementTarget="{Binding ElementName=ItemSearchTextBox}" StaysOpen="False" AllowsTransparency="True">
+
+                                <Border Background="{StaticResource Background.Surface}" 
+                                        BorderBrush="{StaticResource Border.Focus}" 
+                                        BorderThickness="1" 
+                                        CornerRadius="5" 
+                                        Padding="5"
+                                        MinWidth="{Binding ActualWidth, ElementName=ItemSearchTextBox}">
+
+                                    <ListBox ItemsSource="{Binding ResultadosBusquedaItem}"
+                                             SelectedItem="{Binding ItemSeleccionado, Mode=TwoWay}"
+                                             MaxHeight="250"
+                                             FontFamily="{StaticResource Font.Poppins}"
+                                             BorderThickness="0"
+                                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+
+                                        <ListBox.ItemContainerStyle>
+                                            <Style TargetType="ListBoxItem">
+                                                <Setter Property="Padding" Value="10,8"/>
+                                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                                <Style.Triggers>
                                                     <Trigger Property="IsSelected" Value="True">
-                                                        <Setter Property="Background" Value="#4A5568"/>
+                                                        <Setter Property="Background" Value="{StaticResource Background.Surface.Selected}"/>
                                                     </Trigger>
                                                     <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="#4A5568"/>
+                                                        <Setter Property="Background" Value="{StaticResource Background.Surface.Hover}"/>
                                                     </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </ListBox.ItemContainerStyle>
-                        </ListBox>
-                    </Border>
-                </Popup>
-            </Grid>
-            <Label Grid.Column="2" Content="Cantidad:" Style="{StaticResource DarkLableForm}" Margin="10,0,0,0"/>
-            <TextBox Grid.Column="3" Text="{Binding CantidadItem}" Style="{StaticResource DarkInputControlStyle}" TextAlignment="Center"/>
-            <Button Grid.Column="4" Content="Añadir" Style="{StaticResource DarkActionButtonStyle}" 
-                    Command="{Binding AgregarItemCommand}" 
-                    CommandParameter="{Binding ItemSeleccionado}" 
-                    Margin="10,0,0,0"/>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ListBox.ItemContainerStyle>
+
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <StackPanel Grid.Column="0">
+                                                        <TextBlock Text="{Binding Nombre}" FontWeight="SemiBold" FontSize="14" Foreground="{StaticResource Text.Primary}"/>
+                                                        <TextBlock Opacity="0.8" FontSize="11" Foreground="{StaticResource Text.Secondary}">
+                                    <Run Text="OEM:"/>
+                                    <Run Text="{Binding OriginalEquipamentManufacture}"/>
+                                                        </TextBlock>
+                                                    </StackPanel>
+
+                                                    <TextBlock Grid.Column="1" VerticalAlignment="Center" Visibility="{Binding StockCalculado, Converter={StaticResource IntToVisibilityConverter}}">
+                                <Run Text="Stock:" FontSize="11" Foreground="{StaticResource Text.Secondary}"/>
+                                <Run Text="{Binding StockCalculado}" FontWeight="Bold" Foreground="{StaticResource Brush.Status.Green}"/>
+                                                    </TextBlock>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </Border>
+
+                            </Popup>
+                        </Grid>
+
+                        <TextBox Text="{Binding CantidadItem}" Grid.Column="1"
+                                 materialDesign:HintAssist.Hint="Cantidad"
+                                 Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                 FontFamily="{StaticResource Font.Poppins}"
+                                 FontSize="16"
+                                 Width="80"
+                                 Foreground="{StaticResource Text.Primary}"
+                                 TextAlignment="Center" Margin="0,0,15,0"/>
+
+
+                        <Button Grid.Column="0" Grid.Row="1" Content="Añadir" Margin="20 20 0 5" Width="120"
+                            Command="{Binding AgregarItemCommand}"
+                            CommandParameter="{Binding ItemSeleccionado}"
+                            Style="{StaticResource ElegantShadowGhostButton}"
+                            Tag="{StaticResource Brush.Menu.YellowGold}"
+                            IsDefault="True"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="1" Margin="10,0,0,0"
+                    Background="{StaticResource Background.Surface}"
+                    BorderBrush="{StaticResource Border.Default}"
+                    BorderThickness="1" CornerRadius="8" Padding="15">
+                <StackPanel>
+                    <TextBlock Text="Datos de la Venta" FontSize="16" FontWeight="SemiBold" FontFamily="{StaticResource Font.Poppins}" Foreground="{StaticResource Text.Primary}" Margin="0,0,0,10"/>
+                    <ComboBox ItemsSource="{Binding ClientesDisponibles}"
+                              SelectedItem="{Binding ClienteSeleccionado}"
+                              DisplayMemberPath="Nombre"
+                              Style="{StaticResource ElegantComboBoxStyle}"
+                              FontFamily="{StaticResource Font.Poppins}"
+                              Tag="{StaticResource Border.Default}"
+                              Margin="0,5,0,10"/>
+                    <ComboBox ItemsSource="{Binding MetodosDePago}"
+                              SelectedItem="{Binding MetodoPagoSeleccionado}"
+                              DisplayMemberPath="Descripcion"
+                              Style="{StaticResource ElegantComboBoxStyle}"
+                              FontFamily="{StaticResource Font.Poppins}"
+                              Tag="{StaticResource Border.Default}"
+                              Margin="0,5,0,0"/>
+                </StackPanel>
+            </Border>
         </Grid>
 
-        <Border Grid.Row="2" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
-            <DataGrid ItemsSource="{Binding LineasDeFactura}" Style="{StaticResource ElegantDataGridStyle}" CanUserAddRows="False" AutoGenerateColumns="False" IsReadOnly="True">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Descripción" Binding="{Binding Descripcion}" Width="*"/>
-                    <DataGridTextColumn Header="Cantidad" Binding="{Binding Cantidad}" Width="Auto"/>
-                    <DataGridTextColumn Header="Precio Unit." Binding="{Binding PrecioUnitario, StringFormat=C}" Width="Auto"/>
-                    <DataGridTextColumn Header="Subtotal" Binding="{Binding SubtotalCalculado, StringFormat=C}" Width="Auto"/>
-                    <DataGridTemplateColumn Width="Auto">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Button Content="Quitar" Command="{Binding DataContext.EliminarItemCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
-        </Border>
+        <Grid Grid.Row="1">
+            <Border Background="{StaticResource Background.Surface}"
+                    BorderBrush="{StaticResource Border.Default}"
+                    BorderThickness="1" CornerRadius="8">
+                <DataGrid ItemsSource="{Binding LineasDeFactura}"
+                          Style="{StaticResource AppDataGridStyle}"
+                          ColumnHeaderStyle="{StaticResource WhiteHeaderStyle}" 
+                          CellStyle="{StaticResource CustomDataGridCellStyle}"
+                          GridLinesVisibility="Horizontal"
+                          CanUserAddRows="False"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          CanUserSortColumns="True">
 
-        <Grid Grid.Row="3" Margin="10">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="FINALIZAR VENTA" Command="{Binding FinalizarVentaCommand}" Style="{StaticResource DarkActionButtonStyle}" Width="150" Background="ForestGreen"/>
-                <Button Content="Cancelar Venta" Command="{Binding CancelarVentaCommand}" Style="{StaticResource DarkActionButtonStyle}" Margin="10,0,0,0"/>
-            </StackPanel>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Descripción" Binding="{Binding Descripcion}" Width="2*" IsReadOnly="True"/>
+
+                        <DataGridTemplateColumn Header="Cantidad" Width="*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBox Text="{Binding Cantidad, UpdateSourceTrigger=PropertyChanged}" 
+                             TextAlignment="Center" 
+                             Style="{StaticResource MaterialDesignDataGridTextColumnEditingStyle}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTextColumn Header="Precio Unit." Binding="{Binding PrecioUnitario, StringFormat=C}" Width="*" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Subtotal" Binding="{Binding SubTotalLinea, StringFormat=C}" Width="*" FontWeight="Bold" IsReadOnly="True"/>
+
+                        <DataGridTemplateColumn Width="*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Command="{Binding DataContext.EliminarItemCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                            CommandParameter="{Binding}" 
+                            ToolTip="Quitar Ítem"
+                            Style="{StaticResource MaterialDesignToolButton}">
+                                        <materialDesign:PackIcon Kind="DeleteForeverOutline" Foreground="{StaticResource Brush.Accent.DestructiveRed}"/>
+                                    </Button>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+
+                </DataGrid>
+            </Border>
+
+            <Border Background="{StaticResource Background.Surface}"
+                    BorderBrush="{StaticResource Border.Default}"
+                    BorderThickness="1" CornerRadius="8">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding LineasDeFactura.Count}" Value="0">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.6">
+                    <materialDesign:PackIcon Kind="CartPlus" Width="64" Height="64" HorizontalAlignment="Center" Foreground="{StaticResource Text.Secondary}"/>
+                    <TextBlock Text="Añade productos para comenzar la venta" FontSize="18"
+                               Foreground="{StaticResource Text.Secondary}" Margin="0,15,0,0"/>
+                </StackPanel>
+            </Border>
         </Grid>
+
+        <Grid Grid.Row="2" Margin="0,20,5,0" HorizontalAlignment="Right" Width="280">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Row="0" Grid.Column="0" FontFamily="{StaticResource Font.Poppins}" Text="Subtotal:" HorizontalAlignment="Right" FontSize="16" Foreground="{StaticResource Text.Secondary}"/>
+            <TextBlock Grid.Row="0" Grid.Column="1" FontFamily="{StaticResource Font.Poppins}" Text="{Binding SubTotal, StringFormat={}{0:C}}" HorizontalAlignment="Left" FontSize="16" Foreground="{StaticResource Text.Secondary}" Margin="15,0,0,0"/>
+
+            <TextBlock Grid.Row="1" Grid.Column="0" FontFamily="{StaticResource Font.Poppins}" Text="IVA (19%):" HorizontalAlignment="Right" FontSize="16" Foreground="{StaticResource Text.Secondary}" Margin="0,5,0,0"/>
+            <TextBlock Grid.Row="1" Grid.Column="1" FontFamily="{StaticResource Font.Poppins}" Text="{Binding TotalIVA, StringFormat={}{0:C}}" HorizontalAlignment="Left" FontSize="16" Foreground="{StaticResource Text.Secondary}" Margin="15,5,0,0"/>
+
+            <Separator Grid.Row="2" Grid.ColumnSpan="2" Margin="0,8"/>
+
+            <TextBlock Grid.Row="3" Grid.Column="0" FontFamily="{StaticResource Font.Poppins}" Text="TOTAL:" HorizontalAlignment="Right" FontSize="24" FontWeight="Bold" Foreground="{StaticResource Text.Primary}"/>
+            <TextBlock Grid.Row="3" Grid.Column="1" FontFamily="{StaticResource Font.Poppins}" Text="{Binding Total, StringFormat={}{0:C}}" HorizontalAlignment="Left" FontSize="24" FontWeight="Bold" Foreground="{StaticResource Text.Primary}" Margin="15,0,0,0"/>
+        </Grid>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button Content="Cancelar Venta" Command="{Binding CancelarVentaCommand}" IsCancel="True" FontFamily="{StaticResource Font.Poppins}"
+                    Style="{StaticResource MaterialDesignOutlinedButton}">
+                <Button.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="BorderBrush" Value="{StaticResource Brush.Accent.DestructiveRed}"/>
+                    </Style>
+                </Button.Resources>
+            </Button>
+
+            <Button Content="FINALIZAR VENTA" Command="{Binding FinalizarVentaCommand}"
+                    Style="{StaticResource ElegantShadowGhostButton}"
+                    Tag="{StaticResource Brush.Menu.GreenForest}"
+                    Margin="15,0,0,0"/>
+        </StackPanel>
     </Grid>
 </UserControl>

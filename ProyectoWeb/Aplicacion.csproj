@@ -7,16 +7,35 @@
     <UserSecretsId>aspnet-Aplicacion-fd2adc63-a204-40a4-ab1c-5219008d457e</UserSecretsId>
   </PropertyGroup>
 
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.6" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.6" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.6" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.6" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.6" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.6">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.6">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.2" />
+	</ItemGroup>
+
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.12" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.12" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.12" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.11" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.12" />
-	<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.12" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
+    <ProjectReference Include="..\DeluxeCarsSistema\DeluxeCars.DataAccess\DeluxeCars.DataAccess.csproj" />
+    <ProjectReference Include="..\DeluxeCarsSistema\DeluxeCars.Shared\DeluxeCarsShared.csproj" />
+    <ProjectReference Include="..\DeluxeCarsSistema\DeluxeCarsEntities\DeluxeCarsEntities.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\css\img\baterias\" />
+    <Folder Include="wwwroot\css\img\encendido\" />
+    <Folder Include="wwwroot\css\img\motor\" />
+    <Folder Include="wwwroot\css\img\suspension\" />
+    <Folder Include="wwwroot\css\img\transmision\" />
   </ItemGroup>
 
 </Project>

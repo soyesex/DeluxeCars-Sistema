@@ -1,10 +1,15 @@
-﻿using DeluxeCarsDesktop.Interfaces;
-using DeluxeCarsEntities;
+﻿using DeluxeCars.DataAccess.Repositories.Interfaces;
+using DeluxeCarsDesktop.Interfaces;
 using DeluxeCarsDesktop.Services;
 using DeluxeCarsDesktop.Utils;
+using DeluxeCarsEntities;
+using DeluxeCarsShared.Dtos;
+using Microsoft.Win32;
+using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,25 +22,82 @@ namespace DeluxeCarsDesktop.ViewModel
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly INavigationService _navigationService;
-        private List<Factura> _todasLasFacturas;
+        private bool _isSearching = false;
 
+        // --- Propiedades para Filtros ---
         private string _searchText;
-        public string SearchText
+        public string SearchText { get => _searchText; set => SetProperty(ref _searchText, value); } // Lo dejamos así por ahora
+
+        private DateTime? _fechaInicio;
+        public DateTime? FechaInicio
         {
-            get => _searchText;
+            get => _fechaInicio;
             set
             {
-                SetProperty(ref _searchText, value);
-                FiltrarFacturas();
+                if (SetPropertyAndCheck(ref _fechaInicio, value))
+                {
+                    // Si el valor cambió, aplicamos el filtro
+                    AplicarFiltrosCommand.Execute(null);
+                }
             }
         }
 
-        private ObservableCollection<Factura> _facturas;
-        public ObservableCollection<Factura> Facturas
+        private DateTime? _fechaFin;
+        public DateTime? FechaFin
         {
-            get => _facturas;
-            private set => SetProperty(ref _facturas, value);
+            get => _fechaFin;
+            set
+            {
+                if (SetPropertyAndCheck(ref _fechaFin, value))
+                {
+                    AplicarFiltrosCommand.Execute(null);
+                }
+            }
         }
+        public ObservableCollection<Cliente> ClientesDisponibles { get; private set; }
+        public ObservableCollection<DisplayItem<EstadoPagoFactura?>> EstadosPago { get; }
+
+        private Cliente _clienteFiltro;
+        public Cliente ClienteFiltro
+        {
+            get => _clienteFiltro;
+            set
+            {
+                if (SetPropertyAndCheck(ref _clienteFiltro, value))
+                {
+                    AplicarFiltrosCommand.Execute(null);
+                }
+            }
+        }
+        private DisplayItem<EstadoPagoFactura?> _selectedEstadoPago;
+        public DisplayItem<EstadoPagoFactura?> SelectedEstadoPago
+        {
+            get => _selectedEstadoPago;
+            set
+            {
+                if (SetPropertyAndCheck(ref _selectedEstadoPago, value))
+                {
+                    // Cuando el item seleccionado cambia, actualizamos el valor del filtro real
+                    EstadoPagoFiltro = _selectedEstadoPago?.Value;
+                }
+            }
+        }
+        private EstadoPagoFactura? _estadoPagoFiltro;
+        public EstadoPagoFactura? EstadoPagoFiltro
+        {
+            get => _estadoPagoFiltro;
+            set
+            {
+                if (SetPropertyAndCheck(ref _estadoPagoFiltro, value))
+                {
+                    AplicarFiltrosCommand.Execute(null);
+                }
+            }
+        }
+
+        // --- Colección de Datos y Selección ---
+        private ObservableCollection<Factura> _facturas;
+        public ObservableCollection<Factura> Facturas { get => _facturas; private set => SetProperty(ref _facturas, value); }
 
         private Factura _facturaSeleccionada;
         public Factura FacturaSeleccionada
@@ -44,113 +106,265 @@ namespace DeluxeCarsDesktop.ViewModel
             set
             {
                 SetProperty(ref _facturaSeleccionada, value);
-                (VerDetallesCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
-                (AnularFacturaCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
-                (RegistrarPagoCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
-                (LiquidarCreditoCommand as ViewModelCommand)?.RaiseCanExecuteChanged(); // <-- AÑADE ESTA LÍNEA
+                ActualizarEstadoComandos();
             }
         }
 
+        // --- Paginación ---
+        public int NumeroDePagina { get; set; } = 1;
+        public int TamañoDePagina { get; set; } = 15;
+        private int _totalItems;
+        public int TotalItems { get => _totalItems; private set => SetProperty(ref _totalItems, value); }
+        public int TotalPaginas => (TotalItems == 0) ? 1 : (int)Math.Ceiling((double)TotalItems / TamañoDePagina);
 
-        public event Action OnRequestNuevaFactura;
-        public ICommand NuevaFacturaCommand { get; }
+        // --- Comandos ---
+        public ICommand AplicarFiltrosCommand { get; }
+        public ICommand LimpiarFiltrosCommand { get; }
         public ICommand VerDetallesCommand { get; }
         public ICommand AnularFacturaCommand { get; }
-        public ICommand RefrescarCommand { get; }
         public ICommand RegistrarPagoCommand { get; }
         public ICommand LiquidarCreditoCommand { get; }
+        public ICommand IrAPaginaSiguienteCommand { get; }
+        public ICommand IrAPaginaAnteriorCommand { get; }
+        public ICommand NuevaFacturaCommand { get; }
+        public ICommand ExportarExcelCommand { get; }
+
+        public event Action OnRequestNuevaFactura;
+
         public FacturasHistorialViewModel(IUnitOfWork unitOfWork, INavigationService navigationService)
         {
             _unitOfWork = unitOfWork;
             _navigationService = navigationService;
 
-            _todasLasFacturas = new List<Factura>();
             Facturas = new ObservableCollection<Factura>();
+            ClientesDisponibles = new ObservableCollection<Cliente>();
+            EstadosPago = new ObservableCollection<DisplayItem<EstadoPagoFactura?>>
+            {
+                // Aquí puedes poner el texto que prefieras para la opción 'null'
+                new DisplayItem<EstadoPagoFactura?>  { Value = null, DisplayText = "Todos los Estados" },
+                new DisplayItem<EstadoPagoFactura?> { Value = EstadoPagoFactura.Pendiente, DisplayText = "Pendiente" },
+                new DisplayItem<EstadoPagoFactura?> { Value = EstadoPagoFactura.Abonada, DisplayText = "Abonada" },
+                new DisplayItem<EstadoPagoFactura?> { Value = EstadoPagoFactura.Pagada, DisplayText = "Pagada" },
+                new DisplayItem<EstadoPagoFactura?> { Value = EstadoPagoFactura.Anulada, DisplayText = "Anulada" }
+            };
 
-            VerDetallesCommand = new ViewModelCommand(ExecuteVerDetallesCommand, CanExecuteActions);
-            AnularFacturaCommand = new ViewModelCommand(ExecuteAnularFacturaCommand, CanExecuteActions);
-            RefrescarCommand = new ViewModelCommand(async p => await LoadAsync());
-            RegistrarPagoCommand = new ViewModelCommand(ExecuteRegistrarPago, CanExecuteRegistrarPago);
-            NuevaFacturaCommand = new ViewModelCommand(p => OnRequestNuevaFactura?.Invoke());
-            LiquidarCreditoCommand = new ViewModelCommand(async _ => await ExecuteLiquidarCredito(), _ => CanExecuteLiquidarCredito()); 
+            SelectedEstadoPago = EstadosPago.FirstOrDefault();
+
+            // --- Instanciación de Comandos Corregida ---
+            AplicarFiltrosCommand = new ViewModelCommand(async _ => await AplicarFiltros());
+            LimpiarFiltrosCommand = new ViewModelCommand(async _ => await ExecuteLimpiarFiltros());
+            VerDetallesCommand = new ViewModelCommand(ExecuteVerDetalles, CanExecuteActions);
+            AnularFacturaCommand = new ViewModelCommand(async _ => await ExecuteAnularFacturaCommand(), CanExecuteActions);
+            RegistrarPagoCommand = new ViewModelCommand(async _ => await ExecuteRegistrarPago(), CanExecuteRegistrarPago);
+            LiquidarCreditoCommand = new ViewModelCommand(async _ => await ExecuteLiquidarCredito(), CanExecuteLiquidarCredito);
+            NuevaFacturaCommand = new ViewModelCommand(_ => OnRequestNuevaFactura?.Invoke());
+
+            IrAPaginaSiguienteCommand = new ViewModelCommand(async _ => { if (NumeroDePagina < TotalPaginas) { NumeroDePagina++; await AplicarFiltros(); } }, _ => NumeroDePagina < TotalPaginas);
+            IrAPaginaAnteriorCommand = new ViewModelCommand(async _ => { if (NumeroDePagina > 1) { NumeroDePagina--; await AplicarFiltros(); } }, _ => NumeroDePagina > 1);
+            ExportarExcelCommand = new ViewModelCommand(async _ => await ExecuteExportarFacturasExcelCommand());
         }
 
         public async Task LoadAsync()
         {
+            await CargarFiltrosDisponibles();
+            await AplicarFiltros();
+        }
+
+        private async Task CargarFiltrosDisponibles()
+        {
+            var clientes = await _unitOfWork.Clientes.GetAllAsync();
+            ClientesDisponibles.Clear();
+            ClientesDisponibles.Add(new Cliente { Id = 0, Nombre = "Todos los Clientes" });
+            foreach (var cliente in clientes.OrderBy(c => c.Nombre))
+            {
+                ClientesDisponibles.Add(cliente);
+            }
+            ClienteFiltro = ClientesDisponibles.FirstOrDefault();
+            OnPropertyChanged(nameof(ClienteFiltro));
+        }
+
+        private void ExecuteVerDetalles(object obj)
+        {
+            if (FacturaSeleccionada != null)
+            {
+                // Ya no mostramos un MessageBox.
+                // Usamos tu servicio para abrir el nuevo UserControl en la ventana genérica.
+                // Asumo que tu servicio puede tomar un ID como parámetro.
+                _navigationService.OpenFormWindow(FormType.FacturaDetalles, FacturaSeleccionada.Id);
+            }
+        }
+        private async Task AplicarFiltros()
+        {
+            if (_isSearching) return;
+            _isSearching = true;
             try
             {
-                // Llamamos al nuevo método que incluye los detalles
-                var facturasDesdeRepo = await _unitOfWork.Facturas.GetAllWithClienteYMetodoPagoAsync();
-                _todasLasFacturas = facturasDesdeRepo.ToList();
-                FiltrarFacturas(); // Tu lógica de filtrado
+                var criteria = new FacturaSearchCriteria
+                {
+                    SearchText = this.SearchText,
+                    FechaInicio = this.FechaInicio,
+                    FechaFin = this.FechaFin,
+                    ClienteId = (this.ClienteFiltro?.Id > 0) ? this.ClienteFiltro.Id : null,
+                    EstadoPago = this.EstadoPagoFiltro,
+                    PageNumber = this.NumeroDePagina,
+                    PageSize = this.TamañoDePagina
+                };
+
+                var pagedResult = await _unitOfWork.Facturas.SearchAsync(criteria);
+                Facturas = new ObservableCollection<Factura>(pagedResult.Items);
+                TotalItems = pagedResult.TotalCount;
+
+                OnPropertyChanged(nameof(TotalPaginas));
+                OnPropertyChanged(nameof(NumeroDePagina));
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"No se pudieron cargar las facturas: {ex.Message}", "Error de Carga", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Error al filtrar facturas: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-        }
-
-        private void FiltrarFacturas()
-        {
-            IEnumerable<Factura> itemsFiltrados = _todasLasFacturas;
-
-            if (!string.IsNullOrWhiteSpace(SearchText))
+            finally
             {
-                string lowerSearchText = SearchText.ToLower();
-                itemsFiltrados = itemsFiltrados.Where(f =>
-                    f.NumeroFactura.ToLower().Contains(lowerSearchText) ||
-                    (f.Cliente?.Nombre.ToLower().Contains(lowerSearchText) ?? false) || // Se busca en el nombre del cliente
-                    f.Total.ToString().Contains(SearchText) // Se busca en el total como texto
-                );
+                _isSearching = false;
+                ActualizarEstadoComandos();
+            }
+        }
+
+        private async Task ExecuteLimpiarFiltros()
+        {
+            SearchText = string.Empty;
+            FechaInicio = null;
+            FechaFin = null;
+            ClienteFiltro = ClientesDisponibles.FirstOrDefault();
+            EstadoPagoFiltro = null;
+            NumeroDePagina = 1;
+
+            OnPropertyChanged(nameof(SearchText));
+            OnPropertyChanged(nameof(FechaInicio));
+            OnPropertyChanged(nameof(FechaFin));
+            OnPropertyChanged(nameof(ClienteFiltro));
+            OnPropertyChanged(nameof(EstadoPagoFiltro));
+
+            await AplicarFiltros();
+        }
+        private async Task ExecuteExportarFacturasExcelCommand()
+        {
+            // 1. Obtenemos TODAS las facturas que coinciden con los filtros actuales, ignorando la paginación.
+            var exportCriteria = new FacturaSearchCriteria
+            {
+                SearchText = this.SearchText,
+                FechaInicio = this.FechaInicio,
+                FechaFin = this.FechaFin,
+                ClienteId = (this.ClienteFiltro?.Id > 0) ? this.ClienteFiltro.Id : null,
+                EstadoPago = this.EstadoPagoFiltro,
+                PageNumber = 1,
+                PageSize = int.MaxValue // Truco para obtener todos los registros
+            };
+
+            var pagedResult = await _unitOfWork.Facturas.SearchAsync(exportCriteria);
+            var facturasAExportar = pagedResult.Items;
+
+            if (!facturasAExportar.Any())
+            {
+                MessageBox.Show("No hay facturas para exportar con los filtros actuales.", "Información", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
             }
 
-            Facturas = new ObservableCollection<Factura>(itemsFiltrados.OrderByDescending(f => f.FechaEmision));
+            // 2. Usar EPPlus para crear el archivo Excel
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+            using (var package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Historial de Ventas");
+
+                // Encabezados
+                worksheet.Cells[1, 1].Value = "N° Factura";
+                worksheet.Cells[1, 2].Value = "Fecha Emisión";
+                worksheet.Cells[1, 3].Value = "Cliente";
+                worksheet.Cells[1, 4].Value = "Total Factura";
+                worksheet.Cells[1, 5].Value = "Monto Abonado";
+                worksheet.Cells[1, 6].Value = "Saldo Pendiente";
+                worksheet.Cells[1, 7].Value = "Estado";
+                worksheet.Cells[1, 8].Value = "Observaciones";
+
+                // Datos
+                int row = 2;
+                foreach (var factura in facturasAExportar)
+                {
+                    worksheet.Cells[row, 1].Value = factura.NumeroFactura;
+                    worksheet.Cells[row, 2].Value = factura.FechaEmision;
+                    worksheet.Cells[row, 3].Value = factura.Cliente.Nombre;
+                    worksheet.Cells[row, 4].Value = factura.Total;
+                    worksheet.Cells[row, 5].Value = factura.MontoAbonado;
+                    worksheet.Cells[row, 6].Value = factura.SaldoPendiente;
+                    worksheet.Cells[row, 7].Value = factura.EstadoPago.ToString();
+                    worksheet.Cells[row, 8].Value = factura.Observaciones;
+                    row++;
+                }
+
+                // Formato y auto-ajuste de columnas
+                worksheet.Cells["A1:H1"].Style.Font.Bold = true;
+                worksheet.Cells["B:B"].Style.Numberformat.Format = "dd/mm/yyyy"; // Formato de fecha
+                worksheet.Cells["D:F"].Style.Numberformat.Format = "$ #,##0.00"; // Formato de moneda para varias columnas
+                worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
+
+                // 3. Guardar el archivo
+                var saveFileDialog = new SaveFileDialog
+                {
+                    FileName = $"HistorialVentas_DeluxeCars_{DateTime.Now:yyyyMMdd_HHmm}.xlsx",
+                    Filter = "Archivos de Excel (*.xlsx)|*.xlsx"
+                };
+
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    try
+                    {
+                        await package.SaveAsAsync(new FileInfo(saveFileDialog.FileName));
+                        MessageBox.Show("Exportación a Excel completada exitosamente.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Ocurrió un error al guardar el archivo: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
         }
+        private void ActualizarEstadoComandos()
+        {
+            (VerDetallesCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+            (AnularFacturaCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+            (RegistrarPagoCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+            (LiquidarCreditoCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+            (IrAPaginaAnteriorCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+            (IrAPaginaSiguienteCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+        }
+
+        // --- Lógica de los Comandos ---
+
         private bool CanExecuteActions(object obj) => FacturaSeleccionada != null;
-        private bool CanExecuteRegistrarPago(object obj)
-        {
-            return FacturaSeleccionada != null && FacturaSeleccionada.EstadoPago != EstadoPagoFactura.Pagada;
-        }
-        private async void ExecuteRegistrarPago(object obj)
-        {
-            // 1. Verificamos que se pueda ejecutar (buena práctica)
-            if (!CanExecuteRegistrarPago(obj)) return;
+        private bool CanExecuteRegistrarPago(object obj) => FacturaSeleccionada != null && FacturaSeleccionada.EstadoPago != EstadoPagoFactura.Pagada;
+        private bool CanExecuteLiquidarCredito(object obj) => FacturaSeleccionada != null && FacturaSeleccionada.SaldoPendiente < 0;
 
-            // 2. Quitamos el MessageBox y descomentamos la línea de navegación
-            await _navigationService.OpenFormWindow(FormType.RegistrarPagoCliente, FacturaSeleccionada.Id);
-
-            // 3. Refrescamos la lista después de que la ventana se cierre
-            await LoadAsync();
-        }
         private void ExecuteVerDetallesCommand(object obj)
         {
-            // Lógica para abrir una ventana que muestre los detalles de la FacturaSeleccionada
             MessageBox.Show($"Mostrando detalles para la factura: {FacturaSeleccionada.NumeroFactura}", "Información");
         }
 
-        private async void ExecuteAnularFacturaCommand(object obj)
+        private async Task ExecuteAnularFacturaCommand()
         {
-            if (!CanExecuteActions(obj)) return;
-
-            // ANTES: Mostraba un MessageBox
-            // MessageBox.Show("Funcionalidad de anular (Nota de Crédito) pendiente de implementación.", "Información");
-
-            // AHORA: Llama al servicio de navegación para abrir el nuevo formulario
+            if (!CanExecuteActions(null)) return;
             await _navigationService.OpenFormWindow(FormType.NotaDeCredito, FacturaSeleccionada.Id);
-
-            // Al volver, refrescamos por si la factura cambió de estado
-            await LoadAsync();
+            await AplicarFiltros();
         }
 
-        private bool CanExecuteLiquidarCredito()
+        private async Task ExecuteRegistrarPago()
         {
-            // El botón solo estará activo si hay una factura seleccionada Y su saldo es negativo.
-            return FacturaSeleccionada != null && FacturaSeleccionada.SaldoPendiente < 0;
+            if (!CanExecuteRegistrarPago(null)) return;
+            await _navigationService.OpenFormWindow(FormType.RegistrarPagoCliente, FacturaSeleccionada.Id);
+            await AplicarFiltros();
         }
 
         private async Task ExecuteLiquidarCredito()
         {
-            if (!CanExecuteLiquidarCredito()) return;
+            if (!CanExecuteLiquidarCredito(null)) return;
 
             // Pedimos confirmación al usuario
             var confirmacion = MessageBox.Show(
@@ -191,6 +405,10 @@ namespace DeluxeCarsDesktop.ViewModel
             catch (Exception ex)
             {
                 MessageBox.Show($"Ocurrió un error al liquidar el crédito: {ex.Message}", "Error");
+            }
+            finally
+            {
+                await AplicarFiltros();
             }
         }
     }

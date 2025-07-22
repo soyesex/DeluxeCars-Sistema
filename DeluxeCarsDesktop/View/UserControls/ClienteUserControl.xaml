@@ -1,47 +1,370 @@
-﻿<UserControl x:Class="DeluxeCarsDesktop.View.UserControls.ClienteUserControl"
+﻿ <UserControl x:Class="DeluxeCarsDesktop.View.UserControls.ClienteUserControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
-             mc:Ignorable="d" 
-             d:DesignHeight="550" d:DesignWidth="900">
-    <Grid>
+             mc:Ignorable="d"
+              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:behaviors="clr-namespace:DeluxeCarsDesktop.Behaviors"
+             xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
+             d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <Style x:Key="WhiteHeaderStyle" TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+            <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        </Style>
+
+        <Style x:Key="CustomDataGridCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="{DynamicResource Brush.Menu.Lavender}"/>
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Foreground" Value="{DynamicResource Brush.Brand.NavyDark}" />
+            <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource Brush.Brand.NavyDeep}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="KpiCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource Brush.Brand.CharcoalLight}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="15 15 0 15"/>
+            <Setter Property="Margin" Value="0 0 45 15"/>
+            <Setter Property="MinWidth" Value="180"/>
+        </Style>
+        <Style x:Key="KpiValueStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="35"/>
+            <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}" />
+            <Setter Property="FontWeight" Value="DemiBold"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style x:Key="KpiTitleStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}" />
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Foreground" Value="{StaticResource Text.Secondary}"/>
+        </Style>
+    </UserControl.Resources>
+    <!--<UserControl.Resources>
+        <Style x:Key="WhiteHeaderStyle" TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+            <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        </Style>
+
+        <Style x:Key="CustomDataGridCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="5">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Margin="5,5,5,10">
-            <StackPanel Orientation="Horizontal">
-                <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                         Style="{StaticResource SearchBoxStyle}" 
-                         Tag="Buscar clientes..." 
-                         Width="300"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="5,0,10,0" HorizontalAlignment="Right">
-                <Button Content="Añadir" Command="{Binding NuevoClienteCommand}" Style="{StaticResource DarkActionButtonStyle}" Margin="0,0,10,0"/>
-                <Button Content="Editar" Command="{Binding EditarClienteCommand}" Style="{StaticResource DarkActionButtonStyle}" Margin="0,0,10,0"/>
-                <Button Content="Activar/Desactivar" Command="{Binding ToggleEstadoCommand}" Style="{StaticResource DarkActionButtonStyle}"/>
+        <Grid Grid.Row="0" Margin="0,10,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBox Grid.Column="0" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource SearchBoxStyle}" 
+                     MinWidth="300" MaxWidth="500"
+                     Tag="Buscar por Nombre, Email o Teléfono..."/>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Añadir Cliente" Command="{Binding NuevoClienteCommand}"
+                        Style="{StaticResource ElegantShadowGhostButton}"
+                        Tag="{StaticResource Brush.Menu.GreenForest}" Margin="10,0"/>
+
+                <Button Content="Editar Cliente" Command="{Binding EditarClienteCommand}" 
+                        Style="{StaticResource ElegantShadowGhostButton}"
+                        Tag="{StaticResource Brush.Menu.BlueSteel}" Margin="10,0"/>
+
+                <Button Content="Activar/Desactivar" Command="{Binding ToggleEstadoCommand}"
+                        Style="{StaticResource ElegantShadowGhostButton}"
+                        Tag="{StaticResource Brush.Accent.DestructiveRed}" Margin="10,0,20,0"/>
             </StackPanel>
         </Grid>
 
-        <Border Grid.Row="1" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" 
-                BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
+        <Border Grid.Row="1" CornerRadius="10" Background="{StaticResource Brush.Brand.CharcoalLight}" 
+                BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1.2">
             <DataGrid ItemsSource="{Binding Clientes}" 
                       SelectedItem="{Binding ClienteSeleccionado}"
-                      Style="{StaticResource ElegantDataGridStyle}"
+                      Style="{StaticResource AppDataGridStyle}"
+                      ColumnHeaderStyle="{StaticResource WhiteHeaderStyle}" 
+                      CellStyle="{StaticResource CustomDataGridCellStyle}"
                       AutoGenerateColumns="False" 
                       IsReadOnly="True">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Id" Binding="{Binding Id}" Width="Auto"/>
-                    <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="*"/>
-                    <DataGridTextColumn Header="Telefono" Binding="{Binding Telefono}" Width="*"/>
-                    <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="2*"/>
-                    <DataGridCheckBoxColumn Header="Activo" Binding="{Binding Estado}" Width="Auto"/>
-
+                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="60"/>
+                    <DataGridTextColumn Header="Nombre Completo" Binding="{Binding Nombre}" Width="*"/>
+                    <DataGridTextColumn Header="Teléfono" Binding="{Binding Telefono}" Width="1.2*"/>
+                    <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="1.5*"/>
+                    <DataGridCheckBoxColumn Header="Activo" Binding="{Binding Estado}" Width="80"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>
+
+        <Grid Grid.Row="2" Margin="0,10,20,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" Text="{Binding TotalItems, StringFormat='Total: {0} clientes'}" 
+                       FontSize="15" VerticalAlignment="Center" Margin="20,0,0,0"
+                       Foreground="{StaticResource Text.Secondary}"/>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Command="{Binding IrAPaginaAnteriorCommand}" Style="{StaticResource MaterialDesignToolButton}">
+                    <materialDesign:PackIcon Kind="ChevronLeft" Width="15" Height="15"/>
+                </Button>
+
+                <TextBlock VerticalAlignment="Center" Margin="10,0" Foreground="{StaticResource Text.Secondary}">
+                    <Run Text="Página"/>
+                    <Run Text="{Binding NumeroDePagina}"/>
+                    <Run Text="de"/>
+                    <Run Text="{Binding TotalPaginas, Mode=OneWay}"/>
+                </TextBlock>
+
+                <Button Command="{Binding IrAPaginaSiguienteCommand}" Style="{StaticResource MaterialDesignToolButton}">
+                    <materialDesign:PackIcon Kind="ChevronRight" />
+                </Button>
+            </StackPanel>
+        </Grid>
     </Grid>
-</UserControl>
+</UserControl>-->
+
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Grid.Column="0" Margin="0,10,0,30" HorizontalAlignment="Left">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            
+            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource SearchBoxStyle}" 
+                     behaviors:InputBehaviors.EnterEjecutaComando="{Binding AplicarFiltrosCommand}"
+                     MinWidth="300" MaxWidth="500" Width="400" Tag="Buscar por Nombre, Email o Teléfono..."/>
+
+            <ComboBox Grid.Column="1" ItemsSource="{Binding TiposCliente}"
+                      SelectedItem="{Binding TipoClienteSeleccionado}"
+                      Style="{StaticResource ElegantComboBoxStyle}"
+                      FontFamily="{StaticResource Font.Poppins}"
+                      Tag="{StaticResource Border.Default}"
+                      Margin="40,0,30,0">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="SelectionChanged">
+                        <i:InvokeCommandAction Command="{Binding AplicarFiltrosCommand}" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ComboBox>
+
+            <ComboBox Grid.Column="2" ItemsSource="{Binding CiudadesDisponibles}"
+                      SelectedItem="{Binding CiudadSeleccionada}"
+                      DisplayMemberPath="Nombre"
+                      Style="{StaticResource ElegantComboBoxStyle}"
+                      FontFamily="{StaticResource Font.Poppins}"
+                      Tag="{StaticResource Border.Default}"
+                      Width="200"
+                      Margin="0">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="SelectionChanged">
+                        <i:InvokeCommandAction Command="{Binding AplicarFiltrosCommand}" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ComboBox>
+
+            <Button Grid.Column="3" Command="{Binding LimpiarFiltrosCommand}"
+                    Margin="25 0 0 0"
+                    Style="{StaticResource controlButton}"
+                    Tag="{StaticResource color4}"
+                    ToolTip="Limpiar Filtros">
+
+                <fa:IconImage Icon="Trash" Width="20" Height="20" Style="{StaticResource controlButtonIcon}"/>
+
+            </Button>
+
+        </Grid>
+        <Grid Grid.Row="1" HorizontalAlignment="Center" Margin="0,10,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Content="Crear Factura" Grid.Column="0" Command="{Binding CrearFacturaCommand}" 
+                    Style="{StaticResource ElegantShadowGhostButton}" Tag="{StaticResource Brush.Menu.YellowGold}" 
+                    Margin="40,0"/>
+            
+            <Button Content="Añadir Cliente" Grid.Column="1" Command="{Binding NuevoClienteCommand}" 
+                    Style="{StaticResource ElegantShadowGhostButton}" Tag="{StaticResource Brush.Menu.GreenForest}" 
+                    Margin="20,0"/>
+
+            <Button Content="Editar Cliente" Grid.Column="2" Command="{Binding EditarClienteCommand}"
+                    Style="{StaticResource ElegantShadowGhostButton}" Tag="{StaticResource Brush.Menu.BlueSteel}" 
+                    Margin="20,0"/>
+            
+            <Button Content="Activar/Desactivar" Grid.Column="3" Command="{Binding ToggleEstadoCommand}" 
+                    Style="{StaticResource ElegantShadowGhostButton}" Tag="{StaticResource Brush.Accent.DestructiveRed}"
+                    Margin="20,0,0,0"/>
+
+        </Grid>
+        
+        <UniformGrid Grid.Row="2" Rows="1" Margin="10,10,0,30">
+            <Border Style="{StaticResource KpiCardStyle}" Background="{DynamicResource Brush.Aggressive.DeepBlue}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="100"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock HorizontalAlignment="Center" Grid.Column="0" Grid.Row="0" Text="{Binding TotalItems}" Style="{StaticResource KpiValueStyle}"/>
+                        <TextBlock Grid.Column="0" Grid.Row="1" Text="Total de Clientes" Style="{StaticResource KpiTitleStyle}"/>
+                    </Grid>
+                    <Grid Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Border Width="60" Height="60" CornerRadius="30"
+                    Background="{StaticResource Brush.Menu.BlueCornflower}">
+                            <fa:IconImage Icon="Users" Foreground="{StaticResource Brush.Neutral.WhitePure}" Width="30" Height="30"/>
+                        </Border>
+                    </Grid>
+
+                </Grid>
+            </Border>
+            <Border Style="{StaticResource KpiCardStyle}" Background="{DynamicResource Brush.Menu.GreenDeep}"
+        Tag="{StaticResource Brush.Menu.GreenForest}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="100"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <TextBlock HorizontalAlignment="Center" Grid.Row="0" Text="{Binding ClientesActivos}" Style="{StaticResource KpiValueStyle}"/>
+                        <TextBlock Grid.Row="1" Text="Clientes Activos" Style="{StaticResource KpiTitleStyle}"/>
+                    </Grid>
+
+                    <Grid Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Border Width="60" Height="60" CornerRadius="30"
+                    Background="{StaticResource Brush.Menu.GreenForest}">
+                            <fa:IconImage Icon="UserCheck" Foreground="{StaticResource Brush.Neutral.WhitePure}" Width="30" Height="30"/>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <Border Style="{StaticResource KpiCardStyle}" Background="{DynamicResource  Brush.Accent.ActionPurpleDeep}"
+        Tag="{StaticResource Brush.Accent.ActionPurple}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="100"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <TextBlock HorizontalAlignment="Center" Grid.Row="0" Text="{Binding NuevosClientesMes}" Style="{StaticResource KpiValueStyle}"/>
+                        <TextBlock Grid.Row="1" Text="Nuevos este Mes" Style="{StaticResource KpiTitleStyle}"/>
+                    </Grid>
+
+                    <Grid Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Border Width="60" Height="60" CornerRadius="30"
+                    Background="{StaticResource Brush.Accent.ActionPurple}">
+                            <fa:IconImage Icon="UserPlus" Foreground="{StaticResource Brush.Neutral.WhitePure}" Width="30" Height="30"/>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+        </UniformGrid>
+
+        <Border Grid.Row="3" CornerRadius="10" Background="{StaticResource Brush.Brand.CharcoalLight}" 
+                BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1.2">
+            <DataGrid ItemsSource="{Binding Clientes}" 
+                      SelectedItem="{Binding ClienteSeleccionado}"
+                      Style="{StaticResource AppDataGridStyle}"
+                      ColumnHeaderStyle="{StaticResource WhiteHeaderStyle}" 
+                      CellStyle="{StaticResource CustomDataGridCellStyle}"
+                      AutoGenerateColumns="False" 
+                      IsReadOnly="True">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto"/>
+                    <DataGridTextColumn Header="Nombre Completo" Binding="{Binding Nombre}" Width="*"/>
+                    <DataGridTextColumn Header="Teléfono" Binding="{Binding Telefono}" Width="1.2*"/>
+                    <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="1.5*"/>
+                    <DataGridCheckBoxColumn Header="Activo" Binding="{Binding Estado}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <Grid Grid.Row="4" Margin="0,10,20,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" Text="{Binding TotalItems, StringFormat='Total: {0} clientes'}" 
+                       FontSize="15"
+                       FontFamily="{StaticResource Font.Poppins}" FontWeight="Medium"
+                       VerticalAlignment="Center" Margin="20,0,0,0"
+                       Foreground="{StaticResource Text.Secondary}"/>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Command="{Binding IrAPaginaAnteriorCommand}" Style="{StaticResource MaterialDesignToolButton}">
+                    <materialDesign:PackIcon Kind="ChevronLeft" Width="15" Height="15"/>
+                </Button>
+
+                <TextBlock VerticalAlignment="Center" FontSize="15" FontFamily="{StaticResource Font.Poppins}" FontWeight="Medium" Margin="10,0" Foreground="{StaticResource Text.Secondary}">
+                    <Run Text="Página"/>
+                    <Run Text="{Binding NumeroDePagina}"/>
+                    <Run Text="de"/>
+                    <Run Text="{Binding TotalPaginas, Mode=OneWay}"/>
+                </TextBlock>
+
+                <Button Command="{Binding IrAPaginaSiguienteCommand}" Style="{StaticResource MaterialDesignToolButton}">
+                    <materialDesign:PackIcon Kind="ChevronRight" />
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl> 

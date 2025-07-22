@@ -1,4 +1,5 @@
-﻿using DeluxeCarsDesktop.Interfaces;
+﻿using DeluxeCars.DataAccess.Repositories.Interfaces;
+using DeluxeCarsDesktop.Interfaces;
 using DeluxeCarsEntities;
 using System;
 using System.Collections.Generic;

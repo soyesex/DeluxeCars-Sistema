@@ -1,7 +1,9 @@
-﻿using DeluxeCarsDesktop.Interfaces;
-using DeluxeCarsEntities;
+﻿using DeluxeCars.DataAccess.Repositories.Interfaces;
+using DeluxeCarsDesktop.Interfaces;
 using DeluxeCarsDesktop.Services;
 using DeluxeCarsDesktop.Utils;
+using DeluxeCarsEntities;
+using DeluxeCarsShared.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -24,10 +26,12 @@ namespace DeluxeCarsDesktop.ViewModel
         private List<Municipio> _todosLosMunicipios;
 
         // --- Propiedades Públicas para Binding ---
+        private bool _isSearching = false;
+        private CancellationTokenSource _debounceCts;
         public bool IsViewVisible { get; set; } = true;
 
         private string _searchText;
-        public string SearchText { get => _searchText; set { SetProperty(ref _searchText, value); FiltrarProveedores(); } }
+        public string SearchText { get => _searchText; set { if (SetPropertyAndCheck(ref _searchText, value)) _ = TriggerDebouncedSearch(); } }
 
         private ObservableCollection<Proveedor> _proveedores;
         public ObservableCollection<Proveedor> Proveedores { get => _proveedores; private set => SetProperty(ref _proveedores, value); }
@@ -41,6 +45,7 @@ namespace DeluxeCarsDesktop.ViewModel
                 SetProperty(ref _proveedorSeleccionado, value);
                 (EditarProveedorCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
                 (ToggleEstadoCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+                (GestionarProductosCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
             }
         }
 
@@ -54,20 +59,32 @@ namespace DeluxeCarsDesktop.ViewModel
             get => _departamentoFiltro;
             set
             {
-                SetProperty(ref _departamentoFiltro, value);
-                CargarMunicipiosPorDepartamento(); // Lógica en cascada
-                FiltrarProveedores();
+                if (SetPropertyAndCheck(ref _departamentoFiltro, value))
+                {
+                    CargarMunicipiosPorDepartamento();
+                    _ = TriggerDebouncedSearch();
+                }
             }
         }
 
         private Municipio _municipioFiltro;
         public Municipio MunicipioFiltro { get => _municipioFiltro; set { SetProperty(ref _municipioFiltro, value); FiltrarProveedores(); } }
 
+        // --- Propiedades de Paginación ---
+        public int NumeroDePagina { get; set; } = 1;
+        public int TamañoDePagina { get; set; } = 15;
+        private int _totalItems;
+        public int TotalItems { get => _totalItems; private set => SetProperty(ref _totalItems, value); }
+        public int TotalPaginas => (TotalItems > 0) ? (int)Math.Ceiling((double)TotalItems / TamañoDePagina) : 1;
+
         // --- Comandos ---
         public ICommand NuevoProveedorCommand { get; }
         public ICommand EditarProveedorCommand { get; }
         public ICommand ToggleEstadoCommand { get; }
         public ICommand GestionarProductosCommand { get; }
+        public ICommand LimpiarFiltrosCommand { get; }
+        public ICommand IrAPaginaSiguienteCommand { get; }
+        public ICommand IrAPaginaAnteriorCommand { get; }
 
         // --- Constructor ---
         public ProveedorViewModel(IUnitOfWork unitOfWork, INavigationService navigationService)
@@ -86,6 +103,10 @@ namespace DeluxeCarsDesktop.ViewModel
             ToggleEstadoCommand = new ViewModelCommand(async p => await ExecuteToggleEstadoCommand(), p => CanExecuteActions());
 
             GestionarProductosCommand = new ViewModelCommand( async p => await ExecuteGestionarProductos(), p => ProveedorSeleccionado != null);
+            LimpiarFiltrosCommand = new ViewModelCommand(async _ => await ExecuteLimpiarFiltros());
+
+            IrAPaginaSiguienteCommand = new ViewModelCommand(async _ => { if (NumeroDePagina < TotalPaginas) { NumeroDePagina++; await AplicarFiltrosAsync(); } });
+            IrAPaginaAnteriorCommand = new ViewModelCommand(async _ => { if (NumeroDePagina > 1) { NumeroDePagina--; await AplicarFiltrosAsync(); } });
         }
 
         // --- Métodos de Lógica ---
@@ -93,9 +114,70 @@ namespace DeluxeCarsDesktop.ViewModel
         public async Task LoadAsync()
         {
             await LoadUbicacionesAsync();
-            await LoadProveedoresAsync();
+            await AplicarFiltrosAsync();
+        }
+        private async Task AplicarFiltrosAsync()
+        {
+            if (_isSearching) return;
+            _isSearching = true;
+
+            try
+            {
+                var criteria = new ProveedorSearchCriteria
+                {
+                    SearchText = this.SearchText,
+                    DepartamentoId = (this.DepartamentoFiltro?.Id > 0) ? this.DepartamentoFiltro.Id : null,
+                    MunicipioId = (this.MunicipioFiltro?.Id > 0) ? this.MunicipioFiltro.Id : null,
+                    PageNumber = this.NumeroDePagina,
+                    PageSize = this.TamañoDePagina
+                };
+
+                var pagedResult = await _unitOfWork.Proveedores.SearchAsync(criteria);
+
+                Proveedores = new ObservableCollection<Proveedor>(pagedResult.Items);
+                TotalItems = pagedResult.TotalCount;
+                OnPropertyChanged(nameof(TotalPaginas));
+                (IrAPaginaAnteriorCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+                (IrAPaginaSiguienteCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al filtrar proveedores: {ex.Message}", "Error");
+            }
+            finally
+            {
+                _isSearching = false;
+            }
         }
 
+        private async Task TriggerDebouncedSearch()
+        {
+            try
+            {
+                _debounceCts?.Cancel();
+                _debounceCts = new CancellationTokenSource();
+                await Task.Delay(500, _debounceCts.Token);
+                NumeroDePagina = 1; // Resetea a la página 1 en cada nueva búsqueda
+                OnPropertyChanged(nameof(NumeroDePagina));
+                await AplicarFiltrosAsync();
+            }
+            catch (TaskCanceledException) { /* Ignorar */ }
+        }
+
+        private async Task ExecuteLimpiarFiltros()
+        {
+            _searchText = string.Empty;
+            _departamentoFiltro = Departamentos.FirstOrDefault();
+            _municipioFiltro = MunicipiosDisponibles.FirstOrDefault();
+            NumeroDePagina = 1;
+
+            OnPropertyChanged(nameof(SearchText));
+            OnPropertyChanged(nameof(DepartamentoFiltro));
+            OnPropertyChanged(nameof(MunicipioFiltro));
+            OnPropertyChanged(nameof(NumeroDePagina));
+
+            await AplicarFiltrosAsync();
+        }
         private async Task LoadUbicacionesAsync()
         {
             try
@@ -139,7 +221,7 @@ namespace DeluxeCarsDesktop.ViewModel
             {
                 var proveedoresDesdeRepo = await _unitOfWork.Proveedores.GetAllWithLocationAsync();
                 _todosLosProveedores = proveedoresDesdeRepo.ToList();
-                FiltrarProveedores();
+                // Se elimina la llamada a FiltrarProveedores() de aquí.
             }
             catch (Exception ex)
             {
@@ -228,6 +310,8 @@ namespace DeluxeCarsDesktop.ViewModel
                 // No necesitas llamar a UpdateAsync si tu UnitOfWork ya maneja el seguimiento
                 // Simplemente el CompleteAsync (SaveChanges) detectará el cambio
                 await _unitOfWork.CompleteAsync();
+
+                await LoadProveedoresAsync();
 
                 FiltrarProveedores(); // Refresca la UI
                 MessageBox.Show($"Proveedor {accion}do exitosamente.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);

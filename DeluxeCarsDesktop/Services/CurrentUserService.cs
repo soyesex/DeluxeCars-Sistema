@@ -1,5 +1,6 @@
 ﻿using DeluxeCarsDesktop.Interfaces;
 using DeluxeCarsEntities;
+using DeluxeCarsShared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;

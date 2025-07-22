@@ -1,12 +1,14 @@
-﻿using DeluxeCarsDesktop.Data;
+﻿using DeluxeCars.DataAccess;
+using DeluxeCars.DataAccess.Repositories.Implementations;
+using DeluxeCars.DataAccess.Repositories.Interfaces;
 using DeluxeCarsDesktop.Interfaces;
 using DeluxeCarsDesktop.Messages;
 using DeluxeCarsDesktop.Properties;
-using DeluxeCarsDesktop.Repositories;
 using DeluxeCarsDesktop.Services;
-using DeluxeCarsDesktop.Utils;
 using DeluxeCarsDesktop.View;
 using DeluxeCarsDesktop.ViewModel;
+using DeluxeCarsShared.Interfaces;
+using LiveChartsCore.SkiaSharpView;
 using MaterialDesignThemes.Wpf;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,6 +33,19 @@ public partial class App : Application
     //Contructor de la clase App
     public App()
     {
+        LiveChartsCore.LiveCharts.Configure(config =>
+                        config
+                            // Selecciona el backend de renderizado (SkiaSharp es el estándar)
+                            .AddSkiaSharp()
+
+                            // Le dice a LiveCharts cómo mapear tus tipos de datos a puntos en el gráfico
+                            .AddDefaultMappers()
+
+                            // ¡AÑADIDO! Aplica un tema visual. Usamos el tema claro para que coincida con tu app.
+                            .AddLightTheme()
+                    );
+
+
         QuestPDF.Settings.License = LicenseType.Community;
 
         var services = new ServiceCollection();
@@ -45,14 +60,16 @@ public partial class App : Application
     private void ConfigureServices(IServiceCollection services)
     {
         // Registrar el DataContext
-        services.AddDbContext<AppDbContext>(options =>
+        services.AddTransient<AppDbContext>(options =>
         {
             string connectionString = ConfigurationManager.ConnectionStrings["AppDbContext"].ConnectionString;
-            options.UseSqlServer(connectionString);
-        }, ServiceLifetime.Scoped);  
+            var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
+            optionsBuilder.UseSqlServer(connectionString);
+            return new AppDbContext(optionsBuilder.Options);
+        });
 
-        // AHORA (El nuevo modo, registrando todo de una vez con Unit of Work)
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        // UnitOfWork también debe ser Transient para que use un DbContext nuevo cada vez.
+        services.AddTransient<IUnitOfWork, UnitOfWork>();
 
         services.AddScoped<INavigationService, NavigationService>();
         services.AddScoped<IStockAlertService, StockAlertService>();
@@ -108,6 +125,8 @@ public partial class App : Application
         services.AddTransient<RegistrarPagoClienteViewModel>();
         services.AddTransient<NotaDeCreditoViewModel>();
         services.AddTransient<ConfiguracionViewModel>();
+        services.AddTransient<AjusteInventarioViewModel>();
+        services.AddTransient<FacturaDetalleViewModel>();
 
         services.AddSingleton<ISnackbarMessageQueue>(new SnackbarMessageQueue());
 
@@ -122,37 +141,7 @@ public partial class App : Application
 
     protected override async void OnStartup(StartupEventArgs e)
     {
-        // =====================================================================
-        //           INICIO: CÓDIGO TEMPORAL PARA GENERAR PIN
-        // =====================================================================
-        #if DEBUG // Esto asegura que el código solo se compile en modo Debug
-        // Cambia a 'if (false)' después de obtener los valores para que no se ejecute más.
-        if (false)
-        {
-            // Asegúrate de que la clase PasswordHelper sea accesible aquí
-            PasswordHelper.CreatePasswordHash("0000", out byte[] hash, out byte[] salt);
-
-            string hashString = $"new byte[] {{ {string.Join(", ", hash)} }}";
-            string saltString = $"new byte[] {{ {string.Join(", ", salt)} }}";
-
-            Debug.WriteLine("--- VALORES DE PIN GENERADOS ---");
-            Debug.WriteLine("Copia las siguientes líneas en tu AppDbContext.cs dentro del método OnModelCreating:\n");
-            Debug.WriteLine("// HASH para el PIN '0000':");
-            Debug.WriteLine(hashString);
-            Debug.WriteLine("\n// SALT para el PIN '0000':");
-            Debug.WriteLine(saltString);
-            Debug.WriteLine("\n---------------------------------");
-
-            // Detenemos la aplicación para no continuar.
-            Application.Current.Shutdown();
-            return;
-        }
-        #endif
-        // =====================================================================
-        //            FIN: CÓDIGO TEMPORAL PARA GENERAR PIN
-        // =====================================================================
-
-        base.OnStartup(e);
+       base.OnStartup(e);
 
         var savedUsername = Settings.Default.SavedUsername;
 

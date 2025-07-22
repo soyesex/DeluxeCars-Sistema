@@ -1,21 +1,11 @@
-﻿using DeluxeCarsDesktop.Data;
-using DeluxeCarsDesktop.Interfaces;
-using DeluxeCarsDesktop.Repositories;
+﻿using DeluxeCars.DataAccess.Repositories.Interfaces;
 using DeluxeCarsDesktop.Services;
-using DeluxeCarsDesktop.Utils;
 using DeluxeCarsEntities;
+using DeluxeCarsShared.Services;
 using MaterialDesignThemes.Wpf;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Security;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Threading;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
@@ -150,7 +140,7 @@ namespace DeluxeCarsDesktop.ViewModel
 
         private bool CanExecuteRegistrarCommand(object obj)
         {
-            bool camposValidos = !string.IsNullOrWhiteSpace(NombreUsuario) && !string.IsNullOrWhiteSpace(EmailUsuario) && Utils.ValidationHelper.IsValidEmail(EmailUsuario) && !string.IsNullOrEmpty(Password) && Password == ConfirmPassword && RolSeleccionado != null;
+            bool camposValidos = !string.IsNullOrWhiteSpace(NombreUsuario) && !string.IsNullOrWhiteSpace(EmailUsuario) && ValidationHelper.IsValidEmail(EmailUsuario) && !string.IsNullOrEmpty(Password) && Password == ConfirmPassword && RolSeleccionado != null;
             if (!camposValidos) return false;
             if (RolSeleccionado.Nombre == "Administrador" && !_pinVerificadoConExito) return false;
             return true;

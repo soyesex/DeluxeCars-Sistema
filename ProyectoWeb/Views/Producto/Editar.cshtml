@@ -1,0 +1,185 @@
+﻿@model Aplicacion.Application.ViewModels.ProductoViewModel
+@{
+    ViewData["Title"] = "Editar Producto";
+}
+
+<div class="form-container-dark">
+    <div class="text-center mb-4">
+        <h1 class="h2">@ViewData["Title"]</h1>
+        <p class="text-white-50">Modifica los detalles de @Model.Nombre.</p>
+    </div>
+    <hr class="hr-custom" />
+
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <form asp-action="Editar" method="post" enctype="multipart/form-data">
+                <input type="hidden" asp-for="Id" />
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="mb-4">
+                    <label asp-for="Nombre" class="form-label"></label>
+                    <input asp-for="Nombre" class="form-control" placeholder="Ej: Filtro de Aceite Universal" />
+                    <span asp-validation-for="Nombre" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <label asp-for="OriginalEquipmentManufacture" class="form-label">OEM</label>
+                        <input asp-for="OriginalEquipmentManufacture" class="form-control" placeholder="Ej: 15208-65F0A" />
+                        <span asp-validation-for="OriginalEquipmentManufacture" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <label asp-for="IdCategoria" class="form-label">Categoría</label>
+                        <select asp-for="IdCategoria" class="form-select" asp-items="ViewBag.Categorias">
+                            <option value="">Seleccione una categoría...</option>
+                        </select>
+                        <span asp-validation-for="IdCategoria" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <label asp-for="Precio" class="form-label"></label>
+                        <input asp-for="Precio" class="form-control" type="number" step="0.01" placeholder="Ej: 99.99" />
+                        <span asp-validation-for="Precio" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <label asp-for="Stock" class="form-label"></label>
+                        <input asp-for="Stock" class="form-control" type="number" readonly />
+                        <div class="form-text">El stock solo se modifica desde movimientos de inventario.</div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label asp-for="Descripcion" class="form-label"></label>
+                    <textarea asp-for="Descripcion" class="form-control" rows="4" placeholder="Añade una descripción detallada del producto..."></textarea>
+                    <span asp-validation-for="Descripcion" class="text-danger"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="ImagenUrl" class="form-label">URL de la Imagen</label>
+                    <input asp-for="ImagenUrl" class="form-control" placeholder="Ej: /images/productos/mi-producto.jpg" />
+                    <span asp-validation-for="ImagenUrl" class="text-danger"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="ImagenArchivo" class="form-label">Imagen del Producto</label>
+                    <input asp-for="ImagenArchivo" type="file" class="form-control" accept="image/jpeg, image/png">
+
+                    @if (!string.IsNullOrEmpty(Model.ImagenUrl))
+                    {
+                        <div class="mt-3">
+                            <p class="text-muted small">Imagen Actual:</p>
+                            <img src="~/@Model.ImagenUrl" alt="Imagen del producto" style="max-width: 150px; border-radius: 8px;" />
+                        </div>
+                    }
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-5">
+                    <a asp-action="Index" class="btn btn-secondary-custom">Cancelar</a>
+                    <button type="submit" class="btn btn-danger-custom">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+@section Styles {
+    <style>
+        /* --- Estilo Base --- */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f7f6; /* Fondo gris muy claro */
+        }
+
+        /* --- Contenedor Principal del Formulario (Ahora en blanco) --- */
+        .form-container-light {
+            background-color: #ffffff; /* FONDO BLANCO */
+            color: #212529; /* TEXTO OSCURO */
+            padding: 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Sombra más sutil */
+            margin-top: 2rem;
+            border: 1px solid #e9ecef;
+        }
+
+        .hr-custom {
+            border-top: 1px solid rgba(0, 0, 0, 0.1); /* Línea divisoria oscura */
+            margin-bottom: 2rem;
+        }
+
+        /* --- Estilo para Inputs y Textareas --- */
+        .form-control, .form-select {
+            background-color: #f8f9fa; /* Fondo de input gris claro */
+            color: #212529;
+            border: 1px solid #ced4da; /* Borde estándar */
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease-in-out;
+        }
+
+            .form-control::placeholder {
+                color: #6c757d;
+            }
+
+            .form-control:focus, .form-select:focus {
+                background-color: #ffffff;
+                color: #212529;
+                border-color: #dc3545; /* Mantenemos el foco rojo */
+                box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.15); /* Sombra de foco más clara */
+                outline: 0;
+            }
+
+        /* Flecha del dropdown para modo claro */
+        .form-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+        }
+
+        /* --- Estilo de Etiquetas (Labels) --- */
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        /* --- Estilo para Botones --- */
+        .btn-danger-custom {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: #fff;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+            .btn-danger-custom:hover {
+                background-color: #c82333;
+                border-color: #bd2130;
+                transform: translateY(-2px);
+            }
+
+        .btn-secondary-custom {
+            background-color: #6c757d;
+            border: 1px solid #6c757d;
+            color: #ffffff;
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+            .btn-secondary-custom:hover {
+                background-color: #5a6268;
+                border-color: #545b62;
+            }
+
+        /* --- Mensajes de Validación --- */
+        .text-danger, .validation-summary-errors {
+            font-size: 0.875em;
+            font-weight: 500;
+        }
+    </style>
+}

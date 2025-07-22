@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="DeluxeCarsDesktop.View.UserControls.CatalogoUserControl"
+﻿ <UserControl x:Class="DeluxeCarsDesktop.View.UserControls.CatalogoUserControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -6,80 +6,150 @@
              xmlns:converters="clr-namespace:DeluxeCarsDesktop.Converters"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
-             xmlns:viewModel="clr-namespace:DeluxeCarsDesktop.ViewModel"
              mc:Ignorable="d"  
+             xmlns:viewModel="clr-namespace:DeluxeCarsDesktop.ViewModel"
+             x:Name="CatalogoControl"
+             xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
              d:DesignHeight="450" d:DesignWidth="800">
 
     <UserControl.Resources>
         <converters:ImagePathConverter x:Key="ImagePathConverter"/>
+
+        <Style x:Key="WhiteHeaderStyle" TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+            <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        </Style>
+
+        <Style x:Key="CustomDataGridCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource Brush.Brand.NavyDeep}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
     </UserControl.Resources>
-    
-    <Grid>
+
+    <Grid Margin="5">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="154*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Margin="0,0,0,10">
+        <Grid Grid.Row="0" Margin="0,10,0,30" HorizontalAlignment="Left">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" 
-                      Style="{StaticResource SearchBoxStyle}"
-                     MinWidth="300"
-                     Margin="0 0 10 0"
-                      Tag="Buscar por N° Factura o Cliente..."/>     
+            <TextBox Grid.Column="0" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                        Style="{StaticResource SearchBoxStyle}"
+                        MinWidth="300" MaxWidth="500" Width="400"
+                        Tag="Buscar por Nombre, OEM, o Categoría..."/>
 
-            <!--<Border Background="Transparent">
-                <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
+            <ComboBox Grid.Column="1" ItemsSource="{Binding CategoriasDisponibles}"
+                        SelectedItem="{Binding CategoriaFiltroSeleccionada}"
+                        Style="{StaticResource ElegantComboBoxStyle}"
+                        FontFamily="{StaticResource Font.Poppins}"
+                        Tag="{StaticResource Border.Default}"
+                        DisplayMemberPath="Nombre"
+                        Width="Auto" Margin="40 0 30 0"/>
 
-                    
+            <ComboBox Grid.Column="2" ItemsSource="{Binding StockStatusOptions}" 
+                        SelectedItem="{Binding StockStatusFiltroSeleccionado}" 
+                        Style="{StaticResource ElegantComboBoxStyle}"
+                        FontFamily="{StaticResource Font.Poppins}"
+                        Tag="{StaticResource Border.Default}"
+                        Width="120" Margin="0"/>
 
-                    <ComboBox ItemsSource="{Binding CategoriasDisponibles}"
-                      SelectedItem="{Binding CategoriaFiltroSeleccionada}"
-                      Style="{StaticResource DarkComboBoxStyle}"
-                      DisplayMemberPath="Nombre"
-                      Width="180" Margin="10,5,5,5"/>
+            <Button Grid.Column="3" Command="{Binding LimpiarFiltrosCommand}"
+                    Margin="25 0 0 0"
+                    Style="{StaticResource controlButton}"
+                    Tag="{StaticResource color4}"
+                    ToolTip="Limpiar Filtros">
 
-                    <ComboBox ItemsSource="{Binding StockStatusOptions}" 
-                      SelectedItem="{Binding StockStatusFiltroSeleccionado}" 
-                      Style="{StaticResource DarkComboBoxStyle}"
-                      Width="120" Margin="5"/>
-                    
+                <fa:IconImage Icon="Trash" Width="20" Height="20" Style="{StaticResource controlButtonIcon}"/>
 
-                    <Button Content="Limpiar" 
-                    Command="{Binding LimpiarFiltrosCommand}" 
-                    Style="{StaticResource DarkActionButtonStyle}"
-                    Margin="10,5,5,5"/>
+            </Button>
 
-                    <Button Content="Ajuste Manual" Style="{StaticResource DarkActionButtonStyle}" Command="{Binding AjusteManualCommand}"/>
-                </WrapPanel>
-            </Border>-->
-
-            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <Button Content="Nuevo Producto" Style="{StaticResource DarkActionButtonStyle}" 
-                Command="{Binding NuevoProductoCommand}"/>
-                <Button Content="Editar" Style="{StaticResource DarkActionButtonStyle}" 
-                Command="{Binding EditarProductoCommand}" Margin="10,0,0,0"/>
-                <Button Content="Eliminar" Style="{StaticResource DarkActionButtonStyle}" 
-                Command="{Binding EliminarProductoCommand}" Margin="10,0,0,0"/>
-            </StackPanel>
 
         </Grid>
 
-        <Border Grid.Row="1" CornerRadius="10" 
-                Background="{StaticResource PrimaryBackgroundColor}" 
-                 BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
+        <Grid Grid.Row="1" HorizontalAlignment="Center" Margin="20,0,0,30">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="0" Content="Ajuste Manual"
+                        Style="{StaticResource ElegantShadowGhostButton}"
+                        Tag="{StaticResource Brush.Menu.YellowGold}"
+                        Command="{Binding AjusteManualCommand}" Margin="0,0,20,0"/>
+
+                <Button Grid.Column="1" Content="Nuevo Producto"
+                        Style="{StaticResource ElegantShadowGhostButton}"
+                        Tag="{StaticResource Brush.Menu.GreenForest}"
+                        Command="{Binding NuevoProductoCommand}" Margin="20,0,20,0"/>
+
+                <Button Grid.Column="2" Content="Editar"
+                        Style="{StaticResource ElegantShadowGhostButton}"
+                        Tag="{StaticResource Brush.Menu.BlueSteel}"
+                        MinWidth="100"
+                        Command="{Binding EditarProductoCommand}" Margin="20,0,20,0"/>
+
+                <Button Grid.Column="3" Content="{Binding CambiarEstadoButtonText}"
+                        Style="{StaticResource ElegantShadowGhostButton}"
+                        Tag="{StaticResource Brush.Accent.DestructiveRed}"
+                        Command="{Binding CambiarEstadoProductoCommand}" Margin="20,0,20,0"/>
+
+                <Button Grid.Column="4" Content="Exportar a Excel"
+                        Style="{StaticResource ElegantShadowGhostButton}"
+                        Tag="{StaticResource Brush.Menu.GreenForest}"
+                        Command="{Binding ExportarExcelCommand}" 
+                        Margin="20,0,0,0"/>
+            </Grid>
+
+        </Grid>
+
+
+        <Border Margin="10 0 10 10" Grid.Row="2" CornerRadius="10" 
+                Background="{StaticResource Brush.Brand.CharcoalLight}" 
+                 BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1.2">
             <DataGrid ItemsSource="{Binding Productos}"
                       SelectedItem="{Binding ProductoSeleccionado}"
-                      Style="{StaticResource ElegantDataGridStyle}"
+                      Style="{StaticResource AppDataGridStyle}"
+                      ColumnHeaderStyle="{StaticResource WhiteHeaderStyle}" 
+                      CellStyle="{StaticResource CustomDataGridCellStyle}"
+                      GridLinesVisibility="Horizontal"
                       CanUserAddRows="False"
                       AutoGenerateColumns="False"
                       IsReadOnly="True"
                       CanUserSortColumns="True">
-                <DataGrid.RowStyle>
+                <DataGrid.RowStyle> 
                     <Style TargetType="DataGridRow">
                         <Style.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
@@ -87,18 +157,22 @@
                                     <Setter.Value>
                                         <ToolTip Background="#2D3748" BorderThickness="0">
                                             <StackPanel Orientation="Horizontal" Margin="10">
-                                                <Image Source="{Binding Producto.ImagenUrl, Converter={StaticResource ImagePathConverter}}" Width="100" Height="100" Margin="0,0,15,0" />
+                                                <Image Source="{Binding FullImageUrl}" 
+                                       Width="100" Height="100" Margin="0,0,15,0" />
                                                 <StackPanel>
-                                                    <TextBlock Text="{Binding Nombre}" FontWeight="SemiBold" FontFamily="{StaticResource Font.Poppins}" FontSize="14" Foreground="White"/>
-                                                    <TextBlock Text="{Binding OEM}" FontFamily="{StaticResource Font.SourceSans3}" Foreground="LightGray"/>
-                                                    <TextBlock Text="{Binding Producto.Descripcion}" TextWrapping="Wrap" FontFamily="Montserrat" MaxWidth="250" Margin="0,10,0,0" Foreground="White"/>
+                                                    <TextBlock Text="{Binding Nombre}" FontFamily="{StaticResource Font.Poppins}" FontWeight="Medium"
+                                                                FontSize="16" Foreground="{StaticResource Brush.Brand.NavyDark}"/>
+                                                    <TextBlock Text="{Binding OEM}" FontFamily="{StaticResource Font.Poppins}" FontWeight="Medium"
+                                                                FontSize="16" Foreground="{StaticResource Brush.Brand.GraySteel}"/>
+                                                    <TextBlock Text="{Binding Descripcion}" TextWrapping="Wrap" FontFamily="Montserrat" FontWeight="Light"
+                                                                FontSize="16" Foreground="White" MaxWidth="250" Margin="0,10,0,0"/>
                                                 </StackPanel>
                                             </StackPanel>
                                         </ToolTip>
                                     </Setter.Value>
                                 </Setter>
                             </Trigger>
-
+                            
                             <!-- En Stock: verde menta pastel -->
                             <DataTrigger Binding="{Binding EstadoStock}" Value="En Stock">
                                 <Setter Property="Background" Value="#A8E6CF"/>
@@ -116,20 +190,76 @@
                                 <Setter Property="Background" Value="#FFAAA5"/>
                                 <Setter Property="Foreground" Value="#020c1b"/>
                             </DataTrigger>
+
+                            <DataTrigger Binding="{Binding EstadoStock}" Value="Bajo Stock">
+                                <Setter Property="Background" Value="#FFD3B6"/>
+                                <Setter Property="Foreground" Value="#020c1b"/>
+                            </DataTrigger>
+                            
                         </Style.Triggers>
                     </Style>
                 </DataGrid.RowStyle>
 
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50" SortMemberPath="Id"/>
-                    <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="*" SortMemberPath="Nombre"/>
-                    <DataGridTextColumn Header="OEM" Binding="{Binding OEM}" Width="120" SortMemberPath="OEM"/>
-                    <DataGridTextColumn Header="Categoría" Binding="{Binding CategoriaNombre}" Width="150" SortMemberPath="CategoriaNombre"/>
-                    <DataGridTextColumn Header="Precio" Binding="{Binding Precio, StringFormat=C, ConverterCulture=es-CO}" Width="100" SortMemberPath="Precio"/>
-                    <DataGridTextColumn Header="Stock" Binding="{Binding StockCalculado}" Width="70" SortMemberPath="StockCalculado"/>
-                    <DataGridCheckBoxColumn Header="Activo" Binding="{Binding Estado, Mode=OneWay}" Width="70" SortMemberPath="Estado"/>
+                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="52" SortMemberPath="Id" 
+                        Visibility="{Binding DataContext.Columns[0].IsVisible, ElementName=CatalogoControl, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                    <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="Auto" SortMemberPath="Nombre"
+                        Visibility="{Binding DataContext.Columns[1].IsVisible, ElementName=CatalogoControl, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                    <DataGridTextColumn Header="OEM" Binding="{Binding OEM}" Width="120" SortMemberPath="OEM"
+                        Visibility="{Binding DataContext.Columns[2].IsVisible, ElementName=CatalogoControl, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                    <DataGridTextColumn Header="Categoría" Binding="{Binding CategoriaNombre}" Width="2*" SortMemberPath="CategoriaNombre"
+                       Visibility="{Binding DataContext.Columns[3].IsVisible, ElementName=CatalogoControl, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                    <DataGridTextColumn Header="Precio" Binding="{Binding Precio, StringFormat=C, ConverterCulture=es-CO}" Width="120" SortMemberPath="Precio"
+                        Visibility="{Binding DataContext.Columns[4].IsVisible, ElementName=CatalogoControl, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                    <DataGridTextColumn Header="Proveedor" Binding="{Binding NombreProveedorPrincipal}" Width="*" 
+                        Visibility="{Binding DataContext.Columns[5].IsVisible, ElementName=CatalogoControl, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                    <DataGridTextColumn Header="Stock" Binding="{Binding StockCalculado}" Width="80" SortMemberPath="StockCalculado"
+                        Visibility="{Binding DataContext.Columns[6].IsVisible, ElementName=CatalogoControl, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                    <DataGridCheckBoxColumn Header="Activo" Binding="{Binding Estado, Mode=OneWay}" Width="80" SortMemberPath="Estado"
+                            Visibility="{Binding DataContext.Columns[7].IsVisible, ElementName=CatalogoControl, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
                 </DataGrid.Columns>
             </DataGrid>
         </Border>
+
+        <Grid Grid.Row="3" Margin="0,10,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+                
+            <TextBlock Grid.Column="0" Text="{Binding TotalItems, StringFormat='Total: {0} registros'}" 
+                        FontSize="15"
+                        FontFamily="{StaticResource Font.Poppins}" FontWeight="Medium"
+                VerticalAlignment="Center" Margin="20,0,20,0"
+                Foreground="{StaticResource Text.Secondary}"/>
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                <Button Command="{Binding IrAPaginaAnteriorCommand}"  Style="{StaticResource MaterialDesignToolButton}">
+                    <materialDesign:PackIcon Kind="ChevronLeft" Width="15" Height="15"/>
+                </Button>
+
+                <TextBlock VerticalAlignment="Center" FontSize="15" FontFamily="{StaticResource Font.Poppins}" FontWeight="Medium" Margin="10,0" Foreground="{StaticResource Text.Secondary}">
+                    <Run Text="Página"/>    
+                    <Run Text="{Binding NumeroDePagina}"/>
+                    <Run Text="de"/>
+                    <Run Text="{Binding TotalPaginas, Mode=OneWay}"/>
+                </TextBlock>
+
+                <Button Command="{Binding IrAPaginaSiguienteCommand}" Style="{StaticResource MaterialDesignToolButton}">
+                    <materialDesign:PackIcon Kind="ChevronRight" />
+                </Button>
+            </StackPanel>
+            
+        </Grid>
+
     </Grid>
 </UserControl>

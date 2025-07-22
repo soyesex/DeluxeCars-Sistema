@@ -22,6 +22,8 @@ namespace DeluxeCarsDesktop.Services
         // Método para navegar a una nueva vista principal (Genérico y Asíncrono)
         Task NavigateTo<TViewModel>() where TViewModel : ViewModelBase;
 
+        Task NavigateTo<TViewModel, TParameter>(TParameter parameter) where TViewModel : ViewModelBase;
+
         // Método para retroceder en el historial
         void GoBack();
 

@@ -3,33 +3,28 @@
 /*    -----------------------------------------------------------------------*/
 
 .home-page * {
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
 }
 
 .home-page a {
     text-decoration: none;
-    border-radius: 5rem;
-     padding: 1rem
+    color: #000;
 }
 
 .home-page header {
+    padding: 0;
+    /*    height: calc(100vh - 80px);
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 10px
+    justify-content: space-between;*/
 }
 
-    .home-page header col-md-6 {
-        flex: 1;
-        padding: 0;
-    }
-
-        .home-page header col-md-6 img {
-            width: 100%;
-            height: auto;
-            object-fit: cover;
-        }
+.home-page img {
+    object-fit: cover;
+}
 
 .home-page header .left {
     max-width: 700px;
@@ -48,32 +43,30 @@
         color: #777;
     }
 
-    .home-page header d-flex-center a,
-    .home-page .view-more a,
-    .home-page #cta a {
-        background-color: #000;
-        color: white;
-        font-size: 1.2rem;
+    .home-page header .left a {
+        display: flex;
+        align-items: center;
+        background: #000;
         width: 200px;
         padding: 8px;
         border-radius: 60px;
-        transition: background-color 0.3s ease
     }
 
-.home-page .d-flex-center {
-    display: flex;
-    justify-content: center;
-    align-items: center
-}
+        .home-page header .left a i {
+            background-color: #fff;
+            font-size: 24px;
+            border-radius: 50%;
+            padding: 8px;
+        }
 
-.home-page d-flex-center a i {
-    font-size: 24px;
-    border-radius: 50%;
-    padding: 8px;
-}
+        .home-page header .left a span {
+            color: #fff;
+            margin-left: 10px;
+        }
 
-.home-page d-flex-center a span {
-    color: #fff;
+.home-page header img {
+    width: 600px;
+    border-radius: 8px;
 }
 
 .home-page h2 {
@@ -133,22 +126,20 @@
     .home-page .nft-shop .category {
         display: flex;
         gap: 14px;
-        justify-content: space-around;
-        align-items:center
     }
     /**--------------------------------------------*/
-        .home-page .nft-shop .category-btn {
-            background-color: #dfdcdc;
-            padding: 8px 14px;
-            font-size: 15px;
-            border-radius: 14px;
-            transition: all 0.3s ease;
-        }
+    .home-page .nft-shop .category-btn {
+        background-color: #dfdcdc;
+        padding: 8px 14px;
+        font-size: 15px;
+        border-radius: 14px;
+        transition: all 0.3s ease;
+    }
 
-            .home-page .nft-shop .category-btn:hover {
-                color: #fff;
-                background-color: #0f2182;
-            }
+        .home-page .nft-shop .category-btn:hover {
+            color: #fff;
+            background-color: #0f2182;
+        }
 
     .home-page .nft-shop .nft-list {
         padding: 40px 0;
@@ -282,43 +273,20 @@
         height: auto;
         text-align: center;
     }
-    .home-page header {
-        padding: 0 20px;
-        flex-direction: column;
-        height: auto;
-        text-align: center;
-    }
-
-        .home-page header .d-flex {
-            flex-direction: column;
-            align-items: center
-        }
-
-        .home-page header col-md-6 {
-            width: 100%;
-            text-align: center;
-        }
-
-        .home-page header img {
-            width: 70%;
-        }
-
-        .home-page a {
-            font-size: 1rem;
-            padding: 0.5rem 1.5rem;
-        }
 
         .home-page header .left {
             max-width: 100%;
         }
 
             .home-page header .left h1 {
-                font-size: 1.5rem;
+                font-size: 40px;
             }
 
-    .home-page header .left .lead {
-        font-size: 1rem;
-    }
+        .home-page header img {
+            width: 100%;
+            margin-top: 20px;
+        }
+
     .home-page h2 {
         padding: 0 20px;
         font-size: 30px;
@@ -348,12 +316,12 @@
                 transition: all 0.3s ease;
             }
 
-            .home-page .nft-shop .nft-list .item img {
-                width: 100%;
-                height: 280px;
-                object-fit:cover;
-                border-radius: 18px
-            }
+                .home-page .nft-shop .nft-list .item img {
+                    width: 100%;
+                    height: 280px;
+                    object-fit: cover;
+                    border-radius: 18px
+                }
 
     .sellers {
         padding: 0 20px;
@@ -368,6 +336,3 @@
 .card:hover {
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
 }
-
-
-

@@ -13,6 +13,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Navigation;
+using DeluxeCars.DataAccess.Repositories.Interfaces;
+using System.Configuration;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
@@ -74,6 +76,13 @@ namespace DeluxeCarsDesktop.ViewModel
             set { SetProperty(ref _categoriaSeleccionada, value); (GuardarCommand as ViewModelCommand)?.RaiseCanExecuteChanged(); }
         }
 
+        private string _rutaImagenSeleccionada;
+        public string RutaImagenSeleccionada
+        {
+            get => _rutaImagenSeleccionada;
+            set => SetProperty(ref _rutaImagenSeleccionada, value);
+        }
+
         private string _imagenUrl;
         public string ImagenUrl { get => _imagenUrl; set => SetProperty(ref _imagenUrl, value); }
 
@@ -83,6 +92,8 @@ namespace DeluxeCarsDesktop.ViewModel
         public ICommand NuevaCategoriaCommand { get; }
         public Action CloseAction { get; set; }
         public ICommand SeleccionarImagenCommand { get; }
+        // ...junto a tus otros ICommand...
+        public ICommand EliminarImagenCommand { get; }
 
         public ProductoFormViewModel(IUnitOfWork unitOfWork, IStockAlertService stockAlertService,
                                   INotificationService notificationService, INavigationService navigationService)
@@ -97,6 +108,7 @@ namespace DeluxeCarsDesktop.ViewModel
             NuevaCategoriaCommand = new ViewModelCommand(ExecuteShowCategoriaCommand);
             CancelarCommand = new ViewModelCommand(p => CloseAction?.Invoke());
             SeleccionarImagenCommand = new ViewModelCommand(_ => ExecuteSeleccionarImagen());
+            EliminarImagenCommand = new ViewModelCommand(_ => ExecuteEliminarImagen());
         }
 
         public async Task LoadAsync(int productoId)
@@ -134,44 +146,54 @@ namespace DeluxeCarsDesktop.ViewModel
         }
         private void ExecuteSeleccionarImagen()
         {
-            // 1. Creamos un diálogo para que el usuario seleccione un archivo
             var openFileDialog = new OpenFileDialog
             {
                 Filter = "Archivos de Imagen|*.jpg;*.jpeg;*.png;*.gif;*.bmp",
                 Title = "Seleccionar Imagen del Producto"
             };
 
-            // 2. Si el usuario selecciona un archivo y hace clic en "OK"
             if (openFileDialog.ShowDialog() == true)
             {
                 try
                 {
-                    // 3. Definimos una carpeta segura dentro de nuestra aplicación para guardar las imágenes.
-                    string destinationFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", "Products");
+                    // --- CAMBIO 1: Leer la ruta base desde App.config ---
+                    string rutaBase = ConfigurationManager.AppSettings["RutaBaseImagenes"];
+                    if (string.IsNullOrEmpty(rutaBase))
+                    {
+                        MessageBox.Show("La ruta base para imágenes no está configurada en App.config.", "Error de Configuración");
+                        return;
+                    }
+                    string destinationFolder = Path.Combine(rutaBase, "images", "products");
 
-                    // Si la carpeta no existe, la creamos.
                     Directory.CreateDirectory(destinationFolder);
 
-                    // 4. Creamos un nombre de archivo único para evitar conflictos y sobreescrituras.
                     string originalFilePath = openFileDialog.FileName;
                     string newFileName = Guid.NewGuid().ToString() + Path.GetExtension(originalFilePath);
                     string destinationPath = Path.Combine(destinationFolder, newFileName);
 
-                    // 5. Copiamos el archivo seleccionado por el usuario a nuestra carpeta de destino.
                     File.Copy(originalFilePath, destinationPath);
 
-                    // 6. Actualizamos la propiedad del ViewModel con el NUEVO nombre del archivo.
-                    // El binding y el converter se encargarán de mostrar la nueva imagen en la UI.
-                    ImagenUrl = newFileName;
+                    // --- CAMBIO 2: Guardar la ruta RELATIVA, no solo el nombre del archivo ---
+                    // Esta es la ruta que la app web podrá usar directamente.
+                    ImagenUrl = $"images/products/{newFileName}";
+
+                    // Opcional: Para la previsualización en el formulario actual, 
+                    // puedes seguir usando la ruta completa del archivo que el usuario seleccionó.
+                    RutaImagenSeleccionada = originalFilePath;
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Ocurrió un error al procesar la imagen: {ex.Message}", "Error de Imagen", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Ocurrió un error al procesar la imagen: {ex.Message}", "Error de Imagen");
                 }
             }
         }
         private async Task LoadCategoriasAsync()
         {
+            if (Categorias.Any())
+            {
+                return;
+            }
+
             var cats = await _unitOfWork.Categorias.GetAllAsync();
             Categorias.Clear(); // Limpiamos la colección existente
             foreach (var cat in cats.OrderBy(c => c.Nombre))
@@ -246,6 +268,13 @@ namespace DeluxeCarsDesktop.ViewModel
             _navigationService.OpenFormWindow(Utils.FormType.Categoria, 0);
             // No necesitamos esperar a que se cierre, ya que las categorías se recargarán al abrir el formulario de Producto.
 
+        }
+
+        private void ExecuteEliminarImagen()
+        {
+            // Simplemente limpiamos la URL. El binding se encargará de actualizar la vista.
+            // Si quieres poner una imagen por defecto, aquí asignarías su ruta.
+            ImagenUrl = null;
         }
     }
 }

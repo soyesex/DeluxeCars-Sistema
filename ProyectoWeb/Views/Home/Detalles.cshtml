@@ -1,0 +1,132 @@
+﻿@model Aplicacion.Application.ViewModels.ProductoViewModel
+@{
+    ViewData["Title"] = Model.Nombre;
+}
+<div class="container product-details-container">
+    <div class="row g-5">
+        <div class="col-lg-6">
+            <div class="product-image-gallery">
+                <div class="main-image-container">
+                    <img src="~/images/@Model.ImagenUrl"
+                         class="main-image"
+                         alt="@Model.Nombre"
+                         id="mainProductImage"
+                         onerror="this.onerror=null;this.src='/images/placeholder.png';">
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 product-info">
+            <h1 class="mb-2">@Model.Nombre</h1>
+            <p class="text-muted">Categoría: @Model.NombreCategoria</p>
+
+            <p class="my-4 product-price">@Model.Precio.ToString("C0")</p>
+
+            <div class="mb-3">
+                @if (Model.Stock > 0)
+                {
+                    <span class="badge bg-success p-2">Disponible</span>
+                }
+                else
+                {
+                    <span class="badge bg-danger p-2">Agotado</span>
+                }
+            </div>
+
+            <p class="lead">@Model.Descripcion</p>
+
+            @if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                <form asp-controller="Carrito" asp-action="Agregar" method="post" class="mt-4 add-to-cart-form">
+                    <input type="hidden" name="productoId" value="@Model.Id" />
+                    <div class="row align-items-center g-3">
+                        <div class="col-auto">
+                            <label for="cantidad" class="form-label">Cantidad:</label>
+                            <input type="number" id="cantidad" name="cantidad" class="form-control" value="1" min="1" max="@Model.Stock">
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-primary" @(Model.Stock == 0 ? "disabled" : "")>
+                                <i class="bi bi-cart-plus-fill me-2"></i> Añadir al Carrito
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            }
+            else
+            {
+                <div class="mt-4 login-prompt">
+                    <h5 class="fw-bold">¿Listo para comprar?</h5>
+                    <p>Inicia sesión o crea una cuenta para añadir productos a tu carrito y finalizar tu compra.</p>
+                    <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Context.Request.Path" class="btn btn-primary">Iniciar Sesión para Comprar</a>
+                </div>
+            }
+
+            <hr class="my-4">
+
+            <div>
+                <h4>Especificaciones</h4>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between">
+                        <strong>Número de Parte (OEM):</strong>
+                        <span>@Model.OriginalEquipmentManufacture</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <strong>Categoría:</strong>
+                        <span>@Model.NombreCategoria</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    /* Estilos específicos para la página de detalles */
+    .product-details-container {
+        padding-top: 2rem;
+        padding-bottom: 4rem;
+    }
+
+    .product-image-gallery .main-image-container {
+        background-color: var(--color-superficie-oscura);
+        border: 1px solid var(--color-borde-oscuro);
+        border-radius: 1rem;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .product-image-gallery .main-image {
+        max-width: 100%;
+        max-height: 450px;
+        object-fit: contain;
+    }
+
+    .product-info h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+    }
+
+    .product-price {
+        font-size: 2.8rem;
+        font-weight: 700;
+        color: var(--color-primario);
+    }
+
+    .add-to-cart-form .form-control {
+        max-width: 100px;
+    }
+
+    .add-to-cart-form .btn-primary {
+        background-color: var(--color-primario);
+        border-color: var(--color-primario);
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+    }
+    /* Estilo para el llamado a la acción para iniciar sesión */
+    .login-prompt {
+        background-color: var(--color-superficie-oscura);
+        border: 1px solid var(--color-borde-oscuro);
+        border-radius: 1rem;
+        padding: 2rem;
+        text-align: center;
+    }
+</style>

@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using DeluxeCars.DataAccess.Repositories.Interfaces;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
@@ -52,7 +53,24 @@ namespace DeluxeCarsDesktop.ViewModel
             OnPropertyChanged(nameof(ProveedorActual));
             await RefreshLists();
         }
+        public async Task GuardarCambioPrecio(ProductoProveedor productoEditado)
+        {
+            if (productoEditado == null) return;
 
+            try
+            {
+                // No necesitamos llamar a UpdateAsync explícitamente si el objeto ya es
+                // rastreado por el DbContext, pero hacerlo no causa problemas y es más claro.
+                await _unitOfWork.ProductoProveedores.UpdateAsync(productoEditado);
+                await _unitOfWork.CompleteAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"No se pudo actualizar el precio: {ex.Message}", "Error");
+                // Opcional: recargar los datos para revertir el cambio visual en el DataGrid
+                await RefreshLists();
+            }
+        }
         // --- MÉTODO REFRESHLISTS ACTUALIZADO ---
         private async Task RefreshLists()
         {

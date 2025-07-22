@@ -1,38 +1,292 @@
-﻿@using Aplicacion.ViewModels
-@model List<ProductoViewModel>
-
+﻿@model List<Aplicacion.Application.ViewModels.ProductoViewModel>
 @{
     ViewData["Title"] = "Catálogo - Deluxe Cars";
+
+    var ordenActual = ViewData["OrdenActual"] as string;
+    var categoriaActual = ViewData["CategoriaActual"] as string;
+    var todasLasCategorias = ViewData["Categorias"] as List<string> ?? new List<string>();
 }
 
-<!-- Sección de catálogo de productos -->
-<div class="container mt-5 pt-5">
-    <h1 class="text-center mb-4">Catálogo de Autopartes - DeluxeCars</h1>
-    <div class="row" id="product-catalog"></div>
+
+<div class="container-fluid catalog-header text-center mb-5 py-3">
+    <h1 class="display-4 fw-bold" data-aos="fade-up">Nuestro Catálogo de Autopartes</h1>
+    <p class="lead text-white-50" data-aos="fade-up" data-aos-delay="150">Encuentra la pieza de alta calidad que tu vehículo necesita.</p>
 </div>
 
-<!-- Carrito de compras -->
-<div id="cart" class="slide-cart">
-    <div class="cart-header d-flex justify-content-between p-3 text-white">
-        <h4>Carrito de Compras</h4>
-        <button class="btn-close text-white" onclick="toggleCart()"></button>
+    <div class="row">
+
+
+
+        <div class="col-lg-3" data-aos="fade-right">
+            <aside class="filter-sidebar">
+                <form asp-action="Index" asp-controller="Catalogo" method="get">
+
+                    <div class="filter-widget">
+                        <h5 class="widget-title">Buscar Producto</h5>
+                        <div class="search-wrapper">
+                        <input type="text" name="terminoBusqueda" class="search-input searchproduct" placeholder="Nombre, marca, OEM..." value="@ViewData["BusquedaActual"]" />
+                            <button type="submit" class="search-button" title="Buscar">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="filter-widget">
+                        <h5 class="widget-title">Ordenar por</h5>
+                        <select name="orden" class="form-select" onchange="this.form.submit()">
+                            <option class="itemsOrder" value="relevancia" selected="@(ordenActual == "relevancia")">Relevancia</option>
+                            <option class="itemsOrder" value="precio-asc" selected="@(ordenActual == "precio-asc")">Precio: Menor a Mayor</option>
+                            <option class="itemsOrder"  value="precio-desc" selected="@(ordenActual == "precio-desc")">Precio: Mayor a Menor</option>
+                            <option class="itemsOrder" value="nombre-asc" selected="@(ordenActual == "nombre-asc")">Nombre: A-Z</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-widget">
+                        <h5 class="widget-title">Categorías</h5>
+                        <div class="filter-list">
+                            <a asp-action="Index" asp-controller="Catalogo" class="filter-item @(string.IsNullOrEmpty(categoriaActual) ? "active" : "")">Todas</a>
+                            @foreach (var categoria in todasLasCategorias)
+                            {
+                                <a asp-action="Index" asp-controller="Catalogo" asp-route-categoria="@categoria" class="filter-item @(categoria == categoriaActual ? "active" : "")">@categoria</a>
+                            }
+                        </div>
+                    </div>
+
+                </form>
+            </aside>
+        </div>
+
+        <div class="col-lg-9" data-aos="fade-up" data-aos-delay="100">
+            @if (Model != null && Model.Any())
+            {
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-xl-3 g-4">
+                    @foreach (var producto in Model)
+                    {
+                        <div class="col">
+                            @await Html.PartialAsync("_ProductCard", producto)
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center p-5 bg-light rounded">
+                    <h4 class="fw-bold">No se encontraron productos</h4>
+                    <p class="lead text-muted">Intenta ajustar tus filtros o selecciona otra categoría.</p>
+                    <a asp-action="Index" asp-controller="Catalogo" class="btn btn-outline-dark mt-3">Limpiar Filtros</a>
+                </div>
+            }
+        </div>
     </div>
-    <ul id="cart-items" class="list-group list-group-flush"></ul>
-    <div class="cart-footer p-3 text-white d-flex justify-content-between">
-        <p>Total: $<span id="cart-total">0</span></p>
-        <form id="checkoutForm" action="/Pedido/Confirmar" method="post" onsubmit="prepareCartData()">
-            <input type="hidden" id="cartItemsInput" name="cartItemsInput" />
-            <button type="submit" class="btn btn-primary">Finalizar Compra</button>
-        </form>
+<style>
+    /* --- 1. Estilos Generales y Encabezado --- */
+    .catalog-header h1 {
+        color: var(--color-texto-principal, #EAEAEA);
+        font-weight: 700;
+    }
 
-</div>
+    .catalog-header p {
+        color: var(--color-texto-secundario, #A0A0A0);
+    }
 
-<!-- Botón para abrir el carrito -->
-<button class="cart-btn" onclick="toggleCart()">
-    <i class="bi bi-cart3"></i>
-    <span id="cart-count" class="badge bg-danger">0</span>
-</button>
+    /* --- 2. Barra Lateral de Filtros y Categorías --- */
+    .filter-sidebar {
+        background-color: var(--color-superficie-oscura, #1E1E1E);
+        border: 1px solid var(--color-borde-oscuro, #2F2F2F);
+        border-radius: 12px;
+        padding: 1.5rem;
+        height: 100%;
+        position: sticky; /* Para que se mantenga visible al hacer scroll */
+        top: 2rem;
+    }
 
-@section Scripts {
-    <script src="~/js/script.js"></script>
-}
+    .filter-widget {
+        margin-bottom: 2rem;
+    }
+
+    .widget-title { /* Apuntando a tu clase .widget-title */
+        color: var(--color-texto-principal, #EAEAEA);
+        font-weight: 600;
+        font-size: 1.1rem;
+        padding-bottom: 0.75rem;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid var(--color-borde-oscuro, #2F2F2F);
+    }
+
+    /* Estilo para la lista de categorías */
+    .filter-list { /* Apuntando a tu clase .filter-list */
+        list-style: none;
+        padding-left: 0;
+    }
+
+    .filter-item { /* Apuntando a tu clase .filter-item */
+        display: block;
+        padding: 0.75rem 1rem;
+        color: var(--color-texto-secundario, #A0A0A0);
+        text-decoration: none;
+        border-radius: 8px;
+        transition: background-color 0.2s ease, color 0.2s ease;
+        font-weight: 500;
+    }
+
+        .filter-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--color-texto-principal, #EAEAEA);
+        }
+
+        .filter-item.active {
+            background-color: var(--color-primario, #E53559);
+            color: #FFFFFF;
+            font-weight: 700;
+        }
+
+    /* Estilo para el dropdown 'Ordenar por' */
+    .filter-widget .form-select {
+        background-color: rgba(255,255,255,0.05);
+        border-color: var(--color-borde-oscuro);
+        color: var(--color-texto-principal);
+    }
+
+        .filter-widget .form-select:focus {
+            box-shadow: 0 0 0 0.25rem rgba(var(--bs-danger-rgb), .25);
+            border-color: var(--color-primario);
+        }
+
+    /* --- 3. Tarjeta de Producto (se aplica en _ProductCard.cshtml) --- */
+    .product-card {
+        background-color: var(--color-superficie-oscura, #1E1E1E);
+        border: 1px solid var(--color-borde-oscuro, #2F2F2F);
+        border-radius: 12px;
+        text-align: center;
+        transition: all 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden; /* Para que el botón no se salga */
+    }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            border-color: var(--color-primario, #E53559);
+        }
+
+    /* --- ESTILO PARA EL BUSCADOR DEL CATÁLOGO --- */
+
+    .search-form-container {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .search-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 600px; /* Ancho del buscador */
+        display: flex;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9CA3AF; /* Color gris para el icono */
+        font-size: 1.1rem;
+    }
+
+    .search-input {
+        flex-grow: 1; /* El input ocupa todo el espacio disponible */
+        padding: 14px 20px 14px 50px; /* Padding izquierdo para no solapar el icono */
+        font-size: 1rem;
+        color: #FFFFFF;
+        background-color: #1A1A1A; /* Fondo oscuro */
+        border: 1px solid #4D4D4D;
+        border-radius: 50px 0 0 50px; /* Bordes redondeados a la izquierda */
+        transition: all 0.2s ease-in-out;
+    }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #FF4D4D; /* Borde rojo al seleccionar */
+            box-shadow: 0 0 0 3px rgba(255, 77, 77, 0.4);
+            background-color: #333333;
+        }
+
+    .search-button {
+        padding: 14px 28px;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #FFFFFF;
+        text-align: center;
+        background-color: #FF4D4D; /* Rojo sólido */
+        border: 2px solid #FF4D4D;
+        border-radius: 0 50px 50px 0; /* Bordes redondeados a la derecha */
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .search-button:hover {
+            background-color: #CC0000; /* Rojo más oscuro */
+            border-color: #CC0000;
+        }
+
+    /* --- ESTILO PARA EL BUSCADOR DENTRO DEL WIDGET --- */
+    .search-wrapper {
+        position: relative;
+        width: 100%;
+        display: flex;
+    }
+
+    .search-input {
+        flex-grow: 1;
+        padding: 0.75rem 1.5rem 0.75rem 1rem;
+        font-size: 1rem;
+        color: var(--color-texto-principal);
+        background-color: rgba(255,255,255,0.05); /* Mismo fondo que el dropdown */
+        border: 1px solid var(--color-borde-oscuro);
+        border-radius: 8px 0 0 8px; /* Bordes redondeados a la izquierda */
+        transition: all 0.2s ease-in-out;
+        -webkit-appearance: none; /* Quita estilos por defecto en iOS */
+    }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--color-primario);
+            background-color: rgba(0,0,0,0.1);
+            box-shadow: 0 0 0 0.25rem rgba(var(--bs-danger-rgb), .25);
+        }
+
+    .search-button {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        color: #FFFFFF;
+        background-color: var(--color-primario); /* Color rojo principal */
+        border: 1px solid var(--color-primario);
+        border-radius: 0 8px 8px 0; /* Bordes redondeados a la derecha */
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .search-button:hover {
+            background-color: #CC0000; /* Rojo más oscuro */
+            border-color: #CC0000;
+        }
+
+    /* Ajuste para que los botones de categoría parezcan links */
+    .filter-item {
+        background: none;
+        border: none;
+        width: 100%;
+        text-align: left;
+    }
+    /* ... (El resto de los estilos para .product-card que te di antes son correctos) ... */
+
+    .searchproduct {
+        width:5rem
+    }
+
+    .itemsOrder {
+        color:black
+    }
+</style>

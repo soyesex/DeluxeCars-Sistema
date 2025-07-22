@@ -1,65 +1,56 @@
-﻿@using Aplicacion.Application.ViewModels
-@using Aplicacion.ViewModels
-@model IEnumerable<ProductoViewModel>
-
+﻿@model IEnumerable<Aplicacion.Application.ViewModels.ProductoViewModel>
 @{
-    ViewData["Title"] = "Listado de Productos";
+    ViewData["Title"] = "Gestión de Inventario de Productos";
 }
 
-<div class="container mt-4">
-    <h2 class="text-center mb-4">Detalles de los Productos</h2>
-    <div class="card-body">
-        <div class="d-flex justify-content-between mb-3">
-            <div>
-                <a asp-action="Create" class="btn btn-success">
-                    <i class="bi bi-person-plus"></i> Nuevo Producto
-                </a>
-            </div>
-            <form class="d-flex">
-                <input class="form-control me-2" type="search" name="filtro" value="@ViewBag.FiltroActual" placeholder="Buscar..." aria-label="Buscar">
-                <button class="btn btn-outline-secondary" type="submit">Buscar</button>
-            </form>
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2">@ViewData["Title"]</h1>
+        <a asp-action="Crear" class="btn btn-primary" style="background-color: var(--color-primario); border-color: var(--color-primario);">
+            <i class="bi bi-plus-circle-fill me-2"></i>Añadir Nuevo Producto
+        </a>
+    </div>
+
+    <div class="card order-details-card p-4">
+        <div class="table-responsive">
+            <table class="table table-dark-custom table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 5%;"></th>
+                        <th>Nombre del Producto</th>
+                        <th>Categoría</th>
+                        <th>Precio</th>
+                        <th>Stock</th>
+                        <th class="text-end">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <img src="~/images/@item.ImagenUrl" style="width: 40px; height: 40px; object-fit: cover; border-radius: 5px;" onerror="this.onerror=null;this.src='/images/placeholder.png';" />
+                            </td>
+                            <td>
+                                <strong>@item.Nombre</strong><br>
+                                <small class="text-muted">OEM: @item.OriginalEquipmentManufacture</small>
+                            </td>
+                            <td>@item.NombreCategoria</td>
+                            <td class="text-end">@item.Precio.ToString("C")</td>
+                            <td class="text-center">
+                                @{
+                                    var stockClass = item.Stock > 20 ? "bg-success" : (item.Stock > 0 ? "bg-warning" : "bg-danger");
+                                }
+                                <span class="badge @stockClass">@item.Stock</span>
+                            </td>
+                            <td class="text-end">
+                                <a asp-action="Editar" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning">Editar</a>
+                                <a asp-action="Eliminar" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger ms-2">Eliminar</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
-    <table class="table table-striped table-bordered">
-        <thead class="table-dark">
-            <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Descripción</th>
-                <th>Categoría</th>
-                <th>Precio</th>
-                <th>Estado</th>
-                <th>Fecha Ingreso</th>
-                <th>OEM</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var producto in Model)
-            {
-                <tr>
-                    <td>@producto.Id</td>
-                    <td>@producto.Nombre</td>
-                    <td>@producto.Descripcion</td>
-                    <td>@producto.NombreCategoria</td>
-                    <td>@producto.Precio.ToString("C")</td>
-                    <td>
-                        <span class="badge @((producto.Estado ? "bg-success" : "bg-danger"))">
-                            @(producto.Estado ? "Activo" : "Inactivo")
-                        </span>
-                    </td>
-                    <td>@producto.FechaIngreso.ToString("dd/MM/yyyy")</td>
-                    <td>@producto.OrigininalEquipmentManufacture</td>
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@producto.Id" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> Editar</a>
-                        <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="@producto.Id" data-nombre="@producto.Nombre">
-                            <i class="fas fa-trash"></i> Eliminar
-                        </button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
 </div>
-

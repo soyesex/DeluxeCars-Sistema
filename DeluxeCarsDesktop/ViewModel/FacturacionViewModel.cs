@@ -1,11 +1,14 @@
-﻿using DeluxeCarsDesktop.Interfaces;
+﻿using DeluxeCars.DataAccess.Repositories.Interfaces;
+using DeluxeCarsDesktop.Interfaces;
 using DeluxeCarsDesktop.Messages;
-using DeluxeCarsEntities;
 using DeluxeCarsDesktop.Services;
+using DeluxeCarsEntities;
+using DeluxeCarsShared.Interfaces;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,103 +17,94 @@ using System.Windows.Input;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
-    public class FacturacionViewModel : ViewModelBase, IAsyncLoadable
+    public class FacturacionViewModel : ViewModelBase, IAsyncLoadable, IParameterReceiver<int>
     {
+        // --- Dependencias (sin cambios) ---
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUserService;
         private readonly IStockAlertService _stockAlertService;
         private readonly IMessengerService _messengerService;
 
+        // --- Estado Interno ---
         private Factura _facturaEnProgreso;
-        private bool _isInitialized = false;
         private bool _isBuscandoItems = false;
-        private bool _isBuscandoClientes = false;
 
-        // --- Propiedades para Binding (Estandarizadas con SetProperty) ---
-        public ObservableCollection<Cliente> ResultadosBusquedaCliente { get; private set; }
+        // --- NUEVA PROPIEDAD PARA RECIBIR EL ID ---
+        /// <summary>
+        /// El NavigationService establecerá este valor ANTES de llamar a LoadAsync.
+        /// Si es 0, es una factura nueva. Si es > 0, es para un cliente específico.
+        /// </summary>
+        public int ClienteIdToLoad { get; set; }
+
+        // --- PROPIEDADES PARA BINDING (Simplificadas) ---
+        public ObservableCollection<Cliente> ClientesDisponibles { get; private set; }
         public ObservableCollection<MetodoPago> MetodosDePago { get; private set; }
+        public ObservableCollection<DetalleFactura> LineasDeFactura { get; private set; }
+        public ObservableCollection<object> ResultadosBusquedaItem { get; private set; }
 
         private Cliente _clienteSeleccionado;
         public Cliente ClienteSeleccionado
         {
             get => _clienteSeleccionado;
-            set
-            {
-                SetProperty(ref _clienteSeleccionado, value);
-                if (value != null)
-                {
-                    // Actualiza el texto de búsqueda para que el usuario vea su selección
-                    _textoBusquedaCliente = value.Nombre;
-                    OnPropertyChanged(nameof(TextoBusquedaCliente));
-
-                    // Cierra el popup de resultados
-                    IsClientPopupOpen = false;
-                }
-            }
+            set => SetProperty(ref _clienteSeleccionado, value);
         }
 
-        // Coloca estas propiedades junto a las otras en tu ViewModel
+        private MetodoPago _metodoPagoSeleccionado;
+        public MetodoPago MetodoPagoSeleccionado { get => _metodoPagoSeleccionado; set => SetProperty(ref _metodoPagoSeleccionado, value); }
 
+        // ... el resto de propiedades para búsqueda de items y totales se quedan igual ...
+        private string _textoBusquedaItem;
+        public string TextoBusquedaItem { get => _textoBusquedaItem; set { SetProperty(ref _textoBusquedaItem, value); _ = BuscarItems(); } }
+        private int _cantidadItem = 1;
+        public int CantidadItem { get => _cantidadItem; set => SetProperty(ref _cantidadItem, value); }
+        private decimal _subTotal;
+        public decimal SubTotal { get => _subTotal; private set => SetProperty(ref _subTotal, value); }
+        private decimal _totalIVA;
+        public decimal TotalIVA { get => _totalIVA; private set => SetProperty(ref _totalIVA, value); }
+        private decimal _total;
+
+        private decimal _totalDescuentos;
+        public decimal TotalDescuentos { get => _totalDescuentos; private set => SetProperty(ref _totalDescuentos, value); }
+
+        public decimal Total { get => _total; private set => SetProperty(ref _total, value); }
         private bool _isProductPopupOpen;
-        public bool IsProductPopupOpen
-        {
-            get => _isProductPopupOpen;
-            set => SetProperty(ref _isProductPopupOpen, value);
-        }
-
+        public bool IsProductPopupOpen { get => _isProductPopupOpen; set => SetProperty(ref _isProductPopupOpen, value); }
         private object _itemSeleccionado;
         public object ItemSeleccionado
         {
             get => _itemSeleccionado;
             set
             {
+                // Asignamos el valor, pero sin ejecutar ningún comando.
                 SetProperty(ref _itemSeleccionado, value);
+                _ = ActualizarStockParaItemSeleccionadoAsync();
+                // Si el valor no es nulo (es decir, el usuario ha seleccionado algo)...
                 if (value != null)
                 {
-                    // Para obtener el nombre, necesitamos saber si es Producto o Servicio
-                    string nombre = string.Empty;
-                    if (value is Producto p) nombre = p.Nombre;
-                    else if (value is Servicio s) nombre = s.Nombre;
+                    // 1. Obtenemos el nombre para mostrarlo en el TextBox de búsqueda.
+                    string nombreAMostrar = string.Empty;
+                    if (value is Producto p)
+                    {
+                        nombreAMostrar = p.Nombre;
+                    }
+                    else if (value is Servicio s)
+                    {
+                        nombreAMostrar = s.Nombre;
+                    }
 
-                    _textoBusquedaItem = nombre;
+                    // 2. Actualizamos el campo privado del texto y notificamos a la UI.
+                    //    Esto evita disparar otra búsqueda innecesaria.
+                    _textoBusquedaItem = nombreAMostrar;
                     OnPropertyChanged(nameof(TextoBusquedaItem));
 
+                    // 3. Cerramos el popup de resultados.
                     IsProductPopupOpen = false;
                 }
             }
         }
-
-        private MetodoPago _metodoPagoSeleccionado;
-        public MetodoPago MetodoPagoSeleccionado { get => _metodoPagoSeleccionado; set => SetProperty(ref _metodoPagoSeleccionado, value); }
-
-        private string _textoBusquedaCliente;
-        public string TextoBusquedaCliente { get => _textoBusquedaCliente; set { SetProperty(ref _textoBusquedaCliente, value); BuscarClientes(); } }
-
-        public ObservableCollection<DetalleFactura> LineasDeFactura { get; private set; }
-        public ObservableCollection<object> ResultadosBusquedaItem { get; private set; }
-
-        private string _textoBusquedaItem;
-        public string TextoBusquedaItem { get => _textoBusquedaItem; set { SetProperty(ref _textoBusquedaItem, value); BuscarItems(); } }
-
-        private int _cantidadItem = 1;
-        public int CantidadItem { get => _cantidadItem; set => SetProperty(ref _cantidadItem, value); }
-
-        private decimal _subTotal;
-        public decimal SubTotal { get => _subTotal; private set => SetProperty(ref _subTotal, value); }
-
-        private decimal _totalIVA;
-        public decimal TotalIVA { get => _totalIVA; private set => SetProperty(ref _totalIVA, value); }
-
-        private decimal _total;
-        public decimal Total { get => _total; private set => SetProperty(ref _total, value); }
-
-        private bool _isClientPopupOpen;
-        public bool IsClientPopupOpen
-        {
-            get => _isClientPopupOpen;
-            set => SetProperty(ref _isClientPopupOpen, value);
-        }
-
+        // Propiedad para guardar solo el stock del item que estamos viendo
+        private int _stockDelItemSeleccionado;
+        public int StockDelItemSeleccionado { get => _stockDelItemSeleccionado; private set => SetProperty(ref _stockDelItemSeleccionado, value); }
         // --- Comandos ---
         public ICommand AgregarItemCommand { get; }
         public ICommand EliminarItemCommand { get; }
@@ -124,163 +118,160 @@ namespace DeluxeCarsDesktop.ViewModel
             _currentUserService = currentUserService;
             _stockAlertService = stockAlertService;
 
+            // Inicializamos las colecciones
             LineasDeFactura = new ObservableCollection<DetalleFactura>();
-            ResultadosBusquedaCliente = new ObservableCollection<Cliente>();
             ResultadosBusquedaItem = new ObservableCollection<object>();
+            ClientesDisponibles = new ObservableCollection<Cliente>();
             MetodosDePago = new ObservableCollection<MetodoPago>();
-            AgregarItemCommand = new ViewModelCommand( async p => await ExecuteAgregarItem(p), p => p != null && CantidadItem > 0);
+
+            // Inicializamos los comandos
+            AgregarItemCommand = new ViewModelCommand(async p => await ExecuteAgregarItem(p), p => p != null && CantidadItem > 0);
             EliminarItemCommand = new ViewModelCommand(ExecuteEliminarItem);
             FinalizarVentaCommand = new ViewModelCommand(async p => await ExecuteFinalizarVenta(), p => LineasDeFactura.Any() && ClienteSeleccionado != null);
-            CancelarVentaCommand = new ViewModelCommand(async p => await InicializarNuevaVenta());
+            CancelarVentaCommand = new ViewModelCommand(async p => await LoadAsync()); // Cancelar simplemente reinicia la venta
         }
         public async Task LoadAsync()
         {
-            if (_isInitialized)
+            // Reseteamos el estado de la factura
+            _facturaEnProgreso = new Factura();
+            LineasDeFactura.Clear();
+            TextoBusquedaItem = string.Empty;
+            CantidadItem = 1;
+            RecalcularTotales();
+
+            try
             {
-                // Si ya está inicializado, solo reinicia la venta si es necesario
-                if (LineasDeFactura.Any() || ClienteSeleccionado != null)
+                // Cargamos los clientes y métodos de pago
+                var clientes = await _unitOfWork.Clientes.GetByConditionAsync(c => c.Estado);
+                ClientesDisponibles.Clear();
+                foreach (var cliente in clientes.OrderBy(c => c.Nombre))
                 {
-                    await InicializarNuevaVenta();
+                    ClientesDisponibles.Add(cliente);
                 }
-                return;
+
+                var metodos = await _unitOfWork.MetodosPago.GetByConditionAsync(m => m.Disponible && m.AplicaParaVentas);
+                MetodosDePago.Clear();
+                foreach (var metodo in metodos)
+                {
+                    MetodosDePago.Add(metodo);
+                }
+                MetodoPagoSeleccionado = MetodosDePago.FirstOrDefault();
+
+                // --- LÓGICA CLAVE PARA SELECCIONAR EL CLIENTE ---
+                if (ClienteIdToLoad > 0)
+                {
+                    // Si se nos pasó un ID, buscamos y seleccionamos ese cliente.
+                    ClienteSeleccionado = ClientesDisponibles.FirstOrDefault(c => c.Id == ClienteIdToLoad);
+                }
+                else
+                {
+                    // Si no, seleccionamos el "Consumidor Final" por defecto (asumiendo que tiene ID=1).
+                    ClienteSeleccionado = ClientesDisponibles.FirstOrDefault(c => c.Id == 1);
+                }
             }
-            await InicializarNuevaVenta();
-            _isInitialized = true;
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error inicializando la vista de facturación: {ex.Message}", "Error de Carga");
+            }
         }
         private async Task InicializarNuevaVenta()
         {
             _facturaEnProgreso = new Factura();
             try
-            {
+            {// --- INICIO DE LA LÓGICA MODIFICADA ---
+
+                // Carga de Clientes
+                var clientes = await _unitOfWork.Clientes.GetAllAsync();
+                ClientesDisponibles.Clear();
+                // Añadimos una opción para "Cliente Genérico" o "Venta Rápida"
+                ClientesDisponibles.Add(new Cliente { Id = 0, Nombre = "Cliente Ocasional" });
+                foreach (var cliente in clientes.Where(c => c.Estado).OrderBy(c => c.Nombre))
+                {
+                    ClientesDisponibles.Add(cliente);
+                }
+
+                // Carga de Métodos de Pago (sin cambios)
                 var metodos = await _unitOfWork.MetodosPago.GetAllAsync();
-
-                // --- INICIO DE LA CORRECCIÓN ---
-
-                // 1. Limpiamos la colección existente.
                 MetodosDePago.Clear();
-
-                // 2. Añadimos los nuevos métodos a la colección que la UI ya conoce.
                 foreach (var metodo in metodos.Where(m => m.Disponible))
                 {
                     MetodosDePago.Add(metodo);
                 }
-
-                // Ya no necesitas la línea OnPropertyChanged(nameof(MetodosDePago));
-
-                // --- FIN DE LA CORRECCIÓN ---
-
-                MetodoPagoSeleccionado = MetodosDePago.FirstOrDefault();
             }
             catch (Exception ex) { MessageBox.Show($"Error cargando métodos de pago: {ex.Message}", "Error"); }
 
             LineasDeFactura.Clear();
-            ResultadosBusquedaCliente?.Clear(); // Usamos el '?' por si acaso
             ResultadosBusquedaItem?.Clear();
-            ClienteSeleccionado = null; // Esto ya lo tenías, pero es clave
 
-            TextoBusquedaCliente = string.Empty; OnPropertyChanged(nameof(TextoBusquedaCliente));
-            TextoBusquedaItem = string.Empty; OnPropertyChanged(nameof(TextoBusquedaItem));
+            // Seleccionamos los valores por defecto
+            ClienteSeleccionado = ClientesDisponibles.FirstOrDefault();
+            MetodoPagoSeleccionado = MetodosDePago.FirstOrDefault();
+
+            TextoBusquedaItem = string.Empty;
             CantidadItem = 1;
             RecalcularTotales();
-        }
 
-        // --- MÉTODOS DE BÚSQUEDA CORREGIDOS ---
-        // Reemplaza tu método BuscarClientes actual por este
-        private async Task BuscarClientes()
-        {
-            // 1. Añadimos la protección de concurrencia
-            if (_isBuscandoClientes) return;
-
-            try
-            {
-                _isBuscandoClientes = true;
-
-                if (string.IsNullOrWhiteSpace(TextoBusquedaCliente) || TextoBusquedaCliente.Length < 2)
-                {
-                    ResultadosBusquedaCliente?.Clear();
-                    IsClientPopupOpen = false;
-                    return;
-                }
-
-                if (ClienteSeleccionado != null && TextoBusquedaCliente == ClienteSeleccionado.Nombre)
-                {
-                    // Si el texto no ha cambiado desde la selección, cerramos el popup y no buscamos
-                    IsClientPopupOpen = false;
-                    return;
-                }
-
-                // Si el usuario sigue escribiendo, limpiamos la selección anterior
-                ClienteSeleccionado = null;
-
-                // La búsqueda ya es case-insensitive gracias a la configuración de la BD
-                var clientes = await _unitOfWork.Clientes.GetByConditionAsync(c =>
-                    c.Nombre.Contains(TextoBusquedaCliente) ||
-                    c.Email.Contains(TextoBusquedaCliente)
-                );
-
-                // --- CORRECCIÓN CLAVE ---
-                // Limpiamos y añadimos a la colección existente en lugar de crear una nueva
-                ResultadosBusquedaCliente.Clear();
-                foreach (var cliente in clientes)
-                {
-                    ResultadosBusquedaCliente.Add(cliente);
-                }
-
-                IsClientPopupOpen = ResultadosBusquedaCliente.Any();
-            }
-            finally
-            {
-                // Liberamos la bandera para la siguiente búsqueda
-                _isBuscandoClientes = false;
-            }
+            // Notificamos a la UI que estas propiedades han cambiado
+            OnPropertyChanged(nameof(TextoBusquedaItem));
         }
 
         // Reemplaza tu método BuscarItems actual por este
         private async Task BuscarItems()
         {
-            // 1. Chequeo de la bandera de "ocupado" al inicio.
-            if (_isBuscandoItems)
+            if (_isBuscandoItems) return;
+
+            // La lógica para no buscar si el texto es corto o no ha cambiado se mantiene
+            if (string.IsNullOrWhiteSpace(TextoBusquedaItem) || TextoBusquedaItem.Length < 2)
+            {
+                ResultadosBusquedaItem?.Clear();
+                IsProductPopupOpen = false;
                 return;
+            }
+            if (ItemSeleccionado != null)
+            {
+                string nombreSeleccionado = (ItemSeleccionado as Producto)?.Nombre ?? (ItemSeleccionado as Servicio)?.Nombre;
+                if (TextoBusquedaItem == nombreSeleccionado) return;
+            }
 
             try
             {
-                // 2. Se levanta la bandera para indicar que la búsqueda comienza.
                 _isBuscandoItems = true;
-
-                // =============================================================
-                // AHORA VIENE TODA LA LÓGICA QUE YA TENÍAS, PERO LIMPIA
-                // =============================================================
-
-                if (string.IsNullOrWhiteSpace(TextoBusquedaItem) || TextoBusquedaItem.Length < 2)
-                {
-                    ResultadosBusquedaItem?.Clear();
-                    IsProductPopupOpen = false;
-                    return;
-                }
-
-                if (ItemSeleccionado != null)
-                {
-                    string nombreSeleccionado = (ItemSeleccionado as Producto)?.Nombre ?? (ItemSeleccionado as Servicio)?.Nombre;
-                    if (TextoBusquedaItem == nombreSeleccionado) return;
-                }
-
-                ItemSeleccionado = null;
+                
                 ResultadosBusquedaItem.Clear();
 
-                // Ya no usamos .ToUpper() porque la base de datos ahora ignora mayúsculas/minúsculas
-                var productos = await _unitOfWork.Productos.GetByConditionAsync(p => p.Nombre.Contains(TextoBusquedaItem));
-                foreach (var p in productos) { ResultadosBusquedaItem.Add(p); }
+                var productosEncontrados = await _unitOfWork.Productos.SearchActivosConStockAsync(TextoBusquedaItem);
 
-                var servicios = await _unitOfWork.Servicios.GetByConditionAsync(s => s.Nombre.Contains(TextoBusquedaItem));
+                // ✅ --- INICIO DE LA NUEVA LÓGICA ---
+                // 2. Optimizamos la obtención del stock para todos los productos encontrados a la vez
+                var idsProductos = productosEncontrados.Select(p => p.Id).ToList();
+                if (idsProductos.Any())
+                {
+                    var stocks = await _unitOfWork.Productos.GetCurrentStocksAsync(idsProductos);
+                    foreach (var producto in productosEncontrados)
+                    {
+                        // 3. Asignamos el stock calculado a nuestra nueva propiedad [NotMapped]
+                        producto.StockCalculado = stocks.GetValueOrDefault(producto.Id, 0);
+                    }
+                }
+                // ✅ --- FIN DE LA NUEVA LÓGICA ---
+
+                // 4. Añadimos los productos YA CON SU STOCK a la lista de resultados
+                foreach (var p in productosEncontrados) { ResultadosBusquedaItem.Add(p); }
+
+                // Buscamos servicios (sin cambios)
+                var servicios = await _unitOfWork.Servicios.GetByConditionAsync(s => s.Nombre.Contains(TextoBusquedaItem) && s.Estado == true);
                 foreach (var s in servicios) { ResultadosBusquedaItem.Add(s); }
 
-                OnPropertyChanged(nameof(ResultadosBusquedaItem));
                 IsProductPopupOpen = ResultadosBusquedaItem.Any();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error buscando ítems: {ex.Message}");
+                // Opcional: Mostrar un mensaje de error al usuario.
+                MessageBox.Show("Ocurrió un error al buscar los ítems.", "Error");
             }
             finally
             {
-                // 3. En el 'finally', nos aseguramos de que la bandera SIEMPRE se baje,
-                // permitiendo que la próxima búsqueda pueda ejecutarse.
                 _isBuscandoItems = false;
             }
         }
@@ -333,6 +324,10 @@ namespace DeluxeCarsDesktop.ViewModel
                     UnidadMedida = p.UnidadMedida ?? "Unidad",
                     IVA = 19 // O tomarlo de una configuración
                 };
+                // Calculamos y asignamos los valores aquí, en el ViewModel.
+                detalle.SubTotalLinea = (detalle.Cantidad * detalle.PrecioUnitario) - (detalle.Descuento ?? 0);
+                detalle.Total = detalle.SubTotalLinea * (1 + ((detalle.IVA ?? 19) / 100));
+
                 LineasDeFactura.Add(detalle);
             }
             // --- Lógica para SERVICIOS (no cambia) ---
@@ -348,6 +343,10 @@ namespace DeluxeCarsDesktop.ViewModel
                     UnidadMedida = "Servicio",
                     IVA = 19
                 };
+                // --- LÍNEAS AÑADIDAS ---
+                detalle.SubTotalLinea = (detalle.Cantidad * detalle.PrecioUnitario) - (detalle.Descuento ?? 0);
+                detalle.Total = detalle.SubTotalLinea * (1 + ((detalle.IVA ?? 19) / 100));
+
                 LineasDeFactura.Add(detalle);
             }
 
@@ -367,12 +366,34 @@ namespace DeluxeCarsDesktop.ViewModel
 
             }
         }
-        private void RecalcularTotales()
+        private async Task ActualizarStockParaItemSeleccionadoAsync()
+        {
+            if (ItemSeleccionado is Producto p)
+            {
+                // Buscamos el stock y actualizamos la propiedad
+                StockDelItemSeleccionado = await _unitOfWork.Productos.GetCurrentStockAsync(p.Id);
+            }
+            else
+            {
+                // Si no es un producto (o es nulo), el stock es 0
+                StockDelItemSeleccionado = 0;
+            }
+        }
+        public void RecalcularTotales()
         {
             SubTotal = LineasDeFactura.Sum(d => d.Cantidad * d.PrecioUnitario);
-            TotalIVA = LineasDeFactura.Sum(d => d.Cantidad * d.PrecioUnitario * (d.IVA ?? 19) / 100); // Asumimos 19% si es nulo
-            Total = SubTotal + TotalIVA;
+            TotalDescuentos = LineasDeFactura.Sum(d => d.Descuento ?? 0m); // Sumamos todos los descuentos
+
+            var subTotalConDescuento = SubTotal - TotalDescuentos;
+
+            // El IVA se calcula sobre el precio DESPUÉS del descuento
+            TotalIVA = LineasDeFactura.Sum(d => (d.Cantidad * d.PrecioUnitario - (d.Descuento ?? 0m)) * (d.IVA ?? 19) / 100m);
+
+            Total = subTotalConDescuento + TotalIVA;
+
+            // Notificamos a la UI de todos los cambios
             OnPropertyChanged(nameof(SubTotal));
+            OnPropertyChanged(nameof(TotalDescuentos));
             OnPropertyChanged(nameof(TotalIVA));
             OnPropertyChanged(nameof(Total));
         }
@@ -385,7 +406,13 @@ namespace DeluxeCarsDesktop.ViewModel
                 return;
             }
 
-            // 2. Llenar la cabecera de la factura también se queda igual.
+            // --- LÓGICA DE CÁLCULO Y ASIGNACIÓN ---
+            // Calculamos los totales una última vez con los ítems de la lista.
+            _facturaEnProgreso.SubTotal = LineasDeFactura.Sum(d => d.SubTotalLinea);
+            _facturaEnProgreso.TotalIVA = LineasDeFactura.Sum(d => d.SubTotalLinea * ((d.IVA ?? 19) / 100));
+            _facturaEnProgreso.Total = _facturaEnProgreso.SubTotal + _facturaEnProgreso.TotalIVA;
+
+            // Asignamos el resto de los datos
             _facturaEnProgreso.IdCliente = ClienteSeleccionado.Id;
             _facturaEnProgreso.IdMetodoPago = MetodoPagoSeleccionado.Id;
             _facturaEnProgreso.FechaEmision = DateTime.Now;
@@ -479,6 +506,10 @@ namespace DeluxeCarsDesktop.ViewModel
             }
         }
 
+        public void LoadWithParameter(int parameter)
+        {
+            this.ClienteIdToLoad = parameter;
+        }
     }    
 }
 

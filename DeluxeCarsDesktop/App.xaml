@@ -22,6 +22,8 @@
                 <ResourceDictionary Source="/Styles/UIColors.xaml"/>
                 <ResourceDictionary Source="/Styles/ButtonStyle.xaml"/>
                 <ResourceDictionary Source="/Styles/LoginStyles.xaml"/>
+                <ResourceDictionary Source="/Styles/StandardControls.xaml"/>
+                <ResourceDictionary Source="/Styles/StandardDataGrid.xaml"/>
                 
 
                 <ResourceDictionary Source="/Styles/NotificationStyles.xaml"/>
@@ -64,10 +66,10 @@
             </Style>
 
             <Style x:Key="SecondaryTextStyle" TargetType="TextBlock">
-                <Setter Property="FontFamily" Value="{StaticResource Font.SourceSans3}" />
+                <Setter Property="FontFamily" Value="{StaticResource Font.Poppins}" />
                 <Setter Property="FontWeight" Value="Regular" />
-                <Setter Property="FontSize" Value="14" />
-                <Setter Property="Foreground" Value="#8892B0" />
+                <Setter Property="FontSize" Value="18" />
+                <Setter Property="Foreground" Value="{StaticResource Brush.Neutral.WhitePure}" />
             </Style>
 
         </ResourceDictionary>

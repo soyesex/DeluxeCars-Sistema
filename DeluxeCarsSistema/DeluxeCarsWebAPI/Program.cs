@@ -1,3 +1,5 @@
+
+using DeluxeCarsWebAPI.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -6,6 +8,27 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+
+builder.Services.AddRazorPages(); // O AddControllersWithViews() para MVC
+
+// --- REGISTRAR NUESTRO API CLIENT ---
+builder.Services.AddHttpClient<IApiClient, ApiClient>(client =>
+{
+    // Leemos la URL base desde appsettings.json
+    string baseUrl = builder.Configuration["WebApiBaseUrl"]
+        ?? throw new InvalidOperationException("La URL de la WebAPI no está configurada en appsettings.json");
+
+    client.BaseAddress = new Uri(baseUrl);
+});
+
+// 1. Registra el DbContext, apuntando a tu cadena de conexión en appsettings.json
+//builder.Services.AddDbContext<ApplicationDbContext>(options =>
+//    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+//// 2. Registra la Unit of Work para que pueda ser inyectada en los controladores
+//builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
+
 
 var app = builder.Build();
 
@@ -17,9 +40,14 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapRazorPages();
 
 app.Run();
