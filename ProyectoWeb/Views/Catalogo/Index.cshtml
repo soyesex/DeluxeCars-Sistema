@@ -8,25 +8,36 @@
 }
 
 
-<div class="container-fluid catalog-header text-center mb-5">
+<div class="container-fluid catalog-header text-center mb-5 py-3">
     <h1 class="display-4 fw-bold" data-aos="fade-up">Nuestro Catálogo de Autopartes</h1>
     <p class="lead text-white-50" data-aos="fade-up" data-aos-delay="150">Encuentra la pieza de alta calidad que tu vehículo necesita.</p>
 </div>
 
-<div class="container my-5">
     <div class="row">
+
+
 
         <div class="col-lg-3" data-aos="fade-right">
             <aside class="filter-sidebar">
                 <form asp-action="Index" asp-controller="Catalogo" method="get">
 
                     <div class="filter-widget">
+                        <h5 class="widget-title">Buscar Producto</h5>
+                        <div class="search-wrapper">
+                        <input type="text" name="terminoBusqueda" class="search-input searchproduct" placeholder="Nombre, marca, OEM..." value="@ViewData["BusquedaActual"]" />
+                            <button type="submit" class="search-button" title="Buscar">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="filter-widget">
                         <h5 class="widget-title">Ordenar por</h5>
                         <select name="orden" class="form-select" onchange="this.form.submit()">
-                            <option value="relevancia" selected="@(ordenActual == "relevancia")">Relevancia</option>
-                            <option value="precio-asc" selected="@(ordenActual == "precio-asc")">Precio: Menor a Mayor</option>
-                            <option value="precio-desc" selected="@(ordenActual == "precio-desc")">Precio: Mayor a Menor</option>
-                            <option value="nombre-asc" selected="@(ordenActual == "nombre-asc")">Nombre: A-Z</option>
+                            <option class="itemsOrder" value="relevancia" selected="@(ordenActual == "relevancia")">Relevancia</option>
+                            <option class="itemsOrder" value="precio-asc" selected="@(ordenActual == "precio-asc")">Precio: Menor a Mayor</option>
+                            <option class="itemsOrder"  value="precio-desc" selected="@(ordenActual == "precio-desc")">Precio: Mayor a Menor</option>
+                            <option class="itemsOrder" value="nombre-asc" selected="@(ordenActual == "nombre-asc")">Nombre: A-Z</option>
                         </select>
                     </div>
 
@@ -67,7 +78,6 @@
             }
         </div>
     </div>
-</div>
 <style>
     /* --- 1. Estilos Generales y Encabezado --- */
     .catalog-header h1 {
@@ -161,6 +171,122 @@
             border-color: var(--color-primario, #E53559);
         }
 
+    /* --- ESTILO PARA EL BUSCADOR DEL CATÁLOGO --- */
+
+    .search-form-container {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .search-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 600px; /* Ancho del buscador */
+        display: flex;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9CA3AF; /* Color gris para el icono */
+        font-size: 1.1rem;
+    }
+
+    .search-input {
+        flex-grow: 1; /* El input ocupa todo el espacio disponible */
+        padding: 14px 20px 14px 50px; /* Padding izquierdo para no solapar el icono */
+        font-size: 1rem;
+        color: #FFFFFF;
+        background-color: #1A1A1A; /* Fondo oscuro */
+        border: 1px solid #4D4D4D;
+        border-radius: 50px 0 0 50px; /* Bordes redondeados a la izquierda */
+        transition: all 0.2s ease-in-out;
+    }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #FF4D4D; /* Borde rojo al seleccionar */
+            box-shadow: 0 0 0 3px rgba(255, 77, 77, 0.4);
+            background-color: #333333;
+        }
+
+    .search-button {
+        padding: 14px 28px;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #FFFFFF;
+        text-align: center;
+        background-color: #FF4D4D; /* Rojo sólido */
+        border: 2px solid #FF4D4D;
+        border-radius: 0 50px 50px 0; /* Bordes redondeados a la derecha */
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .search-button:hover {
+            background-color: #CC0000; /* Rojo más oscuro */
+            border-color: #CC0000;
+        }
+
+    /* --- ESTILO PARA EL BUSCADOR DENTRO DEL WIDGET --- */
+    .search-wrapper {
+        position: relative;
+        width: 100%;
+        display: flex;
+    }
+
+    .search-input {
+        flex-grow: 1;
+        padding: 0.75rem 1.5rem 0.75rem 1rem;
+        font-size: 1rem;
+        color: var(--color-texto-principal);
+        background-color: rgba(255,255,255,0.05); /* Mismo fondo que el dropdown */
+        border: 1px solid var(--color-borde-oscuro);
+        border-radius: 8px 0 0 8px; /* Bordes redondeados a la izquierda */
+        transition: all 0.2s ease-in-out;
+        -webkit-appearance: none; /* Quita estilos por defecto en iOS */
+    }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--color-primario);
+            background-color: rgba(0,0,0,0.1);
+            box-shadow: 0 0 0 0.25rem rgba(var(--bs-danger-rgb), .25);
+        }
+
+    .search-button {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        color: #FFFFFF;
+        background-color: var(--color-primario); /* Color rojo principal */
+        border: 1px solid var(--color-primario);
+        border-radius: 0 8px 8px 0; /* Bordes redondeados a la derecha */
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .search-button:hover {
+            background-color: #CC0000; /* Rojo más oscuro */
+            border-color: #CC0000;
+        }
+
+    /* Ajuste para que los botones de categoría parezcan links */
+    .filter-item {
+        background: none;
+        border: none;
+        width: 100%;
+        text-align: left;
+    }
     /* ... (El resto de los estilos para .product-card que te di antes son correctos) ... */
 
+    .searchproduct {
+        width:5rem
+    }
+
+    .itemsOrder {
+        color:black
+    }
 </style>

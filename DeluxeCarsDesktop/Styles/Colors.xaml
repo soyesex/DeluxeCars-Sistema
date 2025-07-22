@@ -5,6 +5,9 @@
 
     <SolidColorBrush x:Key="Brush.Accent.DestructiveRed.Transparent" Color="#4DD72638"/>
 
+    <SolidColorBrush x:Key="Brush.Status.Green" Color="#2ECC71"/>
+    <SolidColorBrush x:Key="Brush.Status.Red" Color="#E74C3C"/>
+
     <Color x:Key="Color.Brand.NavyDark">#061229</Color>
     <Color x:Key="Color.Brand.NavyDeep">#0D2149</Color>
     <Color x:Key="Color.Brand.CharcoalDark">#0A192F</Color>
@@ -48,6 +51,12 @@
     <SolidColorBrush x:Key="Brush.Accent.ActionPurpleDeep" Color="{StaticResource Color.Accent.ActionPurpleDeep}"/>
 
     <SolidColorBrush x:Key="Brush.Menu.GreenDeep" Color="{StaticResource Color.Menu.GreenDeep}"/>
+    <Color x:Key="Color.Cafe.TierraSiena">#8C5E4A</Color>
+
+    <SolidColorBrush x:Key="Brush.Cafe.TierraSiena" Color="{StaticResource Color.Cafe.TierraSiena}"/>
+    <Color x:Key="Color.Crema.MarfilClaro">#EFEBE2</Color>
+
+    <SolidColorBrush x:Key="Brush.Crema.MarfilClaro" Color="{StaticResource Color.Crema.MarfilClaro}"/>
 
     <SolidColorBrush x:Key="Brush.Brand.NavyDark" Color="{StaticResource Color.Brand.NavyDark}"/>
     <SolidColorBrush x:Key="Brush.Brand.NavyDeep" Color="{StaticResource Color.Brand.NavyDeep}"/>

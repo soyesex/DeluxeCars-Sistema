@@ -17,7 +17,7 @@ using System.Windows.Input;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
-    public class CatalogoViewModel : ViewModelBase, IAsyncLoadable
+    public class CatalogoViewModel : PaginatedViewModel<ProductoDisplayViewModel>,       IAsyncLoadable
     {
         // --- Dependencias ---
         private readonly IUnitOfWork _unitOfWork;
@@ -33,8 +33,11 @@ namespace DeluxeCarsDesktop.ViewModel
             get => _searchText;
             set
             {
-                SetProperty(ref _searchText, value);
-                FiltrarProductos();
+                // CAMBIO: Usar SetPropertyAndCheck y llamar al método correcto de la clase base
+                if (SetPropertyAndCheck(ref _searchText, value))
+                {
+                    ApplyFilterAndResetPage();
+                }
             }
         }
         private string _cambiarEstadoButtonText = "Desactivar";
@@ -47,59 +50,48 @@ namespace DeluxeCarsDesktop.ViewModel
         public Categoria CategoriaFiltroSeleccionada
         {
             get => _categoriaFiltroSeleccionada;
-            set { SetProperty(ref _categoriaFiltroSeleccionada, value); FiltrarProductos(); }
+            set
+            {
+                // CAMBIO: Usar SetPropertyAndCheck y llamar al método correcto
+                if (SetPropertyAndCheck(ref _categoriaFiltroSeleccionada, value))
+                {
+                    ApplyFilterAndResetPage();
+                }
+            }
         }
-
-        public ObservableCollection<string> StockStatusOptions { get; private set; }
-        private string _stockStatusFiltroSeleccionado;
-        public string StockStatusFiltroSeleccionado
-        {
-            get => _stockStatusFiltroSeleccionado;
-            set { SetProperty(ref _stockStatusFiltroSeleccionado, value); FiltrarProductos(); }
-        }
-
-        // --- Propiedades para el DataGrid y la Selección ---
-        public ObservableCollection<ProductoDisplayViewModel> Productos { get; private set; }
-        public ObservableCollection<Categoria> CategoriasDisponibles { get; private set; }
-        public ObservableCollection<ColumnViewModel> Columns { get; }
-
         private ProductoDisplayViewModel _productoSeleccionado;
         public ProductoDisplayViewModel ProductoSeleccionado
         {
             get => _productoSeleccionado;
             set
             {
-                SetProperty(ref _productoSeleccionado, value);
-                (EditarProductoCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
-                (CambiarEstadoProductoCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
-
-                // --- LÍNEAS A AÑADIR ---
-                if (value != null)
+                if (SetPropertyAndCheck(ref _productoSeleccionado, value))
                 {
-                    // Si el producto está activo, el botón dirá "Desactivar", si no, "Activar"
-                    CambiarEstadoButtonText = value.Estado ? "Desactivar" : "Activar";
-                }
-                else
-                {
-                    // Texto por defecto si no hay nada seleccionado
-                    CambiarEstadoButtonText = "Desactivar";
+                    (EditarProductoCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+                    (CambiarEstadoProductoCommand as ViewModelCommand)?.RaiseCanExecuteChanged();
+                    CambiarEstadoButtonText = value?.Estado == true ? "Desactivar" : "Activar";
                 }
             }
         }
 
-        private int _numeroDePagina = 1;
-        public int NumeroDePagina
+        private string _stockStatusFiltroSeleccionado;
+        public string StockStatusFiltroSeleccionado
         {
-            get => _numeroDePagina;
-            set { SetProperty(ref _numeroDePagina, value); FiltrarProductos(); }
+            get => _stockStatusFiltroSeleccionado;
+            set
+            {
+                // CAMBIO: Usar SetPropertyAndCheck y llamar al método correcto
+                if (SetPropertyAndCheck(ref _stockStatusFiltroSeleccionado, value))
+                {
+                    ApplyFilterAndResetPage();
+                }
+            }
         }
+        public ObservableCollection<ProductoDisplayViewModel> Productos => Items;
 
-        private int _tamañoDePagina = 15; // Mostrar 15 items por página
-        public int TamañoDePagina
-        {
-            get => _tamañoDePagina;
-            set { SetProperty(ref _tamañoDePagina, value); FiltrarProductos(); }
-        }
+        // --- Propiedades para el DataGrid y la Selección ---
+        public ObservableCollection<Categoria> CategoriasDisponibles { get; private set; }
+        public ObservableCollection<ColumnViewModel> Columns { get; }
 
         private int _totalItems;
         public int TotalItems
@@ -108,6 +100,7 @@ namespace DeluxeCarsDesktop.ViewModel
             private set { SetProperty(ref _totalItems, value); OnPropertyChanged(nameof(TotalPaginas)); }
         }
 
+        public ObservableCollection<string> StockStatusOptions { get; }
         public int TotalPaginas => (int)Math.Ceiling((double)TotalItems / TamañoDePagina);
 
         private decimal _valorTotalInventario;
@@ -131,6 +124,7 @@ namespace DeluxeCarsDesktop.ViewModel
             set => SetProperty(ref _productosBajoStock, value);
         }
 
+
         public ICommand ExportarExcelCommand { get; }
 
         // --- Comandos ---
@@ -139,8 +133,6 @@ namespace DeluxeCarsDesktop.ViewModel
         public ICommand CambiarEstadoProductoCommand { get; }
         public ICommand LimpiarFiltrosCommand { get; }
         public ICommand AjusteManualCommand { get; }
-        public ICommand IrAPaginaSiguienteCommand { get; }
-        public ICommand IrAPaginaAnteriorCommand { get; }
 
         // --- Constructor ---
         public CatalogoViewModel(IUnitOfWork unitOfWork, INavigationService navigationService, IStockAlertService stockAlertService, INotificationService notificationService)
@@ -150,8 +142,10 @@ namespace DeluxeCarsDesktop.ViewModel
             _stockAlertService = stockAlertService;
             _notificationService = notificationService;
 
-            Productos = new ObservableCollection<ProductoDisplayViewModel>();
+            // CAMBIO: Inicializar TODAS las colecciones
             CategoriasDisponibles = new ObservableCollection<Categoria>();
+            StockStatusOptions = new ObservableCollection<string> { "Todos", "En Stock", "Agotado", "Bajo Stock" };
+            Columns = new ObservableCollection<ColumnViewModel> { /* ... tus columnas ... */ };
 
             // Opciones para el filtro de Stock
             StockStatusOptions = new ObservableCollection<string> { "Todos", "En Stock", "Agotado", "Bajo Stock" };
@@ -161,22 +155,8 @@ namespace DeluxeCarsDesktop.ViewModel
             CambiarEstadoProductoCommand = new ViewModelCommand(async p => await ExecuteCambiarEstadoProductoCommand(), p => CanExecuteEditDelete());
             LimpiarFiltrosCommand = new ViewModelCommand(ExecuteLimpiarFiltros);
             AjusteManualCommand = new ViewModelCommand(async p => await ExecuteAjusteManualCommand());
-            IrAPaginaSiguienteCommand = new ViewModelCommand(p => NumeroDePagina++, p => NumeroDePagina < TotalPaginas);
-            IrAPaginaAnteriorCommand = new ViewModelCommand(p => NumeroDePagina--, p => NumeroDePagina > 1);
             ExportarExcelCommand = new ViewModelCommand(async p => await ExecuteExportarExcelCommand()); // ✅ INICIALIZACIÓN
             _notificationService = notificationService;
-
-            Columns = new ObservableCollection<ColumnViewModel>
-            {
-                new ColumnViewModel { Header = "ID" },
-                new ColumnViewModel { Header = "Nombre" },
-                new ColumnViewModel { Header = "OEM" },
-                new ColumnViewModel { Header = "Categoría" },
-                new ColumnViewModel { Header = "Precio" },
-                new ColumnViewModel { Header = "Proveedor" },
-                new ColumnViewModel { Header = "Stock" },
-                new ColumnViewModel { Header = "Activo" }
-            };
         }
 
         // --- Lógica Principal ---
@@ -185,9 +165,28 @@ namespace DeluxeCarsDesktop.ViewModel
         {
             await LoadCategoriasAsync();
             await LoadDashboardDataAsync();
-            ExecuteLimpiarFiltros(null); // Limpia los filtros y carga los productos iniciales
+            // CAMBIO: Solo llamamos a LimpiarFiltros para la carga inicial.
+            ExecuteLimpiarFiltros(null);
         }
+        protected override async Task LoadItemsAsync()
+        {
+            var criteria = new ProductSearchCriteria
+            {
+                UniversalSearchText = this.SearchText,
+                CategoryId = this.CategoriaFiltroSeleccionada?.Id == 0 ? null : this.CategoriaFiltroSeleccionada?.Id,
+                StockStatus = this.StockStatusFiltroSeleccionado,
+                PageNumber = this.NumeroDePagina,
+                PageSize = this.TamañoDePagina
+            };
 
+            var pagedResult = await _unitOfWork.Productos.SearchAsync(criteria);
+
+            TotalItems = pagedResult.TotalCount;
+            foreach (var dto in pagedResult.Items)
+            {
+                Items.Add(new ProductoDisplayViewModel(dto));
+            }
+        }
         private async Task LoadCategoriasAsync()
         {
             try
@@ -349,28 +348,23 @@ namespace DeluxeCarsDesktop.ViewModel
         }
         private void ExecuteLimpiarFiltros(object obj)
         {
-            // 1. Desactivamos temporalmente el filtrado automático de los setters
-            //    para evitar múltiples llamadas innecesarias.
-            _isSearching = true;
-
-            // 2. Reseteamos todos los filtros a su estado inicial.
-            //    Al usar el campo privado `_searchText`, evitamos disparar el setter y el filtro.
+            // CAMBIO: No necesitamos el flag _isSearching
             _searchText = string.Empty;
-            OnPropertyChanged(nameof(SearchText)); // Notificamos a la UI que el texto cambió.
+            _categoriaFiltroSeleccionada = CategoriasDisponibles.FirstOrDefault();
+            _stockStatusFiltroSeleccionado = StockStatusOptions.FirstOrDefault();
 
-            CategoriaFiltroSeleccionada = CategoriasDisponibles.FirstOrDefault();
-            StockStatusFiltroSeleccionado = StockStatusOptions.FirstOrDefault();
+            OnPropertyChanged(nameof(SearchText));
+            OnPropertyChanged(nameof(CategoriaFiltroSeleccionada));
+            OnPropertyChanged(nameof(StockStatusFiltroSeleccionado));
 
-            // 3. Reactivamos el filtrado y ejecutamos el filtro UNA SOLA VEZ.
-            _isSearching = false;
-            FiltrarProductos();
+            ApplyFilterAndResetPage();
         }
 
         private async Task ExecuteAjusteManualCommand()
         {
             await _navigationService.OpenFormWindow(FormType.AjusteInventario, 0);
             // Refrescamos la lista principal después de cerrar el diálogo
-            FiltrarProductos();
+            ApplyFilterAndResetPage();
         }
 
         private bool CanExecuteEditDelete() => ProductoSeleccionado != null;
@@ -378,14 +372,14 @@ namespace DeluxeCarsDesktop.ViewModel
         private async Task ExecuteNuevoProductoCommand()
         {
             await _navigationService.OpenFormWindow(FormType.Producto, 0);
-            FiltrarProductos();
+            ApplyFilterAndResetPage();
         }
 
         private async Task ExecuteEditarProductoCommand()
         {
             // CORRECCIÓN: Usar el Id directamente del ViewModel seleccionado
             await _navigationService.OpenFormWindow(FormType.Producto, ProductoSeleccionado.Id);
-            FiltrarProductos();
+            ApplyFilterAndResetPage();
         }
 
         private async Task ExecuteCambiarEstadoProductoCommand()
@@ -433,6 +427,8 @@ namespace DeluxeCarsDesktop.ViewModel
                 // Revertir el cambio en el objeto si falla el guardado
                 productoEnDB.Estado = !productoEnDB.Estado;
             }
+
+            ApplyFilterAndResetPage();
         }
     }
 }

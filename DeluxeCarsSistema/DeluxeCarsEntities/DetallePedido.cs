@@ -18,7 +18,6 @@ namespace DeluxeCarsEntities
         public decimal PrecioUnitario { get; set; }
         public decimal? Descuento { get; set; } // Nullable
         public decimal? IVA { get; set; } // Nullable
-        public decimal Total { get; set; } // Columna calculada
         [NotMapped]
         public decimal SubtotalPreview => Cantidad * PrecioUnitario;
         /// <summary>

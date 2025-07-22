@@ -24,8 +24,44 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        
-        
+
+        <Style x:Key="KpiCardStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="20 5"/>
+            <Setter Property="Margin" Value="10"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect ShadowDepth="2" Color="#000000" Opacity="0.15" BlurRadius="15"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <!-- Al pasar el mouse, el fondo cambia al color definido en el Tag -->
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{Binding Path=Tag, RelativeSource={RelativeSource Self}}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Estilo para el valor numérico grande -->
+        <Style x:Key="KpiValueStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="40"/>
+            <Setter Property="FontFamily" Value="{StaticResource Font.Poppins}"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+        </Style>
+
+        <!-- Estilo para el título descriptivo de la tarjeta -->
+        <Style x:Key="KpiTitleStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontFamily" Value="{StaticResource Font.Poppins}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Opacity" Value="0.8"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Margin" Value="0,2,0,0"/>
+        </Style>
+
         <SolidColorBrush x:Key="CardBackground" Color="#FFFFFF"/>
         <SolidColorBrush x:Key="TextColor" Color="#34495E"/>
         <SolidColorBrush x:Key="MutedTextColor" Color="#7F8C8D"/>
@@ -33,7 +69,7 @@
 
 
         <Style x:Key="CardBorderStyle" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource CardBackground}"/>
+            <Setter Property="Background" Value="{StaticResource Brush.Menu.BlueSky }"/>
             <Setter Property="CornerRadius" Value="10"/>
             <Setter Property="Padding" Value="20"/>
             <Setter Property="Margin" Value="10"/>
@@ -47,14 +83,14 @@
         <Style x:Key="CardTitleStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="16"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="{StaticResource MutedTextColor}"/>
+            <Setter Property="Foreground" Value="{StaticResource Brush.Neutral.WhitePure}"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
         </Style>
 
         <Style x:Key="CardMetricStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="38"/>
             <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Foreground" Value="{StaticResource TextColor}"/>
+            <Setter Property="Foreground" Value="{StaticResource Brush.Neutral.WhitePure}"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="Margin" Value="5,0,0,5"/>
         </Style>
@@ -62,7 +98,7 @@
         <Style x:Key="CardIconStyle" TargetType="fa:IconImage">
             <Setter Property="Height" Value="30"/>
             <Setter Property="Width" Value="30"/>
-            <Setter Property="Foreground" Value="{StaticResource MutedTextColor}"/>
+            <Setter Property="Foreground" Value="{StaticResource Brush.Neutral.WhitePure}"/>
             <Setter Property="Opacity" Value="0.7"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="Margin" Value="0,10,0,0"/>
@@ -74,80 +110,131 @@
             <Setter Property="Foreground" Value="{StaticResource TextColor}"/>
         </Style>
     </UserControl.Resources>
-    
-    <Grid Margin="20">
+
+    <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <UniformGrid Grid.Row="0" Rows="1" Columns="4" Margin="0 0 0 20">
+        <!-- Fila de Tarjetas KPI (Refactorizada) -->
+        <UniformGrid Grid.Row="0" Rows="1" Columns="4">
 
+            <!-- Card 1: Ventas de Hoy -->
             <Button Style="{StaticResource ClickableCardButtonStyle}" Command="{Binding NavigateToVentasCommand}">
-                <Border Style="{StaticResource CardBorderStyle}">
+                <Border Style="{StaticResource KpiCardStyle}" 
+                        Background="#27AE60" 
+                        Tag="#2ECC71">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                            <TextBlock Style="{StaticResource CardTitleStyle}" Text="Ventas de Hoy"/>
-                            <TextBlock Text="{Binding VentasDeHoy, StringFormat=C, ConverterCulture=es-CO}" Style="{StaticResource CardMetricStyle}" Foreground="#2ECC71"/>
-                        </StackPanel>
-                        <fa:IconImage Grid.Column="1" Icon="CashRegister" Style="{StaticResource CardIconStyle}" Width="40" Height="40"/>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Column="0" VerticalAlignment="Center">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0"  Text="{Binding VentasDeHoy, StringFormat=C, ConverterCulture=es-CO}" FontSize="30" Style="{StaticResource KpiValueStyle}"/>
+                            <TextBlock Grid.Row="1" Text="Ventas de Hoy" Style="{StaticResource KpiTitleStyle}"/>
+                        </Grid>
+                        <Border Grid.Column="1" Grid.Row="1" Width="40" Height="40" Background="Transparent" HorizontalAlignment="Right" Margin="0 0 0 10">
+                            <fa:IconImage Icon="CashRegister" Foreground="White" Width="40" Height="40"/>
+                        </Border>
                     </Grid>
                 </Border>
             </Button>
 
+            <!-- Card 2: Pedidos Pendientes -->
             <Button Style="{StaticResource ClickableCardButtonStyle}" Command="{Binding NavigateToPedidosCommand}">
-                <Border Style="{StaticResource CardBorderStyle}">
+                <Border Style="{StaticResource KpiCardStyle}" 
+                        Background="#2980B9" 
+                        Tag="#3498DB">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <fa:IconImage Grid.Column="0" Icon="TruckFast" Style="{StaticResource CardIconStyle}" Width="40" Height="40"/>
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <TextBlock Style="{StaticResource CardTitleStyle}" Text="Pedidos Pendientes"/>
-                            <TextBlock Text="{Binding PedidosPendientes}" Style="{StaticResource CardMetricStyle}" Foreground="#3498DB"/>
-                        </StackPanel>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Column="0" VerticalAlignment="Center">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="{Binding PedidosPendientes}" Margin="0 15 0 0" Style="{StaticResource KpiValueStyle}"/>
+                            <TextBlock Grid.Row="1" Text="Pedidos Pendientes" Margin="0 -5 0 0" TextWrapping="Wrap" Style="{StaticResource KpiTitleStyle}"/>
+                        </Grid>
+                        <Border Grid.Column="1" Grid.Row="0" Width="60" Height="60" CornerRadius="30" Background="Transparent" 
+                                 HorizontalAlignment="Right">
+                            <fa:IconImage Icon="TruckFast" Foreground="White" Width="60" Height="60" VerticalAlignment="Top"/>
+                        </Border>
                     </Grid>
                 </Border>
             </Button>
 
+            <!-- Card 3: Productos en Inventario -->
             <Button Style="{StaticResource ClickableCardButtonStyle}" Command="{Binding NavigateToInventarioCommand}">
-                <Border Style="{StaticResource CardBorderStyle}">
+                <Border Style="{StaticResource KpiCardStyle}" 
+                        Background="#8E44AD" 
+                        Tag="#9B59B6">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                            <TextBlock Style="{StaticResource CardTitleStyle}" Text="Productos en Inventario"/>
-                            <TextBlock Text="{Binding ProductosEnInventario}" Style="{StaticResource CardMetricStyle}"/>
+                            <TextBlock Text="{Binding ProductosEnInventario}" Style="{StaticResource KpiValueStyle}"/>
+                            <TextBlock Text="Inventario" Style="{StaticResource KpiTitleStyle}"/>
                         </StackPanel>
-                        <fa:IconImage Grid.Column="1" Icon="BoxOpen" Style="{StaticResource CardIconStyle}" Width="40" Height="40"/>
+                        <Border Grid.Column="1" Width="60" Height="60" CornerRadius="30" Background="Transparent" HorizontalAlignment="Right">
+                            <fa:IconImage Icon="BoxOpen" Foreground="White" Width="60" Height="60"/>
+                        </Border>
                     </Grid>
                 </Border>
             </Button>
 
+            <!-- Card 4: Productos con Bajo Stock -->
             <Button Style="{StaticResource ClickableCardButtonStyle}" Command="{Binding NavigateToReportesCommand}">
-                <Border Style="{StaticResource CardBorderStyle}">
+                <Border Style="{StaticResource KpiCardStyle}" 
+                        Background="#C0392B" 
+                        Tag="#E74C3C">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <fa:IconImage Grid.Column="0" Icon="ExclamationTriangle" Style="{StaticResource CardIconStyle}" Width="40" Height="40"/>
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <TextBlock Style="{StaticResource CardTitleStyle}" Text="Productos con Bajo Stock"/>
-                            <TextBlock Text="{Binding ProductosBajoStock}" Style="{StaticResource CardMetricStyle}" Foreground="#E74C3C"/>
-                        </StackPanel>
+                        
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        
+                        <Grid Grid.Column="1" VerticalAlignment="Center" >
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Margin="0 15 0 0" HorizontalAlignment="Center" Text="{Binding ProductosBajoStock}" Style="{StaticResource KpiValueStyle}"/>
+                            <TextBlock Grid.Row="1" Text="Bajo Stock" HorizontalAlignment="Left" VerticalAlignment="Top" Style="{StaticResource KpiTitleStyle}"/>
+                        </Grid>
+                        <Border Grid.Column="0" Width="60" Margin="0 25 0 0" Height="60" CornerRadius="30" Background="Transparent" VerticalAlignment="Center" HorizontalAlignment="Left">
+                            <fa:IconImage Icon="ExclamationTriangle" Foreground="White" Width="55" Height="55"/>
+                        </Border>
                     </Grid>
                 </Border>
             </Button>
 
-        </UniformGrid>
+        </UniformGrid> 
 
         <Border Grid.Row="1" Style="{StaticResource CardBorderStyle}" Padding="20">
             <Grid>
@@ -157,20 +244,22 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <Button Grid.Column="0" 
+                <Button Grid.Column="0" Margin="0 0 2 0"
             Command="{Binding PreviousChartCommand}" 
-            Style="{StaticResource CarouselButtonStyle}" 
+            Style="{StaticResource CarouselButtonStyle}"  Background="Transparent"
+                        Height="40"
             HorizontalAlignment="Left">
                     <fa:IconImage Icon="ChevronLeft" Style="{StaticResource CarouselIconStyle}"/>
                 </Button>
 
                 <Grid Grid.Column="1">
                     <TextBlock Text="{Binding CurrentChart.Title}"
-                   FontSize="18"
-                   FontWeight="Bold"
-                   Foreground="{StaticResource TextColor}"
+                   FontSize="25"
+                               FontFamily="{StaticResource Font.Poppins}"
+                   FontWeight="Heavy"   
+                   Foreground="{StaticResource Brush.Neutral.WhitePure}"
                    HorizontalAlignment="Center"
-                   Margin="0,15,0,0"
+                   Margin="0,2,0,0"
                    VerticalAlignment="Top" />
 
                     <Grid x:Name="ChartContainer" Margin="0,50,0,10">
@@ -193,15 +282,17 @@
                                 XAxes="{Binding CurrentChart.XAxes}"
                                 YAxes="{Binding CurrentChart.YAxes}"
                                 LegendPosition="Bottom"
+                                            FontFamily="{StaticResource Font.Poppins}"
                                 LegendTextPaint="{Binding Foreground, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                 TooltipTextPaint="{Binding Foreground, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                 TooltipBackgroundPaint="{Binding Background, RelativeSource={RelativeSource AncestorType=Border}}"/>
                     </Grid>
                 </Grid>
 
-                <Button Grid.Column="2" 
-            Command="{Binding NextChartCommand}" 
+                <Button Grid.Column="2" Margin="2 0 0 0"
+            Command="{Binding NextChartCommand}" Background="Transparent"
             Style="{StaticResource CarouselButtonStyle}" 
+                        Height="40"
             HorizontalAlignment="Right">
                     <fa:IconImage Icon="ChevronRight" Style="{StaticResource CarouselIconStyle}"/>
                 </Button>

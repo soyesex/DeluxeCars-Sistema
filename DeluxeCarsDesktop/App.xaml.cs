@@ -126,6 +126,7 @@ public partial class App : Application
         services.AddTransient<NotaDeCreditoViewModel>();
         services.AddTransient<ConfiguracionViewModel>();
         services.AddTransient<AjusteInventarioViewModel>();
+        services.AddTransient<FacturaDetalleViewModel>();
 
         services.AddSingleton<ISnackbarMessageQueue>(new SnackbarMessageQueue());
 

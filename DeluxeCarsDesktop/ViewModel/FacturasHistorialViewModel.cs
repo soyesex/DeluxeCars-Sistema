@@ -4,9 +4,12 @@ using DeluxeCarsDesktop.Services;
 using DeluxeCarsDesktop.Utils;
 using DeluxeCarsEntities;
 using DeluxeCarsShared.Dtos;
+using Microsoft.Win32;
+using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,14 +26,74 @@ namespace DeluxeCarsDesktop.ViewModel
 
         // --- Propiedades para Filtros ---
         private string _searchText;
-        public string SearchText { get => _searchText; set => SetProperty(ref _searchText, value); }
+        public string SearchText { get => _searchText; set => SetProperty(ref _searchText, value); } // Lo dejamos así por ahora
 
-        public DateTime? FechaInicio { get; set; }
-        public DateTime? FechaFin { get; set; }
+        private DateTime? _fechaInicio;
+        public DateTime? FechaInicio
+        {
+            get => _fechaInicio;
+            set
+            {
+                if (SetPropertyAndCheck(ref _fechaInicio, value))
+                {
+                    // Si el valor cambió, aplicamos el filtro
+                    AplicarFiltrosCommand.Execute(null);
+                }
+            }
+        }
+
+        private DateTime? _fechaFin;
+        public DateTime? FechaFin
+        {
+            get => _fechaFin;
+            set
+            {
+                if (SetPropertyAndCheck(ref _fechaFin, value))
+                {
+                    AplicarFiltrosCommand.Execute(null);
+                }
+            }
+        }
         public ObservableCollection<Cliente> ClientesDisponibles { get; private set; }
-        public Cliente ClienteFiltro { get; set; }
-        public ObservableCollection<EstadoPagoFactura?> EstadosPago { get; }
-        public EstadoPagoFactura? EstadoPagoFiltro { get; set; }
+        public ObservableCollection<DisplayItem<EstadoPagoFactura?>> EstadosPago { get; }
+
+        private Cliente _clienteFiltro;
+        public Cliente ClienteFiltro
+        {
+            get => _clienteFiltro;
+            set
+            {
+                if (SetPropertyAndCheck(ref _clienteFiltro, value))
+                {
+                    AplicarFiltrosCommand.Execute(null);
+                }
+            }
+        }
+        private DisplayItem<EstadoPagoFactura?> _selectedEstadoPago;
+        public DisplayItem<EstadoPagoFactura?> SelectedEstadoPago
+        {
+            get => _selectedEstadoPago;
+            set
+            {
+                if (SetPropertyAndCheck(ref _selectedEstadoPago, value))
+                {
+                    // Cuando el item seleccionado cambia, actualizamos el valor del filtro real
+                    EstadoPagoFiltro = _selectedEstadoPago?.Value;
+                }
+            }
+        }
+        private EstadoPagoFactura? _estadoPagoFiltro;
+        public EstadoPagoFactura? EstadoPagoFiltro
+        {
+            get => _estadoPagoFiltro;
+            set
+            {
+                if (SetPropertyAndCheck(ref _estadoPagoFiltro, value))
+                {
+                    AplicarFiltrosCommand.Execute(null);
+                }
+            }
+        }
 
         // --- Colección de Datos y Selección ---
         private ObservableCollection<Factura> _facturas;
@@ -64,6 +127,8 @@ namespace DeluxeCarsDesktop.ViewModel
         public ICommand IrAPaginaSiguienteCommand { get; }
         public ICommand IrAPaginaAnteriorCommand { get; }
         public ICommand NuevaFacturaCommand { get; }
+        public ICommand ExportarExcelCommand { get; }
+
         public event Action OnRequestNuevaFactura;
 
         public FacturasHistorialViewModel(IUnitOfWork unitOfWork, INavigationService navigationService)
@@ -73,12 +138,22 @@ namespace DeluxeCarsDesktop.ViewModel
 
             Facturas = new ObservableCollection<Factura>();
             ClientesDisponibles = new ObservableCollection<Cliente>();
-            EstadosPago = new ObservableCollection<EstadoPagoFactura?> { null, EstadoPagoFactura.Pendiente, EstadoPagoFactura.Abonada, EstadoPagoFactura.Pagada };
+            EstadosPago = new ObservableCollection<DisplayItem<EstadoPagoFactura?>>
+            {
+                // Aquí puedes poner el texto que prefieras para la opción 'null'
+                new DisplayItem<EstadoPagoFactura?>  { Value = null, DisplayText = "Todos los Estados" },
+                new DisplayItem<EstadoPagoFactura?> { Value = EstadoPagoFactura.Pendiente, DisplayText = "Pendiente" },
+                new DisplayItem<EstadoPagoFactura?> { Value = EstadoPagoFactura.Abonada, DisplayText = "Abonada" },
+                new DisplayItem<EstadoPagoFactura?> { Value = EstadoPagoFactura.Pagada, DisplayText = "Pagada" },
+                new DisplayItem<EstadoPagoFactura?> { Value = EstadoPagoFactura.Anulada, DisplayText = "Anulada" }
+            };
+
+            SelectedEstadoPago = EstadosPago.FirstOrDefault();
 
             // --- Instanciación de Comandos Corregida ---
             AplicarFiltrosCommand = new ViewModelCommand(async _ => await AplicarFiltros());
             LimpiarFiltrosCommand = new ViewModelCommand(async _ => await ExecuteLimpiarFiltros());
-            VerDetallesCommand = new ViewModelCommand(ExecuteVerDetallesCommand, CanExecuteActions);
+            VerDetallesCommand = new ViewModelCommand(ExecuteVerDetalles, CanExecuteActions);
             AnularFacturaCommand = new ViewModelCommand(async _ => await ExecuteAnularFacturaCommand(), CanExecuteActions);
             RegistrarPagoCommand = new ViewModelCommand(async _ => await ExecuteRegistrarPago(), CanExecuteRegistrarPago);
             LiquidarCreditoCommand = new ViewModelCommand(async _ => await ExecuteLiquidarCredito(), CanExecuteLiquidarCredito);
@@ -86,6 +161,7 @@ namespace DeluxeCarsDesktop.ViewModel
 
             IrAPaginaSiguienteCommand = new ViewModelCommand(async _ => { if (NumeroDePagina < TotalPaginas) { NumeroDePagina++; await AplicarFiltros(); } }, _ => NumeroDePagina < TotalPaginas);
             IrAPaginaAnteriorCommand = new ViewModelCommand(async _ => { if (NumeroDePagina > 1) { NumeroDePagina--; await AplicarFiltros(); } }, _ => NumeroDePagina > 1);
+            ExportarExcelCommand = new ViewModelCommand(async _ => await ExecuteExportarFacturasExcelCommand());
         }
 
         public async Task LoadAsync()
@@ -107,6 +183,16 @@ namespace DeluxeCarsDesktop.ViewModel
             OnPropertyChanged(nameof(ClienteFiltro));
         }
 
+        private void ExecuteVerDetalles(object obj)
+        {
+            if (FacturaSeleccionada != null)
+            {
+                // Ya no mostramos un MessageBox.
+                // Usamos tu servicio para abrir el nuevo UserControl en la ventana genérica.
+                // Asumo que tu servicio puede tomar un ID como parámetro.
+                _navigationService.OpenFormWindow(FormType.FacturaDetalles, FacturaSeleccionada.Id);
+            }
+        }
         private async Task AplicarFiltros()
         {
             if (_isSearching) return;
@@ -159,7 +245,88 @@ namespace DeluxeCarsDesktop.ViewModel
 
             await AplicarFiltros();
         }
+        private async Task ExecuteExportarFacturasExcelCommand()
+        {
+            // 1. Obtenemos TODAS las facturas que coinciden con los filtros actuales, ignorando la paginación.
+            var exportCriteria = new FacturaSearchCriteria
+            {
+                SearchText = this.SearchText,
+                FechaInicio = this.FechaInicio,
+                FechaFin = this.FechaFin,
+                ClienteId = (this.ClienteFiltro?.Id > 0) ? this.ClienteFiltro.Id : null,
+                EstadoPago = this.EstadoPagoFiltro,
+                PageNumber = 1,
+                PageSize = int.MaxValue // Truco para obtener todos los registros
+            };
 
+            var pagedResult = await _unitOfWork.Facturas.SearchAsync(exportCriteria);
+            var facturasAExportar = pagedResult.Items;
+
+            if (!facturasAExportar.Any())
+            {
+                MessageBox.Show("No hay facturas para exportar con los filtros actuales.", "Información", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            // 2. Usar EPPlus para crear el archivo Excel
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+            using (var package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Historial de Ventas");
+
+                // Encabezados
+                worksheet.Cells[1, 1].Value = "N° Factura";
+                worksheet.Cells[1, 2].Value = "Fecha Emisión";
+                worksheet.Cells[1, 3].Value = "Cliente";
+                worksheet.Cells[1, 4].Value = "Total Factura";
+                worksheet.Cells[1, 5].Value = "Monto Abonado";
+                worksheet.Cells[1, 6].Value = "Saldo Pendiente";
+                worksheet.Cells[1, 7].Value = "Estado";
+                worksheet.Cells[1, 8].Value = "Observaciones";
+
+                // Datos
+                int row = 2;
+                foreach (var factura in facturasAExportar)
+                {
+                    worksheet.Cells[row, 1].Value = factura.NumeroFactura;
+                    worksheet.Cells[row, 2].Value = factura.FechaEmision;
+                    worksheet.Cells[row, 3].Value = factura.Cliente.Nombre;
+                    worksheet.Cells[row, 4].Value = factura.Total;
+                    worksheet.Cells[row, 5].Value = factura.MontoAbonado;
+                    worksheet.Cells[row, 6].Value = factura.SaldoPendiente;
+                    worksheet.Cells[row, 7].Value = factura.EstadoPago.ToString();
+                    worksheet.Cells[row, 8].Value = factura.Observaciones;
+                    row++;
+                }
+
+                // Formato y auto-ajuste de columnas
+                worksheet.Cells["A1:H1"].Style.Font.Bold = true;
+                worksheet.Cells["B:B"].Style.Numberformat.Format = "dd/mm/yyyy"; // Formato de fecha
+                worksheet.Cells["D:F"].Style.Numberformat.Format = "$ #,##0.00"; // Formato de moneda para varias columnas
+                worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
+
+                // 3. Guardar el archivo
+                var saveFileDialog = new SaveFileDialog
+                {
+                    FileName = $"HistorialVentas_DeluxeCars_{DateTime.Now:yyyyMMdd_HHmm}.xlsx",
+                    Filter = "Archivos de Excel (*.xlsx)|*.xlsx"
+                };
+
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    try
+                    {
+                        await package.SaveAsAsync(new FileInfo(saveFileDialog.FileName));
+                        MessageBox.Show("Exportación a Excel completada exitosamente.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Ocurrió un error al guardar el archivo: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+        }
         private void ActualizarEstadoComandos()
         {
             (VerDetallesCommand as ViewModelCommand)?.RaiseCanExecuteChanged();

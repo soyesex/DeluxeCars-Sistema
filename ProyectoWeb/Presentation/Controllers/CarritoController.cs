@@ -31,8 +31,14 @@ namespace Aplicacion.Presentation.Controllers
                 return Json(new { success = false, message = "La cantidad debe ser mayor a cero." });
             }
 
-            // 2. Usar await y llamar al método con sufijo Async
-            await _carritoService.AddItemAsync(productoId, cantidad);
+            // 1. Capturamos el resultado del servicio
+            var success = await _carritoService.AddItemAsync(productoId, cantidad);
+
+            // 2. Verificamos si la operación fue exitosa
+            if (!success)
+            {
+                return Json(new { success = false, message = "El producto no existe o no está disponible." });
+            }
 
             var carrito = _carritoService.GetCarrito();
             return Json(new { success = true, message = "¡Producto añadido al carrito!", itemCount = carrito.Items.Sum(i => i.Cantidad) });

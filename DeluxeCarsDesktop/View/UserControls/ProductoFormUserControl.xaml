@@ -8,171 +8,118 @@
              xmlns:converters="clr-namespace:DeluxeCarsDesktop.Converters"
              xmlns:behaviors="clr-namespace:DeluxeCarsDesktop.Behaviors"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             d:DesignHeight="600" d:DesignWidth="1000" MaxWidth="1000">
+             d:DesignHeight="700" d:DesignWidth="900">
 
     <UserControl.Resources>
         <converters:ImagePathConverter x:Key="ImagePathConverter"/>
     </UserControl.Resources>
+    <Grid Margin="5">
 
-    <!--<Grid Margin="25">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Column="0" Margin="0,0,30,0" VerticalAlignment="Top">
-            <Border BorderBrush="{StaticResource Border.Default}" BorderThickness="1" CornerRadius="8" Width="220" Height="220" Background="{StaticResource Background.Surface}">
-                <Image Source="{Binding ImagenUrl, Converter={StaticResource ImagePathConverter}}" Stretch="Uniform"/>
-            </Border>
-            <Button Content="Seleccionar Imagen..."
-                    Command="{Binding SeleccionarImagenCommand}"
-                    Style="{StaticResource MaterialDesignOutlinedButton}"
-                    Margin="0,15,0,0"/>
-            <Button Command="{Binding EliminarImagenCommand}"
-                    Style="{StaticResource MaterialDesignToolButton}"
-                    ToolTip="Eliminar Imagen"
-                    HorizontalAlignment="Right" Margin="0,10,97,0">
-                <fa:IconImage Icon="TrashCan" Foreground="{StaticResource Brush.Accent.DestructiveRed}"/>
-            </Button>
-        </StackPanel>
 
-        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
-            <StackPanel>
-                <TextBox Style="{StaticResource AppFormFieldStyle}"
-             Tag="Nombre del Producto"
-             Text="{Binding Nombre, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
-
-                <TextBox Style="{StaticResource AppFormFieldStyle}"
-             Tag="OEM / Referencia"
-             Text="{Binding OEM, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
-
-                <ComboBox Style="{StaticResource AppFormComboBoxStyle}"
-              Tag="Categoría"
-              ItemsSource="{Binding Categorias}" 
-              SelectedItem="{Binding CategoriaSeleccionada}"
-              DisplayMemberPath="Nombre"/>
-
-                <TextBox Style="{StaticResource AppFormFieldStyle}"
-             Tag="Precio de Venta"
-             Text="{Binding Precio, UpdateSourceTrigger=PropertyChanged, StringFormat=N0, ValidatesOnDataErrors=True}"
-             behaviors:InputBehaviors.SoloNumeros="True"/>
-
-                <TextBox Style="{StaticResource AppFormFieldStyle}"
-             Tag="Unidad de Medida (Ej: Unidad, Juego, Caja)"
-             Text="{Binding UnidadMedida, UpdateSourceTrigger=PropertyChanged}"/>
-
-                <TextBox Style="{StaticResource AppFormFieldStyle}"
-             Tag="Stock Mínimo"
-             Text="{Binding StockMinimo, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-             behaviors:InputBehaviors.SoloNumeros="True"/>
-
-                <TextBox Style="{StaticResource AppFormFieldStyle}"
-             Tag="Stock Máximo"
-             Text="{Binding StockMaximo, UpdateSourceTrigger=PropertyChanged}"
-             behaviors:InputBehaviors.SoloNumeros="True"/>
-
-                <TextBox Style="{StaticResource AppFormMultiLineTextBoxStyle}"
-                         Tag="Descripción"
-                         Text="{Binding Descripcion, UpdateSourceTrigger=PropertyChanged}"/>    
-
-                <CheckBox IsChecked="{Binding Estado}"
-              Content="Producto Activo"
-              Style="{StaticResource MaterialDesignCheckBox}"
-              Margin="0,8,0,20"/>
-
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Content="Guardar" Style="{StaticResource FormActionButtonStyle}" Command="{Binding GuardarCommand}"/>
-                    <Button Content="Cancelar" Style="{StaticResource FormActionButtonStyle}" IsCancel="True" Command="{Binding CancelarCommand}" Margin="15,0,0,0"
-                Background="{StaticResource Brush.Brand.GrayMedium}"/>
-                </StackPanel>
+        <Border Grid.Column="0" 
+                Background="{DynamicResource Brush.Brand.CharcoalDark}"
+                CornerRadius="10"
+                Padding="25"
+                Margin="0,0,15,20">
+            <StackPanel VerticalAlignment="Center">
+                <Border BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1" 
+                        CornerRadius="8" Width="220" Height="220">
+                    <Image Source="{Binding ImagenUrl, Converter={StaticResource ImagePathConverter}}" Stretch="Uniform"/>
+                </Border>
+                <Button Content="Seleccionar Imagen..."
+                        Command="{Binding SeleccionarImagenCommand}"
+                        Style="{StaticResource ElegantShadowGhostButton}"
+                        Tag="{StaticResource Brush.Menu.BlueSteel}"
+                        Width="200"
+                        Height="60"
+                        Margin="0,30,0,40"/>
+                <Button Command="{Binding EliminarImagenCommand}"
+                        Style="{StaticResource MaterialDesignToolButton}"
+                        ToolTip="Eliminar Imagen"
+                        HorizontalAlignment="Center" Margin="0,10,0,0">
+                    <fa:IconImage Icon="TrashCan" Foreground="{StaticResource Brush.Accent.DestructiveRed}"/>
+                </Button>
             </StackPanel>
-        </ScrollViewer>
-    </Grid>
-</UserControl>-->
+        </Border>
 
-    <Grid Margin="25">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="1" Margin="15,0,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <!-- Fila para los campos del formulario -->
+                <RowDefinition Height="Auto"/>
+                <!-- Fila para los botones de acción -->
+            </Grid.RowDefinitions>
 
-        <StackPanel Grid.Column="0" Margin="0,0,30,0" VerticalAlignment="Top">
-            <Border BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1" CornerRadius="8" Width="220" Height="220" Background="{StaticResource Brush.Brand.CharcoalLight}">
-                <Image Source="{Binding ImagenUrl, Converter={StaticResource ImagePathConverter}}" Stretch="Uniform"/>
-            </Border>
+            <!-- Contenedor principal para las dos columnas de campos -->
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="340"/>
+                    <ColumnDefinition Width="360"/>
+                </Grid.ColumnDefinitions>
 
-            <Button Content="Seleccionar Imagen..."
-                     Command="{Binding SeleccionarImagenCommand}"
-                     Style="{StaticResource MaterialDesignOutlinedButton}"
-                     Margin="0,15,0,0"/>
+                <!-- === COLUMNA 1 === -->
+                <StackPanel Grid.Column="0" Margin="0,0,17,0">
+                    <Label Content="Nombre del Producto:" Style="{StaticResource DarkLableForm}"/>
+                    <TextBox Style="{StaticResource ElegantTextBoxStyle}"
+                             Text="{Binding Nombre, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
 
-            <Button Command="{Binding EliminarImagenCommand}"
-                    Style="{StaticResource MaterialDesignToolButton}"
-                    ToolTip="Eliminar Imagen"
-                    HorizontalAlignment="Center" Margin="0,10,0,0">
-                <fa:IconImage Icon="TrashCan" Foreground="{StaticResource Brush.Accent.DestructiveRed}"/>
-            </Button>
-        </StackPanel>
+                    <Label Content="OEM / Referencia:" Style="{StaticResource DarkLableForm}" Margin="0,15,0,0"/>
+                    <TextBox Style="{StaticResource ElegantTextBoxStyle}"
+                             Text="{Binding OEM, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
 
-        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
-            <StackPanel>
-                <TextBox Style="{StaticResource StandardFormTextBoxStyle}"
-                 materialDesign:HintAssist.Hint="Nombre del Producto"
-                 Text="{Binding Nombre, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
+                    <Label Content="Categoría:" Style="{StaticResource DarkLableForm}" Margin="0,15,0,0"/>
+                    <ComboBox Style="{StaticResource ElegantComboBoxStyle}"
+                              ItemsSource="{Binding Categorias}" 
+                              SelectedItem="{Binding CategoriaSeleccionada}"
+                              DisplayMemberPath="Nombre"/>
 
-                <TextBox Style="{StaticResource StandardFormTextBoxStyle}"
-                 materialDesign:HintAssist.Hint="OEM / Referencia"
-                 Text="{Binding OEM, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
+                    <Label Content="Precio de Venta:" Style="{StaticResource DarkLableForm}" Margin="0,15,0,0"/>
+                    <TextBox Style="{StaticResource ElegantTextBoxStyle}"
+                             Text="{Binding Precio, UpdateSourceTrigger=PropertyChanged, StringFormat=N0, ValidatesOnDataErrors=True}"
+                             behaviors:InputBehaviors.SoloNumeros="True"/>
 
-                <ComboBox Style="{StaticResource AppComboBoxStyle}"
-                  materialDesign:HintAssist.Hint="Categoría"
-                  ItemsSource="{Binding Categorias}" 
-                  SelectedItem="{Binding CategoriaSeleccionada}"
-                  DisplayMemberPath="Nombre"/>
-
-                <TextBox Style="{StaticResource StandardFormTextBoxStyle}"
-                 materialDesign:HintAssist.Hint="Precio de Venta"
-                 Text="{Binding Precio, UpdateSourceTrigger=PropertyChanged, StringFormat=N0, ValidatesOnDataErrors=True}"
-                 behaviors:InputBehaviors.SoloNumeros="True"/>
-
-                <TextBox Style="{StaticResource StandardFormTextBoxStyle}"
-                 materialDesign:HintAssist.Hint="Unidad de Medida (Ej: Unidad, Juego, Caja)"
-                 Text="{Binding UnidadMedida, UpdateSourceTrigger=PropertyChanged}"/>
-
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <TextBox Grid.Column="0" Margin="0,10,5,10" Style="{StaticResource StandardFormTextBoxStyle}"
-                     materialDesign:HintAssist.Hint="Stock Mínimo"
-                     Text="{Binding StockMinimo, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                     behaviors:InputBehaviors.SoloNumeros="True"/>
-
-                    <TextBox Grid.Column="1" Margin="5,10,0,10" Style="{StaticResource StandardFormTextBoxStyle}"
-                     materialDesign:HintAssist.Hint="Stock Máximo"
-                     Text="{Binding StockMaximo, UpdateSourceTrigger=PropertyChanged}"
-                     behaviors:InputBehaviors.SoloNumeros="True"/>
-                </Grid>
-
-                <TextBox Style="{StaticResource StandardFormMultiLineTextBoxStyle}"
-                 materialDesign:HintAssist.Hint="Descripción"
-                 Text="{Binding Descripcion, UpdateSourceTrigger=PropertyChanged}"/>
-
-                <CheckBox IsChecked="{Binding Estado}"
-                  Content="Producto Activo"
-                  Style="{StaticResource MaterialDesignCheckBox}"
-                  Margin="5,15,0,20"
-                  Foreground="White"/>
-
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Content="Cancelar" Command="{Binding CancelarCommand}" Style="{StaticResource ElegantShadowGhostButton}"
-                            Tag="{StaticResource Brush.Menu.YellowGold}" IsCancel="True" Margin="0,0,15,0"/>
-                    <Button Content="Guardar" Command="{Binding GuardarCommand}" IsDefault="True" Style="{StaticResource ElegantShadowGhostButton}"
-                            Tag="{StaticResource Brush.Menu.YellowGold}"/>
+                    <Label Content="Stock Mínimo:" Style="{StaticResource DarkLableForm}" Margin="0,15,0,0"/>
+                    <TextBox Style="{StaticResource ElegantTextBoxStyle}"
+                             Text="{Binding StockMinimo, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                             behaviors:InputBehaviors.SoloNumeros="True"/>
                 </StackPanel>
+
+                <!-- === COLUMNA 2 === -->
+                <StackPanel Grid.Column="1" Margin="15,0,0,0">
+                    <Label Content="Unidad de Medida (Ej: Unidad, Juego):" Style="{StaticResource DarkLableForm}"/>
+                    <TextBox Style="{StaticResource ElegantTextBoxStyle}"
+                             Text="{Binding UnidadMedida, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <Label Content="Stock Máximo:" Style="{StaticResource DarkLableForm}" Margin="0,15,0,0"/>
+                    <TextBox Style="{StaticResource ElegantTextBoxStyle}"
+                             Text="{Binding StockMaximo, UpdateSourceTrigger=PropertyChanged}"
+                             behaviors:InputBehaviors.SoloNumeros="True"/>
+
+                    <Label Content="Descripción:" Style="{StaticResource DarkLableForm}" Margin="0,15,0,0"/>
+                    <TextBox Style="{StaticResource ElegantTextBoxStyle}"
+                             Text="{Binding Descripcion, UpdateSourceTrigger=PropertyChanged}"
+                             Height="138" TextWrapping="Wrap" AcceptsReturn="True" VerticalContentAlignment="Top" Padding="10,8"/>
+
+                    <CheckBox IsChecked="{Binding Estado}"
+                              Content="Producto Activo"
+                              FontSize="16"
+                              FontFamily="{StaticResource Font.Poppins}"
+                              Style="{StaticResource MaterialDesignCheckBox}"
+                              Margin="5,20,0,0"
+                              Foreground="White"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Botones de Acción en la parte inferior -->
+            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,10,0">
+                <Button Content="Cancelar" Command="{Binding CancelarCommand}" Style="{StaticResource ElegantShadowGhostButton}" Tag="Gray" IsCancel="True" Margin="0,0,15,0"/>
+                <Button Content="Guardar" Command="{Binding GuardarCommand}" IsDefault="True" Style="{StaticResource ElegantShadowGhostButton}" Tag="{StaticResource Brush.Menu.GreenForest}"/>
             </StackPanel>
-        </ScrollViewer>
+        </Grid>
     </Grid>
 </UserControl>

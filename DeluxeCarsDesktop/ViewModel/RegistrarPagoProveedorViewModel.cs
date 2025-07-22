@@ -18,6 +18,7 @@ namespace DeluxeCarsDesktop.ViewModel
         private readonly IUnitOfWork _unitOfWork;
         private readonly INotificationService _notificationService;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IEmailService _emailService;
 
         private Pedido _pedidoEnCuestion;
 
@@ -54,11 +55,13 @@ namespace DeluxeCarsDesktop.ViewModel
         public ICommand GuardarPagoCommand { get; }
         public Action CloseAction { get; set; }
 
-        public RegistrarPagoProveedorViewModel(IUnitOfWork unitOfWork, INotificationService notificationService, ICurrentUserService currentUserService)
+        public RegistrarPagoProveedorViewModel(IUnitOfWork unitOfWork, INotificationService notificationService, ICurrentUserService currentUserService,
+                                           IEmailService emailService)
         {
             _unitOfWork = unitOfWork;
             _notificationService = notificationService;
             _currentUserService = currentUserService;
+            _emailService = emailService;
 
             MetodosDePago = new ObservableCollection<MetodoPago>();
             GuardarPagoCommand = new ViewModelCommand(async _ => await ExecuteGuardarPago(), _ => CanExecuteGuardarPago());
@@ -66,8 +69,9 @@ namespace DeluxeCarsDesktop.ViewModel
 
         public async Task LoadAsync(int pedidoId)
         {
-            // Cargamos el pedido con toda la información necesaria para los cálculos
-            _pedidoEnCuestion = await _unitOfWork.Pedidos.GetPedidoWithDetailsAsync(pedidoId);
+            // Llama al nuevo método específico y robusto
+            _pedidoEnCuestion = await _unitOfWork.Pedidos.GetForPaymentProcessingAsync(pedidoId);
+
             if (_pedidoEnCuestion == null)
             {
                 _notificationService.ShowError("No se pudo cargar el pedido seleccionado.");
@@ -75,6 +79,7 @@ namespace DeluxeCarsDesktop.ViewModel
                 return;
             }
 
+            // El resto del código funcionará correctamente ahora
             var metodos = await _unitOfWork.MetodosPago.GetByConditionAsync(m => m.AplicaParaCompras && m.Disponible);
             MetodosDePago.Clear();
             foreach (var metodo in metodos)
@@ -83,8 +88,10 @@ namespace DeluxeCarsDesktop.ViewModel
             }
             MetodoPagoSeleccionado = MetodosDePago.FirstOrDefault();
 
+            // Esta asignación ahora tendrá el valor correcto
             MontoAPagar = _pedidoEnCuestion.SaldoPendiente;
 
+            // Y estas notificaciones mostrarán los datos correctos en la vista
             OnPropertyChanged(nameof(NumeroPedido));
             OnPropertyChanged(nameof(NombreProveedor));
             OnPropertyChanged(nameof(SaldoActual));
@@ -134,6 +141,18 @@ namespace DeluxeCarsDesktop.ViewModel
 
                 // --- PASO 5: Guardar todos los cambios en una sola transacción ---
                 await _unitOfWork.CompleteAsync();
+
+                try
+                {
+                    // Pasamos tanto el pago como el pedido afectado
+                    await _emailService.EnviarEmailPagoRealizado(nuevoPago, _pedidoEnCuestion);
+                    _notificationService.ShowSuccess("Pago registrado y notificación enviada exitosamente.");
+                }
+                catch (Exception ex)
+                {
+                    // El pago se guardó, pero el correo falló.
+                    _notificationService.ShowWarning($"Pago registrado, pero falló el envío del correo: {ex.Message}");
+                }
 
                 _notificationService.ShowSuccess("Pago registrado exitosamente.");
                 CloseAction?.Invoke();

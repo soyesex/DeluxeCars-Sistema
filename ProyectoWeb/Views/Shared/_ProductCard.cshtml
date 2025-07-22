@@ -3,14 +3,25 @@
 <div class="product-card">
     <div class="product-card-image-container">
         <a asp-action="Detalles" asp-controller="Producto" asp-route-id="@Model.Id" class="product-image-link">
-            @if (!string.IsNullOrEmpty(Model.ImagenUrl))
-            {
-                <img src="@Model.ImagenUrl" class="card-img-top" alt="@Model.Nombre">
+            @{
+                // --- INICIO DE LA NUEVA LÓGICA ---
+                string imageUrl;
+                if (!string.IsNullOrEmpty(Model.ImagenUrl))
+                {
+                    // 1. Tomamos el nombre del archivo desde la ruta que viene de la BD
+                    var fileName = System.IO.Path.GetFileName(Model.ImagenUrl);
+
+                    // 2. Reconstruimos la URL completa y correcta desde la raíz del sitio
+                    imageUrl = Url.Content($"~/images/productos/{fileName}");
+                }
+                else
+                {
+                    // 3. Si no hay imagen, usamos la de por defecto
+                    imageUrl = Url.Content("~/images/default-product.png");
+                }
+                // --- FIN DE LA NUEVA LÓGICA ---
             }
-            else
-            {
-                <img src="~/images/placeholder-product.png" class="card-img-top" alt="Imagen no disponible">
-            }
+            <img src="@imageUrl" class="card-img-top" alt="@Model.Nombre">
         </a>
     </div>
     <div class="product-card-body">
@@ -28,7 +39,6 @@
                 data-cantidad="1">
             <i class="bi bi-cart-plus me-2"></i>Añadir al Carrito
         </button>
-
     </div>
 </div>
 

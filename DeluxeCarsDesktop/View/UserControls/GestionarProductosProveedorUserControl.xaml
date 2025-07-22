@@ -6,8 +6,33 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="1000"
-             MinWidth="950" MaxWidth="1200">
+             d:DesignHeight="700" d:DesignWidth="1000" MaxHeight="600" MaxWidth="1200">
+
+    <UserControl.Resources>
+
+        <Style x:Key="WhiteHeaderStyle" TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+            <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        </Style>
+
+        <Style x:Key="CustomDataGridCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource Brush.Brand.NavyDeep}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+    </UserControl.Resources>
 
     <Grid Margin="15">
         <Grid.RowDefinitions>
@@ -15,24 +40,31 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" FontFamily="{StaticResource Font.SourceSans3}" Margin="5,0,5,20" TextWrapping="Wrap"
-                   Foreground="{StaticResource Text.Secondary}" FontSize="14">
-            Use esta pantalla para administrar el catálogo de productos de un proveedor. Asocie productos de su inventario general (derecha) al catálogo del proveedor (izquierda) asignándoles un precio de compra.
-        </TextBlock>
+        <Border Grid.Row="0"  CornerRadius="10" HorizontalAlignment="Left" Background="{StaticResource Brush.Menu.GreenDeep}" 
+                Margin="0 0 0 30">
+            
+            <TextBlock FontFamily="{StaticResource Font.Poppins}"
+                       Margin="5,0,5,20" TextWrapping="Wrap"
+                       Foreground="{StaticResource Text.Secondary}" FontSize="18">
+    Use esta pantalla para administrar el catálogo de productos de un proveedor. Define el precio y mueve los productos entre el catálogo general y el catálogo del proveedor.
+            </TextBlock>
+        </Border>
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="410"/>
             <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="410"/>
         </Grid.ColumnDefinitions>
 
-        
 
-        <!-- Columna 0: Catálogo del Proveedor (Productos ya asociados) -->
+            <!-- Columna 0: Inventario General (Productos disponibles para asociar) -->
+            
             <Border Grid.Column="0" Grid.Row="1" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
             <DockPanel>
-                <TextBlock DockPanel.Dock="Top" Text="Inventario General (Disponibles)" Foreground="White" FontSize="16" FontWeight="Bold" Margin="10,10,10,5"/>
+                <TextBlock DockPanel.Dock="Top" Text="Inventario General (Disponibles)" 
+                           FontFamily="{StaticResource Font.Poppins}" FontSize="18"
+                           Foreground="White" FontWeight="Bold" Margin="10,10,15,5"/>
 
                 <!-- Cuadro de búsqueda del segundo archivo -->
                 <TextBox DockPanel.Dock="Top" Margin="5,0,5,5"
@@ -41,10 +73,17 @@
                  Tag="Buscar en inventario..."/>
 
                 <DataGrid ItemsSource="{Binding ProductosNoAsociados}" 
-                  AutoGenerateColumns="False" SelectedItem="{Binding ProductoNoAsociadoSeleccionado}" Style="{StaticResource ElegantDataGridStyle}">
+                            AutoGenerateColumns="False" SelectedItem="{Binding ProductoNoAsociadoSeleccionado}"
+                            Style="{StaticResource AppDataGridStyle}"
+                            ColumnHeaderStyle="{StaticResource WhiteHeaderStyle}" 
+                            CellStyle="{StaticResource CustomDataGridCellStyle}"
+                            GridLinesVisibility="Horizontal"
+                            CanUserAddRows="False"
+                            IsReadOnly="True"
+                           CanUserSortColumns="True">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Nombre Producto" Binding="{Binding Nombre}" Width="*"/>
-                        <DataGridTextColumn Header="Precio Venta" Binding="{Binding Precio, StringFormat=C, ConverterCulture=es-CO}" Width="Auto"/>
+                        <DataGridTextColumn Header="Nombre Producto" Binding="{Binding Nombre}" Width="Auto"/>
+                        <DataGridTextColumn Header="Precio Venta" Binding="{Binding Precio, StringFormat=C, ConverterCulture=es-CO}" Width="*"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </DockPanel>
@@ -53,42 +92,56 @@
         
 
         <!-- Columna 1: Controles de Acción (Añadir / Quitar / Precio) -->
-            <Grid Grid.Column="1" Grid.Row="1" VerticalAlignment="Center" Margin="15,0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="20"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
+            <!-- Columna de Controles de Acción (Refactorizada para claridad y UX) -->
+            <StackPanel Grid.Column="1" Grid.Row="1" VerticalAlignment="Center" Margin="15,0">
+                <!-- 2. Campo para el Precio de Compra -->
+                <Label Content="Precio de Compra para este Proveedor:" 
+           Style="{StaticResource DarkLableForm}" 
+           HorizontalAlignment="Center"/>
 
-            <Label Grid.Row="0" Content="Precio de Compra:" Style="{StaticResource DarkLableForm}" HorizontalAlignment="Center"/>
-            <TextBox Grid.Row="1" Text="{Binding NuevoPrecioCompra, UpdateSourceTrigger=PropertyChanged}" 
-                     Width="120" TextAlignment="Center" Style="{StaticResource DarkInputControlStyle}"/>
+                <TextBox Text="{Binding NuevoPrecioCompra, UpdateSourceTrigger=PropertyChanged}" 
+             Width="150" 
+             TextAlignment="Center" 
+             Style="{StaticResource ElegantTextBoxStyle}"/>
 
-                <Button Grid.Row="2" Command="{Binding AsociarCommand}" ToolTip="Asociar producto seleccionado al catálogo"
-                    Style="{StaticResource DarkActionButtonStyle}" Margin="0,10,0,0">
-                <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Añadir al catalogo >>" />
+                <!-- 3. Botones de Acción con Iconos -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,25,0,0">
+
+                    <!-- Botón para Quitar (Desasociar) -->
+                    <Button Command="{Binding DesasociarCommand}" 
+                ToolTip="Quitar producto seleccionado del catálogo del proveedor"
+                Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
+                Margin="0,0,15,0">
+                        <fa:IconImage Icon="ArrowLeft" Height="18" Width="18"/>
+                    </Button>
+
+                    <!-- Botón para Añadir (Asociar) -->
+                    <Button Command="{Binding AsociarCommand}" 
+                ToolTip="Añadir producto seleccionado al catálogo del proveedor"
+                Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                Background="{StaticResource Brush.Menu.GreenForest}">
+                        <fa:IconImage Icon="ArrowRight" Height="18" Width="18"/>
+                    </Button>
+
                 </StackPanel>
-            </Button>
+            </StackPanel>
 
-                <Button Grid.Row="4" Command="{Binding DesasociarCommand}" ToolTip="Quitar producto seleccionado del catálogo"
-                    Style="{StaticResource DarkActionButtonStyle}">
-                <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="&lt;&lt; Quitar del catalogo"/>
-                </StackPanel>
-            </Button>
-        </Grid>
-
-        <!-- Columna 2: Inventario General (Productos disponibles para asociar) -->
-        <Border Grid.Column="2" Grid.Row="1" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
+            <!-- Columna 2: Catálogo del Proveedor (Productos ya asociados) -->
+            <Border Grid.Column="2" Grid.Row="1" CornerRadius="10" Background="{StaticResource PrimaryBackgroundColor}" BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1">
             <DockPanel>
-                <TextBlock DockPanel.Dock="Top" Text="{Binding ProveedorActual.RazonSocial, StringFormat='Catálogo de {0}', FallbackValue='Catálogo del Proveedor'}"  Foreground="White" FontSize="16" FontWeight="Bold" Margin="10,10,10,5"/>
+                <TextBlock DockPanel.Dock="Top" Text="{Binding ProveedorActual.RazonSocial, 
+                    StringFormat='Catálogo de {0}', FallbackValue='Catálogo del Proveedor'}" 
+                           FontFamily="{StaticResource Font.Poppins}" FontSize="18"
+                           Foreground="White" FontWeight="Bold" Margin="10,10,10,5"/>
                     <DataGrid ItemsSource="{Binding ProductosAsociados}" 
                               SelectedItem="{Binding ProductoAsociadoSeleccionado}" 
                               Style="{StaticResource ElegantDataGridStyle}"
-                              IsReadOnly="False"
+                            ColumnHeaderStyle="{StaticResource WhiteHeaderStyle}" 
+                            CellStyle="{StaticResource CustomDataGridCellStyle}"
+                            GridLinesVisibility="Horizontal"
+                            CanUserAddRows="False"
+                            IsReadOnly="True"
+                            CanUserSortColumns="True"
                               AutoGenerateColumns="False"
                               CellEditEnding="DataGrid_CellEditEnding">
                         <DataGrid.Columns>
@@ -97,7 +150,7 @@
                             <DataGridTemplateColumn Header="Precio Compra" Width="Auto">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding PrecioCompra, StringFormat=C, ConverterCulture=es-CO}" VerticalAlignment="Center" Margin="5,0"/>
+                                        <TextBlock Text="{Binding PrecioCompra, StringFormat=C, ConverterCulture=es-CO}" VerticalAlignment="Center"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                                 <DataGridTemplateColumn.CellEditingTemplate>

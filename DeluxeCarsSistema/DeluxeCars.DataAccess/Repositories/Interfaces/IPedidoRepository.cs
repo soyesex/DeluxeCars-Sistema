@@ -10,6 +10,7 @@ namespace DeluxeCars.DataAccess.Repositories.Interfaces
 {
     public interface IPedidoRepository : IGenericRepository<Pedido>
     {
+        Task<Pedido> GetForPaymentProcessingAsync(int pedidoId);
         Task<PagedResult<Pedido>> SearchAsync(string searchText, DateTime fechaInicio, DateTime fechaFin, int? proveedorId, EstadoPedido? estado, int pageNumber, int pageSize);
         // Obtiene un pedido incluyendo todos sus detalles (productos solicitados).
         Task<Pedido> GetPedidoWithDetailsAsync(int pedidoId);

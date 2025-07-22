@@ -37,7 +37,6 @@ namespace DeluxeCarsEntities
         public virtual ICollection<PagoClienteFactura> PagosRecibidos { get; set; }
         public virtual ICollection<NotaDeCredito> NotasDeCredito { get; set; }
 
-        // --- PROPIEDADES CALCULADAS (NO GUARDADAS EN DB) ---
         // Estas propiedades calculan el estado ACTUAL de la factura en tiempo real.
 
         [NotMapped]

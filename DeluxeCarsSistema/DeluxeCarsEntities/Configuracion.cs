@@ -48,5 +48,18 @@ namespace DeluxeCarsEntities
 
         // Guarda el número de intentos fallidos.
         public int PinFailedAttempts { get; set; }
+        [StringLength(100)]
+        public string? SmtpHost { get; set; } // ej: "smtp.gmail.com"
+
+        public int SmtpPort { get; set; } // ej: 587
+
+        [StringLength(100)]
+        public string? EmailEmisor { get; set; } // El correo que enviará los emails
+
+        // La contraseña se guarda como un array de bytes encriptado
+        public byte[]? PasswordEmailEmisor { get; set; }
+
+        public bool EnableSsl { get; set; }
+        public bool NotificacionesActivas { get; set; }
     }
 }

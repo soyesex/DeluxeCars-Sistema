@@ -11,37 +11,42 @@ namespace DeluxeCarsDesktop.Utils
 {
     public static class PasswordBoxHelper
     {
-        public static readonly DependencyProperty BoundPassword =
-            DependencyProperty.RegisterAttached("BoundPassword", typeof(SecureString), typeof(PasswordBoxHelper), new PropertyMetadata(null, OnBoundPasswordChanged));
+        public static readonly DependencyProperty BoundPasswordProperty =
+        DependencyProperty.RegisterAttached(
+            "BoundPassword",
+            typeof(string),
+            typeof(PasswordBoxHelper),
+            new PropertyMetadata(string.Empty, OnBoundPasswordChanged));
 
-        public static SecureString GetBoundPassword(DependencyObject d)
+        public static string GetBoundPassword(DependencyObject dp)
         {
-            return (SecureString)d.GetValue(BoundPassword);
+            return (string)dp.GetValue(BoundPasswordProperty);
         }
 
-        public static void SetBoundPassword(DependencyObject d, SecureString value)
+        public static void SetBoundPassword(DependencyObject dp, string value)
         {
-            d.SetValue(BoundPassword, value);
+            dp.SetValue(BoundPasswordProperty, value);
         }
 
-        private static void OnBoundPasswordChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnBoundPasswordChanged(
+            DependencyObject d,
+            DependencyPropertyChangedEventArgs e)
         {
-            if (d is PasswordBox box)
+            var passwordBox = (PasswordBox)d;
+            passwordBox.PasswordChanged -= PasswordBox_PasswordChanged;
+
+            if (e.NewValue != null)
             {
-                box.PasswordChanged -= HandlePasswordChanged;
-                if (e.NewValue != null)
-                {
-                    box.PasswordChanged += HandlePasswordChanged;
-                }
+                passwordBox.Password = (string)e.NewValue;
             }
+
+            passwordBox.PasswordChanged += PasswordBox_PasswordChanged;
         }
 
-        private static void HandlePasswordChanged(object sender, RoutedEventArgs e)
+        private static void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
         {
-            if (sender is PasswordBox box)
-            {
-                SetBoundPassword(box, box.SecurePassword);
-            }
+            var passwordBox = (PasswordBox)sender;
+            SetBoundPassword(passwordBox, passwordBox.Password);
         }
     }
 }

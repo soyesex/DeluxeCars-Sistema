@@ -6,71 +6,79 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
              mc:Ignorable="d"  
-             d:DesignHeight="500" d:DesignWidth="600">
-    <StackPanel Margin="20">
+             d:DesignHeight="500" d:DesignWidth="800">
 
-        <Grid>
+    <Grid Margin="25">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <!-- Fila para los campos del formulario -->
+            <RowDefinition Height="Auto"/>
+            <!-- Fila para los botones de acción -->
+        </Grid.RowDefinitions>
+
+        <!-- Contenedor principal para las dos columnas de campos -->
+        <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="400"/>
+                <ColumnDefinition Width="400"/>
             </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
 
-            <TextBox Grid.Row="0" Grid.Column="1" Style="{StaticResource StandardFormTextBoxStyle}"
-                 materialDesign:HintAssist.Hint="Razón Social" Text="{Binding RazonSocial, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+            <!-- === COLUMNA 1 === -->
+            <StackPanel Grid.Column="0" Margin="0,0,15,0">
+                <Label Content="Razón Social:" Style="{StaticResource DarkLableForm}"/>
+                <TextBox Style="{StaticResource ElegantTextBoxStyle}"
+                        Text="{Binding RazonSocial, UpdateSourceTrigger=PropertyChanged}"/>
 
-            <TextBox Grid.Row="1" Grid.Column="1" Style="{StaticResource StandardFormTextBoxStyle}"
-                 materialDesign:HintAssist.Hint="Teléfono" Text="{Binding Telefono, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+                <Label Content="NIT:" Style="{StaticResource DarkLableForm}" Margin="0,15,0,0"/>
+                <TextBox Style="{StaticResource ElegantTextBoxStyle}"
+                        Text="{Binding NIT, UpdateSourceTrigger=PropertyChanged}"/>
 
-            <TextBox Grid.Row="2" Grid.Column="1" Style="{StaticResource StandardFormTextBoxStyle}"
-                 materialDesign:HintAssist.Hint="Correo Electronico" Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+                <Label Content="Teléfono:" Style="{StaticResource DarkLableForm}" Margin="0,15,0,0"/>
+                <TextBox Style="{StaticResource ElegantTextBoxStyle}"
+                        Text="{Binding Telefono, UpdateSourceTrigger=PropertyChanged}"/>
+            </StackPanel>
 
-            <TextBox Grid.Row="3" Grid.Column="1" Style="{StaticResource StandardFormTextBoxStyle}"
-                 materialDesign:HintAssist.Hint="NIT" Text="{Binding NIT, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+            <!-- === COLUMNA 2 === -->
+            <StackPanel Grid.Column="1" Margin="15,0,0,0">
+                <Label Content="Correo Electrónico:" Style="{StaticResource DarkLableForm}"/>
+                <TextBox Style="{StaticResource ElegantTextBoxStyle}"
+                        Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"/>
 
-            <Label Grid.Row="4" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="Departamento:" VerticalAlignment="Center"/>
-            <ComboBox Grid.Row="4" Grid.Column="1" Style="{DynamicResource MaterialDesignComboBox}"
-                        Foreground="{StaticResource Text.Secondary}"
-                        FontFamily="{StaticResource Font.SourceSans3}"
-                        FontWeight="Medium"
+                <Label Content="Departamento:" Style="{StaticResource DarkLableForm}" Margin="0,15,0,0"/>
+                <ComboBox Style="{StaticResource ElegantComboBoxStyle}"
+                        ItemsSource="{Binding Departamentos}"
+                        SelectedItem="{Binding DepartamentoSeleccionado}"
+                        DisplayMemberPath="Nombre"/>
+
+                <Label Content="Municipio:" Style="{StaticResource DarkLableForm}" Margin="0,15,0,0"/>
+                <ComboBox Style="{StaticResource ElegantComboBoxStyle}"
+                        ItemsSource="{Binding Municipios}"
+                        SelectedItem="{Binding MunicipioSeleccionado}"
+                        DisplayMemberPath="Nombre"/>
+
+                <CheckBox IsChecked="{Binding Estado}"
+                        Content="Proveedor Activo"
+                        Style="{StaticResource MaterialDesignCheckBox}"
+                        Margin="5,25,0,0"
                         FontSize="16"
-                        BorderBrush="{DynamicResource Background.Disabled}"
-                        materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource Brush.Menu.BlueCornflower}"
-                        Margin="5"
-                      ItemsSource="{Binding Departamentos}"
-                      SelectedItem="{Binding DepartamentoSeleccionado}"
-                      DisplayMemberPath="Nombre"/>
-
-            <Label Grid.Row="5" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="Municipio:" VerticalAlignment="Center"/>
-            <ComboBox Grid.Row="5" Grid.Column="1" 
-                       Style="{DynamicResource MaterialDesignComboBox}"
-                        Foreground="{StaticResource Text.Secondary}"
-                        FontFamily="{StaticResource Font.SourceSans3}"
-                        FontWeight="Medium"
-                        FontSize="16"
-                        BorderBrush="{DynamicResource Background.Disabled}"
-                        materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource Brush.Menu.BlueCornflower}"
-                        Margin="5"
-                      ItemsSource="{Binding Municipios}"
-                      SelectedItem="{Binding MunicipioSeleccionado}"
-                      DisplayMemberPath="Nombre"/>
-            <Label Grid.Row="6" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="Activo:" VerticalAlignment="Center"/>
-            <CheckBox Grid.Row="6" Grid.Column="1" IsChecked="{Binding Estado}" VerticalAlignment="Center" Margin="5"/>
+                        FontFamily="{StaticResource Font.Poppins}"
+                        Foreground="White"/>
+            </StackPanel>
         </Grid>
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-            <Button Content="Guardar"  Style="{StaticResource ElegantShadowGhostButton}"
-                            Tag="{StaticResource Brush.Menu.YellowGold}" Command="{Binding GuardarCommand}" Width="100"/>
-            <Button Content="Cancelar"  Style="{StaticResource ElegantShadowGhostButton}"
-                            Tag="{StaticResource Brush.Menu.YellowGold}" Command="{Binding CancelarCommand}" Width="100" Margin="10,0,0,0"/>
+        <!-- Botones de Acción en la parte inferior -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,30,0,0">
+            <Button Content="Cancelar" 
+                Command="{Binding CancelarCommand}" 
+                Style="{StaticResource ElegantShadowGhostButton}" 
+                Tag="Gray" 
+                IsCancel="True" 
+                Margin="0,0,15,0"/>
+            <Button Content="Guardar" 
+                Command="{Binding GuardarCommand}" 
+                IsDefault="True" 
+                Style="{StaticResource ElegantShadowGhostButton}" 
+                Tag="{StaticResource Brush.Menu.GreenForest}"/>
         </StackPanel>
-    </StackPanel>
+    </Grid>
 </UserControl>

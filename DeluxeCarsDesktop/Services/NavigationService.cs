@@ -22,6 +22,33 @@ namespace DeluxeCarsDesktop.Services
             }
         }
 
+        public async Task NavigateTo<TViewModel, TParameter>(TParameter parameter) where TViewModel : ViewModelBase
+        {
+            if (CurrentMainView != null)
+            {
+                _history.Push(CurrentMainView);
+            }
+
+            var newViewModel = _serviceProvider.GetRequiredService<TViewModel>();
+
+            // *** LÓGICA PARA PASAR EL PARÁMETRO ***
+            // Verificamos si el ViewModel que acabamos de crear implementa nuestra interfaz
+            if (parameter != null && newViewModel is IParameterReceiver<TParameter> vmWithParam)
+            {
+                // Si lo hace, le pasamos el parámetro.
+                vmWithParam.LoadWithParameter(parameter);
+            }
+
+            // Después de pasar el parámetro, cargamos los datos asíncronos
+            if (newViewModel is IAsyncLoadable vmWithLoad)
+            {
+                await vmWithLoad.LoadAsync();
+            }
+
+            // Finalmente, actualizamos la vista principal
+            CurrentMainView = newViewModel;
+            CurrentMainViewChanged?.Invoke();
+        }
         public bool CanGoBack => _history.Count > 0;
         public event Action CurrentMainViewChanged;
 
@@ -95,7 +122,7 @@ namespace DeluxeCarsDesktop.Services
 
             // 5. Asignamos el DataContext y mostramos la ventana.
             formWindow.DataContext = formViewModel;
-            formWindow.Show();
+            formWindow.ShowDialog();
         }
     }
 }

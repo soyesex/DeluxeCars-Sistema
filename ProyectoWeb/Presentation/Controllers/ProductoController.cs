@@ -14,34 +14,45 @@ namespace Aplicacion.Presentation.Controllers
     {
         // 1. Inyectamos IUnitOfWork como ÚNICA dependencia para el acceso a datos.
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public ProductoController(IUnitOfWork unitOfWork)
+        public ProductoController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
         {
             _unitOfWork = unitOfWork;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         // GET: /Producto/
         public async Task<IActionResult> Index()
         {
-            // 2. Obtenemos las entidades y calculamos su stock para la vista de admin.
+            // 1. Obtenemos las entidades base en una consulta
             var productos = await _unitOfWork.Productos.GetAllWithCategoriaAsync();
-            var viewModels = new List<ProductoViewModel>();
-
-            foreach (var p in productos)
+            if (!productos.Any())
             {
-                viewModels.Add(new ProductoViewModel
-                {
-                    Id = p.Id,
-                    Nombre = p.Nombre,
-                    Precio = p.Precio,
-                    Stock = await _unitOfWork.Productos.GetCurrentStockAsync(p.Id),
-                    Descripcion = p.Descripcion,
-                    Estado = p.Estado,
-                    NombreCategoria = p.Categoria?.Nombre,
-                    OriginalEquipmentManufacture = p.OriginalEquipamentManufacture,
-                    ImagenUrl = p.ImagenUrl
-                });
+                return View(new List<ProductoViewModel>());
             }
+
+            // 2. Obtenemos TODOS los stocks necesarios en UNA SOLA consulta
+            var idsDeProductos = productos.Select(p => p.Id);
+            var stocksDiccionario = await _unitOfWork.Productos.GetCurrentStocksAsync(idsDeProductos);
+
+            // 3. Mapeamos a los ViewModels en memoria, sin más consultas a la BD
+            var viewModels = productos.Select(p => new ProductoViewModel
+            {
+                Id = p.Id,
+                Nombre = p.Nombre,
+                Precio = p.Precio,
+                // Buscamos el stock en el diccionario localmente. Es instantáneo.
+                Stock = stocksDiccionario.GetValueOrDefault(p.Id, 0),
+                Descripcion = p.Descripcion,
+                Estado = p.Estado,
+                NombreCategoria = p.Categoria?.Nombre,
+                OriginalEquipmentManufacture = p.OriginalEquipamentManufacture,
+                ImagenUrl = string.IsNullOrEmpty(p.ImagenUrl)
+                ? "/images/default.jpeg"
+                : "/" + p.ImagenUrl
+            }).ToList();
+
             return View(viewModels);
         }
 
@@ -61,7 +72,31 @@ namespace Aplicacion.Presentation.Controllers
         {
             if (ModelState.IsValid)
             {
-                // 4. Al crear, manejamos la entidad y el movimiento de inventario.
+                string? rutaImagenRelativa = null;
+
+                // --- LÓGICA PARA GUARDAR LA IMAGEN ---
+                if (model.ImagenArchivo != null && model.ImagenArchivo.Length > 0)
+                {
+                    // 1. Definir la carpeta donde se guardarán las imágenes
+                    string carpetaImagenes = Path.Combine(_webHostEnvironment.WebRootPath, "images", "productos");
+
+                    // Esta única línea es suficiente. Crea el directorio si no existe.
+                    Directory.CreateDirectory(carpetaImagenes);
+
+                    // 2. Crear un nombre de archivo único para evitar conflictos
+                    string nombreArchivoUnico = Guid.NewGuid().ToString() + Path.GetExtension(model.ImagenArchivo.FileName);
+                    string rutaFisicaCompleta = Path.Combine(carpetaImagenes, nombreArchivoUnico);
+
+                    // 3. Guardar el archivo en el servidor
+                    using (var stream = new FileStream(rutaFisicaCompleta, FileMode.Create))
+                    {
+                        await model.ImagenArchivo.CopyToAsync(stream);
+                    }
+
+                    // 4. Guardar solo la ruta relativa en la base de datos
+                    rutaImagenRelativa = Path.Combine("images", "productos", nombreArchivoUnico).Replace('\\', '/');
+                }
+
                 var producto = new Producto
                 {
                     Nombre = model.Nombre,
@@ -70,7 +105,7 @@ namespace Aplicacion.Presentation.Controllers
                     Estado = true,
                     OriginalEquipamentManufacture = model.OriginalEquipmentManufacture,
                     Precio = model.Precio,
-                    ImagenUrl = model.ImagenUrl
+                    ImagenUrl = rutaImagenRelativa
                 };
 
                 await _unitOfWork.Productos.AddAsync(producto);
@@ -130,6 +165,31 @@ namespace Aplicacion.Presentation.Controllers
             {
                 var producto = await _unitOfWork.Productos.GetByIdAsync(id);
                 if (producto == null) return NotFound();
+                // --- LÓGICA PARA ACTUALIZAR LA IMAGEN ---
+                if (model.ImagenArchivo != null && model.ImagenArchivo.Length > 0)
+                {
+                        // Opcional: Eliminar la imagen anterior si existe
+                    if (!string.IsNullOrEmpty(producto.ImagenUrl))
+                    {
+                        string rutaImagenAnterior = Path.Combine(_webHostEnvironment.WebRootPath, producto.ImagenUrl.Replace('/', '\\'));
+                        if (System.IO.File.Exists(rutaImagenAnterior))
+                        {
+                            System.IO.File.Delete(rutaImagenAnterior);
+                        }
+                    }
+
+
+                    // Guardar la nueva imagen (misma lógica que en Crear)
+                    string carpetaImagenes = Path.Combine(_webHostEnvironment.WebRootPath, "images", "productos");
+                    Directory.CreateDirectory(carpetaImagenes);
+                    string nombreArchivoUnico = Guid.NewGuid().ToString() + Path.GetExtension(model.ImagenArchivo.FileName);
+                    string rutaFisicaCompleta = Path.Combine(carpetaImagenes, nombreArchivoUnico);
+                    using (var stream = new FileStream(rutaFisicaCompleta, FileMode.Create))
+                    {
+                        await model.ImagenArchivo.CopyToAsync(stream);
+                    }
+                    producto.ImagenUrl = Path.Combine("images", "productos", nombreArchivoUnico).Replace('\\', '/');
+            }
 
                 // Actualizamos las propiedades de la entidad desde el modelo
                 producto.Nombre = model.Nombre;
@@ -138,7 +198,6 @@ namespace Aplicacion.Presentation.Controllers
                 producto.Estado = model.Estado;
                 producto.OriginalEquipamentManufacture = model.OriginalEquipmentManufacture;
                 producto.Precio = model.Precio;
-                producto.ImagenUrl = model.ImagenUrl;
                 // NOTA: El stock no se modifica aquí, se hace con movimientos de inventario.
 
                 await _unitOfWork.CompleteAsync();

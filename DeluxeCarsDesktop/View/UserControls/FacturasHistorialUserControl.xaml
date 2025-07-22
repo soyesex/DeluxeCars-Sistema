@@ -5,191 +5,260 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
              mc:Ignorable="d" 
+             xmlns:enums="clr-namespace:DeluxeCarsEntities;assembly=DeluxeCarsEntities"
+             xmlns:behaviors="clr-namespace:DeluxeCarsDesktop.Behaviors"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
              d:DesignHeight="550" d:DesignWidth="900">
-    <Grid Margin="15">
+
+    
+    
+    <UserControl.Resources>
+
+        <Style x:Key="WhiteHeaderStyle" TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+            <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        </Style>
+
+        <Style x:Key="CustomDataGridCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource Brush.Brand.NavyDeep}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+    </UserControl.Resources>
+    
+    
+    <Grid Margin="5">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="154*"/>
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <WrapPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
 
-            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                     Style="{StaticResource SearchBoxStyle}"
-                     Tag="Buscar por N° Factura o Cliente..."
-                     MinWidth="300" MaxWidth="500" Width="350"
-                     Margin="5"/>
+        <Grid Grid.Row="0" Margin="0,10,0,30" HorizontalAlignment="Left">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
-            <ComboBox ItemsSource="{Binding ClientesDisponibles}"
-                      SelectedItem="{Binding ClienteFiltro}"
-                      DisplayMemberPath="Nombre"
-                      Style="{StaticResource StyleComboBoxDc}" 
-                      Tag="Filtrar por Cliente"
-                      Width="200" Margin="5"/>
+            <TextBox  Grid.Column="0" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                Style="{StaticResource SearchBoxStyle}"
+                behaviors:InputBehaviors.EnterEjecutaComando="{Binding AplicarFiltrosCommand}"
+                Tag="Buscar por N° Factura o Cliente..."
+                MinWidth="300" MaxWidth="500" Width="350"
+                Margin="0 0 0 0">
+                
+            </TextBox>
 
-            <ComboBox ItemsSource="{Binding EstadosPago}"
-                      SelectedItem="{Binding EstadoPagoFiltro}"
-                      Style="{StaticResource StyleComboBoxDc}"
-                      Tag="Filtrar por Estado"
-                      Foreground="{StaticResource Text.Secondary}"
-                      Width="150" Margin="5"/>
+            <DatePicker Grid.Column="1" SelectedDate="{Binding FechaInicio}"
+                            Style="{StaticResource DarkDatePickerStyle}"
+                            Tag="Fecha Inicio"
+                            Padding="5 0 10 0"
+                            Margin="50 0 0 0"/>
 
-            <DatePicker SelectedDate="{Binding FechaInicio}"
-                Style="{StaticResource DarkDatePickerStyle}"
-                Tag="Fecha Inicio"
-                Width="140" Margin="5"/>
-
-            <DatePicker SelectedDate="{Binding FechaFin}"
-                Style="{StaticResource DarkDatePickerStyle}"
-                Tag="Fecha Fin"
-                Width="140" Margin="5"/>
-
-            <Button Content="Aplicar Filtros"
-            Command="{Binding AplicarFiltrosCommand}"
-            Style="{StaticResource MaterialDesignRaisedButton}"
-            Margin="15,5,5,5"/>
+            <DatePicker Grid.Column="2" SelectedDate="{Binding FechaFin}"
+                            Style="{StaticResource DarkDatePickerStyle}"
+                            Padding="5 0 10 0"
+                            Tag="Fecha Fin"
+                            Margin="50 0 0 0"/>
 
             <Button Grid.Column="3" Command="{Binding LimpiarFiltrosCommand}"
-                    Margin="50 0"
+                    Margin="25 0 0 0"
                     Style="{StaticResource controlButton}"
                     Tag="{StaticResource color4}"
                     ToolTip="Limpiar Filtros">
-                <fa:IconImage Icon="Eraser" Width="15" Height="15" Style="{StaticResource controlButtonIcon}"/>
+                <fa:IconImage Icon="Trash" Width="20" Height="20" Style="{StaticResource controlButtonIcon}"/>
             </Button>
 
 
+        </Grid>
 
-            <Button Content="Nueva Factura"
-            Command="{Binding NuevaFacturaCommand}"
-            Style="{StaticResource ElegantShadowGhostButton}"
-            Tag="{StaticResource Brush.Menu.GreenForest}"
-            Margin="15,5,5,5"/>
+        <Grid Grid.Row="1" HorizontalAlignment="Left" Margin="20,0,0,30">
 
-        </WrapPanel>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-        <Border Grid.Row="1" CornerRadius="10" Background="{StaticResource Brush.Brand.CharcoalLight}" 
+            <Grid Grid.Row="0" >
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <ComboBox Grid.Column="0" ItemsSource="{Binding ClientesDisponibles}"
+                            SelectedItem="{Binding ClienteFiltro}"
+                            DisplayMemberPath="Nombre"
+                            Style="{StaticResource ElegantComboBoxStyle}"
+                            FontFamily="{StaticResource Font.Poppins}"
+                            Tag="{StaticResource Border.Default}"
+                            Width="200" Margin="0 0 10 0"/>
+
+                <ComboBox Grid.Column="1"
+          ItemsSource="{Binding EstadosPago}"
+          
+          DisplayMemberPath="DisplayText"
+          SelectedItem="{Binding SelectedEstadoPago}"
+          
+          Style="{StaticResource ElegantComboBoxStyle}"
+          FontFamily="{StaticResource Font.Poppins}" 
+          Tag="{StaticResource Border.Default}"
+          Width="180" Margin="20 0 0 0"/>
+
+                <!--<Button Grid.Column="2" Content="Nueva Factura"
+                        Command="{Binding NuevaFacturaCommand}"
+                        Style="{StaticResource ElegantShadowGhostButton}"
+                        Tag="{StaticResource Brush.Menu.GreenForest}"
+                        Margin="50,0,20,0"/>-->
+
+            </Grid>
+        </Grid>
+
+        <Border Grid.Row="2" CornerRadius="10" Background="{StaticResource Brush.Brand.CharcoalLight}" 
                 BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1.2">
-            <DataGrid ItemsSource="{Binding Facturas}" 
+                <DataGrid ItemsSource="{Binding Facturas}" 
                       SelectedItem="{Binding FacturaSeleccionada}"
                       Style="{StaticResource AppDataGridStyle}"
-                      AutoGenerateColumns="False" 
-                      IsReadOnly="True">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Factura N°" Binding="{Binding NumeroFactura}" Width="*"/>
-                    <DataGridTextColumn Header="Fecha" Binding="{Binding FechaEmision, StringFormat=d}" Width="Auto"/>
-                    <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nombre}" Width="2*"/>
+                        ColumnHeaderStyle="{StaticResource WhiteHeaderStyle}" 
+                        CellStyle="{StaticResource CustomDataGridCellStyle}"
+                        GridLinesVisibility="Horizontal"
+                        CanUserAddRows="False"
+                        AutoGenerateColumns="False"
+                        IsReadOnly="True"
+                        CanUserSortColumns="True">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Factura N°" Binding="{Binding NumeroFactura}" Width="*"/>
+                        <DataGridTextColumn Header="Fecha" Binding="{Binding FechaEmision, StringFormat=d}" Width="Auto"/>
+                        <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nombre}" Width="2*"/>
 
-                    <DataGridTextColumn Header="Total Factura" Binding="{Binding Total, StringFormat=C}" Width="Auto" FontWeight="Bold"/>
-                    <DataGridTextColumn Header="Saldo Pendiente" Binding="{Binding SaldoPendiente, StringFormat=C}" Width="Auto"/>
-                    <DataGridTemplateColumn Header="Estado Pago" Width="Auto" MinWidth="100">
+                        <DataGridTextColumn Header="Total Factura" Binding="{Binding Total, StringFormat=C}" Width="Auto" FontWeight="Bold"/>
+                        <DataGridTextColumn Header="Saldo Pendiente" Binding="{Binding SaldoPendiente, StringFormat=C}" Width="Auto"/>
+                    <DataGridTemplateColumn Header="Estado Pago" Width="150" MinWidth="120">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Border CornerRadius="4" Padding="8,3" Margin="2">
-                                    <TextBlock Text="{Binding EstadoPago}" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                <Border CornerRadius="12" Padding="10,4" Margin="2">
+                                    <TextBlock Text="{Binding EstadoPago}" 
+                           FontFamily="{DynamicResource Font.Poppins}" 
+                           FontSize="14" 
+                           FontWeight="Medium" 
+                           HorizontalAlignment="Center"/>
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Background" Value="#6B7280"/>
+                                            <Setter Property="ToolTip" Value="Esta factura ha sido anulada."/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding EstadoPago}" Value="{x:Static enums:EstadoPagoFactura.Pendiente}">
+                                                    <Setter Property="Background" Value="#EF4444"/>
+                                                    <Setter Property="ToolTip" Value="Factura pendiente de pago."/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding EstadoPago}" Value="{x:Static enums:EstadoPagoFactura.Abonada}">
+                                                    <Setter Property="Background" Value="#F59E0B"/>
+                                                    <Setter Property="ToolTip" Value="Se han realizado abonos a esta factura."/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding EstadoPago}" Value="{x:Static enums:EstadoPagoFactura.Pagada}">
+                                                    <Setter Property="Background" Value="#10B981"/>
+                                                    <Setter Property="ToolTip" Value="Factura pagada en su totalidad."/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
                                 </Border>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Header="Acciones" Width="Auto" MinWidth="150">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <DataGridTemplateColumn Header="Acciones" Width="Auto" MinWidth="120">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
 
-                                    <Button Style="{StaticResource DataGridIconSharpButton_Style}"
+                                        <Button Style="{StaticResource DataGridIconSharpButton_Style}"
                         Tag="{x:Static fa:IconChar.HandHoldingUsd}"
                         ToolTip="Registrar Pago de Cliente"
                         Command="{Binding DataContext.RegistrarPagoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                         CommandParameter="{Binding}"/>
 
-                                    <Button Style="{StaticResource DataGridIconSharpButton_Style}"
+                                        <!--<Button Style="{StaticResource DataGridIconSharpButton_Style}"
                                             Tag="{x:Static fa:IconChar.ExchangeAlt}"
                                             ToolTip="Liquidar Saldo a Favor"
                                             Command="{Binding DataContext.LiquidarCreditoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                            CommandParameter="{Binding}"/>      
+                                            CommandParameter="{Binding}"/>-->
 
-                                    <Button Style="{StaticResource DataGridIconSharpButton_Style}"
+                                        <Button Style="{StaticResource DataGridIconSharpButton_Style}"
                         Tag="{x:Static fa:IconChar.Eye}"
                         ToolTip="Ver Detalles de la Factura"
                         Command="{Binding DataContext.VerDetallesCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                         CommandParameter="{Binding}"/>
 
-                                    <Button Style="{StaticResource DataGridIconSharpButton_Style}"
+                                        <Button Style="{StaticResource DataGridIconSharpButton_Style}"
                         Tag="{x:Static fa:IconChar.Ban}"
                         ToolTip="Anular Factura (Nota de Crédito)"
                         Command="{Binding DataContext.AnularFacturaCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                         CommandParameter="{Binding}"/>
 
-                                    <Button Style="{StaticResource DataGridIconSharpButton_Style}"
+                                        <!--<Button Style="{StaticResource DataGridIconSharpButton_Style}"
                         Tag="{x:Static fa:IconChar.FilePdf}"
+                                                Command="{Binding DataContext.GenerarPdfCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                         ToolTip="Generar Factura en PDF"
-                        IsEnabled="False"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
-        </Border>
-        <!--<WrapPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+                        IsEnabled="False"/>-->
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+        
+        <Grid Grid.Row="3" Margin="0,10,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                     Style="{StaticResource SearchBoxStyle}"
-                     Tag="Buscar por N° Factura o Cliente..."
-                     MinWidth="300" MaxWidth="500" Width="310"
-                     Margin="5"/>
+            <TextBlock Grid.Column="0" Text="{Binding TotalItems, StringFormat='Total: {0} registros'}" 
+                            FontSize="15"
+                            FontFamily="{StaticResource Font.Poppins}" FontWeight="Medium"
+                    VerticalAlignment="Center" Margin="20,0,20,0"
+                    Foreground="{StaticResource Text.Secondary}"/>
 
-            <ComboBox ItemsSource="{Binding ClientesDisponibles}"
-                      SelectedItem="{Binding ClienteFiltro}"
-                      DisplayMemberPath="Nombre"
-                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                      Foreground="{StaticResource Text.Secondary}"
-                      FontFamily="{StaticResource Font.SourceSans3}"
-                      FontWeight="Medium"
-                      FontSize="16"
-                      BorderBrush="{DynamicResource Background.Disabled}"
-                      materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource Brush.Menu.BlueCornflower}"
-                      Tag="Filtrar por Cliente"
-                      Width="200" Margin="5"/>
+            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                <Button Command="{Binding IrAPaginaAnteriorCommand}"  Style="{StaticResource MaterialDesignToolButton}">
+                    <materialDesign:PackIcon Kind="ChevronLeft" Width="15" Height="15"/>
+                </Button>
 
-            <ComboBox ItemsSource="{Binding EstadosPago}"
-              SelectedItem="{Binding EstadoPagoFiltro}"
-              Style="{StaticResource MaterialDesignOutlinedComboBox}"
-              Tag="Filtrar por Estado"
-              Width="150" Margin="5"/>
+                <TextBlock VerticalAlignment="Center" FontSize="15" FontFamily="{StaticResource Font.Poppins}" FontWeight="Medium" Margin="10,0" Foreground="{StaticResource Text.Secondary}">
+                        <Run Text="Página"/>    
+                        <Run Text="{Binding NumeroDePagina}"/>
+                        <Run Text="de"/>
+                        <Run Text="{Binding TotalPaginas, Mode=OneWay}"/>
+                </TextBlock>
 
-            <DatePicker SelectedDate="{Binding FechaInicio}"
-                Style="{StaticResource MaterialDesignOutlinedDatePicker}"
-                Tag="Fecha Inicio"
-                Width="140" Margin="5"/>
+                <Button Command="{Binding IrAPaginaSiguienteCommand}" Style="{StaticResource MaterialDesignToolButton}">
+                    <materialDesign:PackIcon Kind="ChevronRight" />
+                </Button>
+            </StackPanel>
 
-            <DatePicker SelectedDate="{Binding FechaFin}"
-                Style="{StaticResource MaterialDesignOutlinedDatePicker}"
-                Tag="Fecha Fin"
-                Width="140" Margin="5"/>
-
-            <Button Content="Aplicar Filtros"
-            Command="{Binding AplicarFiltrosCommand}"
-            Style="{StaticResource MaterialDesignRaisedButton}"
-            Margin="15,5,5,5"/>
-
-            <Button Command="{Binding LimpiarFiltrosCommand}"
-                    Style="{StaticResource MaterialDesignOutlinedButton}"
-                    ToolTip="Limpiar Filtros"
-                    Margin="5">
-                <fa:IconImage Icon="Broom" Style="{StaticResource ButtonIcon}" Margin="0"/>
-            </Button>
-
-            <Button Content="Nueva Factura"
-            Command="{Binding NuevaFacturaCommand}"
-            Style="{StaticResource ElegantShadowGhostButton}"
-            Tag="{StaticResource Brush.Menu.GreenForest}"
-            Margin="15,5,5,5"/>
-
-        </WrapPanel>-->
-
+        </Grid>
     </Grid>
 </UserControl>

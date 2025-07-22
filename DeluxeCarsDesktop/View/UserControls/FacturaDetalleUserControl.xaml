@@ -1,0 +1,125 @@
+﻿<UserControl x:Class="DeluxeCarsDesktop.View.UserControls.FacturaDetalleUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <Style x:Key="DetailLabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}"/>
+            <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="0,15,0,5"/>
+        </Style>
+
+        <Style x:Key="ReadOnlyDataStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="FontSize" Value="16"/>
+        </Style>
+
+        <Style x:Key="WhiteHeaderStyle" TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+            <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        </Style>
+
+        <Style x:Key="CustomDataGridCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource Brush.Brand.NavyDeep}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
+            <TextBlock Text="Factura N°: " Style="{StaticResource ReadOnlyDataStyle}" FontSize="22"/>
+            <TextBlock Text="{Binding Factura.NumeroFactura}" Style="{StaticResource ReadOnlyDataStyle}" FontSize="22" Foreground="{DynamicResource Brush.Accent.BrightBlue}"/>
+            <TextBlock Text=" - Fecha: " Style="{StaticResource ReadOnlyDataStyle}" Margin="30,0,0,0"/>
+            <TextBlock Text="{Binding Factura.FechaEmision, StringFormat='dd/MM/yyyy'}" Style="{StaticResource ReadOnlyDataStyle}"/>
+        </StackPanel>
+
+        <Border Grid.Row="1" Background="{DynamicResource Brush.Brand.CharcoalDark}" CornerRadius="8" Padding="15" Margin="0,0,0,20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Cliente:" Style="{StaticResource DetailLabelStyle}" Margin="0"/>
+                    <TextBlock Text="{Binding Factura.Cliente.Nombre}" Style="{StaticResource ReadOnlyDataStyle}"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="Identificación:" Style="{StaticResource DetailLabelStyle}" Margin="0"/>
+                    <TextBlock Text="{Binding Factura.Cliente.Identificacion}" Style="{StaticResource ReadOnlyDataStyle}"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="Email:" Style="{StaticResource DetailLabelStyle}" Margin="0"/>
+                    <TextBlock Text="{Binding Factura.Cliente.Email}" Style="{StaticResource ReadOnlyDataStyle}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <DataGrid Grid.Row="2" 
+                  ItemsSource="{Binding Factura.DetallesFactura}"
+                  Style="{StaticResource AppDataGridStyle}"
+                  ColumnHeaderStyle="{StaticResource WhiteHeaderStyle}"
+                  CellStyle="{StaticResource CustomDataGridCellStyle}"
+                  CanUserAddRows="False"
+                  IsReadOnly="True"
+                  AutoGenerateColumns="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Descripción" Binding="{Binding Descripcion}" Width="3*"/>
+                <DataGridTextColumn Header="Cantidad" Binding="{Binding Cantidad}" Width="*"/>
+                <DataGridTextColumn Header="Precio Unit." Binding="{Binding PrecioUnitario, StringFormat=C}" Width="*"/>
+                <DataGridTextColumn Header="Total" Binding="{Binding Total, StringFormat=C}" Width="*" FontWeight="Bold"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Border Grid.Row="3" Background="{DynamicResource Brush.Brand.CharcoalDark}" CornerRadius="8" Padding="15" Margin="0,20,0,0" HorizontalAlignment="Right">
+            <StackPanel>
+                <Grid Width="350">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="SubTotal:" Style="{StaticResource ReadOnlyDataStyle}" HorizontalAlignment="Right"/>
+                    <TextBlock Grid.Column="1" Text="{Binding Factura.SubTotal, StringFormat=C}" Style="{StaticResource ReadOnlyDataStyle}" Margin="15,0,0,0"/>
+
+                    <TextBlock Grid.Column="0" Text="IVA:" Style="{StaticResource ReadOnlyDataStyle}" HorizontalAlignment="Right" Margin="0,20,0,0"/>
+                    <TextBlock Grid.Column="1" Text="{Binding Factura.TotalIVA, StringFormat=C}" Style="{StaticResource ReadOnlyDataStyle}" Margin="15,20,0,0"/>
+
+                    <TextBlock Grid.Column="0" Text="TOTAL FACTURA:" FontSize="18" Style="{StaticResource ReadOnlyDataStyle}" HorizontalAlignment="Right" Margin="0,20,0,0"/>
+                    <TextBlock Grid.Column="1" Text="{Binding Factura.Total, StringFormat=C}" FontSize="18" Style="{StaticResource ReadOnlyDataStyle}" Margin="15,20,0,0" Foreground="{DynamicResource Brush.Accent.BrightBlue}"/>
+
+                    <TextBlock Grid.Column="0" Text="Total Abonado:" Style="{StaticResource ReadOnlyDataStyle}" HorizontalAlignment="Right" Margin="0,20,0,0"/>
+                    <TextBlock Grid.Column="1" Text="{Binding Factura.MontoAbonado, StringFormat=C}" Style="{StaticResource ReadOnlyDataStyle}" Margin="15,20,0,0" Foreground="{DynamicResource Brush.Accent.Green}"/>
+
+                    <TextBlock Grid.Column="0" Text="SALDO PENDIENTE:" FontSize="18" Style="{StaticResource ReadOnlyDataStyle}" HorizontalAlignment="Right" Margin="0,20,0,0"/>
+                    <TextBlock Grid.Column="1" Text="{Binding Factura.SaldoPendiente, StringFormat=C}" FontSize="18" Style="{StaticResource ReadOnlyDataStyle}" Margin="15,20,0,0" Foreground="{DynamicResource Brush.Accent.DestructiveRed}"/>
+                </Grid>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

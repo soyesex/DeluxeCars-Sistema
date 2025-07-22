@@ -5,7 +5,7 @@ namespace Aplicacion.Core.Interfaces
     public interface ICarritoService
     {
         CarritoViewModel GetCarrito();
-        Task AddItemAsync(int productoId, int cantidad);
+        Task<bool> AddItemAsync(int productoId, int cantidad);
         // Aquí podrías añadir métodos como RemoveItem, UpdateQuantity, etc.
         void RemoveItem(int productoId);
     }

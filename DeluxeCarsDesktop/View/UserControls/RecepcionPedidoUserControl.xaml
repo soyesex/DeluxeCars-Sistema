@@ -9,7 +9,32 @@
              MaxWidth="900"
              MinHeight="450"
              d:DesignHeight="450" d:DesignWidth="800">
-    
+    <UserControl.Resources>
+
+        <Style x:Key="WhiteHeaderStyle" TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+            <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        </Style>
+
+        <Style x:Key="CustomDataGridCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource Brush.Brand.NavyDeep}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+    </UserControl.Resources>
+
     <Grid Margin="15">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -17,14 +42,25 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="{Binding Titulo}" Style="{StaticResource H1TextStyle}" Margin="10"/>
+        <TextBlock Grid.Row="0" Text="{Binding Titulo}" FontSize="35" Style="{StaticResource H1TextStyle}" Margin="10 10 10 20"/>
 
-        <DataGrid Grid.Row="1" ItemsSource="{Binding ItemsARecepcionar}" Style="{StaticResource ElegantDataGridStyle}" AutoGenerateColumns="False">
+        <Border Margin="10 0 10 10" Grid.Row="1" CornerRadius="10" 
+        Background="{StaticResource Brush.Brand.CharcoalLight}" 
+         BorderBrush="{StaticResource PrimaryBorderColor}" BorderThickness="1.2">
+        <DataGrid ItemsSource="{Binding ItemsARecepcionar}" 
+                  Style="{StaticResource AppDataGridStyle}"
+                ColumnHeaderStyle="{StaticResource WhiteHeaderStyle}" 
+                CellStyle="{StaticResource CustomDataGridCellStyle}"
+                GridLinesVisibility="Horizontal"
+                CanUserAddRows="False"
+                AutoGenerateColumns="False"
+                IsReadOnly="True"
+                CanUserSortColumns="True">
             <DataGrid.Columns>
 
                 <DataGridTextColumn Header="Producto" Binding="{Binding NombreProducto}" IsReadOnly="True" Width="*"/>
 
-                <DataGridTextColumn Header="Cant. Pedida" Binding="{Binding CantidadPedida}" IsReadOnly="True" Width="120"/>
+                <DataGridTextColumn Header="Cant. Pedida" Binding="{Binding CantidadPedida}" IsReadOnly="True" Width="*"/>
 
                 <DataGridTemplateColumn Header="Cant. Recibida" Width="120">
                     <DataGridTemplateColumn.CellTemplate>
@@ -50,10 +86,15 @@
 
             </DataGrid.Columns>
         </DataGrid>
+        </Border>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
-            <Button Content="Confirmar Recepción" Command="{Binding ConfirmarRecepcionCommand}" Style="{StaticResource DarkActionButtonStyle}" Width="180"/>
-            <Button Content="Cancelar" Command="{Binding CloseAction}" Style="{StaticResource DarkActionButtonStyle}" Width="120" Margin="10,0,0,0"/>
+            <Button Content="Confirmar Recepción" Command="{Binding ConfirmarRecepcionCommand}" 
+                    Style="{StaticResource ElegantShadowGhostButton}"
+Tag="{StaticResource Brush.Menu.GreenForest}" Width="210"/>
+            <Button Content="Cancelar" Command="{Binding CloseAction}"
+                    Style="{StaticResource ElegantShadowGhostButton}"
+Tag="{StaticResource Brush.Menu.GreenForest}" Width="120" Margin="50,0,0,0"/>
         </StackPanel>
     </Grid>
 </UserControl>

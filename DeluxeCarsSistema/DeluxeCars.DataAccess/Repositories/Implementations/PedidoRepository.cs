@@ -9,50 +9,56 @@ namespace DeluxeCars.DataAccess.Repositories.Implementations
     {
         public PedidoRepository(AppDbContext context) : base(context)
         { }
+        public async Task<Pedido> GetForPaymentProcessingAsync(int pedidoId)
+        {
+            return await _context.Pedidos
+                .Include(p => p.Proveedor)           // Necesario para el nombre del proveedor.
+                .Include(p => p.DetallesPedidos)     // Necesario para calcular el MontoTotal.
+                .Include(p => p.PagosAplicados)      // Necesario para la colección de pagos.
+                    .ThenInclude(pa => pa.PagoProveedor) // Necesario para sumar los MontosPagados.
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.Id == pedidoId);
+        }
         public async Task<PagedResult<Pedido>> SearchAsync(string searchText, DateTime fechaInicio, DateTime fechaFin, int? proveedorId, EstadoPedido? estado, int pageNumber, int pageSize)
         {
-            var query = _context.Pedidos
-                .Include(p => p.Proveedor) // Incluimos para poder buscar y mostrar el nombre
-                .AsQueryable();
+            var query = _context.Pedidos.AsQueryable();
 
-            // Filtro por texto universal (N° de Pedido o Proveedor)
+            // 1. APLICA TODOS LOS FILTROS PRIMERO
             if (!string.IsNullOrWhiteSpace(searchText))
             {
                 query = query.Where(p => p.NumeroPedido.Contains(searchText) ||
                                          (p.Proveedor != null && p.Proveedor.RazonSocial.Contains(searchText)));
             }
 
-            // Filtro por fechas
             query = query.Where(p => p.FechaEmision >= fechaInicio.Date && p.FechaEmision < fechaFin.Date.AddDays(1));
 
-            // Filtro por Proveedor ID
             if (proveedorId.HasValue && proveedorId.Value > 0)
             {
                 query = query.Where(p => p.IdProveedor == proveedorId.Value);
             }
 
-            // Filtro por Estado
             if (estado.HasValue)
             {
                 query = query.Where(p => p.Estado == estado.Value);
             }
 
-            // Conteo total ANTES de paginar
+            // 2. OBTÉN EL CONTEO TOTAL DESPUÉS DE FILTRAR
             var totalCount = await query.CountAsync();
 
-            // Aplicamos orden y paginación, e incluimos datos relacionados para las columnas calculadas
+            // 3. APLICA ORDEN, INCLUDES Y PAGINACIÓN AL FINAL
             var items = await query.OrderByDescending(p => p.FechaEmision)
                                    .Skip((pageNumber - 1) * pageSize)
                                    .Take(pageSize)
+                                   // Le decimos a EF que traiga toda la data relacionada justo antes de ejecutar
+                                   .Include(p => p.Proveedor)
                                    .Include(p => p.DetallesPedidos)
                                    .Include(p => p.PagosAplicados)
-                                        .ThenInclude(pa => pa.PagoProveedor)
+                                       .ThenInclude(pa => pa.PagoProveedor)
                                    .AsNoTracking()
                                    .ToListAsync();
 
             return new PagedResult<Pedido> { Items = items, TotalCount = totalCount };
         }
-
         // --- IMPLEMENTACIÓN DEL NUEVO MÉTODO ---
         public async Task<IEnumerable<Pedido>> GetPendingOrdersWithDetailsAsync(DateTime forDate)
         {

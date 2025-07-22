@@ -22,16 +22,16 @@
 
         <Style x:Key="CustomDataGridCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Background" Value="{StaticResource Brush.Neutral.WhiteSecondary}"/>
-            <Setter Property="FontWeight" Value="DemiBold" />
+            <Setter Property="Background" Value="{DynamicResource Brush.Menu.Lavender}"/>
+            <Setter Property="FontWeight" Value="Medium" />
             <Setter Property="FontSize" Value="14" />
-            <Setter Property="Foreground" Value="{StaticResource Brush.Brand.NavyDeep}" />
+            <Setter Property="Foreground" Value="{DynamicResource Brush.Brand.NavyDark}" />
             <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}" />
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="{DynamicResource Brush.Accent.VibrantBlue.Transparent}"/>
-                    <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=DataGridRow}}"/>
+                    <Setter Property="Background" Value="{DynamicResource Brush.Brand.NavyDeep}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
                 </Trigger>
             </Style.Triggers>
         </Style>

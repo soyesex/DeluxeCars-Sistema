@@ -117,14 +117,16 @@
                                 Orientation="Horizontal"
                                 Height="35"
                                 Margin="15,25,0,40">
-                        <Image Source="/Images/deluxeCarsLogo.jpg " Height="30"/>
+                        <Grid Width="35" Height="35" Margin="5,5,10,0">
+                            <Image Source="/icono3.ico" Stretch="UniformToFill"/>
+                        </Grid>
                         <TextBlock Text="Deluxe Cars"
                                    Foreground="{StaticResource titleColor2}"
-                                   FontSize="21"
+                                   FontSize="26"
                                    FontWeight="SemiBold"
                                    FontFamily="{StaticResource Font.Poppins}" 
                                    VerticalAlignment="Center"
-                                   Margin="10,0,0,0"/>
+                                   Margin="0,5,0,0"/>
 
                     </StackPanel>
 
@@ -232,7 +234,7 @@
                                 </StackPanel>
                             </RadioButton>
 
-                            <RadioButton Style="{StaticResource menuButton1}"
+                            <!--<RadioButton Style="{StaticResource menuButton1}"
                                  Tag="{StaticResource color9}"
                                  Command="{Binding ShowReportesViewCommand}"
                                  Margin="0,0,0,10"
@@ -245,9 +247,9 @@
                                     <fa:IconImage Icon="ChartColumn" Style="{StaticResource menuButtonIcon}"/>
                                     <TextBlock Text="Reportes" Style="{StaticResource menuButtonText}"/>
                                 </StackPanel>
-                            </RadioButton>
+                            </RadioButton>-->
                             
-                            <RadioButton Style="{StaticResource menuButton1}"
+                            <!--<RadioButton Style="{StaticResource menuButton1}"
                                          Tag="{StaticResource color13}"
                                          Command="{Binding ShowRolViewCommand}"
                                          Margin="0,0,0,5"
@@ -275,7 +277,7 @@
                                     <fa:IconImage Icon="UserGear" Style="{StaticResource menuButtonIcon}"/>
                                     <TextBlock Text="Usuarios" Style="{StaticResource menuButtonText}"/>
                                 </StackPanel>
-                            </RadioButton>
+                            </RadioButton>-->
 
                             <RadioButton Style="{StaticResource menuButton1}"
                                          Tag="{StaticResource color12}"

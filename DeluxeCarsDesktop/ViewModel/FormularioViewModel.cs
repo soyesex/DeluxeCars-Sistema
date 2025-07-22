@@ -207,6 +207,12 @@ namespace DeluxeCarsDesktop.ViewModel
                     Icon = IconChar.Calculator; // Ícono más apropiado
                     break;
 
+                case FormType.FacturaDetalles:
+                    CurrentChildView = serviceProvider.GetService<FacturaDetalleViewModel>();
+                    Icon = IconChar.FileInvoiceDollar;
+                    Caption = "Detalle de Factura";
+                    break;
+
                 default:
                     Caption = "Formulario Desconocido";
                     Icon = IconChar.QuestionCircle;

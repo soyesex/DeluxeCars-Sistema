@@ -130,13 +130,13 @@ namespace DeluxeCarsDesktop.ViewModel
             await LoadCurrentUserData(); // Carga los datos del usuario logueado
 
             // 1. Establece el saludo inicial.
-            GreetingText = $"Bienvenido, {CurrentUserAccount.DisplayName}";
+            GreetingText = $"Bienvenido {CurrentUserAccount.DisplayName}";
 
             // 2. Crea un temporizador que se ejecutará en el hilo de la UI.
             var greetingTimer = new System.Windows.Threading.DispatcherTimer
             {
                 // Se disparará una sola vez después de 5 segundos.
-                Interval = TimeSpan.FromSeconds(5)
+                Interval = TimeSpan.FromSeconds(15)
             };
 
             // 3. Define qué hacer cuando el tiempo se cumpla.
@@ -311,7 +311,7 @@ namespace DeluxeCarsDesktop.ViewModel
         // Centraliza toda la lógica para actualizar el título y el ícono de la ventana.
         private void UpdateCaptionAndIcon(ViewModelBase viewModel)
         {
-            // Mapeo centralizado de ViewModel a sus metadatos de UI
+            // Centraliza toda la lógica para actualizar el título y el ícono de la ventana.
             var viewMetadata = new Dictionary<Type, (string Caption, IconChar Icon, Brush AccentBrush)>
             {
                 [typeof(DashboardViewModel)] = ("Panel Principal", IconChar.Home, (Brush)Application.Current.FindResource("Brush.Menu.BlueSteel")),

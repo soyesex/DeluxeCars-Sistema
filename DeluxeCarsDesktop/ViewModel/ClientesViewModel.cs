@@ -135,7 +135,7 @@ namespace DeluxeCarsDesktop.ViewModel
             NuevoClienteCommand = new ViewModelCommand(async _ => await ExecuteNuevoCliente());
             EditarClienteCommand = new ViewModelCommand(async _ => await ExecuteEditarCliente(), _ => CanExecuteEditToggle());
             ToggleEstadoCommand = new ViewModelCommand(async _ => await ExecuteToggleEstado(), _ => CanExecuteEditToggle());
-            CrearFacturaCommand = new ViewModelCommand(async _ => await ExecuteCrearFactura(), _ => CanExecuteEditToggle());
+            CrearFacturaCommand = new ViewModelCommand(async p => await ExecuteCrearFactura(), p => CanExecuteEditToggle());
             LimpiarFiltrosCommand = new ViewModelCommand(async _ => await ExecuteLimpiarFiltros());
             // DESPUÉS
             IrAPaginaSiguienteCommand = new ViewModelCommand(async _ => { if (NumeroDePagina < TotalPaginas) { NumeroDePagina++; await FiltrarClientes(); } });
@@ -207,8 +207,13 @@ namespace DeluxeCarsDesktop.ViewModel
         }
         private async Task ExecuteCrearFactura()
         {
-            // Navega a la vista de facturación pasándole el ID del cliente seleccionado
-            await _navigationService.OpenFormWindow(FormType.Factura, ClienteSeleccionado.Id);
+            // Verificación de seguridad, aunque el CanExecute ya lo impide.
+            if (ClienteSeleccionado == null) return;
+
+            // ¡Aquí está! Llamamos a la nueva versión de NavigateTo
+            // Le decimos que navegue a FacturacionViewModel y le pasamos un entero (int)
+            // que es el ID del cliente seleccionado.
+            await _navigationService.NavigateTo<FacturacionViewModel, int>(ClienteSeleccionado.Id);
         }
         private async Task ExecuteLimpiarFiltros()
         {

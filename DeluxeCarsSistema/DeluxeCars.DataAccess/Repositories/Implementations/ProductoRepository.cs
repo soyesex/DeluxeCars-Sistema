@@ -177,7 +177,7 @@ namespace DeluxeCars.DataAccess.Repositories.Implementations
         {
             var query = _context.Productos.AsQueryable();
 
-            // --- Aplicamos filtros que sí se pueden traducir bien a SQL ---
+            // 1. Aplicamos filtros que se pueden traducir a SQL (sin cambios aquí)
             if (criteria.CategoryId.HasValue && criteria.CategoryId.Value != 0)
             {
                 query = query.Where(p => p.IdCategoria == criteria.CategoryId.Value);
@@ -189,25 +189,20 @@ namespace DeluxeCars.DataAccess.Repositories.Implementations
                 query = query.Where(p => p.Nombre.Contains(searchText) || p.OriginalEquipamentManufacture.Contains(searchText));
             }
 
-            // --- La paginación se hace sobre esta consulta base ---
-            var totalCount = await query.CountAsync();
-
-            var productosDePagina = await query
-                .OrderBy(p => p.Id)
-                .Skip((criteria.PageNumber - 1) * criteria.PageSize)
-                .Take(criteria.PageSize)
-                .Include(p => p.Categoria) // Incluimos la categoría para tener el nombre
+            // CAMBIO 1: Traemos TODOS los productos que coinciden, SIN PAGINAR todavía.
+            var productosDesdeBD = await query
+                .Include(p => p.Categoria)
                 .AsNoTracking()
                 .ToListAsync();
 
-            var productIds = productosDePagina.Select(p => p.Id).ToList();
+            var productIds = productosDesdeBD.Select(p => p.Id).ToList();
 
-            // --- Obtenemos datos relacionados (stock, proveedor) en consultas separadas y eficientes ---
+            // Obtenemos datos relacionados (sin cambios)
             var stocks = await GetCurrentStocksAsync(productIds);
             var proveedores = await GetPrimaryProvidersAsync(productIds);
 
-            // --- Construimos el DTO final en memoria ---
-            var items = productosDePagina.Select(p => new ProductoStockDto
+            // Construimos el DTO final en memoria (sin cambios)
+            var items = productosDesdeBD.Select(p => new ProductoStockDto
             {
                 Id = p.Id,
                 Nombre = p.Nombre,
@@ -222,7 +217,7 @@ namespace DeluxeCars.DataAccess.Repositories.Implementations
                 NombreProveedorPrincipal = proveedores.GetValueOrDefault(p.Id)
             }).ToList();
 
-            // --- Filtro por estado de stock (se aplica en memoria después de obtener los datos) ---
+            // CAMBIO 2: Filtro por estado de stock (se aplica ANTES de paginar y contar)
             if (!string.IsNullOrWhiteSpace(criteria.StockStatus) && criteria.StockStatus != "Todos")
             {
                 switch (criteria.StockStatus)
@@ -234,15 +229,28 @@ namespace DeluxeCars.DataAccess.Repositories.Implementations
                         items = items.Where(p => p.StockActual == 0).ToList();
                         break;
                     case "Bajo Stock":
-                        items = items.Where(p => p.StockMinimo.HasValue && p.StockMinimo > 0 && p.StockActual < p.StockMinimo.Value).ToList();
+                        // Esta es la lógica correcta que ya tenías, ahora funcionará bien.
+                        items = items.Where(p => p.StockMinimo.HasValue &&
+                                                 p.StockActual > 0 &&
+                                                 p.StockActual <= p.StockMinimo.Value).ToList();
                         break;
                 }
             }
 
+            // CAMBIO 3: El conteo total se calcula DESPUÉS del filtro de stock, sobre la lista en memoria.
+            var totalCount = items.Count;
+
+            // CAMBIO 4: La paginación se aplica al final, sobre la lista ya filtrada y contada.
+            var pagedItems = items
+                .OrderBy(p => p.Id)
+                .Skip((criteria.PageNumber - 1) * criteria.PageSize)
+                .Take(criteria.PageSize)
+                .ToList();
+
             return new PagedResult<ProductoStockDto>
             {
-                Items = items,
-                TotalCount = totalCount
+                Items = pagedItems, // Devolvemos solo la página de items
+                TotalCount = totalCount  // Devolvemos el conteo total correcto
             };
         }
 

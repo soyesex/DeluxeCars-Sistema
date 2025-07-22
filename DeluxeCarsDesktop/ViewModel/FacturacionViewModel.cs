@@ -17,7 +17,7 @@ using System.Windows.Input;
 
 namespace DeluxeCarsDesktop.ViewModel
 {
-    public class FacturacionViewModel : ViewModelBase, IAsyncLoadable
+    public class FacturacionViewModel : ViewModelBase, IAsyncLoadable, IParameterReceiver<int>
     {
         // --- Dependencias (sin cambios) ---
         private readonly IUnitOfWork _unitOfWork;
@@ -62,6 +62,10 @@ namespace DeluxeCarsDesktop.ViewModel
         private decimal _totalIVA;
         public decimal TotalIVA { get => _totalIVA; private set => SetProperty(ref _totalIVA, value); }
         private decimal _total;
+
+        private decimal _totalDescuentos;
+        public decimal TotalDescuentos { get => _totalDescuentos; private set => SetProperty(ref _totalDescuentos, value); }
+
         public decimal Total { get => _total; private set => SetProperty(ref _total, value); }
         private bool _isProductPopupOpen;
         public bool IsProductPopupOpen { get => _isProductPopupOpen; set => SetProperty(ref _isProductPopupOpen, value); }
@@ -73,7 +77,7 @@ namespace DeluxeCarsDesktop.ViewModel
             {
                 // Asignamos el valor, pero sin ejecutar ningún comando.
                 SetProperty(ref _itemSeleccionado, value);
-
+                _ = ActualizarStockParaItemSeleccionadoAsync();
                 // Si el valor no es nulo (es decir, el usuario ha seleccionado algo)...
                 if (value != null)
                 {
@@ -98,7 +102,9 @@ namespace DeluxeCarsDesktop.ViewModel
                 }
             }
         }
-
+        // Propiedad para guardar solo el stock del item que estamos viendo
+        private int _stockDelItemSeleccionado;
+        public int StockDelItemSeleccionado { get => _stockDelItemSeleccionado; private set => SetProperty(ref _stockDelItemSeleccionado, value); }
         // --- Comandos ---
         public ICommand AgregarItemCommand { get; }
         public ICommand EliminarItemCommand { get; }
@@ -230,18 +236,31 @@ namespace DeluxeCarsDesktop.ViewModel
             try
             {
                 _isBuscandoItems = true;
-                ItemSeleccionado = null;
+                
                 ResultadosBusquedaItem.Clear();
 
-                // 1. Ejecutamos la búsqueda de productos y ESPERAMOS a que termine.
-                var productos = await _unitOfWork.Productos.SearchActivosConStockAsync(TextoBusquedaItem);
-                foreach (var p in productos) { ResultadosBusquedaItem.Add(p); }
+                var productosEncontrados = await _unitOfWork.Productos.SearchActivosConStockAsync(TextoBusquedaItem);
 
-                // 2. UNA VEZ TERMINADA la anterior, ejecutamos la búsqueda de servicios.
+                // ✅ --- INICIO DE LA NUEVA LÓGICA ---
+                // 2. Optimizamos la obtención del stock para todos los productos encontrados a la vez
+                var idsProductos = productosEncontrados.Select(p => p.Id).ToList();
+                if (idsProductos.Any())
+                {
+                    var stocks = await _unitOfWork.Productos.GetCurrentStocksAsync(idsProductos);
+                    foreach (var producto in productosEncontrados)
+                    {
+                        // 3. Asignamos el stock calculado a nuestra nueva propiedad [NotMapped]
+                        producto.StockCalculado = stocks.GetValueOrDefault(producto.Id, 0);
+                    }
+                }
+                // ✅ --- FIN DE LA NUEVA LÓGICA ---
+
+                // 4. Añadimos los productos YA CON SU STOCK a la lista de resultados
+                foreach (var p in productosEncontrados) { ResultadosBusquedaItem.Add(p); }
+
+                // Buscamos servicios (sin cambios)
                 var servicios = await _unitOfWork.Servicios.GetByConditionAsync(s => s.Nombre.Contains(TextoBusquedaItem) && s.Estado == true);
                 foreach (var s in servicios) { ResultadosBusquedaItem.Add(s); }
-
-                // --- FIN DE LA CORRECCIÓN ---
 
                 IsProductPopupOpen = ResultadosBusquedaItem.Any();
             }
@@ -347,12 +366,34 @@ namespace DeluxeCarsDesktop.ViewModel
 
             }
         }
-        private void RecalcularTotales()
+        private async Task ActualizarStockParaItemSeleccionadoAsync()
         {
-            Total = LineasDeFactura.Sum(d => d.Total);
-            SubTotal = LineasDeFactura.Sum(d => d.SubTotalLinea);
-            TotalIVA = Total - SubTotal;
+            if (ItemSeleccionado is Producto p)
+            {
+                // Buscamos el stock y actualizamos la propiedad
+                StockDelItemSeleccionado = await _unitOfWork.Productos.GetCurrentStockAsync(p.Id);
+            }
+            else
+            {
+                // Si no es un producto (o es nulo), el stock es 0
+                StockDelItemSeleccionado = 0;
+            }
+        }
+        public void RecalcularTotales()
+        {
+            SubTotal = LineasDeFactura.Sum(d => d.Cantidad * d.PrecioUnitario);
+            TotalDescuentos = LineasDeFactura.Sum(d => d.Descuento ?? 0m); // Sumamos todos los descuentos
+
+            var subTotalConDescuento = SubTotal - TotalDescuentos;
+
+            // El IVA se calcula sobre el precio DESPUÉS del descuento
+            TotalIVA = LineasDeFactura.Sum(d => (d.Cantidad * d.PrecioUnitario - (d.Descuento ?? 0m)) * (d.IVA ?? 19) / 100m);
+
+            Total = subTotalConDescuento + TotalIVA;
+
+            // Notificamos a la UI de todos los cambios
             OnPropertyChanged(nameof(SubTotal));
+            OnPropertyChanged(nameof(TotalDescuentos));
             OnPropertyChanged(nameof(TotalIVA));
             OnPropertyChanged(nameof(Total));
         }
@@ -465,6 +506,10 @@ namespace DeluxeCarsDesktop.ViewModel
             }
         }
 
+        public void LoadWithParameter(int parameter)
+        {
+            this.ClienteIdToLoad = parameter;
+        }
     }    
 }
 

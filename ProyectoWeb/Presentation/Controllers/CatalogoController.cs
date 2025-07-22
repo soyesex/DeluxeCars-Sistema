@@ -26,7 +26,8 @@ namespace Aplicacion.Presentation.Controllers
                 Id = p.Id,
                 Nombre = p.Nombre,
                 Precio = p.Precio,
-                ImagenUrl = string.IsNullOrEmpty(p.ImagenUrl) ? "/images/Default.jpeg" : $"/images/{p.ImagenUrl}",
+                ImagenUrl = string.IsNullOrEmpty(p.ImagenUrl)
+                ? "/images/default.jpeg" : "/" + p.ImagenUrl,
                 // El resto de las propiedades que tu _ProductCard.cshtml necesite
             }).ToList(); // Convertimos a Lista para la vista
 

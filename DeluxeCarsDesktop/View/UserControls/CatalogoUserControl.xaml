@@ -31,8 +31,8 @@
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="{DynamicResource Brush.Accent.VibrantBlue.Transparent}"/>
-                    <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=DataGridRow}}"/>
+                    <Setter Property="Background" Value="{DynamicResource Brush.Brand.NavyDeep}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -58,7 +58,7 @@
             <TextBox Grid.Column="0" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                         Style="{StaticResource SearchBoxStyle}"
                         MinWidth="300" MaxWidth="500" Width="400"
-                        Tag="Buscar por N° Factura o Cliente..."/>
+                        Tag="Buscar por Nombre, OEM, o Categoría..."/>
 
             <ComboBox Grid.Column="1" ItemsSource="{Binding CategoriasDisponibles}"
                         SelectedItem="{Binding CategoriaFiltroSeleccionada}"
@@ -157,7 +157,8 @@
                                     <Setter.Value>
                                         <ToolTip Background="#2D3748" BorderThickness="0">
                                             <StackPanel Orientation="Horizontal" Margin="10">
-                                                <Image Source="{Binding ImagenUrl, Converter={StaticResource ImagePathConverter}}" Width="100" Height="100" Margin="0,0,15,0" />
+                                                <Image Source="{Binding FullImageUrl}" 
+                                       Width="100" Height="100" Margin="0,0,15,0" />
                                                 <StackPanel>
                                                     <TextBlock Text="{Binding Nombre}" FontFamily="{StaticResource Font.Poppins}" FontWeight="Medium"
                                                                 FontSize="16" Foreground="{StaticResource Brush.Brand.NavyDark}"/>

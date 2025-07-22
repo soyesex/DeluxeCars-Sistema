@@ -20,14 +20,19 @@ namespace Aplicacion.Application.Services
         }
 
         // 3. El método ahora es asíncrono para esperar la consulta a la BD
-        public async Task AddItemAsync(int productoId, int cantidad)
+        // En: CarritoService.cs
+
+        // El método ahora debe devolver Task<bool> para implementar la interfaz correctamente
+        public async Task<bool> AddItemAsync(int productoId, int cantidad)
         {
             var carrito = GetCarrito();
-
-            // 4. Obtenemos el producto directamente del repositorio, de forma asíncrona
             var producto = await _unitOfWork.Productos.GetByIdAsync(productoId);
 
-            if (producto == null) return;
+            // Si el producto no se encuentra, devuelve false
+            if (producto == null)
+            {
+                return false;
+            }
 
             var itemEnCarrito = carrito.Items.FirstOrDefault(i => i.ProductoId == productoId);
 
@@ -43,12 +48,15 @@ namespace Aplicacion.Application.Services
                     NombreProducto = producto.Nombre,
                     Cantidad = cantidad,
                     Precio = producto.Precio,
-                    // Asegúrate de que tu entidad Producto tenga ImagenUrl
-                    ImagenUrl = producto.ImagenUrl
+                    // Importante: Asegúrate que la URL de la imagen sea raíz
+                    ImagenUrl = string.IsNullOrEmpty(producto.ImagenUrl) ? "/images/default.jpeg" : "/" + producto.ImagenUrl
                 });
             }
 
             GuardarCarritoEnSesion(carrito);
+
+            // Si todo fue bien, devuelve true
+            return true;
         }
 
         public CarritoViewModel GetCarrito()

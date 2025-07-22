@@ -5,8 +5,34 @@
              xmlns:behaviors="clr-namespace:DeluxeCarsDesktop.Behaviors"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DeluxeCarsDesktop.View.UserControls"
-             mc:Ignorable="d" 
-             d:DesignHeight="550" d:DesignWidth="800">
+             mc:Ignorable="d" MaxWidth="1100"
+             d:DesignHeight="700" d:DesignWidth="800">
+    <UserControl.Resources>
+        <Style x:Key="WhiteHeaderStyle" TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+            <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        </Style>
+
+        <Style x:Key="CustomDataGridCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="{DynamicResource Brush.Menu.Lavender}"/>
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Foreground" Value="{DynamicResource Brush.Brand.NavyDark}" />
+            <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource Brush.Brand.NavyDeep}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
     <Grid Margin="15">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -17,7 +43,7 @@
 
         <TextBlock Grid.Row="0" Text="{Binding Titulo}" Style="{StaticResource H1TextStyle}" Margin="10,0,10,10"/>
 
-        <DataGrid Grid.Row="1" ItemsSource="{Binding ItemsParaDevolver}" Style="{StaticResource ElegantDataGridStyle}" AutoGenerateColumns="False">
+        <DataGrid Grid.Row="1" CellStyle="{StaticResource CustomDataGridCellStyle}" Background="{StaticResource Brush.Menu.Teal}" ItemsSource="{Binding ItemsParaDevolver}" Style="{StaticResource ElegantDataGridStyle}" AutoGenerateColumns="False">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Producto" Binding="{Binding DescripcionProducto}" Width="2*" IsReadOnly="True"/>
                 <DataGridTextColumn Header="Cant. Vendida" Binding="{Binding CantidadVendida}" Width="Auto" IsReadOnly="True"/>
@@ -28,7 +54,7 @@
                         <DataTemplate>
                             <TextBox Text="{Binding CantidadADevolver, UpdateSourceTrigger=PropertyChanged}" 
                                      behaviors:InputBehaviors.SoloNumeros="True" 
-                                     Style="{StaticResource DarkInputControlStyle}" TextAlignment="Center"/>
+                                     Style="{StaticResource DarkInputControlStyle}" Height="Auto" TextAlignment="Center"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
@@ -46,16 +72,18 @@
 
         <StackPanel Grid.Row="2" Margin="0,15,0,0">
             <Label Content="Motivo de la Devolución / Garantía:" Style="{StaticResource DarkLableForm}"/>
-            <TextBox Text="{Binding Motivo, UpdateSourceTrigger=PropertyChanged}"
+            <TextBox Text="{Binding Motivo, UpdateSourceTrigger=PropertyChanged}" FontSize="16"
                      Style="{StaticResource DarkInputControlStyle}" Height="60" TextWrapping="Wrap" AcceptsReturn="True"/>
         </StackPanel>
 
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
             <Button Grid.Row="3" Content="Confirmar Devolución" 
-        Command="{Binding ConfirmarDevolucionCommand}" Style="{StaticResource DarkActionButtonStyle}" 
+        Command="{Binding ConfirmarDevolucionCommand}" Style="{StaticResource ElegantShadowGhostButton}"
+Tag="{StaticResource Brush.Menu.GreenForest}"
         HorizontalAlignment="Center" VerticalAlignment="Bottom" 
-        Width="180" Height="40" Margin="0,0,10,0"/>
-            <Button Content="Cancelar" Command="{Binding CloseAction}" Width="120" Style="{StaticResource DarkActionButtonStyle}" Margin="10,0,0,0"/>
+        Width="220" Height="40" Margin="0,0,10,0"/>
+            <Button Content="Cancelar" Command="{Binding CloseAction}" Width="170" Style="{StaticResource ElegantShadowGhostButton}"
+Tag="{StaticResource Brush.Menu.GreenForest}" Margin="10,0,0,0"/>
         </StackPanel>
     </Grid>
 </UserControl>

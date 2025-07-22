@@ -217,6 +217,13 @@ namespace DeluxeCars.DataAccess.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("EmailEmisor")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("EnableSsl")
+                        .HasColumnType("bit");
+
                     b.Property<string>("HorarioAtencion")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -233,11 +240,24 @@ namespace DeluxeCars.DataAccess.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<bool>("NotificacionesActivas")
+                        .HasColumnType("bit");
+
+                    b.Property<byte[]>("PasswordEmailEmisor")
+                        .HasColumnType("varbinary(max)");
+
                     b.Property<int>("PinFailedAttempts")
                         .HasColumnType("int");
 
                     b.Property<decimal>("PorcentajeIVA")
                         .HasColumnType("decimal(5, 2)");
+
+                    b.Property<string>("SmtpHost")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("SmtpPort")
+                        .HasColumnType("int");
 
                     b.Property<string>("Telefono")
                         .IsRequired()
@@ -256,10 +276,15 @@ namespace DeluxeCars.DataAccess.Migrations
                             AdminPINSalt = new byte[] { 200, 83, 160, 16, 78, 248, 207, 38, 92, 77, 89, 102, 153, 114, 81, 115, 83, 30, 186, 233, 102, 213, 73, 2, 96, 217, 113, 195, 170, 196, 242, 251, 129, 207, 218, 130, 213, 87, 159, 92, 195, 57, 218, 61, 141, 228, 57, 69, 141, 252, 79, 232, 234, 248, 158, 153, 105, 6, 107, 229, 59, 2, 96, 151, 68, 31, 241, 195, 1, 90, 56, 145, 138, 20, 210, 114, 191, 199, 75, 61, 21, 160, 101, 184, 223, 64, 29, 126, 194, 161, 64, 192, 154, 154, 89, 83, 176, 121, 121, 121, 206, 132, 229, 52, 47, 239, 88, 93, 102, 226, 96, 15, 61, 150, 137, 82, 38, 54, 163, 54, 136, 220, 154, 111, 209, 217, 250, 29 },
                             Direccion = "La rosita",
                             Email = "deluxecars@gmail.com",
+                            EmailEmisor = "",
+                            EnableSsl = true,
                             HorarioAtencion = "Lunes a Viernes de 8am a 6pm",
                             NombreTienda = "Deluxe Cars",
+                            NotificacionesActivas = false,
                             PinFailedAttempts = 0,
                             PorcentajeIVA = 19.0m,
+                            SmtpHost = "",
+                            SmtpPort = 587,
                             Telefono = "3001234567"
                         });
                 });
@@ -428,9 +453,6 @@ namespace DeluxeCars.DataAccess.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("PrecioUnitario")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<decimal>("Total")
                         .HasColumnType("decimal(18, 2)");
 
                     b.Property<string>("UnidadMedida")

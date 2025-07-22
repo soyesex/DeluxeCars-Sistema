@@ -28,7 +28,7 @@ namespace DeluxeCarsEntities
         public virtual ICollection<PagoProveedorPedido> PagosAplicados { get; set; }
 
         [NotMapped]
-        public decimal MontoTotal => DetallesPedidos?.Sum(d => d.Total) ?? 0;
+        public decimal MontoTotal => DetallesPedidos?.Sum(d => d.SubtotalPreview) ?? 0;
 
         [NotMapped]
         public decimal MontoPagado => PagosAplicados?.Select(pp => pp.PagoProveedor).Sum(p => p.MontoPagado) ?? 0;

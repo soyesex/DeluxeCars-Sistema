@@ -21,24 +21,26 @@
         <Style x:Key="CustomDataGridCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Background" Value="{DynamicResource Brush.Brand.CharcoalDark}"/>
             <Setter Property="FontSize" Value="14" />
-            <Setter Property="Foreground" Value="{StaticResource Brush.Brand.GraySteel}" />
+            <Setter Property="Foreground" Value="{DynamicResource Brush.Crema.MarfilClaro}" />
             <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}" />
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="{DynamicResource Brush.Accent.VibrantBlue.Transparent}"/>
-                    <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=DataGridRow}}"/>
+                    <Setter Property="Background" Value="{DynamicResource Brush.Menu.YellowGold}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource Brush.Brand.CharcoalDark}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
     </UserControl.Resources>
-     
-        <Grid Margin="5">
+
+    <Grid Margin="5">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0"  Margin="0,10,0,30" HorizontalAlignment="Left">
@@ -80,11 +82,11 @@
 
                 </Button>
             </StackPanel>
-            
+
         </Grid>
 
         <Grid Grid.Row="1" HorizontalAlignment="Center" Margin="20,0,0,30">
-            
+
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
@@ -93,7 +95,7 @@
             </Grid.ColumnDefinitions>
 
             <Button Content="Nuevo Proveedor" Grid.Column="0" Command="{Binding NuevoProveedorCommand}" 
-                     Style="{StaticResource ElegantShadowGhostButton}"
+                    Style="{StaticResource ElegantShadowGhostButton}"
                     Tag="{StaticResource Brush.Menu.GreenForest}"
                     Margin="20,0,0,0" VerticalAlignment="Center" Width="Auto" Padding="15,0"/>
 
@@ -124,9 +126,9 @@
                       CellStyle="{StaticResource CustomDataGridCellStyle}"
                       CanUserAddRows="False" AutoGenerateColumns="False" IsReadOnly="True">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Razón Social" Binding="{Binding RazonSocial}" Width="2*"/>
+                    <DataGridTextColumn Header="Razón Social" Binding="{Binding RazonSocial}" Width="*"/>
                     <DataGridTextColumn Header="NIT" Binding="{Binding NIT}" Width="*"/>
-                    <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="2*"/>
+                    <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="1*"/>
                     <DataGridTextColumn Header="Teléfono" Binding="{Binding Telefono}" Width="*"/>
                     <DataGridTextColumn Header="Ubicación" Binding="{Binding Municipio.Nombre}" Width="*"/>
                     <DataGridTextColumn Header="Departamento" Binding="{Binding Municipio.Departamento.Nombre}" Width="*"/>
@@ -134,5 +136,36 @@
                 </DataGrid.Columns>
             </DataGrid>
         </Border>
+        <Grid Grid.Row="3" Margin="0,10,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" Text="{Binding TotalItems, StringFormat='Total: {0} registros'}" 
+            FontSize="15"
+            FontFamily="{StaticResource Font.Poppins}" FontWeight="Medium"
+            VerticalAlignment="Center" Margin="20,0,20,0"
+            Foreground="{StaticResource Text.Secondary}"/>
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                <Button Command="{Binding IrAPaginaAnteriorCommand}"  Style="{StaticResource MaterialDesignToolButton}">
+                    <materialDesign:PackIcon Kind="ChevronLeft" Width="15" Height="15"/>
+                </Button>
+
+                <TextBlock VerticalAlignment="Center" FontSize="15" FontFamily="{StaticResource Font.Poppins}" FontWeight="Medium" Margin="10,0" Foreground="{StaticResource Text.Secondary}">
+                    <Run Text="Página"/>    
+                    <Run Text="{Binding NumeroDePagina}"/>
+                    <Run Text="de"/>
+                    <Run Text="{Binding TotalPaginas, Mode=OneWay}"/>
+                </TextBlock>
+
+                <Button Command="{Binding IrAPaginaSiguienteCommand}" Style="{StaticResource MaterialDesignToolButton}">
+                    <materialDesign:PackIcon Kind="ChevronRight" />
+                </Button>
+            </StackPanel>
+
+        </Grid>
     </Grid>
 </UserControl>

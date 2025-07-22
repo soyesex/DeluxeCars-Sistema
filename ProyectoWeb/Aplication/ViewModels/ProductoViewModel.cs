@@ -23,6 +23,7 @@ namespace Aplicacion.Application.ViewModels
 
         // Cambiado a ImagenUrl para ser más consistente con la entidad.
         public string? ImagenUrl { get; set; }
+        public IFormFile? ImagenArchivo { get; set; }
 
         public int IdCategoria { get; set; }
 

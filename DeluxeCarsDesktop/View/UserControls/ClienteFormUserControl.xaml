@@ -8,39 +8,116 @@
              xmlns:converters="clr-namespace:DeluxeCarsDesktop.Converters"
              xmlns:behaviors="clr-namespace:DeluxeCarsDesktop.Behaviors"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             d:DesignHeight="300" d:DesignWidth="600">
-    <StackPanel Margin="20">
+             d:DesignHeight="600" d:DesignWidth="800" MinWidth="750" MinHeight="450">
 
-        <Grid>
+    <!-- 
+    NOTA GENERAL:
+    - Se usa un Grid principal con 2 filas: una para el formulario y otra para los botones.
+    - El formulario se divide en un Grid de 2 columnas para una distribución equilibrada.
+    - Se eliminan los <Label> y se usa 'materialDesign:HintAssist.Hint' para un diseño más limpio y moderno.
+    - Se aplica un margen inferior a cada control para un espaciado consistente.
+    -->
+
+    <Grid Margin="25">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <!-- Fila para los campos del formulario -->
+            <RowDefinition Height="Auto"/>
+            <!-- Fila para los botones de acción -->
+        </Grid.RowDefinitions>
+
+        <!-- Contenedor del formulario con dos columnas proporcionales -->
+        <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
 
-            <TextBox Grid.Row="0" Style="{StaticResource StandardFormTextBoxStyle}"
-                 materialDesign:HintAssist.Hint="Nombre del Cliente" Grid.Column="1" Text="{Binding Nombre, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+            <!-- === COLUMNA 1 === -->
+            <StackPanel Grid.Column="0" Margin="0,0,20,0">
 
-            <TextBox Grid.Row="1" Style="{StaticResource StandardFormTextBoxStyle}"
-                 materialDesign:HintAssist.Hint="Telefono" Grid.Column="1" Text="{Binding Telefono, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+                <TextBox Style="{StaticResource ElegantTextBoxStyle}"
+                         materialDesign:HintAssist.Hint="Nombre del Cliente"
+                         Text="{Binding Nombre, UpdateSourceTrigger=PropertyChanged}"
+                         Margin="0,0,0,15"/>
 
-            <TextBox Grid.Row="2" Style="{StaticResource StandardFormTextBoxStyle}"
-                 materialDesign:HintAssist.Hint="Correo Electronico" Grid.Column="1" Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+                <ComboBox Style="{StaticResource ElegantComboBoxStyle}"
+                          materialDesign:HintAssist.Hint="Tipo de Cliente"
+                          ItemsSource="{Binding TiposClienteDisponibles}"
+                          SelectedItem="{Binding TipoCliente, UpdateSourceTrigger=PropertyChanged}"
+                          Margin="0,0,0,15"/>
 
-            <Label Grid.Row="3" Style="{StaticResource DarkLableForm}" Grid.Column="0" Content="Activo:" VerticalAlignment="Center"/>
-            <CheckBox Grid.Row="3"  Grid.Column="1" IsChecked="{Binding Estado}" VerticalAlignment="Center" Margin="5"/>
+                <ComboBox Style="{StaticResource ElegantComboBoxStyle}"
+                          materialDesign:HintAssist.Hint="Tipo de Identificación"
+                          ItemsSource="{Binding TiposIdentificacionDisponibles}"
+                          SelectedItem="{Binding TipoIdentificacion, UpdateSourceTrigger=PropertyChanged}"
+                          Margin="0,0,0,15"/>
+
+                <TextBox Style="{StaticResource ElegantTextBoxStyle}"
+                         materialDesign:HintAssist.Hint="Número de Identificación"
+                         Text="{Binding Identificacion, UpdateSourceTrigger=PropertyChanged}"
+                         Margin="0,0,0,15"/>
+
+                <TextBox Style="{StaticResource ElegantTextBoxStyle}"
+                         materialDesign:HintAssist.Hint="Teléfono"
+                         Text="{Binding Telefono, UpdateSourceTrigger=PropertyChanged}"/>
+
+            </StackPanel>
+
+            <!-- === COLUMNA 2 === -->
+            <StackPanel Grid.Column="1" Margin="20,0,0,0">
+
+                <TextBox Style="{StaticResource ElegantTextBoxStyle}"
+                         materialDesign:HintAssist.Hint="Correo Electrónico"
+                         Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"
+                         Margin="0,0,0,15"/>
+
+                <TextBox Style="{StaticResource ElegantTextBoxStyle}"
+                         materialDesign:HintAssist.Hint="Dirección"
+                         Text="{Binding Direccion, UpdateSourceTrigger=PropertyChanged}"
+                         Height="120"
+                         TextWrapping="Wrap"
+                         AcceptsReturn="True"
+                         VerticalScrollBarVisibility="Auto"
+                         VerticalContentAlignment="Top"
+                         Margin="0,0,0,15"/>
+
+                <ComboBox Style="{StaticResource ElegantComboBoxStyle}"
+                          materialDesign:HintAssist.Hint="Ciudad"
+                          ItemsSource="{Binding CiudadesDisponibles}"
+                          DisplayMemberPath="Nombre"
+                          SelectedValuePath="Id"
+                          SelectedValue="{Binding IdCiudad, UpdateSourceTrigger=PropertyChanged}"
+                          Margin="0,0,0,15"/>
+
+                <CheckBox IsChecked="{Binding Estado}"
+                          Content="Cliente Activo"
+                          FontSize="16"
+                          FontFamily="{StaticResource Font.Poppins}"
+                          Style="{StaticResource MaterialDesignCheckBox}"
+                          Margin="5,15,0,0"
+                          Foreground="White"/>
+            </StackPanel>
         </Grid>
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-            <Button Content="Guardar" Style="{StaticResource ElegantShadowGhostButton}"
-                            Tag="{StaticResource Brush.Menu.YellowGold}" Command="{Binding GuardarCommand}" Width="100"/>
-            <Button Content="Cancelar" Style="{StaticResource ElegantShadowGhostButton}"
-                            Tag="{StaticResource Brush.Menu.YellowGold}"  Command="{Binding CancelarCommand}" Width="100" Margin="10,0,0,0"/>
+        <!-- Panel de botones de acción -->
+        <StackPanel Grid.Row="1" 
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Right" 
+                    Margin="0,30,0,0">
+
+            <Button Content="Cancelar" 
+                    Command="{Binding CancelarCommand}" 
+                    Style="{StaticResource ElegantShadowGhostButton}" 
+                    Tag="Gray" 
+                    IsCancel="True" 
+                    Margin="0,0,15,0"/>
+
+            <Button Content="Guardar" 
+                    Command="{Binding GuardarCommand}" 
+                    IsDefault="True" 
+                    Style="{StaticResource ElegantShadowGhostButton}" 
+                    Tag="{StaticResource Brush.Menu.GreenForest}"/>
         </StackPanel>
-    </StackPanel>
+    </Grid>
 </UserControl>

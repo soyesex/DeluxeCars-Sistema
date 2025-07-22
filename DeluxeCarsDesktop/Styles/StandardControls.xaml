@@ -2,6 +2,36 @@
                     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
                     xmlns:fa="clr-namespace:FontAwesome.Sharp;assembly=FontAwesome.Sharp"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
+    <Style x:Key="CustomDarkDatePickerStyle" TargetType="DatePicker" BasedOn="{StaticResource MaterialDesignOutlinedDatePicker}">
+        <Setter Property="Background" Value="#FFFFFF"/>
+        <Setter Property="Foreground" Value="#FFFFFF"/>
+        <Setter Property="BorderBrush" Value="#4A5A72"/>
+        <Setter Property="Height" Value="45"/>
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}"/>
+        <Setter Property="materialDesign:HintAssist.Hint" Value="Fecha Inicio"/>
+        <Setter Property="materialDesign:HintAssist.Foreground" Value="#8A9EB5"/>
+        <Setter Property="materialDesign:TextFieldAssist.UnderlineBrush" Value="{DynamicResource PrimaryHueMidBrush}"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="BorderBrush" Value="{DynamicResource PrimaryHueMidBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="ContextMenuIconItemStyle" TargetType="MenuItem">
+        <Setter Property="Padding" Value="10,8"/>
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}"/>
+        <Setter Property="Background" Value="{DynamicResource Brush.Brand.NavyDark}"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Icon">
+            <Setter.Value>
+                <fa:IconImage Icon="{Binding Tag, RelativeSource={RelativeSource Self}}"
+                          Width="20" Height="20" Margin="0,0,10,0"
+                          Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=MenuItem}}"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
 
     <Style x:Key="CarouselButtonStyle" TargetType="Button">
         <Setter Property="Width" Value="40"/>
@@ -37,7 +67,7 @@
 
         <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}"/>
         <Setter Property="FontWeight" Value="Medium"/>
-        <Setter Property="Foreground" Value="#C8C8C8"/>
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Neutral.WhiteMuted}"/>
         <Setter Property="FontSize" Value="15"/>
         <Setter Property="MinHeight" Value="42"/>
         <Setter Property="MinWidth" Value="130"/>
@@ -58,7 +88,33 @@
         </Style.Triggers>
     </Style>
 
+    <Style x:Key="ElegantTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
+        <!-- Propiedades visuales adaptadas del ComboBox -->
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Neutral.WhiteMuted}"/>
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="Height" Value="45"/>
+        <Setter Property="MinWidth" Value="130"/>
+        <Setter Property="Padding" Value="10 10"/>
 
+        <!-- Se usa la propiedad de Material Design para las esquinas del borde -->
+        <Setter Property="materialDesign:TextFieldAssist.TextFieldCornerRadius" Value="5" />
+
+        <!-- El fondo y el borde se establecen aquí para el estado normal -->
+        <Setter Property="Background" Value="{DynamicResource Background.Surface}"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+
+        <!-- El Trigger de IsMouseOver se adapta para el TextBox -->
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{DynamicResource Brush.Brand.CharcoalLight}"/>
+                <Setter Property="Foreground" Value="{DynamicResource Brush.Neutral.WhiteMuted}"/>
+                <!-- El BorderBrush cambiará al color definido en la propiedad Tag del TextBox -->
+                <Setter Property="BorderBrush" Value="{Binding Path=Tag, RelativeSource={RelativeSource Self}}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
 
     <Style x:Key="StandardFormTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}">
         <Setter Property="materialDesign:HintAssist.FloatingScale" Value="1.0"/>
@@ -91,7 +147,7 @@
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="BorderBrush" Value="{StaticResource Border.Default}"/>
         <Setter Property="Padding" Value="8,5"/>
-        <Setter Property="FontFamily" Value="Montserrat"/>
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}"/>
         <Setter Property="FontSize" Value="12"/>
     </Style>
 
@@ -418,50 +474,7 @@
         </Setter>
     </Style>
 
-    <Style x:Key="DarkInputControlStyle" TargetType="TextBox"
-   BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
-        <!-- Ajustes principales -->
-        <Setter Property="Background" Value="#1F2A44"/>
-        <Setter Property="Foreground" Value="#E0E6F1"/>
-        <Setter Property="BorderBrush" Value="#4D5B7C"/>
-        <Setter Property="FontFamily" Value="Montserrat"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Height" Value="40"/>
-        <Setter Property="Padding" Value="10,0"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
-
-        <Setter Property="materialDesign:HintAssist.HintOpacity" Value="0.5"/>
-        <Setter Property="materialDesign:HintAssist.Foreground" Value="#9BA6B7"/>
-
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="TextBox">
-                    <Border x:Name="border"
-            Background="{TemplateBinding Background}"
-            BorderBrush="{TemplateBinding BorderBrush}"
-            BorderThickness="{TemplateBinding BorderThickness}"
-            CornerRadius="15"
-            SnapsToDevicePixels="True">
-                        <Grid>
-                            <ScrollViewer x:Name="PART_ContentHost"
-                      Focusable="False"
-                      HorizontalScrollBarVisibility="Hidden"
-                      VerticalScrollBarVisibility="Hidden"
-                      Margin="{TemplateBinding Padding}"/>
-                        </Grid>
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="border" Property="BorderBrush" Value="#28AEED"/>
-                        </Trigger>
-                        <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="border" Property="BorderBrush" Value="#28AEED"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
+    
 
     <Style x:Key="DarkActionButtonStyle" TargetType="Button"
            BasedOn="{StaticResource MaterialDesignRaisedButton}">
@@ -809,14 +822,13 @@
     <Style x:Key="DarkDatePickerStyle" TargetType="DatePicker"
    BasedOn="{StaticResource MaterialDesignFloatingHintDatePicker}">
         <!-- Personalización general -->
-        <Setter Property="Background" Value="{DynamicResource PrimaryBackgroundColor}"/>
+        <Setter Property="Background" Value="{DynamicResource Brush.Neutral.WhitePure}"/>
         <Setter Property="Foreground" Value="{DynamicResource Brush.Neutral.WhitePure}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBorderColor}"/>
-        <Setter Property="FontFamily" Value="{DynamicResource Font.SourceSans3}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}"/>
         <Setter Property="FontSize" Value="18"/>
-        <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Height" Value="40"/>
-        <Setter Property="Padding" Value="10,0"/>
+        <Setter Property="Padding" Value="0,0"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
 
@@ -840,7 +852,7 @@
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="BorderBrush" Value="{DynamicResource HighlightBorderColor}"/>
-                <Setter Property="Foreground" Value="{DynamicResource Brush.Brand.CharcoalDark}"/>
+                <Setter Property="Foreground" Value="{DynamicResource PrimaryBackgroundColor}"/>
             </Trigger>
             <Trigger Property="IsKeyboardFocused" Value="True">
                 <Setter Property="BorderBrush" Value="{DynamicResource HighlightBorderColor}"/>
@@ -933,77 +945,90 @@
         </Setter>
     </Style>
 
-    <Style x:Key="SecondaryViewInputStyle" TargetType="Control">
-        <Setter Property="FontFamily" Value="{DynamicResource Font.SourceSans3}"/>
-        <Setter Property="FontWeight" Value="Normal"/>
-        <Setter Property="FontSize" Value="14"/>
-        <Setter Property="Height" Value="32"/>
+    <Style x:Key="DarkInputControlStyle" TargetType="TextBox"
+            BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
+        <!-- Ajustes principales -->
+        <Setter Property="Background" Value="{StaticResource Background.Secondary}"/>
+        <Setter Property="Foreground" Value="#E0E6F1"/>
+        <Setter Property="BorderBrush" Value="#4D5B7C"/>
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}"/>
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="Padding" Value="10,0"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
-        <Setter Property="Padding" Value="10,0,30,0"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource Border.Secondary}"/>
-    </Style>
-
-    <!--searchbox forms estilos-->
-    <Style x:Key="SecondarySearchBoxStyle" TargetType="TextBox" BasedOn="{StaticResource SecondaryViewInputStyle}">
-        <Setter Property="Background" Value="{DynamicResource Background.Secondary}"/>
-        <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}"/>
-        <Setter Property="CaretBrush" Value="{DynamicResource Text.Secondary}"/>
-        <Setter Property="BorderThickness" Value="1"/>
-
+        <Setter Property="materialDesign:HintAssist.HintOpacity" Value="0.5"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
                     <Border x:Name="border"
-                    Background="{TemplateBinding Background}"
-                    BorderBrush="{TemplateBinding BorderBrush}"
-                    BorderThickness="{TemplateBinding BorderThickness}"
-                    CornerRadius="8"
-                    SnapsToDevicePixels="True">
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="5"
+                            SnapsToDevicePixels="True">
                         <Grid>
                             <ScrollViewer x:Name="PART_ContentHost"
-                                  Margin="{TemplateBinding Padding}"
-                                  VerticalAlignment="Center"
-                                  HorizontalScrollBarVisibility="Hidden"
-                                  VerticalScrollBarVisibility="Hidden"/>
-
-                            <TextBlock Text="{TemplateBinding Tag}"
-                               Foreground="{DynamicResource Placeholder.Secondary}"
-                               IsHitTestVisible="False"
-                               VerticalAlignment="Center"
-                               Margin="12,0,0,0">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-
-                            <fa:IconImage Icon="MagnifyingGlass"
-                                  Width="14" Height="14"
-                                  VerticalAlignment="Center"
-                                  HorizontalAlignment="Right"
-                                  Margin="0,0,10,0"
-                                  Foreground="{TemplateBinding BorderBrush}"/>
+                  Focusable="False"
+                  HorizontalScrollBarVisibility="Hidden"
+                  VerticalScrollBarVisibility="Hidden"
+                  Margin="{TemplateBinding Padding}"/>
                         </Grid>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource Text.Secondary}"/>
-                        </Trigger>
-                        <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource Text.Secondary}"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{Binding Path=Tag, RelativeSource={RelativeSource Self}}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
-    
+
+    <Style x:Key="SecondaryViewInputStyle" TargetType="Control">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.SourceSans3}"/>
+        <Setter Property="FontWeight" Value="Normal"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Height" Value="45"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Padding" Value="10,0,30,0"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Border.Secondary}"/>
+    </Style>
+
+    <Style x:Key="SecondarySearchBoxStyle" TargetType="TextBox" BasedOn="{StaticResource SecondaryViewInputStyle}">
+        <Setter Property="Background" Value="{DynamicResource Background.Secondary}"/>
+        <Setter Property="FontWeight" Value="Normal"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}"/>
+        <Setter Property="CaretBrush" Value="{DynamicResource Text.Secondary}"/>
+        <Setter Property="materialDesign:HintAssist.HintOpacity" Value="0.5"/>
+        <Setter Property="materialDesign:HintAssist.Foreground" Value="#9BA6B7"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Border x:Name="border"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="5">
+
+                        <ScrollViewer x:Name="PART_ContentHost"
+                                  Focusable="false"
+                                  HorizontalScrollBarVisibility="Hidden"
+                                  VerticalScrollBarVisibility="Hidden"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource Brush.Brand.GraySteel}"/>
+
+                            <Setter TargetName="border" Property="BorderBrush" Value="{Binding Path=Tag, RelativeSource={RelativeSource Self}}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+
     <!--Estilos combobox-->
     <Style x:Key="FilteringComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource SecondaryViewInputStyle}">
         <Setter Property="Background" Value="{DynamicResource Background.Secondary}"/>
@@ -1129,7 +1154,7 @@
     <Style x:Key="SecondaryComboBoxItemStyle" TargetType="ComboBoxItem">
         <Setter Property="Padding" Value="10,5"/>
         <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Brand.NavyDark}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBoxItem">

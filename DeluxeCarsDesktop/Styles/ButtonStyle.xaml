@@ -50,7 +50,7 @@
         <Setter Property="Height" Value="30"/>
         <Setter Property="Margin" Value="2,0"/>
         <Setter Property="Cursor" Value="Hand"/>
-        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryColor}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Tech.DarkCharcoal}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
@@ -159,28 +159,10 @@
         </Setter>
     </Style>
     
-    <Style x:Key="DarkDatePickerStyle" TargetType="DatePicker">
-        <Setter Property="Background" Value="{DynamicResource PrimaryBackgroundColor}"/>
-        <Setter Property="Foreground" Value="{DynamicResource PrimaryBackgroundColor}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBorderColor}"/>
-        <Setter Property="FontFamily" Value="Montserrat"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Height" Value="40"/>
-        <Setter Property="Padding" Value="10,0"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
-
-        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="BorderBrush" Value="{DynamicResource HighlightBorderColor}"/>
-            </Trigger>
-        </Style.Triggers>
-    </Style>
     
     <Style x:Key="DarkLableForm" TargetType="Label">
         <Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
-        <Setter Property="FontFamily" Value="{DynamicResource Font.SourceSans3}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Poppins}"/>
         <Setter Property="FontSize" Value="16"/>
         <Setter Property="FontWeight" Value="Medium"/>
     </Style>
@@ -409,51 +391,6 @@
         </Setter>
     </Style>
 
-
-    <Style x:Key="DarkInputControlStyle" TargetType="TextBox"
-       BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
-        <!-- Ajustes principales -->
-        <Setter Property="Background" Value="#1F2A44"/>
-        <Setter Property="Foreground" Value="#E0E6F1"/>
-        <Setter Property="BorderBrush" Value="#4D5B7C"/>
-        <Setter Property="FontFamily" Value="Montserrat"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Height" Value="40"/>
-        <Setter Property="Padding" Value="10,0"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
-
-        <Setter Property="materialDesign:HintAssist.HintOpacity" Value="0.5"/>
-        <Setter Property="materialDesign:HintAssist.Foreground" Value="#9BA6B7"/>
-
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="TextBox">
-                    <Border x:Name="border"
-                Background="{TemplateBinding Background}"
-                BorderBrush="{TemplateBinding BorderBrush}"
-                BorderThickness="{TemplateBinding BorderThickness}"
-                CornerRadius="15"
-                SnapsToDevicePixels="True">
-                        <Grid>
-                            <ScrollViewer x:Name="PART_ContentHost"
-                          Focusable="False"
-                          HorizontalScrollBarVisibility="Hidden"
-                          VerticalScrollBarVisibility="Hidden"
-                          Margin="{TemplateBinding Padding}"/>
-                        </Grid>
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="border" Property="BorderBrush" Value="#28AEED"/>
-                        </Trigger>
-                        <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="border" Property="BorderBrush" Value="#28AEED"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
 
     <!-- Estilos Data Grid -->
     <Style x:Key="ElegantDataGridStyle" TargetType="DataGrid"

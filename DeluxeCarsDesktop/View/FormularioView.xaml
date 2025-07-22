@@ -10,12 +10,12 @@
         Title="Formulario"
         WindowStyle="None"
         ResizeMode="NoResize"
-        Width="1100" 
         FontFamily="{DynamicResource Font.SourceSans3}"
-        Height="700"
+        MinHeight="500" MinWidth="450" MaxHeight="700" MaxWidth="1400"
         WindowStartupLocation="CenterScreen"
         Background="Transparent"
         AllowsTransparency="True" 
+        SizeToContent="WidthAndHeight"
         xmlns:viewModel="clr-namespace:DeluxeCarsDesktop.ViewModel"
         xmlns:userControl="clr-namespace:DeluxeCarsDesktop.View.UserControls">
 
@@ -28,6 +28,10 @@
 
         <DataTemplate DataType="{x:Type viewModel:FacturacionViewModel}">
             <userControl:FacturacionUserControl/>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type viewModel:FacturaDetalleViewModel}">
+            <userControl:FacturaDetalleUserControl/>
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type viewModel:AjusteInventarioViewModel}">
@@ -205,3 +209,4 @@
         </Border>
     </Border>
 </Window>
+

@@ -1,4 +1,5 @@
-﻿using DeluxeCarsEntities;
+﻿using DeluxeCarsDesktop.Utils;
+using DeluxeCarsEntities;
 using DeluxeCarsShared.Dtos;
 using System;
 using System.Collections.Generic;
@@ -31,6 +32,23 @@ namespace DeluxeCarsDesktop.ViewModel
                 if (StockCalculado <= 0) return "Agotado";
                 if (StockMinimo.HasValue && StockCalculado < StockMinimo.Value) return "Bajo Stock";
                 return "En Stock";
+            }
+        }
+
+        public string FullImageUrl
+        {
+            get
+            {
+                // Si la ImagenUrl está vacía, devuelve una imagen local por defecto.
+                // Asegúrate de tener esta imagen en tu proyecto.
+                if (string.IsNullOrEmpty(ImagenUrl))
+                {
+                    return "pack://application:,,,/Images/placeholder.png";
+                }
+
+                // Llama a la clase ConfigHelper que creamos para obtener la URL base
+                // y la combina con la ruta relativa de la imagen.
+                return $"{ConfigHelper.GetBaseImageUrl()}{ImagenUrl}";
             }
         }
 
