@@ -68,7 +68,6 @@ Este software de escritorio ofrece una solución completa para la administració
 
 ¡Aquí es donde tu proyecto cobra vida! Agrega las mejores capturas de pantalla que tienes en tu documento de testing para mostrar cómo se ve el software.
 
-**(Ejemplo de cómo añadir imágenes)**
 
 | Inicio de Sesión | Módulo de Inventario |
 | :---: | :---: |
